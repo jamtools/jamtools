@@ -8,7 +8,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const root = ReactDOM.createRoot(rootElem);
     const App = () => (
         <div>
-            <h1>Jam Tools!</h1>
+            <h1>Jam Tools baby yeah yup!</h1>
         </div>
     );
 
