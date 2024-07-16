@@ -22,7 +22,7 @@ jobs:
             - name: Install modules
               run: npm i
             - name: Build app
-              run: turbo build
+              run: npx turbo build
     types:
         runs-on: ubuntu-latest
         steps:
@@ -35,4 +35,4 @@ jobs:
             - name: Install modules
               run: npm i
             - name: Check Types
-              run: turbo check-types
+              run: npx turbo check-types
