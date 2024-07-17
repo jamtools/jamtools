@@ -36,3 +36,16 @@ jobs:
               run: npm i
             - name: Check Types
               run: npx turbo check-types
+    lint:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - name: Install Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 21
+                  cache: 'npm'
+            - name: Install modules
+              run: npm i
+            - name: Run eslint
+              run: npx turbo lint
