@@ -1,0 +1,17 @@
+{
+  "name": "jamtools-server",
+  "scripts": {
+    "build:watch": "nodemon dist/local-server.js",
+    "run:watch": "npm run build-local-server -- --watch",
+    "dev": "npm-run-all --parallel build:watch run:watch",
+    "build-local-server": "esbuild src/entrypoints/local-server.entrypoint.ts --outfile=dist/local-server.js --bundle --platform=node",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "jamtools-core": "*"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21"
+  }
+}

@@ -5,7 +5,8 @@
   "main": "index.js",
   "packageManager": "npm@10.2.4",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "turbo run dev"
   },
   "keywords": [],
   "author": "",
@@ -13,6 +14,8 @@
   "devDependencies": {
     "esbuild": "^0.23.0",
     "eslint": "^9.6.0",
+    "nodemon": "^3.1.4",
+    "npm-run-all": "^4.1.5",
     "turbo": "^2.0.6",
     "typescript": "^5.4.5"
   },
