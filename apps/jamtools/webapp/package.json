@@ -1,0 +1,20 @@
+{
+  "name": "jamtools-webapp",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "npm run build -- --watch",
+    "build": "esbuild src/index.tsx --outfile=dist/index.js --bundle",
+    "check-types": "tsc --noEmit",
+    "lint": "eslint --ext ts --ext tsx src/",
+    "fix": "npm run lint -- --fix"
+  },
+  "dependencies": {
+    "jamtools-core": "*"
+  },
+  "devDependencies": {
+    "configs": "*"
+  },
+  "config": {
+    "dir": "../../../configs"
+  }
+}
