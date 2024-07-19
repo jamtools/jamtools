@@ -7,6 +7,7 @@ import {
 } from 'react-router-dom';
 
 import {useJamToolsEngine} from '~/engine/engine';
+import {Module} from '~/module_registry/module_registry';
 
 export const FrontendRoutes = () => {
     const engine = useJamToolsEngine();
@@ -27,7 +28,7 @@ export const FrontendRoutes = () => {
     const router = createBrowserRouter([
         {
             path: '/',
-            element: <div>Default root path</div>,
+            element: <RootPath mods={mods}/>
         },
         {
             path: '/modules',
@@ -39,3 +40,33 @@ export const FrontendRoutes = () => {
         <RouterProvider router={router}/>
     );
 };
+
+const RootPath = (props: {mods: Module[]}) => {
+    return (
+        <ul>
+            {props.mods.map(mod => (
+                <RenderModuleRoutes
+                    key={mod.moduleId}
+                    mod={mod}
+                />
+            ))}
+        </ul>
+    )
+}
+
+const RenderModuleRoutes = ({mod}: {mod: Module}) => {
+    return (
+        <li>
+            {mod.moduleId}
+            <ul>
+                {mod.routes && Object.keys(mod.routes).map(path => (
+                    <li key={path}>
+                        <a href={`/modules/${mod.moduleId}/${path}`}>
+                            {path || '/'}
+                        </a>
+                    </li>
+                ))}
+            </ul>
+        </li>
+    )
+}
