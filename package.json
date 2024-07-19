@@ -7,7 +7,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "turbo run dev",
-    "ci": "turbo run lint check-types build"
+    "ci": "turbo run lint check-types build --output-logs errors-only"
   },
   "keywords": [],
   "author": "",
@@ -16,8 +16,7 @@
     "esbuild": "^0.23.0",
     "nodemon": "^3.1.4",
     "npm-run-all": "^4.1.5",
-    "turbo": "^2.0.6",
-    "typescript": "^5.4.5"
+    "turbo": "^2.0.6"
   },
   "workspaces": [
     "apps/jamtools/*",

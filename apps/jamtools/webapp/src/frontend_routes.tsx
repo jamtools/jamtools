@@ -2,41 +2,40 @@ import React from 'react';
 
 import {
     createBrowserRouter,
+    RouteObject,
     RouterProvider,
-    useParams,
 } from 'react-router-dom';
 
-import {HelloModule} from 'jamtools-core/modules/hello/hello_module';
-
-type ModuleRouteParams = {
-    moduleId: string;
-};
+import {useJamToolsEngine} from '~/engine/engine';
 
 export const FrontendRoutes = () => {
+    const engine = useJamToolsEngine();
+
+    const mods = engine.moduleRegistry.getModules();
+
+    const moduleRoutes: RouteObject[] = mods.filter(mod => Boolean(mod.routes)).map(mod => ({
+        path: mod.moduleId,
+        children: Object.keys(mod.routes!).map((path): RouteObject => {
+            const Component = mod.routes![path];
+            return {
+                path,
+                element: <Component/>,
+            };
+        }),
+    }));
+
     const router = createBrowserRouter([
         {
             path: '/',
-            element: <div>Hello world!</div>,
+            element: <div>Default root path</div>,
         },
         {
-            path: '/modules/:moduleId',
-            element: <ModuleRoute/>,
+            path: '/modules',
+            children: moduleRoutes,
         },
     ]);
 
     return (
         <RouterProvider router={router}/>
     );
-}
-
-const ModuleRoute = () => {
-    const params = useParams<ModuleRouteParams>();
-
-    if (params.moduleId === 'hello') {
-        return <HelloModule.Component/>;
-    }
-
-    return (
-        <div>Module ID: {params.moduleId}</div>
-    );
-}
+};

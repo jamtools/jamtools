@@ -1,6 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 
+import {CoreDependencies} from '~/types/module_types';
+
 import {Main} from './main';
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -9,5 +11,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
     const root = ReactDOM.createRoot(rootElem);
 
-    root.render(<Main />);
+    const coreDeps: CoreDependencies = {
+        log: console.log,
+    }
+
+    root.render(<Main coreDeps={coreDeps} />);
 });
