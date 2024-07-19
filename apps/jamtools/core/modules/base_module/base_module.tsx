@@ -9,7 +9,7 @@ export type ModuleHookValue<M extends Module> = {
 };
 
 export class BaseModule {
-    static Provider = <M extends Module>(mod: M, ctx: React.Context<ModuleHookValue<M>>) => (props: React.PropsWithChildren) => {
+    static Provider = <M extends Module>(mod: M, ctx: React.Context<ModuleHookValue<M>>) => function Provider(props: React.PropsWithChildren) {
         const [moduleStoredState, setModuleStoredState] = useState(mod.state);
         const moduleRefState = useRef(mod.state);
 

@@ -13,7 +13,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     const coreDeps: CoreDependencies = {
         log: console.log,
-    }
+    };
 
     root.render(<Main coreDeps={coreDeps} />);
 });

@@ -34,7 +34,7 @@ export class HelloModule implements Module<HelloState> {
     };
 
     initialize = async () => {
-
+        console.log('hello module initializing');
     };
 
     private hello = () => {
