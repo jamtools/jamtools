@@ -8,7 +8,8 @@
     "build-local-server": "esbuild src/entrypoints/local-server.entrypoint.ts --outfile=dist/local-server.js --bundle --platform=node",
     "check-types": "tsc --noEmit",
     "lint": "eslint --ext ts --ext tsx src/",
-    "fix": "npm run lint -- --fix"
+    "fix": "npm run lint -- --fix",
+    "run-telemetry-scratch-server": "cd tracing && node build.js && node dist/bundle.js"
   },
   "dependencies": {
     "@opentelemetry/api": "^1.9.0",
