@@ -22,7 +22,8 @@ app.get('/', async (req, res) => {
 });
 
 // Global error handler to capture unhandled exceptions
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
     console.error(err);
 
     const activeContext = context.active();
@@ -39,13 +40,7 @@ const fromMiddleware_trace = async () => {
     return new Promise((r) => {
         setTimeout(r, 3000);
     });
-}
-
-const yeah_trace = async () => {
-    return new Promise((r) => {
-        setTimeout(r, 1000);
-    });
-}
+};
 
 const other_trace = async () => {
     const x = undefined;
@@ -54,7 +49,7 @@ const other_trace = async () => {
     return new Promise((r) => {
         setTimeout(r, randomWait);
     });
-}
+};
 
 app.listen('1337', () => {
     console.log('http://localhost:1337');
