@@ -1,7 +1,17 @@
 tasks:
-  - init: |
+  - name: Jam Tools
+    init: |
       npm install
       npm install -g turbo
       turbo run build
     command: |
       npm run dev
+  - name: SigNoz
+    init: |
+      cd /workspace
+      git clone https://github.com/SigNoz/signoz.git
+      cd /workspace/signoz/deploy/docker/clickhouse-setup
+      sed -i '/hotrod/,$d' docker-compose.yaml
+      docker compose pull
+    command:
+      docker compose up -d
