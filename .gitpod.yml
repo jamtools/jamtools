@@ -1,3 +1,23 @@
+ports:
+  - port: 2181
+    onOpen: ignore
+  - port: 2888
+    onOpen: ignore
+  - port: 3888
+    onOpen: ignore
+  - port: 4317
+    onOpen: ignore
+  - port: 4318
+    onOpen: ignore
+  - port: 8123
+    onOpen: ignore
+  - port: 9000
+    onOpen: ignore
+  - port: 9181
+    onOpen: ignore
+  - port: 35527
+    onOpen: ignore
+
 tasks:
   - name: SigNoz
     init: |
