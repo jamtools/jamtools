@@ -1,11 +1,4 @@
 tasks:
-  - name: Jam Tools
-    init: |
-      npm install
-      npm install -g turbo
-      turbo run build
-    command: |
-      npm run dev
   - name: SigNoz
     init: |
       cd /workspace
@@ -15,3 +8,10 @@ tasks:
       docker compose pull
     command:
       docker compose up -d
+  - name: Jam Tools
+    init: |
+      npm install
+      npm install -g turbo
+      turbo run build
+    command: |
+      npm run dev
