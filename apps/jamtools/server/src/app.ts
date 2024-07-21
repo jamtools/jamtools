@@ -23,6 +23,8 @@ app.get('/', async (req, res) => {
 
 // Global error handler to capture unhandled exceptions
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+    console.error(err);
+
     const activeContext = context.active();
     const span = trace.getSpan(activeContext);
     if (span) {
@@ -46,8 +48,8 @@ const yeah_trace = async () => {
 }
 
 const other_trace = async () => {
-    // const x = undefined;
-    // (x as unknown as string).toUpperCase();
+    const x = undefined;
+    (x as unknown as string).toUpperCase();
     const randomWait = Math.random() * 1000 * 10;
     return new Promise((r) => {
         setTimeout(r, randomWait);
