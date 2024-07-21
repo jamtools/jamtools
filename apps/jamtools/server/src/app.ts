@@ -1,9 +1,9 @@
 import 'source-map-support/register';
 
 import 'express-async-errors';
-const hey = () => yep();
+const hey = (shouldError: boolean) => yep(shouldError);
 import './tracing';
-const yep = () => other_trace();
+const yep = (shouldError: boolean) => other_trace(shouldError);
 import express, {NextFunction, Request, Response} from 'express';
 
 import {context, SpanStatusCode, trace} from '@opentelemetry/api';
@@ -16,8 +16,12 @@ app.use(async function myMiddleware(req, res, next) {
 });
 
 app.get('/', async (req, res) => {
-    // await yeah_trace();
-    await hey();
+    await hey(false);
+    res.json({yeah: 'buddy'});
+});
+
+app.get('/error', async (req, res) => {
+    await hey(true);
     res.json({yeah: 'buddy'});
 });
 
@@ -42,9 +46,12 @@ const fromMiddleware_trace = async () => {
     });
 };
 
-const other_trace = async () => {
-    const x = undefined;
-    (x as unknown as string).toUpperCase();
+const other_trace = async (shouldError: boolean) => {
+    if (shouldError) {
+        const x = undefined;
+        (x as unknown as string).toUpperCase();
+    }
+
     const randomWait = Math.random() * 1000 * 10;
     return new Promise((r) => {
         setTimeout(r, randomWait);
@@ -53,4 +60,5 @@ const other_trace = async () => {
 
 app.listen('1337', () => {
     console.log('http://localhost:1337');
+    console.log('http://localhost:1337/error');
 });

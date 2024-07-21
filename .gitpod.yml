@@ -34,4 +34,6 @@ tasks:
       npm install -g turbo
       turbo run build
     command: |
-      npm run dev
+      # npm run dev
+      cd apps/jamtools/server
+      npm run run-telemetry-scratch-server
