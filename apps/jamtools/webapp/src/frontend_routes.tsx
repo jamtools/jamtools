@@ -12,23 +12,29 @@ import {Module} from '~/module_registry/module_registry';
 
 import {Layout} from './layout';
 
-type Props = React.PropsWithChildren;
-
-export const FrontendRoutes = (props: Props) => {
+export const FrontendRoutes = () => {
     const engine = useJamToolsEngine();
 
     const mods = engine.moduleRegistry.getModules();
 
-    const moduleRoutes: RouteObject[] = mods.filter(mod => Boolean(mod.routes)).map(mod => ({
-        path: mod.moduleId,
-        children: Object.keys(mod.routes!).map((path): RouteObject => {
-            const Component = mod.routes![path];
-            return {
-                path,
-                element: <Layout><Component/></Layout>,
-            };
-        }),
-    }));
+    const moduleRoutes: RouteObject[] = [];
+    for (const mod of mods) {
+        if (!mod.routes) {
+            continue;
+        }
+
+        const routes = mod.routes;
+        moduleRoutes.push({
+            path: mod.moduleId,
+            children: Object.keys(routes).map((path): RouteObject => {
+                const Component = routes[path];
+                return {
+                    path,
+                    element: <Layout><Component/></Layout>,
+                };
+            }),
+        });
+    }
 
     const router = createBrowserRouter([
         {
@@ -56,8 +62,8 @@ const RootPath = (props: {mods: Module[]}) => {
                 />
             ))}
         </ul>
-    )
-}
+    );
+};
 
 const RenderModuleRoutes = ({mod}: {mod: Module}) => {
     return (
@@ -74,4 +80,4 @@ const RenderModuleRoutes = ({mod}: {mod: Module}) => {
             </ul>
         </li>
     );
-}
+};

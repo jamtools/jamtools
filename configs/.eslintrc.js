@@ -29,6 +29,7 @@ module.exports = {
     rules: {
         indent: 'off',
         '@typescript-eslint/indent': ['error'],
+        '@typescript-eslint/no-explicit-any': 'off',
         quotes: [
             'error',
             'single'
