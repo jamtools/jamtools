@@ -1,18 +1,25 @@
 {
   "name": "jamtools-core",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "check-types": "tsc --noEmit",
+    "lint": "eslint --ext ts --ext tsx ./",
+    "fix": "npm run lint -- --fix"
+  },
+  "dependencies": {
+    "json-rpc-2.0": "^1.7.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "rxjs": "^7.8.1"
+  },
   "devDependencies": {
     "@types/node": "^20.14.2",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
+    "configs": "*",
     "typescript": "^5.4.5"
   },
-  "dependencies": {
-    "jotai": "^2.8.4",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "license": "MIT"
+  "config": {
+    "dir": "../../../configs"
+  }
 }
