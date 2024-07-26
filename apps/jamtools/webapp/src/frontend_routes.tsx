@@ -2,6 +2,7 @@ import React from 'react';
 
 import {
     createBrowserRouter,
+    Link,
     RouteObject,
     RouterProvider,
 } from 'react-router-dom';
@@ -9,7 +10,11 @@ import {
 import {useJamToolsEngine} from '~/engine/engine';
 import {Module} from '~/module_registry/module_registry';
 
-export const FrontendRoutes = () => {
+import {Layout} from './layout';
+
+type Props = React.PropsWithChildren;
+
+export const FrontendRoutes = (props: Props) => {
     const engine = useJamToolsEngine();
 
     const mods = engine.moduleRegistry.getModules();
@@ -20,7 +25,7 @@ export const FrontendRoutes = () => {
             const Component = mod.routes![path];
             return {
                 path,
-                element: <Component/>,
+                element: <Layout><Component/></Layout>,
             };
         }),
     }));
@@ -28,7 +33,7 @@ export const FrontendRoutes = () => {
     const router = createBrowserRouter([
         {
             path: '/',
-            element: <RootPath mods={mods}/>
+            element: <Layout><RootPath mods={mods}/></Layout>
         },
         {
             path: '/modules',
@@ -61,12 +66,12 @@ const RenderModuleRoutes = ({mod}: {mod: Module}) => {
             <ul>
                 {mod.routes && Object.keys(mod.routes).map(path => (
                     <li key={path}>
-                        <a href={`/modules/${mod.moduleId}/${path}`}>
+                        <Link to={`/modules/${mod.moduleId}/${path}`}>
                             {path || '/'}
-                        </a>
+                        </Link>
                     </li>
                 ))}
             </ul>
         </li>
-    )
+    );
 }

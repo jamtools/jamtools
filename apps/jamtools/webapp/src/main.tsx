@@ -12,9 +12,6 @@ type Props = {
 export const Main = (props: Props) => {
     return (
         <JamToolsProvider coreDeps={props.coreDeps}>
-            <nav>
-                <a href='/'>Home</a>
-            </nav>
             <FrontendRoutes/>
         </JamToolsProvider>
     );
