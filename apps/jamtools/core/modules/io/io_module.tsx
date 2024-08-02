@@ -39,7 +39,7 @@ export class IoModule implements Module<IoState> {
     };
 
     uninitialize = () => {
-        this.helloModuleSubscription?.unsubscribe()
+        this.helloModuleSubscription?.unsubscribe();
     };
 
     onNewMidiDeviceFound = (device: {name: string}) => {
