@@ -4,6 +4,7 @@ import {useMount} from '~/hooks/useMount';
 import {ModuleRegistry} from '~/module_registry/module_registry';
 import {HelloModule} from '~/modules/hello/hello_module';
 import {IoModule} from '~/modules/io/io_module';
+import {WledModule} from '~/modules/wled/wled_module';
 import {CoreDependencies, ModuleDependencies} from '~/types/module_types';
 
 export class JamToolsEngine {
@@ -23,6 +24,7 @@ export class JamToolsEngine {
         const modules = [
             new HelloModule(this.coreDeps, modDependencies),
             new IoModule(this.coreDeps, modDependencies),
+            new WledModule(this.coreDeps, modDependencies),
         ];
 
         for (const mod of modules) {

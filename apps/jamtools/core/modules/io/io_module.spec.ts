@@ -1,0 +1,23 @@
+import {CoreDependencies} from '~/types/module_types';
+import {JamToolsEngine} from '~/engine/engine';
+
+describe('IoModule', () => {
+    it('should initialize with the engine', async () => {
+        const coreDeps: CoreDependencies = {
+            log: jest.fn(),
+        };
+
+        const engine = new JamToolsEngine(coreDeps);
+        await engine.initialize();
+
+        const ioModule = engine.moduleRegistry.getModule('io');
+
+        expect(ioModule.state).toEqual({
+            midiInputDevices: [],
+            midiOutputDevices: [],
+        });
+
+        expect(coreDeps.log).toHaveBeenCalledWith('From io module: Original hello state: true');
+        expect(coreDeps.log).toHaveBeenCalledWith('hello module initializing');
+    });
+});

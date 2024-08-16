@@ -3,6 +3,7 @@ import React from 'react';
 import {Subject} from 'rxjs';
 import {HelloModule} from '~/modules/hello/hello_module';
 import {IoModule} from '~/modules/io/io_module';
+import {WledModule} from '~/modules/wled/wled_module';
 
 export type Module<State extends object = any> = {
     moduleId: string;
@@ -16,17 +17,20 @@ export type Module<State extends object = any> = {
 export type AllModules = {
     hello: HelloModule;
     io: IoModule;
+    wled: WledModule;
 }
 
 export class ModuleRegistry {
-    private modules: Module<any>[] = [];
+    private modules: Module[] = [];
+    private modulesByKey: {[moduleId: string]: Module} = {};
 
     registerModule(mod: Module<any>) {
         this.modules.push(mod);
+        this.modulesByKey[mod.moduleId] = mod;
     }
 
     getModule<ModuleId extends keyof AllModules>(moduleId: ModuleId): AllModules[ModuleId] {
-        return this.modules.find(m => m.moduleId === moduleId) as AllModules[ModuleId];
+        return this.modulesByKey[moduleId] as AllModules[ModuleId];
     }
 
     getModules() {

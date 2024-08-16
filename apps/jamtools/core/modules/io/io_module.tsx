@@ -5,6 +5,7 @@ import {Subject, Subscription} from 'rxjs';
 import {CoreDependencies, ModuleDependencies} from '~/types/module_types';
 import {BaseModule, ModuleHookValue} from '../base_module/base_module';
 import {Module} from '~/module_registry/module_registry';
+import {QwertyCallbackPayload} from '~/types/io_types';
 
 type IoState = {
     midiInputDevices: string[];
@@ -27,19 +28,17 @@ export class IoModule implements Module<IoState> {
         midiOutputDevices: [],
     };
 
-    helloModuleSubscription?: Subscription;
+    qwertySubscription?: Subscription;
+    inputSubject: Subject<QwertyCallbackPayload> = new Subject();
 
     initialize = async () => {
-        const helloModule = this.moduleDeps.moduleRegistry.getModule('hello');
-
-        this.coreDeps.log(`From io module: Original hello state: ${helloModule.state.hello}`);
-        this.helloModuleSubscription = helloModule.subject.subscribe(state => {
-            this.coreDeps.log(`From io module: New hello state: ${state.hello}`);
+        this.qwertySubscription = this.coreDeps.inputs.qwerty.onKeyDown.subscribe(event => {
+            this.inputSubject.next(event);
         });
     };
 
     uninitialize = () => {
-        this.helloModuleSubscription?.unsubscribe();
+        this.qwertySubscription?.unsubscribe();
     };
 
     onNewMidiDeviceFound = (device: {name: string}) => {
