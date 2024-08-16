@@ -4,6 +4,7 @@ import {Subject} from 'rxjs';
 import {HelloModule} from '~/modules/hello/hello_module';
 import {IoModule} from '~/modules/io/io_module';
 import {MacroModule} from '~/modules/macro_module/macro_module';
+import {MacroModuleClient} from '~/modules/macro_module/macro_module_types';
 import {WledModule} from '~/modules/wled/wled_module';
 
 export type Module<State extends object = any> = {
@@ -13,7 +14,7 @@ export type Module<State extends object = any> = {
     state?: State;
     subject?: Subject<State>;
     routes?: Record<string, React.ElementType>;
-}
+} & Partial<MacroModuleClient<any>>
 
 export type AllModules = {
     hello: HelloModule;

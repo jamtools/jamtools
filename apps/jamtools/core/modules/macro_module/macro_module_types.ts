@@ -5,6 +5,8 @@ export type MidiDeviceAndChannel = {
 
 export type HashedMidiDeviceAndChannel<DC extends MidiDeviceAndChannel> = `${DC["device"]}-${DC["channel"]}`;
 
+export const makeHashedMidiDeviceAndChannel = (device: MidiDeviceAndChannel) => `${device.device}-${device.channel}` as const;
+
 export type MidiDeviceAndChannelMap<Value> = {
     [key: HashedMidiDeviceAndChannel<MidiDeviceAndChannel>]: Value;
 }
@@ -28,12 +30,16 @@ export type MidiEventFull = {
     event: MidiEvent;
 }
 
-type MacroConfigItemMusicalKeyboard = {
-    type: 'musical_keyboard';
-    onTrigger(midiEvent: MidiEventFull, inputDevice: MIDIInput): void;
+export type MacroConfigItemMusicalKeyboardInput = {
+    type: 'musical_keyboard_input';
+    onTrigger(midiEvent: MidiEventFull): void;
 }
 
-type MacroConfigItem = MacroConfigItemMusicalKeyboard;
+export type MacroConfigItemMusicalKeyboardOutput = {
+    type: 'musical_keyboard_output';
+};
+
+type MacroConfigItem = MacroConfigItemMusicalKeyboardInput | MacroConfigItemMusicalKeyboardOutput;
 
 export type RegisteredMacroConfigItems = {
     [fieldName: string]: MacroConfigItem;
@@ -41,46 +47,35 @@ export type RegisteredMacroConfigItems = {
 
 export type MacroModuleClient<T extends RegisteredMacroConfigItems> = {
     macroConfig: T;
-    updateMacroConfigState(state: FullProducedOutput<T>): void
+    updateMacroState(state: FullProducedOutput<T>): void
 }
 
-type AvailableTypes = 'same_type';
-
-type MyType1 = {
-    type: 'musical_keyboard';
+export type ProducedMacroConfigMusicalKeyboardInput = {
+    type: 'musical_keyboard_input';
 }
 
-type MyType2 = {
-    type: 'type2';
-}
-
-type MyTypes = MyType1 | MyType2;
-
-type YourType1 = {
-    type: 'musical_keyboard';
-}
-
-type YourType2 = {
-    type: 'type2';
+export type ProducedMacroConfigMusicalKeyboardOutput = {
+    type: 'musical_keyboard_output';
+    send: (midiEvent: MidiEvent) => void;
 }
 
 type MappedTypes = {
-    'musical_keyboard': YourType1;
-    'type2': YourType2;
+    'musical_keyboard_input': ProducedMacroConfigMusicalKeyboardInput;
+    'musical_keyboard_output': ProducedMacroConfigMusicalKeyboardOutput;
 }
 
-type ProducedType<T extends MyTypes> = MappedTypes[T["type"]]
+type ProducedType<T extends MacroConfigItem> = MappedTypes[T["type"]]
 
-const produce = <T extends MyTypes>(myObj: T): ProducedType<T> => {
+const produce = <T extends MacroConfigItem>(myObj: T): ProducedType<T> => {
     return {} as any;
 }
 
-type FullInputConfig = {
-    [fieldName: string]: MyTypes;
+export type FullInputConfig = {
+    [fieldName: string]: MacroConfigItem;
 }
 
 export type FullProducedOutput<T extends FullInputConfig> = {
-    [K in keyof T]: ProducedType<T[K]>
+    [K in keyof T]: () => ProducedType<T[K]>;
 }
 
 const produceFull = <T extends FullInputConfig>(myConfig: T): FullProducedOutput<T> => {
@@ -88,7 +83,8 @@ const produceFull = <T extends FullInputConfig>(myConfig: T): FullProducedOutput
 }
 
 const yeah = {
-    type: 'musical_keyboard',
+    type: 'musical_keyboard_input',
+    onTrigger: () => {},
 } as const;
 
 const produced = produce(yeah);
@@ -115,7 +111,7 @@ class Thing {
     };
 
     doTheThing = () => {
-        this.prod.yeah?.type;
+        // this.prod.yeah?.type;
     }
 }
 

@@ -5,7 +5,7 @@ import {Subject} from 'rxjs';
 import {CoreDependencies, ModuleDependencies} from '~/types/module_types';
 import {BaseModule, ModuleHookValue} from '../../base_module/base_module';
 import {Module} from '~/module_registry/module_registry';
-import {FullProducedOutput, MacroModuleClient, MidiDeviceAndChannel, MidiDeviceAndChannelMap, MidiEventFull} from '~/modules/macro_module/macro_module_types';
+import {FullProducedOutput, MacroModuleClient, MidiDeviceAndChannel, MidiDeviceAndChannelMap, MidiEventFull, RegisteredMacroConfigItems} from '~/modules/macro_module/macro_module_types';
 
 type MidiThruState = {
     inputDevice?: MidiDeviceAndChannel;
@@ -33,46 +33,47 @@ type MidiThruHookValue = ModuleHookValue<MidiThruModule>;
 
 const midiThruContext = createContext<MidiThruHookValue>({} as MidiThruHookValue);
 
+type MacroConfigState<M extends RegisteredMacroConfigItems> = FullProducedOutput<M>;
+
 export class MidiThruModule implements Module<MidiThruState>, MacroModuleClient<MidiThruModule["macroConfig"]> {
     moduleId = 'basic_midi_thru';
 
-    state: MidiThruState = {
-        // hello: true,
-    };
-
-    internalState: MidiThruInternalState = {
-        heldNotes: {
-            inputs: {},
-            outputs: {},
-        },
-    };
+    onMidiInput = (midiEvent: MidiEventFull) => {
+        this.macros.myMidiOutput().send(midiEvent.event);
+    }
 
     macroConfig = {
-        input: {
-            type: 'musical_keyboard',
-            onTrigger: this.handleInputMidiEvent.bind(this),
+        myMidiInput: {
+            type: 'musical_keyboard_input',
+            onTrigger: this.onMidiInput,
         },
-        output: {
-            type: 'musical_keyboard',
-            onTrigger: () => {},
+        myMidiOutput: {
+            type: 'musical_keyboard_output',
         },
-    } as const;
+    } as const satisfies RegisteredMacroConfigItems;
 
-    macroConfigState: Partial<FullProducedOutput<MidiThruModule["macroConfig"]>> = {};
+    /**
+     *
+     * Macro Module Boilerplate
+     *
+     **/
 
-    updateMacroConfigState(state: Partial<FullProducedOutput<MidiThruModule["macroConfig"]>>) {
-        this.macroConfigState = this.macroConfigState;
+    macros!: MacroConfigState<MidiThruModule["macroConfig"]>;
+
+    updateMacroState(macros: MacroConfigState<MidiThruModule["macroConfig"]>) {
+        this.macros = macros;
     }
 
-    handleInputMidiEvent(evt: MidiEventFull){
-        const midiOutput = this.macroConfigState.output;
+    // state: MidiThruState = {
+    //     // hello: true,
+    // };
 
-        // const macroMod = this.modDeps.moduleRegistry.getModule('macro');
-        // const device = macroMod.getRegisteredMacros(this.moduleId).output as MidiDeviceAndChannel;
-        // const midiOutput = this.modDeps.services.midiService.getOutput(device.device);
-
-        // midiOutput.send(evt);
-    }
+    // internalState: MidiThruInternalState = {
+    //     heldNotes: {
+    //         inputs: {},
+    //         outputs: {},
+    //     },
+    // };
 
     /**
      *

@@ -19,6 +19,16 @@ export class JamToolsEngine {
             toast: (options) => {
                 this.coreDeps.log(options.message);
             },
+            isMaestro: () => true,
+            callRpc: async (name: string, args, rpcArgs) => {
+                const message = `RPC not implemented. called rpc method '${name}'. ${JSON.stringify(args)} ${JSON.stringify(rpcArgs)}`;
+                alert(message);
+                return message;
+            },
+            registerRpc: (name, cb) => {
+                const message = `registering rpc method '${name}'`;
+                this.coreDeps.log(message);
+            },
         };
 
         const modules = [
