@@ -48,7 +48,7 @@ export class MidiThruModule implements Module<MidiThruState>, MacroModuleClient<
 
     private onMidiInput(midiEvent: MidiEventFull) {
         this.macros.myMidiOutput.send(midiEvent.event);
-    };
+    }
 
     /**
      *
@@ -57,7 +57,7 @@ export class MidiThruModule implements Module<MidiThruState>, MacroModuleClient<
      **/
 
     macros = stubProducedMacros(this.macroConfig);
-    updateMacroState(macros: typeof this.macros) {this.macros = macros}
+    updateMacroState(macros: typeof this.macros) {this.macros = macros;}
 
     // state: MidiThruState = {
     //     // hello: true,

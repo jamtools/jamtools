@@ -55,7 +55,7 @@ export class MusicalKeyboardInputHandler {
         }
 
         this.debugReactSubject.next(this.state);
-    }
+    };
 
     onMidiMessage = (midiEvent: MidiEventFull) => {
         const device = midiEvent.device.name!;
@@ -68,12 +68,12 @@ export class MusicalKeyboardInputHandler {
     };
 
     public getCurrentlyHeldDownNotes = () => {
-
-    }
+        this.coreDeps.log('getCurrentlyHeldDownNotes');
+    };
 
     state = {
         currentQwertyPressInfo: '',
-    }
+    };
 
     private debugReactSubject: Subject<this['state']> = new Subject();
 

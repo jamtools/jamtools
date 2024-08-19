@@ -10,10 +10,10 @@ export class BrowserKVStoreService implements KVStore {
         }
 
         return JSON.parse(s) as T;
-    }
+    };
 
     set = async <T>(key: string, value: T) => {
         const s = JSON.stringify(value);
         this.ls.setItem(key, s);
-    }
+    };
 }

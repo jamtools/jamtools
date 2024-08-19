@@ -61,10 +61,16 @@ export type ProducedMacroConfigMusicalKeyboardOutput = {
     send: (midiEvent: MidiEvent) => void;
 }
 
-export type ProducedType<T extends MacroConfigItem> =
-  T['type'] extends 'musical_keyboard_input' ? MusicalKeyboardInputHandler :
-  T['type'] extends 'musical_keyboard_output' ? ProducedMacroConfigMusicalKeyboardOutput :
-  never;
+type MacroTypes = 'musical_keyboard_input' | 'musical_keyboard_output';
+
+type ProducedTypeMap<T extends string> =
+  T extends 'musical_keyboard_input' ? MusicalKeyboardInputHandler :
+      T extends 'musical_keyboard_output' ? ProducedMacroConfigMusicalKeyboardOutput :
+          never;
+
+export type ProducedType<T extends MacroConfigItem> = ProducedTypeMap<T['type']>;
+
+export type ProducedTypeFromTypeString<T extends MacroTypes> = ProducedTypeMap<T>;
 
 export function stubProducedMacros<T extends RegisteredMacroConfigItems >(
     config: T

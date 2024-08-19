@@ -5,6 +5,15 @@ describe('IoModule', () => {
     it('should initialize with the engine', async () => {
         const coreDeps: CoreDependencies = {
             log: jest.fn(),
+            inputs: {
+                midi: {
+
+                } as any,
+                qwerty: {
+
+                } as any,
+            },
+            kvStore: {} as any,
         };
 
         const engine = new JamToolsEngine(coreDeps);

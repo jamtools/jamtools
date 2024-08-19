@@ -65,7 +65,7 @@ const isModuleEnabled = (mod: Module) => {
     }
 
     return true;
-}
+};
 
 export const useJamToolsEngine = () => {
     return useContext(engineContext);
