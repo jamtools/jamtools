@@ -1,9 +1,11 @@
+import type {MusicalKeyboardInputHandler} from './macro_handlers/musical_keyboard_input_macro_handler';
+
 export type MidiDeviceAndChannel = {
     device: string;
     channel: number;
 };
 
-export type HashedMidiDeviceAndChannel<DC extends MidiDeviceAndChannel> = `${DC["device"]}-${DC["channel"]}`;
+export type HashedMidiDeviceAndChannel<DC extends MidiDeviceAndChannel> = `${DC['device']}-${DC['channel']}`;
 
 export const makeHashedMidiDeviceAndChannel = (device: MidiDeviceAndChannel) => `${device.device}-${device.channel}` as const;
 
@@ -59,15 +61,16 @@ export type ProducedMacroConfigMusicalKeyboardOutput = {
     send: (midiEvent: MidiEvent) => void;
 }
 
-type MappedTypes = {
-    'musical_keyboard_input': ProducedMacroConfigMusicalKeyboardInput;
-    'musical_keyboard_output': ProducedMacroConfigMusicalKeyboardOutput;
-}
+export type ProducedType<T extends MacroConfigItem> =
+  T['type'] extends 'musical_keyboard_input' ? MusicalKeyboardInputHandler :
+  T['type'] extends 'musical_keyboard_output' ? ProducedMacroConfigMusicalKeyboardOutput :
+  never;
 
-type ProducedType<T extends MacroConfigItem> = MappedTypes[T["type"]]
-
-const produce = <T extends MacroConfigItem>(myObj: T): ProducedType<T> => {
-    return {} as any;
+export function stubProducedMacros<T extends RegisteredMacroConfigItems >(
+    config: T
+): { [K in keyof T]: ProducedType<T[K]> } {
+    const result = {} as { [K in keyof T]: ProducedType<T[K]> };
+    return result;
 }
 
 export type FullInputConfig = {
@@ -75,45 +78,9 @@ export type FullInputConfig = {
 }
 
 export type FullProducedOutput<T extends FullInputConfig> = {
-    [K in keyof T]: () => ProducedType<T[K]>;
+    [K in keyof T]: ProducedType<T[K]>;
 }
 
-const produceFull = <T extends FullInputConfig>(myConfig: T): FullProducedOutput<T> => {
-    return {} as any;
-}
-
-const yeah = {
-    type: 'musical_keyboard_input',
-    onTrigger: () => {},
-} as const;
-
-const produced = produce(yeah);
-
-const fullConfig = {
-    yeah,
-} as const;
-
-const fullOutput = produceFull(fullConfig);
-fullOutput.yeah;
-
-const addThings = (thing: Thing) => {
-    return {
-        x: 'yay',
-    };
-};
-
-class Thing {
-    config = fullConfig;
-    prod: Partial<FullProducedOutput<Thing["config"]>> = {};
-
-    updateMacroConfigState = (prod: Partial<FullProducedOutput<Thing["config"]>>) => {
-        this.prod = prod;
-    };
-
-    doTheThing = () => {
-        // this.prod.yeah?.type;
-    }
-}
 
 // how do I structure the directories to differentiate between plumbing modules and feature modules?
 // plumbing, porcelain, feature

@@ -5,7 +5,7 @@ import {Subject} from 'rxjs';
 import {CoreDependencies, ModuleDependencies} from '~/types/module_types';
 import {BaseModule, ModuleHookValue} from '../../base_module/base_module';
 import {Module} from '~/module_registry/module_registry';
-import {FullProducedOutput, MacroModuleClient, MidiDeviceAndChannel, MidiDeviceAndChannelMap, MidiEventFull, RegisteredMacroConfigItems} from '~/modules/macro_module/macro_module_types';
+import {MacroModuleClient, MidiDeviceAndChannel, MidiDeviceAndChannelMap, MidiEventFull, RegisteredMacroConfigItems, stubProducedMacros} from '~/modules/macro_module/macro_module_types';
 
 type MidiThruState = {
     inputDevice?: MidiDeviceAndChannel;
@@ -27,30 +27,28 @@ const MidiThruComponent = () => {
             Hey
         </div>
     );
-}
+};
 
 type MidiThruHookValue = ModuleHookValue<MidiThruModule>;
 
 const midiThruContext = createContext<MidiThruHookValue>({} as MidiThruHookValue);
 
-type MacroConfigState<M extends RegisteredMacroConfigItems> = FullProducedOutput<M>;
-
-export class MidiThruModule implements Module<MidiThruState>, MacroModuleClient<MidiThruModule["macroConfig"]> {
+export class MidiThruModule implements Module<MidiThruState>, MacroModuleClient<MidiThruModule['macroConfig']> {
     moduleId = 'basic_midi_thru';
-
-    onMidiInput = (midiEvent: MidiEventFull) => {
-        this.macros.myMidiOutput().send(midiEvent.event);
-    }
 
     macroConfig = {
         myMidiInput: {
             type: 'musical_keyboard_input',
-            onTrigger: this.onMidiInput,
+            onTrigger: this.onMidiInput.bind(this),
         },
         myMidiOutput: {
             type: 'musical_keyboard_output',
         },
     } as const satisfies RegisteredMacroConfigItems;
+
+    private onMidiInput(midiEvent: MidiEventFull) {
+        this.macros.myMidiOutput.send(midiEvent.event);
+    };
 
     /**
      *
@@ -58,11 +56,8 @@ export class MidiThruModule implements Module<MidiThruState>, MacroModuleClient<
      *
      **/
 
-    macros!: MacroConfigState<MidiThruModule["macroConfig"]>;
-
-    updateMacroState(macros: MacroConfigState<MidiThruModule["macroConfig"]>) {
-        this.macros = macros;
-    }
+    macros = stubProducedMacros(this.macroConfig);
+    updateMacroState(macros: typeof this.macros) {this.macros = macros}
 
     // state: MidiThruState = {
     //     // hello: true,
@@ -107,5 +102,5 @@ export class MidiThruModule implements Module<MidiThruState>, MacroModuleClient<
     static use = BaseModule.useModule(midiThruContext);
     private setState = BaseModule.setState(this);
 
-    constructor(private coreDeps: CoreDependencies, private modDeps: ModuleDependencies) {}
+    constructor(private coreDeps: CoreDependencies, private moduleDeps: ModuleDependencies) {}
 }

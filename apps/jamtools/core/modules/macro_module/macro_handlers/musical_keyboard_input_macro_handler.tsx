@@ -1,16 +1,36 @@
+import React, {useEffect, useState} from 'react';
+
 import {CoreDependencies, ModuleDependencies} from '~/types/module_types';
 import {MacroConfigItemMusicalKeyboardInput, MidiDeviceAndChannel, MidiDeviceAndChannelMap, MidiEventFull, ProducedMacroConfigMusicalKeyboardInput, makeHashedMidiDeviceAndChannel} from '../macro_module_types';
+import {QwertyCallbackPayload} from '~/types/io_types';
+import {Subject} from 'rxjs';
 
 type StoredMusicalKeyboardData = MidiDeviceAndChannel[];
 
 const makeStoredKeyForMusicalKeyboard = (moduleId: string, fieldName: string) => {
     return `${moduleId}-${fieldName}-musical_keyboard`;
-}
+};
+
+const useSubject = <T,>(initialData: T, subject: Subject<T>) => {
+    const [state, setState] = useState(initialData);
+
+    useEffect(() => {
+        const subscription = subject.subscribe((data) => {
+            setState(data);
+        });
+
+        return () => subscription.unsubscribe();
+    }, []);
+
+    return state;
+};
 
 export class MusicalKeyboardInputHandler {
     configuredMappings: MidiDeviceAndChannelMap<boolean> = {};
 
-    constructor(private moduleId: string, private fieldName: string, private coreDeps: CoreDependencies, private modDeps: ModuleDependencies, private conf: MacroConfigItemMusicalKeyboardInput) {}
+    cleanup: (() => void)[] = [];
+
+    constructor(private moduleId: string, private fieldName: string, private coreDeps: CoreDependencies, private moduleDeps: ModuleDependencies, private conf: MacroConfigItemMusicalKeyboardInput) {}
 
     initialize = async () => {
         const storedKey = makeStoredKeyForMusicalKeyboard(this.moduleId, this.fieldName);
@@ -18,6 +38,23 @@ export class MusicalKeyboardInputHandler {
         if (storedValue) {
             this.prepareMappings(storedValue);
         }
+
+        const ioModule = this.moduleDeps.moduleRegistry.getModule('io');
+
+        const sub = ioModule.qwertyInputSubject.subscribe(event => {
+            this.qwertyKeyPressed(event);
+        }); this.cleanup.push(sub.unsubscribe);
+    };
+
+    qwertyKeyPressed = (event: QwertyCallbackPayload) => {
+        if (event.event === 'keydown') {
+            this.state = {currentQwertyPressInfo: event.key};
+        } else {
+            // make this be empty string once multi-key touches are implemented
+            this.state = {currentQwertyPressInfo: event.key};
+        }
+
+        this.debugReactSubject.next(this.state);
     }
 
     onMidiMessage = (midiEvent: MidiEventFull) => {
@@ -28,6 +65,28 @@ export class MusicalKeyboardInputHandler {
         if (this.configuredMappings[hashedKey]) {
             this.conf.onTrigger(midiEvent);
         }
+    };
+
+    public getCurrentlyHeldDownNotes = () => {
+
+    }
+
+    state = {
+        currentQwertyPressInfo: '',
+    }
+
+    private debugReactSubject: Subject<this['state']> = new Subject();
+
+    Component = () => {
+        const state = useSubject(this.state, this.debugReactSubject);
+
+        return (
+            <div>
+                <pre>
+                    {JSON.stringify(state)}
+                </pre>
+            </div>
+        );
     };
 
     // each "Handler" implementation is responsible for providing a way to enable/disable things
@@ -65,7 +124,7 @@ export class MusicalKeyboardInputHandler {
         // set some local state to start listening for the next incoming midi note
 
         return 'hey';
-    }
+    };
 
     submitEditForm = async () => {
         const res = await this.saveConfig({} as any);
@@ -79,7 +138,7 @@ export class MusicalKeyboardInputHandler {
     // this will be called when the module using this is shut down. or something like that
     close = () => {
         // this.midiSubject.unsubscribe();
-    }
+    };
 
     private prepareMappings = (value: StoredMusicalKeyboardData) => {
         this.configuredMappings = {};
@@ -94,27 +153,27 @@ export class MusicalKeyboardInputHandler {
     };
 
     wrapRpc = <Args, Return>(cb: (args: Args) => Promise<Return>, methodName: string): ((args: Args) => Promise<Return | string>) => {
-        const id = this.makeId;
+        const id = this.makeId();
         const fullMethodName = `${id}.${methodName}`;
 
-        this.modDeps.registerRpc(fullMethodName, cb);
+        this.moduleDeps.registerRpc(fullMethodName, cb);
 
         return async (args: Args) => {
-            if (this.modDeps.isMaestro()) {
+            if (this.moduleDeps.isMaestro()) {
                 return cb(args);
             }
 
-            return this.modDeps.callRpc<Args, Return>(fullMethodName, args, {isMaestroOnly: true});
-        }
-    }
+            return this.moduleDeps.callRpc<Args, Return>(fullMethodName, args, {isMaestroOnly: true});
+        };
+    };
 
     produce = (): ProducedMacroConfigMusicalKeyboardInput => {
         return {
             type: 'musical_keyboard_input',
         };
-    }
+    };
 
     actions = {
         dotMenuEdit: this.wrapRpc(this.dotMenuEdit, 'dotMenuEdit'),
-    }
+    };
 }

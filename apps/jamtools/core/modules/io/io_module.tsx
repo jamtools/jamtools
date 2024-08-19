@@ -1,11 +1,11 @@
 import React, {createContext} from 'react';
 
-import {Subject, Subscription} from 'rxjs';
+import {Subject} from 'rxjs';
 
 import {CoreDependencies, ModuleDependencies} from '~/types/module_types';
 import {BaseModule, ModuleHookValue} from '../base_module/base_module';
 import {Module} from '~/module_registry/module_registry';
-import {QwertyCallbackPayload} from '~/types/io_types';
+import {MidiInputEventPayload, QwertyCallbackPayload} from '~/types/io_types';
 
 type IoState = {
     midiInputDevices: string[];
@@ -19,6 +19,8 @@ const ioContext = createContext<IoHookValue>({} as IoHookValue);
 export class IoModule implements Module<IoState> {
     moduleId = 'io';
 
+    cleanup: (() => void)[] = [];
+
     routes = {
         '': () => 'io yeah',
     };
@@ -28,17 +30,17 @@ export class IoModule implements Module<IoState> {
         midiOutputDevices: [],
     };
 
-    qwertySubscription?: Subscription;
-    inputSubject: Subject<QwertyCallbackPayload> = new Subject();
+    qwertyInputSubject: Subject<QwertyCallbackPayload> = new Subject();
+    midiInputSubject: Subject<MidiInputEventPayload> = new Subject();
 
     initialize = async () => {
-        this.qwertySubscription = this.coreDeps.inputs.qwerty.onKeyDown.subscribe(event => {
-            this.inputSubject.next(event);
-        });
-    };
+        const qwertySubscription = this.coreDeps.inputs.qwerty.onInputEvent.subscribe(event => {
+            this.qwertyInputSubject.next(event);
+        }); this.cleanup.push(qwertySubscription.unsubscribe);
 
-    uninitialize = () => {
-        this.qwertySubscription?.unsubscribe();
+        const midiSubscription = this.coreDeps.inputs.midi.onInputEvent.subscribe(event => {
+            this.midiInputSubject.next(event);
+        }); this.cleanup.push(midiSubscription.unsubscribe);
     };
 
     onNewMidiDeviceFound = (device: {name: string}) => {

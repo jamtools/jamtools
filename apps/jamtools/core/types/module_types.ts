@@ -1,10 +1,11 @@
 import {ModuleRegistry} from '~/module_registry/module_registry';
-import {QwertyService} from './io_types';
+import {MidiService, QwertyService} from './io_types';
 
 export type CoreDependencies = {
     log: (s: any) => void;
     inputs: {
         qwerty: QwertyService;
+        midi: MidiService;
     }
     kvStore: KVStore;
 }

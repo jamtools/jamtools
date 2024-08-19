@@ -4,52 +4,88 @@ import {Module} from '~/module_registry/module_registry';
 import {CoreDependencies, ModuleDependencies} from '~/types/module_types';
 import {FullInputConfig, FullProducedOutput, MacroConfigItemMusicalKeyboardInput, MacroConfigItemMusicalKeyboardOutput, MacroModuleClient, MidiDeviceAndChannelMap, ProducedMacroConfigMusicalKeyboardInput, ProducedMacroConfigMusicalKeyboardOutput, RegisteredMacroConfigItems} from './macro_module_types';
 import {MusicalKeyboardInputHandler} from './macro_handlers/musical_keyboard_input_macro_handler';
+import {Subject} from 'rxjs';
+import {BaseModule, ModuleHookValue} from '../base_module/base_module';
 
 type ModuleId = string;
 
-type InputEvent = {
-    type: InputType;
-    device: {
-
-    }
-}
-
-type InputType = 'midi' | 'qwerty';
-
-type InputConfig = {
-    id: string;
-    name: string;
-    type: string;
-    onTrigger: (config: InputConfig, ) => {};
-};
-
 type MacroConfigState = {
-    configs: Record<ModuleId, InputConfig[]>;
+    configs: Record<ModuleId, RegisteredMacroConfigItems>;
+    producedMacros: Record<ModuleId, FullProducedOutput<FullInputConfig>>;
 };
 
-const context = React.createContext<MacroConfigState>({} as MacroConfigState);
+type MacroHookValue = ModuleHookValue<MacroModule>;
+
+const macroContext = React.createContext<MacroHookValue>({} as MacroHookValue);
 
 type ProviderProps = React.PropsWithChildren<{
     remoteState: MacroConfigState;
 }>;
 
-export class MacroModule implements Module {
+export class MacroModule implements Module<MacroConfigState> {
     moduleId = 'macro';
 
-    constructor(private coreDeps: CoreDependencies, private modDeps: ModuleDependencies) {
-        // this.musicalKeyboardHandler = new MusicalKeyboardInputHandler(coreDeps, modDeps);
+    constructor(private coreDeps: CoreDependencies, private moduleDeps: ModuleDependencies) {
+        // this.musicalKeyboardHandler = new MusicalKeyboardInputHandler(coreDeps, moduleDeps);
     }
 
-    initialize = async () => {
-        // await this.musicalKeyboardHandler.initialize();
+    routes = {
+        '': () => {
+            const mod = MacroModule.use();
 
-        const mods = this.modDeps.moduleRegistry.getModules();
+            const moduleIds = Object.keys(mod.state.configs);
+
+            return (
+                <ul>
+                    {moduleIds.map((moduleId) => {
+                        const c = mod.state.configs[moduleId];
+                        const fieldNames = Object.keys(c);
+
+                        return (
+                            <li key={moduleId}>
+                                {moduleId}
+                                <ul>
+                                    {fieldNames.map((fieldName) => {
+                                        const mapping = c[fieldName];
+                                        const producedMacro = this.state.producedMacros[moduleId][fieldName];
+                                        const Component = ((producedMacro as {Component?: React.ElementType}).Component);
+
+                                        return (
+                                            <li key={fieldName}>
+                                                {Component && <Component />}
+                                                {fieldName} - {mapping.type}
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+                            </li>
+                        );
+                    })}
+                </ul>
+            );
+        },
+    };
+
+    state: MacroConfigState = {
+        configs: {},
+        producedMacros: {},
+    };
+
+    initialize = async () => {
+        const allConfigs: Record<ModuleId, RegisteredMacroConfigItems> = {};
+        const allProducedMacros: Record<ModuleId, FullProducedOutput<FullInputConfig>> = {};
+
+        const mods = this.moduleDeps.moduleRegistry.getModules();
         for (const mod of mods) {
             if (mod.macroConfig) {
+                allConfigs[mod.moduleId] = mod.macroConfig;
                 const withMacroConfig = mod as Module & MacroModuleClient<any>;
-                await this.registerModuleMacroConfig(withMacroConfig);
+                const producedMacros = await this.registerModuleMacroConfig(withMacroConfig);
+                allProducedMacros[mod.moduleId] = producedMacros;
             }
         }
+
+        this.setState({configs: allConfigs, producedMacros: allProducedMacros});
     };
 
     private registerModuleMacroConfig = async (mod: Module & MacroModuleClient<RegisteredMacroConfigItems>) => {
@@ -61,11 +97,12 @@ export class MacroModule implements Module {
             const conf = macroConfig[fieldName];
             switch (conf.type) {
                 case 'musical_keyboard_input':
-                    const handler = new MusicalKeyboardInputHandler(mod.moduleId, fieldName, this.coreDeps, this.modDeps, conf);
-                    producedMacros[fieldName] = handler.produce;
+                    const handler = new MusicalKeyboardInputHandler(mod.moduleId, fieldName, this.coreDeps, this.moduleDeps, conf);
+                    await handler.initialize();
+                    producedMacros[fieldName] = handler;
                     break;
                 case 'musical_keyboard_output':
-                    producedMacros[fieldName] = () => this.produceMusicalKeyboardOutput(conf);
+                    producedMacros[fieldName] = {} as any;
                     break;
                 default:
                     this.coreDeps.log(`Unsupported macro config type: ${(conf as {type: string}).type}`);
@@ -73,59 +110,16 @@ export class MacroModule implements Module {
         }
 
         mod.updateMacroState(producedMacros);
-    }
-
-    private produceMusicalKeyboardInput = (conf: MacroConfigItemMusicalKeyboardInput): ProducedMacroConfigMusicalKeyboardInput => {
-        return {
-            type: 'musical_keyboard_input',
-        };
-    }
+        return producedMacros;
+    };
 
     private produceMusicalKeyboardOutput = (conf: MacroConfigItemMusicalKeyboardOutput): ProducedMacroConfigMusicalKeyboardOutput => {
         return {} as any;
-    }
-
-    Provider = ({remoteState, children}: ProviderProps) => {
-        const [localState, setLocalState] = useState<MacroConfigState>(remoteState);
-
-        useEffect(() => {
-            setLocalState(remoteState);
-        }, [remoteState]);
-
-        return (
-            <context.Provider value={localState}>
-                {children}
-            </context.Provider>
-        );
     };
 
-    // // process a state change from a different module. only runs on the leader device
-    // processLeaderStateChange = (moduleId: string, path: string, data: object) => {
+    subject: Subject<MacroConfigState> = new Subject();
 
-    // };
-
-    // this should call `useIo` to get info on available io devices
-    MainConfigPage = () => {
-        const module = MacroModule.use();
-
-        return (
-            <div>
-                <h1>Main Config Module</h1>
-                <button onClick={() => module.modDeps.toast({
-                    target: 'all',
-                    message: 'Hello from the main config module!',
-                    variant: 'info',
-                })}>
-                    Show toast
-                </button>
-            </div>
-        );
-    };
-
-    static use = (): MacroModule => {
-        return {} as any;
-        // return new MainConfigModule({toast: console.log});
-        // const moduleRegistry = useModuleRegistry();
-        // return moduleRegistry.getModule(MainConfigModule.moduleId);
-    };
+    Provider: React.ElementType = BaseModule.Provider(this, macroContext);
+    static use = BaseModule.useModule(macroContext);
+    private setState = BaseModule.setState(this);
 }

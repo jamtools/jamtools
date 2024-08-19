@@ -1,9 +1,11 @@
 import React, {createContext, useContext, useState} from 'react';
 
 import {useMount} from '~/hooks/useMount';
-import {ModuleRegistry} from '~/module_registry/module_registry';
+import {Module, ModuleRegistry} from '~/module_registry/module_registry';
 import {HelloModule} from '~/modules/hello/hello_module';
 import {IoModule} from '~/modules/io/io_module';
+import {MacroModule} from '~/modules/macro_module/macro_module';
+import {MidiThruModule} from '~/modules/midi_playback/basic_midi_thru/basic_midi_thru_module';
 import {WledModule} from '~/modules/wled/wled_module';
 import {CoreDependencies, ModuleDependencies} from '~/types/module_types';
 
@@ -13,6 +15,8 @@ export class JamToolsEngine {
     constructor(private coreDeps: CoreDependencies) {}
 
     initialize = async () => {
+        await this.coreDeps.inputs.midi.initialize();
+
         this.moduleRegistry = new ModuleRegistry();
         const modDependencies: ModuleDependencies = {
             moduleRegistry: this.moduleRegistry,
@@ -34,17 +38,33 @@ export class JamToolsEngine {
         const modules = [
             new HelloModule(this.coreDeps, modDependencies),
             new IoModule(this.coreDeps, modDependencies),
+            new MacroModule(this.coreDeps, modDependencies),
             new WledModule(this.coreDeps, modDependencies),
+            new MidiThruModule(this.coreDeps, modDependencies),
         ];
 
         for (const mod of modules) {
-            this.moduleRegistry.registerModule(mod);
+            if (isModuleEnabled(mod)) {
+                this.moduleRegistry.registerModule(mod);
+            }
         }
 
         for (const mod of modules) {
-            await mod.initialize();
+            if (isModuleEnabled(mod)) {
+                await mod.initialize();
+            }
         }
     };
+}
+
+const isModuleEnabled = (mod: Module) => {
+    // check if module disabled itself with "enabled = false"
+    const maybeEnabled = (mod as {enabled?: boolean}).enabled;
+    if (maybeEnabled === false) {
+        return false;
+    }
+
+    return true;
 }
 
 export const useJamToolsEngine = () => {

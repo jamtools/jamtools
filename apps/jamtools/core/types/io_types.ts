@@ -1,10 +1,19 @@
 import {Subject} from 'rxjs';
+import {MidiEventFull} from '~/modules/macro_module/macro_module_types';
 
 export type QwertyCallbackPayload = {
+    event: 'keydown' | 'keyup';
     key: string;
 }
 
 export type QwertyService = {
-    onKeyDown: Subject<QwertyCallbackPayload>;
-    onKeyUp: Subject<QwertyCallbackPayload>;
+    onInputEvent: Subject<QwertyCallbackPayload>;
+}
+
+export type MidiInputEventPayload = MidiEventFull;
+
+export type MidiService = {
+    onInputEvent: Subject<MidiInputEventPayload>;
+    initialize: () => Promise<void>;
+    // getAvailableDevices: Subject<MidiInputEventPayload>;
 }

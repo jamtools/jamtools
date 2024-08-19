@@ -49,5 +49,5 @@ export class HelloModule implements Module<HelloState> {
     static use = BaseModule.useModule(helloContext);
     private setState = BaseModule.setState(this);
 
-    constructor(private coreDeps: CoreDependencies, private modDeps: ModuleDependencies) {}
+    constructor(private coreDeps: CoreDependencies, private moduleDeps: ModuleDependencies) {}
 }

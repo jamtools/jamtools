@@ -28,6 +28,10 @@ const WledContext = createContext<WledHookValue>({} as WledHookValue);
 export class WledModule implements Module<WledState> {
     moduleId = 'wled';
 
+    enabled = false;
+
+    cleanup: (() => void)[] = [];
+
     routes = {
         '': () => {
             const mod = WledModule.use();
@@ -51,22 +55,18 @@ export class WledModule implements Module<WledState> {
 
     clients: WledClientUrlPair[] = [];
 
-    ioSubscription?: Subscription;
-
     initialize = async () => {
         setTimeout(this.initializeClients);
 
         const ioModule = this.moduleDeps.moduleRegistry.getModule('io');
 
-        this.ioSubscription = ioModule.inputSubject.subscribe(event => {
+        const sub = ioModule.qwertyInputSubject.subscribe(event => {
             if (event.key === 'w') {
                 this.doSomething();
             }
         });
-    };
 
-    uninitialize = () => {
-        this.ioSubscription?.unsubscribe();
+        this.cleanup.push(sub.unsubscribe);
     };
 
     private initializeClients = async () => {
