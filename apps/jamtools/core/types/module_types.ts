@@ -30,6 +30,6 @@ export type ModuleDependencies = {
         persistent?: boolean;
     }) => void;
     isMaestro: () => boolean;
-    callRpc: <Args, Return>(name: string, args: Args, rpcArgs: RpcArgs) => Promise<Return | string>;
+    callRpc: <Args, Return>(name: string, args: Args, rpcArgs?: RpcArgs) => Promise<Return | string>;
     registerRpc: <Args, Return>(name: string, cb: (args: Args) => Promise<Return>) => void;
 }
