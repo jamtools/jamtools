@@ -1,0 +1,17 @@
+site_name: Jam Tools
+docs_dir: content
+theme:
+  name: material
+extra_css:
+  - stylesheets/custom.css
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Installation: installation.md
+      - Usage: usage.md
+  - API Reference:
+      - Endpoints: api/endpoints.md
+      - Authentication: api/authentication.md
+  - FAQ: faq.md
+  - About: about.md
