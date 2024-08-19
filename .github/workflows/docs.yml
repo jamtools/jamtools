@@ -27,12 +27,14 @@ jobs:
 
     - name: Build and Deploy for Production
       if: github.ref == 'refs/heads/main'
+      working-directory: docs
       run: mkdocs gh-deploy --force
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build and Deploy for PR Preview
       if: github.event_name == 'pull_request'
+      working-directory: docs
       run: |
         PR_NUMBER=${{ github.event.pull_request.number }}
         mkdocs gh-deploy --remote-branch gh-pages-preview-${PR_NUMBER} --force
