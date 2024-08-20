@@ -15,7 +15,9 @@ export class JamToolsEngine {
     constructor(private coreDeps: CoreDependencies) {}
 
     initialize = async () => {
+        // how can we make sure each thing is initialized without adding more stuff here? maybe this is best for now
         await this.coreDeps.inputs.midi.initialize();
+        await this.coreDeps.rpc.initialize();
 
         this.moduleRegistry = new ModuleRegistry();
         const modDependencies: ModuleDependencies = {
@@ -23,19 +25,13 @@ export class JamToolsEngine {
             toast: (options) => {
                 this.coreDeps.log(options.message);
             },
+            // how can we make it so if the maestro refreshes, they can pick up where the jam was at?
+            // maybe we don't support that at first. refreshing maestro is not expected to resume maybe?
             isMaestro: () => true,
-            callRpc: async (name: string, args, rpcArgs) => {
-                const message = `RPC not implemented. called rpc method '${name}'. ${JSON.stringify(args)} ${JSON.stringify(rpcArgs)}`;
-                alert(message);
-                return message;
-            },
-            registerRpc: (name, cb) => {
-                const message = `registering rpc method '${name}'`;
-                this.coreDeps.log(message);
-            },
+            rpc: this.coreDeps.rpc,
         };
 
-        const modules = [
+        const modules: Module<any>[] = [
             new HelloModule(this.coreDeps, modDependencies),
             new IoModule(this.coreDeps, modDependencies),
             new MacroModule(this.coreDeps, modDependencies),
@@ -51,7 +47,7 @@ export class JamToolsEngine {
 
         for (const mod of modules) {
             if (isModuleEnabled(mod)) {
-                await mod.initialize();
+                await mod.initialize?.();
             }
         }
     };

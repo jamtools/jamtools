@@ -10,8 +10,8 @@ import {WledModule} from '~/modules/wled/wled_module';
 
 export type Module<State extends object = any> = {
     moduleId: string;
-    initialize: () => void | Promise<void>;
-    Provider: React.ElementType;
+    initialize?: () => void | Promise<void>;
+    Provider?: React.ElementType;
     state?: State;
     subject?: Subject<State>;
     routes?: Record<string, React.ElementType>;

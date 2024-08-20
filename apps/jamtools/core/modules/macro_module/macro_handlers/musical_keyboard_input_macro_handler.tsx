@@ -4,6 +4,8 @@ import {CoreDependencies, ModuleDependencies} from '~/types/module_types';
 import {MacroConfigItemMusicalKeyboardInput, MidiDeviceAndChannel, MidiDeviceAndChannelMap, MidiEventFull, ProducedMacroConfigMusicalKeyboardInput, makeHashedMidiDeviceAndChannel} from '../macro_module_types';
 import {QwertyCallbackPayload} from '~/types/io_types';
 import {Subject} from 'rxjs';
+import {QWERTY_TO_MIDI_MAPPINGS} from '~/constants/qwerty_to_midi_mappings';
+import {MIDI_NUMBER_TO_NOTE_NAME_MAPPINGS} from '~/constants/midi_number_to_note_name_mappings';
 
 type StoredMusicalKeyboardData = MidiDeviceAndChannel[];
 
@@ -46,15 +48,57 @@ export class MusicalKeyboardInputHandler {
         }); this.cleanup.push(sub.unsubscribe);
     };
 
+    onEventSubject = new Subject<MidiEventFull>();
+
     qwertyKeyPressed = (event: QwertyCallbackPayload) => {
+        const midiNumber = QWERTY_TO_MIDI_MAPPINGS[event.key as keyof typeof QWERTY_TO_MIDI_MAPPINGS];
+        if (midiNumber === undefined) {
+            return;
+        }
+
+        const index = this.state.currentQwertyPressInfo.indexOf(event.key);
+
         if (event.event === 'keydown') {
-            this.state = {currentQwertyPressInfo: event.key};
+            if (index !== -1) {
+                return;
+            }
+
+            this.state = {currentQwertyPressInfo: [...this.state.currentQwertyPressInfo, event.key]};
         } else {
-            // make this be empty string once multi-key touches are implemented
-            this.state = {currentQwertyPressInfo: event.key};
+            this.state = {currentQwertyPressInfo: [
+                ...this.state.currentQwertyPressInfo.slice(0, index),
+                ...this.state.currentQwertyPressInfo.slice(index + 1),
+            ]};
         }
 
         this.debugReactSubject.next(this.state);
+        this.actions.setState(this.state);
+
+        const noteName = MIDI_NUMBER_TO_NOTE_NAME_MAPPINGS[(midiNumber % 12) as keyof typeof MIDI_NUMBER_TO_NOTE_NAME_MAPPINGS];
+
+        const octave = Math.ceil((midiNumber + 1) / 12) + 3;
+
+        const noteIdentifier = `${noteName}${octave}` as const;
+
+        const fullEvent: MidiEventFull = {
+            device: null as any,
+            deviceInfo: {type: 'midi', subtype: 'midi_input'},
+            event: {
+                channel: 0,
+                number: midiNumber,
+                type: event.event === 'keydown' ? 'noteon' : 'noteoff',
+                velocity: 127,
+                noteAndOctave: noteIdentifier,
+            },
+            type: 'midi',
+        };
+
+        const onTrigger = this.conf.onTrigger;
+        if (onTrigger) {
+            onTrigger(fullEvent);
+        }
+
+        this.onEventSubject.next(fullEvent);
     };
 
     onMidiMessage = (midiEvent: MidiEventFull) => {
@@ -63,7 +107,12 @@ export class MusicalKeyboardInputHandler {
         const hashedKey = makeHashedMidiDeviceAndChannel({device, channel});
 
         if (this.configuredMappings[hashedKey]) {
-            this.conf.onTrigger(midiEvent);
+            const onTrigger = this.conf.onTrigger;
+            if (onTrigger) {
+                onTrigger(midiEvent);
+            }
+
+            this.onEventSubject.next(midiEvent);
         }
     };
 
@@ -72,7 +121,13 @@ export class MusicalKeyboardInputHandler {
     };
 
     state = {
-        currentQwertyPressInfo: '',
+        currentQwertyPressInfo: [] as string[],
+    };
+
+    private setState = async (state: Partial<typeof this.state>) => {
+        this.state = {...this.state, ...state};
+        this.debugReactSubject.next(this.state);
+        return '';
     };
 
     private debugReactSubject: Subject<this['state']> = new Subject();
@@ -83,7 +138,13 @@ export class MusicalKeyboardInputHandler {
         return (
             <div>
                 <pre>
-                    {JSON.stringify(state)}
+                    {state.currentQwertyPressInfo.map((key) => (
+                        <div key={key}>
+                            {MIDI_NUMBER_TO_NOTE_NAME_MAPPINGS[(
+                                QWERTY_TO_MIDI_MAPPINGS[key as keyof typeof QWERTY_TO_MIDI_MAPPINGS] % 12
+                            ) as keyof typeof MIDI_NUMBER_TO_NOTE_NAME_MAPPINGS]}
+                        </div>
+                    ))}
                 </pre>
             </div>
         );
@@ -152,18 +213,22 @@ export class MusicalKeyboardInputHandler {
         await this.coreDeps.kvStore.set(storedKey, value);
     };
 
-    wrapRpc = <Args, Return>(cb: (args: Args) => Promise<Return>, methodName: string): ((args: Args) => Promise<Return | string>) => {
+    wrapRpc = <Args, Return>(cb: (args: Args) => Promise<Return>, methodName: string, sendUnconditionally: boolean): ((args: Args) => Promise<Return | string>) => {
         const id = this.makeId();
         const fullMethodName = `${id}.${methodName}`;
 
-        this.moduleDeps.registerRpc(fullMethodName, cb);
+        this.moduleDeps.rpc.registerRpc(fullMethodName, cb);
 
         return async (args: Args) => {
             if (this.moduleDeps.isMaestro()) {
-                return cb(args);
+                const result = cb(args);
+
+                if (!sendUnconditionally) {
+                    return result;
+                }
             }
 
-            return this.moduleDeps.callRpc<Args, Return>(fullMethodName, args, {isMaestroOnly: true});
+            return this.moduleDeps.rpc.callRpc<Args, Return>(fullMethodName, args, {isMaestroOnly: true});
         };
     };
 
@@ -174,6 +239,7 @@ export class MusicalKeyboardInputHandler {
     };
 
     actions = {
-        dotMenuEdit: this.wrapRpc(this.dotMenuEdit, 'dotMenuEdit'),
+        dotMenuEdit: this.wrapRpc(this.dotMenuEdit, 'dotMenuEdit, false'),
+        setState: this.wrapRpc(this.setState, 'setState', true),
     };
 }

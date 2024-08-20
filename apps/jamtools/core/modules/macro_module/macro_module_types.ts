@@ -18,6 +18,7 @@ export type MidiEvent = {
     number: number;
     channel: number;
     velocity: number;
+    noteAndOctave: string;
 }
 
 export type DeviceInfo = {
@@ -34,14 +35,14 @@ export type MidiEventFull = {
 
 export type MacroConfigItemMusicalKeyboardInput = {
     type: 'musical_keyboard_input';
-    onTrigger(midiEvent: MidiEventFull): void;
+    onTrigger?(midiEvent: MidiEventFull): void;
 }
 
 export type MacroConfigItemMusicalKeyboardOutput = {
     type: 'musical_keyboard_output';
 };
 
-type MacroConfigItem = MacroConfigItemMusicalKeyboardInput | MacroConfigItemMusicalKeyboardOutput;
+export type MacroConfigItem = MacroConfigItemMusicalKeyboardInput | MacroConfigItemMusicalKeyboardOutput;
 
 export type RegisteredMacroConfigItems = {
     [fieldName: string]: MacroConfigItem;
@@ -63,7 +64,7 @@ export type ProducedMacroConfigMusicalKeyboardOutput = {
 
 type MacroTypes = 'musical_keyboard_input' | 'musical_keyboard_output';
 
-type ProducedTypeMap<T extends string> =
+export type ProducedTypeMap<T extends string> =
   T extends 'musical_keyboard_input' ? MusicalKeyboardInputHandler :
       T extends 'musical_keyboard_output' ? ProducedMacroConfigMusicalKeyboardOutput :
           never;

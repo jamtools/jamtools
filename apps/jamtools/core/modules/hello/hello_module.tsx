@@ -35,6 +35,16 @@ export class HelloModule implements Module<HelloState> {
 
     initialize = async () => {
         this.coreDeps.log('hello module initializing');
+
+        // this.moduleDeps.rpc.registerRpc('hello', async (args) => {
+        //     this.coreDeps.log('registerRpc hello', args);
+        //     this.hello();
+        //     return {response_from: 'hello module'};
+        // });
+
+        // this.moduleDeps.rpc.callRpc('hello', {sending_from: 'hello module'}).then((result) => {
+        //     this.coreDeps.log('callRpc hello', result);
+        // });
     };
 
     private hello = () => {

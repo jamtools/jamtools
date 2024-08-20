@@ -2,7 +2,7 @@ import {WebSocketServer, WebSocket} from 'ws';
 import {JSONRPCServer, JSONRPCClient, JSONRPCRequest} from 'json-rpc-2.0';
 import {ModuleDependencies} from '~/types/module_types';
 
-type RpcClient = Pick<ModuleDependencies, 'callRpc'>;
+type RpcClient = ModuleDependencies['rpc'];
 
 export class NodeJsonRpcServer implements RpcClient {
     rpcClient!: JSONRPCClient;
@@ -10,6 +10,10 @@ export class NodeJsonRpcServer implements RpcClient {
     callRpc = async <Return, Args>(method: string, args: Args): Promise<Return> => {
         const result = await this.rpcClient.request(method, args);
         return result;
+    };
+
+    registerRpc = <Args, Return>(name: string, cb: (args: Args) => Promise<Return>) => {
+        return cb;
     };
 
     initialize = async () => {
@@ -37,20 +41,27 @@ export class NodeJsonRpcServer implements RpcClient {
 
             ws.on('message', async (data) => {
                 const message = data.toString();
+                console.log(message);
                 const jsonMessage = JSON.parse(message);
-                console.log(jsonMessage);
 
-                if (jsonMessage.jsonrpc === '2.0' && jsonMessage.method) {
-                    for (const c of Object.keys(outgoingClients)) {
-                        if (c === clientId) {
-                            continue;
-                        }
-
-                        outgoingClients[c].send(jsonMessage);
+                // if (jsonMessage.jsonrpc === '2.0' && jsonMessage.method) {
+                for (const c of Object.keys(incomingClients)) {
+                    if (c === clientId) {
+                        continue;
                     }
-                } else {
-                    client.receive(jsonMessage);
+
+                    const method = jsonMessage.method;
+                    const args = jsonMessage.params;
+
+                    incomingClients[c].send(message);
+
+                    // const result = await outgoingClients[c].request(method, args);
+                    // client.send(result);
                 }
+                // } else {
+                //     console.log('receive 2')
+                //     client.receive(jsonMessage);
+                // }
             });
 
             jsonRpcServer.addMethod('echo-to-server', ({text}: {text: string}) => {
