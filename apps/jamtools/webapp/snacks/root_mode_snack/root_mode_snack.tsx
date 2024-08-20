@@ -12,36 +12,6 @@ setTimeout(() => {
     main();
 });
 
-let scale = 0; // C major
-
-const getChordFromRootNote = (scale: number, rootNote: number): number[] => {
-    const scaleDegreeInfo = getScaleDegreeFromScaleAndNote(scale, rootNote);
-
-    if (!scaleDegreeInfo) {
-        return [];
-    }
-
-    if (scaleDegreeInfo.quality === 'major') {
-        return [
-            rootNote,
-            rootNote + 4,
-            rootNote + 7,
-            rootNote + 12,
-        ];
-    }
-
-    if (scaleDegreeInfo.quality === 'minor') {
-        return [
-            rootNote,
-            rootNote + 3,
-            rootNote + 7,
-            rootNote + 12,
-        ];
-    }
-
-    return [];
-};
-
 type State = {
     chord: ScaleDegreeInfo | null;
     scale: number;
@@ -69,29 +39,7 @@ const main = async () => {
         macroModule.createMacro('MIDI Output', {type: 'musical_keyboard_output'}),
     ]);
 
-    const onClick = () => {
-        scale = cycle(scale + 1);
-        rootModeStateSubject.next({
-            chord: null,
-            scale,
-        });
-    };
-
-    engine.moduleRegistry.registerModule({
-        moduleId: 'root_mode_snack',
-        routes: {
-            '': () => {
-                const state = useSubject({chord: null, scale}, rootModeStateSubject);
-
-                return (
-                    <RootModeComponent
-                        {...state}
-                        onClick={onClick}
-                    />
-                );
-            },
-        },
-    });
+    let scale = 0; // C major on page load
 
     input.onEventSubject.subscribe(evt => {
         const midiNumber = evt.event.number;
@@ -123,4 +71,60 @@ const main = async () => {
             });
         }
     });
+
+    const setScale = (newScale: number) => {
+        scale = newScale;
+        rootModeStateSubject.next({
+            chord: null,
+            scale,
+        });
+    }
+
+    engine.moduleRegistry.registerModule({
+        moduleId: 'root_mode_snack',
+        routes: {
+            '': () => {
+                const state = useSubject({chord: null, scale}, rootModeStateSubject);
+
+                const onClick = () => {
+                    setScale(cycle(state.scale + 1));
+                };
+
+                return (
+                    <RootModeComponent
+                        {...state}
+                        onClick={onClick}
+                    />
+                );
+            },
+        },
+    });
+};
+
+const getChordFromRootNote = (scale: number, rootNote: number): number[] => {
+    const scaleDegreeInfo = getScaleDegreeFromScaleAndNote(scale, rootNote);
+
+    if (!scaleDegreeInfo) {
+        return [];
+    }
+
+    if (scaleDegreeInfo.quality === 'major') {
+        return [
+            rootNote,
+            rootNote + 4,
+            rootNote + 7,
+            rootNote + 12,
+        ];
+    }
+
+    if (scaleDegreeInfo.quality === 'minor') {
+        return [
+            rootNote,
+            rootNote + 3,
+            rootNote + 7,
+            rootNote + 12,
+        ];
+    }
+
+    return [];
 };
