@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 
 import {Subject} from 'rxjs';
 import {HelloModule} from '~/modules/hello/hello_module';
@@ -25,13 +25,25 @@ export type AllModules = {
     midiThru: MidiThruModule;
 }
 
+type ModuleMap = {[moduleId: string]: Module};
+
 export class ModuleRegistry {
     private modules: Module[] = [];
-    private modulesByKey: {[moduleId: string]: Module} = {};
+    private modulesByKey: ModuleMap = {};
 
     registerModule(mod: Module<any>) {
         this.modules.push(mod);
         this.modulesByKey[mod.moduleId] = mod;
+
+        this.modulesSubject.next([...this.modules]);
+    }
+
+    async registerAndInitializeModule(mod: Module<any>) {
+        this.modules.push(mod);
+        this.modulesByKey[mod.moduleId] = mod;
+        await mod.initialize?.();
+
+        this.modulesSubject.next([...this.modules]);
     }
 
     getModule<ModuleId extends keyof AllModules>(moduleId: ModuleId): AllModules[ModuleId] {
@@ -41,4 +53,24 @@ export class ModuleRegistry {
     getModules() {
         return this.modules;
     }
+
+    modulesSubject: Subject<Module[]> = new Subject();
+
+    useModules = (): Module[] => {
+        return useSubject(this.modules, this.modulesSubject);
+    }
 }
+
+export const useSubject = <T,>(initialData: T, subject: Subject<T>): T => {
+    const [data, setData] = useState(initialData);
+
+    useEffect(() => {
+        const subscription = subject.subscribe((newData) => {
+            setData(newData);
+        });
+
+        return () => subscription.unsubscribe();
+    }, []);
+
+    return data;
+};

@@ -30,6 +30,7 @@ module.exports = {
         indent: 'off',
         '@typescript-eslint/indent': ['error'],
         '@typescript-eslint/no-explicit-any': 'off',
+        "no-empty-function": ['warn'],
         quotes: [
             'error',
             'single'

@@ -2,9 +2,9 @@
   "name": "jamtools-webapp",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "npm run build -- --watch",
+    "dev": "npm run build-snack -- --watch",
     "build": "esbuild src/index.tsx --outfile=dist/index.js --bundle",
-    "build-snack": "esbuild ../snacks/midi_thru_snack.ts --outfile=dist/index.js --bundle",
+    "build-snack": "esbuild ./snacks/root_mode_snack/root_mode_snack.tsx --outfile=dist/index.js --bundle",
     "check-types": "tsc --noEmit",
     "lint": "eslint --ext ts --ext tsx src/",
     "fix": "npm run lint -- --fix"

@@ -2,11 +2,12 @@ import React from 'react';
 import {Module} from '~/module_registry/module_registry';
 
 import {CoreDependencies, ModuleDependencies} from '~/types/module_types';
-import {FullInputConfig, FullProducedOutput, MacroConfigItem, MacroConfigItemMusicalKeyboardInput, MacroConfigItemMusicalKeyboardOutput, MacroModuleClient, ProducedMacroConfigMusicalKeyboardOutput, ProducedType, ProducedTypeMap, RegisteredMacroConfigItems} from './macro_module_types';
+import {FullInputConfig, FullProducedOutput, MacroConfigItem, ProducedType, ProducedTypeMap, RegisteredMacroConfigItems} from './macro_module_types';
 import {MusicalKeyboardInputHandler} from './macro_handlers/musical_keyboard_input_macro_handler';
 import {Subject} from 'rxjs';
 import {BaseModule, ModuleHookValue} from '../base_module/base_module';
 import {MacroPage} from './macro_page';
+import {SoundfontPeripheral} from '~/peripherals/outputs/soundfont_peripheral';
 
 type ModuleId = string;
 
@@ -61,16 +62,12 @@ export class MacroModule implements Module<MacroConfigState> {
     public createMacro = async <T extends MacroConfigItem>(name: string, configOrCallback: T | (() => T)): Promise<ProducedType<T> > => {
         const config = typeof configOrCallback === 'function' ? configOrCallback() : configOrCallback;
 
-        const allConfigs = {...this.state.configs};
-        const allProducedMacros = {...this.state.producedMacros};
-
-        const tempConfig = {[name]: config};
-
         const moduleId = '';
-        allConfigs[moduleId] = {...allConfigs[moduleId], ...tempConfig};
+        const tempConfig = {[name]: config};
+        this.state.configs = {...this.state.configs, [moduleId]: {...this.state.configs[moduleId], ...tempConfig}};
 
         const producedMacros = await this.registerModuleMacroConfig(moduleId, tempConfig);
-        allProducedMacros[moduleId] = {...allProducedMacros[moduleId], ...producedMacros};
+        this.state.producedMacros = {...this.state.producedMacros, [moduleId]: {...this.state.producedMacros[moduleId], ...producedMacros}};
 
         return producedMacros[name];
     };
@@ -105,10 +102,9 @@ export class MacroModule implements Module<MacroConfigState> {
                     await handler.initialize();
                     break;
                 } case 'musical_keyboard_output': {
-                    const handler: ProducedType<typeof conf> = {send: (midiEvent) => {
-                        // this.coreDeps.log(midiEvent);
-                    }, type: 'musical_keyboard_output'};
+                    const handler: ProducedType<typeof conf> = new SoundfontPeripheral(this.coreDeps, this.moduleDeps);
                     producedMacros[fname] = handler as ProducedTypeMap<T[keyof T]['type']>;
+                    await handler.initialize?.();
                     break;
                 } default:
                     this.coreDeps.log(`Unsupported macro config type: ${(conf as {type: string}).type}`);

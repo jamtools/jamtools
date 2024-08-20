@@ -1,3 +1,4 @@
+import {MIDI_NUMBER_TO_NOTE_NAME_MAPPINGS} from '~/constants/midi_number_to_note_name_mappings';
 import type {MusicalKeyboardInputHandler} from './macro_handlers/musical_keyboard_input_macro_handler';
 
 export type MidiDeviceAndChannel = {
@@ -18,8 +19,15 @@ export type MidiEvent = {
     number: number;
     channel: number;
     velocity: number;
-    noteAndOctave: string;
 }
+
+export const convertMidiNumberToNoteAndOctave = (midiNumber: number): string => {
+    const noteName = MIDI_NUMBER_TO_NOTE_NAME_MAPPINGS[(midiNumber % 12) as keyof typeof MIDI_NUMBER_TO_NOTE_NAME_MAPPINGS];
+
+    const octave = Math.ceil((midiNumber + 1) / 12);
+
+    return `${noteName}${octave}` as const;
+};
 
 export type DeviceInfo = {
     type: 'midi';
@@ -53,20 +61,16 @@ export type MacroModuleClient<T extends RegisteredMacroConfigItems> = {
     updateMacroState(state: FullProducedOutput<T>): void
 }
 
-export type ProducedMacroConfigMusicalKeyboardInput = {
-    type: 'musical_keyboard_input';
-}
-
-export type ProducedMacroConfigMusicalKeyboardOutput = {
-    type: 'musical_keyboard_output';
-    send: (midiEvent: MidiEvent) => void;
+export interface OutputMidiDevice {
+    send(midiEvent: MidiEvent): void;
+    initialize?: () => Promise<void>;
 }
 
 type MacroTypes = 'musical_keyboard_input' | 'musical_keyboard_output';
 
 export type ProducedTypeMap<T extends string> =
   T extends 'musical_keyboard_input' ? MusicalKeyboardInputHandler :
-      T extends 'musical_keyboard_output' ? ProducedMacroConfigMusicalKeyboardOutput :
+      T extends 'musical_keyboard_output' ? OutputMidiDevice:
           never;
 
 export type ProducedType<T extends MacroConfigItem> = ProducedTypeMap<T['type']>;

@@ -6,7 +6,7 @@ import Soundfont from 'soundfont-player';
 import {CoreDependencies, ModuleDependencies} from '~/types/module_types';
 import {BaseModule, ModuleHookValue} from '../../base_module/base_module';
 import {Module} from '~/module_registry/module_registry';
-import {MacroModuleClient, MidiDeviceAndChannel, MidiDeviceAndChannelMap, MidiEventFull, ProducedType, RegisteredMacroConfigItems, stubProducedMacros} from '~/modules/macro_module/macro_module_types';
+import {MacroModuleClient, MidiDeviceAndChannel, MidiDeviceAndChannelMap, MidiEventFull, ProducedType, RegisteredMacroConfigItems, convertMidiNumberToNoteAndOctave, stubProducedMacros} from '~/modules/macro_module/macro_module_types';
 
 type MidiThruState = {
     inputDevice?: MidiDeviceAndChannel;
@@ -20,6 +20,7 @@ const midiThruContext = createContext<MidiThruHookValue>({} as MidiThruHookValue
 
 export class MidiThruModule implements Module<MidiThruState>, MacroModuleClient<MidiThruModule['macroConfig']> {
     moduleId = 'basic_midi_thru';
+    enabled = false;
 
     soundfont!: Soundfont.Player;
 
@@ -70,11 +71,14 @@ export class MidiThruModule implements Module<MidiThruState>, MacroModuleClient<
     private onMidiInput(midiEvent: MidiEventFull) {
         // this.coreDeps.log(midiEvent);
         // this.macros.myMidiOutput.send(midiEvent.event);
+
+        const noteAndOctave = convertMidiNumberToNoteAndOctave(midiEvent.event.number);
+
         if (midiEvent.event.type === 'noteon') {
-            const playingNote = this.soundfont.start(midiEvent.event.noteAndOctave);
-            this.heldSoundfontNotes.push({noteName: midiEvent.event.noteAndOctave, player: playingNote});
+            const playingNote = this.soundfont.start(noteAndOctave);
+            this.heldSoundfontNotes.push({noteName: noteAndOctave, player: playingNote});
         } else if (midiEvent.event.type === 'noteoff') {
-            const playingNoteIndex = this.heldSoundfontNotes.findIndex(p => p.noteName === midiEvent.event.noteAndOctave);
+            const playingNoteIndex = this.heldSoundfontNotes.findIndex(p => p.noteName === noteAndOctave);
             if (playingNoteIndex !== -1) {
                 const playingNote = this.heldSoundfontNotes[playingNoteIndex];
                 playingNote.player.stop();

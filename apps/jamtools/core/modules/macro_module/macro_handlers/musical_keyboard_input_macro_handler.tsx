@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 
 import {CoreDependencies, ModuleDependencies} from '~/types/module_types';
-import {MacroConfigItemMusicalKeyboardInput, MidiDeviceAndChannel, MidiDeviceAndChannelMap, MidiEventFull, ProducedMacroConfigMusicalKeyboardInput, makeHashedMidiDeviceAndChannel} from '../macro_module_types';
+import {MacroConfigItemMusicalKeyboardInput, MidiDeviceAndChannel, MidiDeviceAndChannelMap, MidiEventFull, makeHashedMidiDeviceAndChannel} from '../macro_module_types';
 import {QwertyCallbackPayload} from '~/types/io_types';
 import {Subject} from 'rxjs';
 import {QWERTY_TO_MIDI_MAPPINGS} from '~/constants/qwerty_to_midi_mappings';
@@ -48,6 +48,7 @@ export class MusicalKeyboardInputHandler {
         }); this.cleanup.push(sub.unsubscribe);
     };
 
+    // I wonder if there should be a separate subject like "note event", so as to avoid clock and pitch wheel events coming through here. idk what the performance impact would be
     onEventSubject = new Subject<MidiEventFull>();
 
     qwertyKeyPressed = (event: QwertyCallbackPayload) => {
@@ -74,12 +75,6 @@ export class MusicalKeyboardInputHandler {
         this.debugReactSubject.next(this.state);
         this.actions.setState(this.state);
 
-        const noteName = MIDI_NUMBER_TO_NOTE_NAME_MAPPINGS[(midiNumber % 12) as keyof typeof MIDI_NUMBER_TO_NOTE_NAME_MAPPINGS];
-
-        const octave = Math.ceil((midiNumber + 1) / 12) + 3;
-
-        const noteIdentifier = `${noteName}${octave}` as const;
-
         const fullEvent: MidiEventFull = {
             device: null as any,
             deviceInfo: {type: 'midi', subtype: 'midi_input'},
@@ -88,7 +83,6 @@ export class MusicalKeyboardInputHandler {
                 number: midiNumber,
                 type: event.event === 'keydown' ? 'noteon' : 'noteoff',
                 velocity: 127,
-                noteAndOctave: noteIdentifier,
             },
             type: 'midi',
         };
@@ -229,12 +223,6 @@ export class MusicalKeyboardInputHandler {
             }
 
             return this.moduleDeps.rpc.callRpc<Args, Return>(fullMethodName, args, {isMaestroOnly: true});
-        };
-    };
-
-    produce = (): ProducedMacroConfigMusicalKeyboardInput => {
-        return {
-            type: 'musical_keyboard_input',
         };
     };
 

@@ -1,22 +1,14 @@
-import {JamToolsEngine} from '~/engine/engine';
-
-import {getBrowserDeps} from './get_browser_deps';
-
-const startJamToolsAndGetMacroModule = async () => {
-    const coreDeps = getBrowserDeps();
-
-    const engine = new JamToolsEngine(coreDeps);
-    await engine.initialize();
-
-    return engine.moduleRegistry.getModule('macro');
-}
+import {startJamToolsAndRenderApp} from '@/react_entrypoint';
 
 setTimeout(() => {
     main();
 });
 
 const main = async () => {
-    const macroModule = await startJamToolsAndGetMacroModule();
+    console.log('running snack: midi thru');
+
+    const engine = await startJamToolsAndRenderApp();
+    const macroModule = engine.moduleRegistry.getModule('macro');
 
     const [input, output] = await Promise.all([
         macroModule.createMacro('MIDI Input', {type: 'musical_keyboard_input'}),
@@ -27,7 +19,8 @@ const main = async () => {
 };
 
 const main0 = async () => {
-    const macroModule = await startJamToolsAndGetMacroModule();
+    const engine = await startJamToolsAndRenderApp();
+    const macroModule = engine.moduleRegistry.getModule('macro');
 
     const input = await macroModule.createMacro('MIDI Input', {
         type: 'musical_keyboard_input',
@@ -41,7 +34,8 @@ const main0 = async () => {
 };
 
 const main1 = async () => {
-    const macroModule = await startJamToolsAndGetMacroModule();
+    const engine = await startJamToolsAndRenderApp();
+    const macroModule = engine.moduleRegistry.getModule('macro');
 
     const output = await macroModule.createMacro('MIDI Output', () => ({
         type: 'musical_keyboard_output',
@@ -56,10 +50,7 @@ const main1 = async () => {
 };
 
 const main2 = async () => {
-    const coreDeps = getBrowserDeps();
-
-    const engine = new JamToolsEngine(coreDeps);
-    await engine.initialize();
+    const engine = await startJamToolsAndRenderApp();
 
     engine.moduleRegistry.registerModule({
         moduleId: 'basic_midi_thru',

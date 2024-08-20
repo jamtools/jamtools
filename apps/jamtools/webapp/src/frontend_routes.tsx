@@ -15,7 +15,7 @@ import {Layout} from './layout';
 export const FrontendRoutes = () => {
     const engine = useJamToolsEngine();
 
-    const mods = engine.moduleRegistry.getModules();
+    const mods = engine.moduleRegistry.useModules();
 
     const moduleRoutes: RouteObject[] = [];
     for (const mod of mods) {
@@ -35,6 +35,11 @@ export const FrontendRoutes = () => {
             }),
         });
     }
+
+    moduleRoutes.push({
+        path: '*',
+        element: <span/>,
+    });
 
     const router = createBrowserRouter([
         {

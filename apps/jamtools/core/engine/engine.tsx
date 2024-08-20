@@ -10,9 +10,11 @@ import {WledModule} from '~/modules/wled/wled_module';
 import {CoreDependencies, ModuleDependencies} from '~/types/module_types';
 
 export class JamToolsEngine {
-    moduleRegistry!: ModuleRegistry;
+    public moduleRegistry!: ModuleRegistry;
 
-    constructor(private coreDeps: CoreDependencies) {}
+    constructor(public coreDeps: CoreDependencies) {}
+
+    private initializeCallbacks: (() => void)[] = [];
 
     initialize = async () => {
         // how can we make sure each thing is initialized without adding more stuff here? maybe this is best for now
@@ -50,6 +52,18 @@ export class JamToolsEngine {
                 await mod.initialize?.();
             }
         }
+
+        for (const cb of this.initializeCallbacks) {
+            cb();
+        }
+    };
+
+    public waitForInitialize = (): Promise<void> => {
+        return new Promise((resolve) => {
+            this.initializeCallbacks.push(() => {
+                resolve();
+            });
+        });
     };
 }
 
@@ -68,7 +82,7 @@ export const useJamToolsEngine = () => {
 };
 
 type JamToolsProviderProps = React.PropsWithChildren<{
-    coreDeps: CoreDependencies;
+    engine: JamToolsEngine;
 }>;
 
 const engineContext = createContext<JamToolsEngine>({} as JamToolsEngine);
@@ -77,10 +91,8 @@ export const JamToolsProvider = (props: JamToolsProviderProps) => {
     const [engine, setEngine] = useState<JamToolsEngine | null>(null);
 
     useMount(async () => {
-        const e = new JamToolsEngine(props.coreDeps);
-        await e.initialize();
-
-        setEngine(e);
+        await props.engine.initialize();
+        setEngine(props.engine);
     });
 
     if (!engine) {
