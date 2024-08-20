@@ -14,6 +14,7 @@ describe('IoModule', () => {
                 } as any,
             },
             kvStore: {} as any,
+            rpc: {} as any,
         };
 
         const engine = new JamToolsEngine(coreDeps);
