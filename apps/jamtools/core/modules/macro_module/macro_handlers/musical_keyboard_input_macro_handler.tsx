@@ -239,7 +239,7 @@ export class MusicalKeyboardInputHandler {
     };
 
     actions = {
-        dotMenuEdit: this.wrapRpc(this.dotMenuEdit, 'dotMenuEdit, false'),
+        dotMenuEdit: this.wrapRpc(this.dotMenuEdit, 'dotMenuEdit', false),
         setState: this.wrapRpc(this.setState, 'setState', true),
     };
 }
