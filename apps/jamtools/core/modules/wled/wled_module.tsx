@@ -44,6 +44,8 @@ export class WledModule implements Module<WledState> {
         },
     };
 
+    // wled controllers need to be stored as hostnames,
+    // so they are readable and stay consistent for that controller
     state: WledState = {
         controllers: [
             {
