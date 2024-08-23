@@ -1,10 +1,11 @@
 import React, {createContext} from 'react';
 
-import {Subject, Subscription} from 'rxjs';
+import {Subject} from 'rxjs';
 
 import {CoreDependencies, ModuleDependencies} from '~/types/module_types';
 import {BaseModule, ModuleHookValue} from '../base_module/base_module';
 import {Module} from '~/module_registry/module_registry';
+import {MidiInputEventPayload, QwertyCallbackPayload} from '~/types/io_types';
 
 type IoState = {
     midiInputDevices: string[];
@@ -18,6 +19,8 @@ const ioContext = createContext<IoHookValue>({} as IoHookValue);
 export class IoModule implements Module<IoState> {
     moduleId = 'io';
 
+    cleanup: (() => void)[] = [];
+
     routes = {
         '': () => 'io yeah',
     };
@@ -27,19 +30,17 @@ export class IoModule implements Module<IoState> {
         midiOutputDevices: [],
     };
 
-    helloModuleSubscription?: Subscription;
+    qwertyInputSubject: Subject<QwertyCallbackPayload> = new Subject();
+    midiInputSubject: Subject<MidiInputEventPayload> = new Subject();
 
     initialize = async () => {
-        const helloModule = this.moduleDeps.moduleRegistry.getModule('hello');
+        const qwertySubscription = this.coreDeps.inputs.qwerty.onInputEvent.subscribe(event => {
+            this.qwertyInputSubject.next(event);
+        }); this.cleanup.push(qwertySubscription.unsubscribe);
 
-        this.coreDeps.log(`From io module: Original hello state: ${helloModule.state.hello}`);
-        this.helloModuleSubscription = helloModule.subject.subscribe(state => {
-            this.coreDeps.log(`From io module: New hello state: ${state.hello}`);
-        });
-    };
-
-    uninitialize = () => {
-        this.helloModuleSubscription?.unsubscribe();
+        const midiSubscription = this.coreDeps.inputs.midi.onInputEvent.subscribe(event => {
+            this.midiInputSubject.next(event);
+        }); this.cleanup.push(midiSubscription.unsubscribe);
     };
 
     onNewMidiDeviceFound = (device: {name: string}) => {

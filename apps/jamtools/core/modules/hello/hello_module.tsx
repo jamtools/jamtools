@@ -19,6 +19,8 @@ const helloContext = createContext<HelloHookValue>({} as HelloHookValue);
 export class HelloModule implements Module<HelloState> {
     moduleId = 'hello';
 
+    enabled = false;
+
     routes: Record<string, React.ElementType> = {
         '': HelloComponent,
         'actions': HelloComponent,
@@ -34,7 +36,17 @@ export class HelloModule implements Module<HelloState> {
     };
 
     initialize = async () => {
-        console.log('hello module initializing');
+        this.coreDeps.log('hello module initializing');
+
+        this.moduleDeps.rpc.registerRpc('hello', async (args) => {
+            this.coreDeps.log('registerRpc hello', args);
+            this.hello();
+            return {response_from: 'hello module'};
+        });
+
+        this.moduleDeps.rpc.callRpc('hello', {sending_from: 'hello module'}).then((result) => {
+            this.coreDeps.log('callRpc hello', result);
+        });
     };
 
     private hello = () => {
@@ -49,5 +61,5 @@ export class HelloModule implements Module<HelloState> {
     static use = BaseModule.useModule(helloContext);
     private setState = BaseModule.setState(this);
 
-    constructor(private coreDeps: CoreDependencies, private modDeps: ModuleDependencies) {}
+    constructor(private coreDeps: CoreDependencies, private moduleDeps: ModuleDependencies) {}
 }
