@@ -58,5 +58,5 @@ export class SoundfontPeripheral implements OutputMidiDevice {
             ];
             return;
         }
-    }
+    };
 }

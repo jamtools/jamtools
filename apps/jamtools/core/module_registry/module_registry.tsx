@@ -58,7 +58,7 @@ export class ModuleRegistry {
 
     useModules = (): Module[] => {
         return useSubject(this.modules, this.modulesSubject);
-    }
+    };
 }
 
 export const useSubject = <T,>(initialData: T, subject: Subject<T>): T => {
