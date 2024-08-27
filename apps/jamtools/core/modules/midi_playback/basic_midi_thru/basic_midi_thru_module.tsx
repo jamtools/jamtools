@@ -7,22 +7,19 @@ import {CoreDependencies, JamTools, ModuleDependencies} from '~/types/module_typ
 import {BaseModule, ModuleHookValue} from '../../base_module/base_module';
 import {Module} from '~/module_registry/module_registry';
 import {MacroModuleClient, MidiDeviceAndChannel, MidiDeviceAndChannelMap, MidiEventFull, ProducedType, RegisteredMacroConfigItems, convertMidiNumberToNoteAndOctave, stubProducedMacros} from '~/modules/macro_module/macro_module_types';
+import {jamtools} from '~/engine/register';
 
 type MidiThruState = {
     inputDevice?: MidiDeviceAndChannel;
     outputDevice?: MidiDeviceAndChannel;
 };
 
-
 type MidiThruHookValue = ModuleHookValue<MidiThruModule>;
 
 const midiThruContext = createContext<MidiThruHookValue>({} as MidiThruHookValue);
 
-setTimeout(() => {
-    (globalThis as unknown as {jamtools: JamTools}).jamtools.registerClassModule(
-        (coreDeps: CoreDependencies, modDependencies: ModuleDependencies) => {
-            return new MidiThruModule(coreDeps, modDependencies);
-        });
+jamtools.registerClassModule((coreDeps: CoreDependencies, modDependencies: ModuleDependencies) => {
+    return new MidiThruModule(coreDeps, modDependencies);
 });
 
 declare module '~/module_registry/module_registry' {

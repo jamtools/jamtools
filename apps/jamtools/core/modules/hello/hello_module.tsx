@@ -7,6 +7,7 @@ import {BaseModule, ModuleHookValue} from '../base_module/base_module';
 import {Module} from '~/module_registry/module_registry';
 
 import {HelloComponent} from './hello_component';
+import {jamtools} from '~/engine/register';
 
 type HelloState = {
     hello: boolean;
@@ -16,11 +17,8 @@ type HelloHookValue = ModuleHookValue<HelloModule>;
 
 const helloContext = createContext<HelloHookValue>({} as HelloHookValue);
 
-setTimeout(() => {
-    (globalThis as unknown as {jamtools: JamTools}).jamtools.registerClassModule(
-        (coreDeps: CoreDependencies, modDependencies: ModuleDependencies) => {
-            return new HelloModule(coreDeps, modDependencies);
-        });
+jamtools.registerClassModule((coreDeps: CoreDependencies, modDependencies: ModuleDependencies) => {
+    return new HelloModule(coreDeps, modDependencies);
 });
 
 declare module '~/module_registry/module_registry' {

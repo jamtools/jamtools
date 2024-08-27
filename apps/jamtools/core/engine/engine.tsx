@@ -1,18 +1,6 @@
 import {CoreDependencies, JamTools, ModuleCallback, ModuleDependencies} from '~/types/module_types';
 
-const registeredClassModuleCallbacks: ModuleCallback<any>[] = [];
-const registeredFunctionModuleCallbacks: ModuleCallback<any>[] = [];
-
-const jt = {
-    registerClassModule: async (cb) => {
-        registeredClassModuleCallbacks.push(cb);
-    },
-    registerModule: async (cb) => {
-        registeredFunctionModuleCallbacks.push(cb);
-    },
-} as JamTools;
-
-(globalThis as unknown as {jamtools: JamTools}).jamtools = jt;
+import {ClassModuleCallback, RegisterModuleOptions, jamtools} from './register';
 
 import React, {createContext, useContext, useState} from 'react';
 
@@ -24,6 +12,9 @@ import '~/modules/hello/hello_module';
 import '~/modules/macro_module/macro_module';
 import '~/modules/midi_playback/basic_midi_thru/basic_midi_thru_module';
 import '~/modules/wled/wled_module';
+
+type CapturedRegisterModuleCalls = [string, RegisterModuleOptions, ModuleCallback<any>];
+type CapturedRegisterClassModuleCalls = ClassModuleCallback<any>;
 
 export class JamToolsEngine {
     public moduleRegistry!: ModuleRegistry;
@@ -49,34 +40,61 @@ export class JamToolsEngine {
             rpc: this.coreDeps.rpc,
         };
 
+        const registeredClassModuleCallbacks = (jamtools.registerClassModule as unknown as {calls: CapturedRegisterClassModuleCalls[]}).calls || [];
+        jamtools.registerClassModule = this.registerClassModule;
+
+        const registeredModuleCallbacks = (jamtools.registerModule as unknown as {calls: CapturedRegisterModuleCalls[]}).calls || [];
+        jamtools.registerModule = this.registerModule;
+
         const modules: Module<any>[] = [];
 
         for (const modClassCallback of registeredClassModuleCallbacks) {
-            const mod = await Promise.resolve(modClassCallback(this.coreDeps, modDependencies));
-            modules.push(mod);
-        }
-
-        for (const mod of modules) {
-            if (isModuleEnabled(mod)) {
+            const mod = await this.registerClassModule(modClassCallback);
+            if (mod) {
+                modules.push(mod);
                 this.moduleRegistry.registerModule(mod);
             }
         }
 
-        for (const mod of modules) {
-            if (isModuleEnabled(mod)) {
-                await mod.initialize?.();
+        for (const modFuncCallback of registeredModuleCallbacks) {
+            const mod = await this.registerModule(modFuncCallback[0], modFuncCallback[1], modFuncCallback[2]);
+            if (mod) {
+                modules.push(mod);
+                this.moduleRegistry.registerModule(mod);
             }
-        }
-
-        for (const modFuncCallback of registeredFunctionModuleCallbacks) {
-            const mod = await Promise.resolve(modFuncCallback(this.coreDeps, modDependencies));
-            this.moduleRegistry.registerModule(mod);
-            await mod.initialize?.();
         }
 
         for (const cb of this.initializeCallbacks) {
             cb();
         }
+    };
+
+    public registerModule = async <ModuleOptions extends RegisterModuleOptions, ModuleReturnValue extends object>(
+        moduleName: string,
+        options: ModuleOptions,
+        cb: ModuleCallback<ModuleReturnValue>,
+    ) => {
+        throw new Error('registerModule not implemented');
+    };
+
+    public registerClassModule = async <T extends object,>(cb: ClassModuleCallback<T>): Promise<Module | null> => {
+        const modDependencies: ModuleDependencies = {
+            moduleRegistry: this.moduleRegistry,
+            toast: (options) => {
+                this.coreDeps.log(options.message);
+            },
+            isMaestro: () => true,
+            rpc: this.coreDeps.rpc,
+        };
+
+        const mod = await Promise.resolve(cb(this.coreDeps, modDependencies));
+
+        if (!isModuleEnabled(mod)) {
+            return null;
+        }
+
+        await mod.initialize?.();
+        return mod;
     };
 
     public waitForInitialize = (): Promise<void> => {

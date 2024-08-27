@@ -8,12 +8,10 @@ import {ScaleDegreeInfo, cycle, getScaleDegreeFromScaleAndNote} from './root_mod
 
 import {RootModeComponent} from './root_mode_component';
 import {CoreDependencies, JamTools, ModuleDependencies} from '~/types/module_types';
+import {jamtools} from '~/engine/register';
 
-setTimeout(() => {
-    (globalThis as unknown as {jamtools: JamTools}).jamtools.registerClassModule(
-        (coreDeps: CoreDependencies, modDependencies: ModuleDependencies) => {
-            return rootModeModule(coreDeps, modDependencies);
-        });
+jamtools.registerClassModule((coreDeps: CoreDependencies, modDependencies: ModuleDependencies) => {
+    return rootModeModule(coreDeps, modDependencies);
 });
 
 setTimeout(async () => {

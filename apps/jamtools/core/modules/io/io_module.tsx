@@ -6,6 +6,7 @@ import {CoreDependencies, JamTools, ModuleDependencies} from '~/types/module_typ
 import {BaseModule, ModuleHookValue} from '../base_module/base_module';
 import {Module} from '~/module_registry/module_registry';
 import {MidiInputEventPayload, QwertyCallbackPayload} from '~/types/io_types';
+import {jamtools} from '~/engine/register';
 
 type IoState = {
     midiInputDevices: string[];
@@ -16,11 +17,8 @@ type IoHookValue = ModuleHookValue<IoModule>;
 
 const ioContext = createContext<IoHookValue>({} as IoHookValue);
 
-setTimeout(() => {
-    (globalThis as unknown as {jamtools: JamTools}).jamtools.registerClassModule(
-        (coreDeps: CoreDependencies, modDependencies: ModuleDependencies) => {
-            return new IoModule(coreDeps, modDependencies);
-        });
+jamtools.registerClassModule((coreDeps: CoreDependencies, modDependencies: ModuleDependencies) => {
+    return new IoModule(coreDeps, modDependencies);
 });
 
 declare module '~/module_registry/module_registry' {

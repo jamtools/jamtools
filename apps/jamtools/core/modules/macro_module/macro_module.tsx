@@ -8,6 +8,7 @@ import {Subject} from 'rxjs';
 import {BaseModule, ModuleHookValue} from '../base_module/base_module';
 import {MacroPage} from './macro_page';
 import {SoundfontPeripheral} from '~/peripherals/outputs/soundfont_peripheral';
+import {jamtools} from '~/engine/register';
 
 type ModuleId = string;
 
@@ -20,11 +21,8 @@ type MacroHookValue = ModuleHookValue<MacroModule>;
 
 const macroContext = React.createContext<MacroHookValue>({} as MacroHookValue);
 
-setTimeout(() => {
-    (globalThis as unknown as {jamtools: JamTools}).jamtools.registerClassModule(
-        (coreDeps: CoreDependencies, modDependencies: ModuleDependencies) => {
-            return new MacroModule(coreDeps, modDependencies);
-        });
+jamtools.registerClassModule((coreDeps: CoreDependencies, modDependencies: ModuleDependencies) => {
+    return new MacroModule(coreDeps, modDependencies);
 });
 
 declare module '~/module_registry/module_registry' {
@@ -36,9 +34,7 @@ declare module '~/module_registry/module_registry' {
 export class MacroModule implements Module<MacroConfigState> {
     moduleId = 'macro';
 
-    constructor(private coreDeps: CoreDependencies, private moduleDeps: ModuleDependencies) {
-        // this.musicalKeyboardHandler = new MusicalKeyboardInputHandler(coreDeps, moduleDeps);
-    }
+    constructor(private coreDeps: CoreDependencies, private moduleDeps: ModuleDependencies) {}
 
     routes = {
         '': () => {
