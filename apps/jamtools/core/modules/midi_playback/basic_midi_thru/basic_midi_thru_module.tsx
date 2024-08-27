@@ -3,7 +3,7 @@ import {Subject} from 'rxjs';
 
 import Soundfont from 'soundfont-player';
 
-import {CoreDependencies, ModuleDependencies} from '~/types/module_types';
+import {CoreDependencies, JamTools, ModuleDependencies} from '~/types/module_types';
 import {BaseModule, ModuleHookValue} from '../../base_module/base_module';
 import {Module} from '~/module_registry/module_registry';
 import {MacroModuleClient, MidiDeviceAndChannel, MidiDeviceAndChannelMap, MidiEventFull, ProducedType, RegisteredMacroConfigItems, convertMidiNumberToNoteAndOctave, stubProducedMacros} from '~/modules/macro_module/macro_module_types';
@@ -17,6 +17,19 @@ type MidiThruState = {
 type MidiThruHookValue = ModuleHookValue<MidiThruModule>;
 
 const midiThruContext = createContext<MidiThruHookValue>({} as MidiThruHookValue);
+
+setTimeout(() => {
+    (globalThis as unknown as {jamtools: JamTools}).jamtools.registerClassModule(
+        (coreDeps: CoreDependencies, modDependencies: ModuleDependencies) => {
+            return new MidiThruModule(coreDeps, modDependencies);
+        });
+});
+
+declare module '~/module_registry/module_registry' {
+    interface AllModules {
+        basic_midi_thru: MidiThruModule;
+    }
+}
 
 export class MidiThruModule implements Module<MidiThruState>, MacroModuleClient<MidiThruModule['macroConfig']> {
     moduleId = 'basic_midi_thru';

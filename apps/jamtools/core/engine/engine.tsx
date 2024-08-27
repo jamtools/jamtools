@@ -1,13 +1,29 @@
+import {CoreDependencies, JamTools, ModuleCallback, ModuleDependencies} from '~/types/module_types';
+
+const registeredClassModuleCallbacks: ModuleCallback<any>[] = [];
+const registeredFunctionModuleCallbacks: ModuleCallback<any>[] = [];
+
+const jt = {
+    registerClassModule: async (cb) => {
+        registeredClassModuleCallbacks.push(cb);
+    },
+    registerModule: async (cb) => {
+        registeredFunctionModuleCallbacks.push(cb);
+    },
+} as JamTools;
+
+(globalThis as unknown as {jamtools: JamTools}).jamtools = jt;
+
 import React, {createContext, useContext, useState} from 'react';
 
 import {useMount} from '~/hooks/useMount';
 import {Module, ModuleRegistry} from '~/module_registry/module_registry';
-import {HelloModule} from '~/modules/hello/hello_module';
-import {IoModule} from '~/modules/io/io_module';
-import {MacroModule} from '~/modules/macro_module/macro_module';
-import {MidiThruModule} from '~/modules/midi_playback/basic_midi_thru/basic_midi_thru_module';
-import {WledModule} from '~/modules/wled/wled_module';
-import {CoreDependencies, ModuleDependencies} from '~/types/module_types';
+
+import '~/modules/io/io_module';
+import '~/modules/hello/hello_module';
+import '~/modules/macro_module/macro_module';
+import '~/modules/midi_playback/basic_midi_thru/basic_midi_thru_module';
+import '~/modules/wled/wled_module';
 
 export class JamToolsEngine {
     public moduleRegistry!: ModuleRegistry;
@@ -33,13 +49,12 @@ export class JamToolsEngine {
             rpc: this.coreDeps.rpc,
         };
 
-        const modules: Module<any>[] = [
-            new HelloModule(this.coreDeps, modDependencies),
-            new IoModule(this.coreDeps, modDependencies),
-            new MacroModule(this.coreDeps, modDependencies),
-            new WledModule(this.coreDeps, modDependencies),
-            new MidiThruModule(this.coreDeps, modDependencies),
-        ];
+        const modules: Module<any>[] = [];
+
+        for (const modClassCallback of registeredClassModuleCallbacks) {
+            const mod = await Promise.resolve(modClassCallback(this.coreDeps, modDependencies));
+            modules.push(mod);
+        }
 
         for (const mod of modules) {
             if (isModuleEnabled(mod)) {
@@ -51,6 +66,12 @@ export class JamToolsEngine {
             if (isModuleEnabled(mod)) {
                 await mod.initialize?.();
             }
+        }
+
+        for (const modFuncCallback of registeredFunctionModuleCallbacks) {
+            const mod = await Promise.resolve(modFuncCallback(this.coreDeps, modDependencies));
+            this.moduleRegistry.registerModule(mod);
+            await mod.initialize?.();
         }
 
         for (const cb of this.initializeCallbacks) {

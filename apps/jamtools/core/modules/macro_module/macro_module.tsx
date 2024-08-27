@@ -1,7 +1,7 @@
 import React from 'react';
 import {Module} from '~/module_registry/module_registry';
 
-import {CoreDependencies, ModuleDependencies} from '~/types/module_types';
+import {CoreDependencies, JamTools, ModuleDependencies} from '~/types/module_types';
 import {FullInputConfig, FullProducedOutput, MacroConfigItem, ProducedType, ProducedTypeMap, RegisteredMacroConfigItems} from './macro_module_types';
 import {MusicalKeyboardInputHandler} from './macro_handlers/musical_keyboard_input_macro_handler';
 import {Subject} from 'rxjs';
@@ -20,11 +20,18 @@ type MacroHookValue = ModuleHookValue<MacroModule>;
 
 const macroContext = React.createContext<MacroHookValue>({} as MacroHookValue);
 
-type ProviderProps = React.PropsWithChildren<{
-    remoteState: MacroConfigState;
-}>;
+setTimeout(() => {
+    (globalThis as unknown as {jamtools: JamTools}).jamtools.registerClassModule(
+        (coreDeps: CoreDependencies, modDependencies: ModuleDependencies) => {
+            return new MacroModule(coreDeps, modDependencies);
+        });
+});
 
-type computeMacros = <T extends RegisteredMacroConfigItems>(cb: () => T) => { [K in keyof T]: ProducedType<T[K]> };
+declare module '~/module_registry/module_registry' {
+    interface AllModules {
+        macro: MacroModule;
+    }
+}
 
 export class MacroModule implements Module<MacroConfigState> {
     moduleId = 'macro';
@@ -36,7 +43,7 @@ export class MacroModule implements Module<MacroConfigState> {
     routes = {
         '': () => {
             const mod = MacroModule.use();
-            return <MacroPage state={mod.state}/>;
+            return <MacroPage state={mod.state} />;
         },
     };
 
@@ -45,7 +52,7 @@ export class MacroModule implements Module<MacroConfigState> {
         producedMacros: {},
     };
 
-    public createMacros = async <T extends RegisteredMacroConfigItems>(moduleId: string, cb: () => T): Promise<{ [K in keyof T]: ProducedType<T[K]> }> => {
+    public createMacros = async <T extends RegisteredMacroConfigItems>(moduleId: string, cb: () => T): Promise<{[K in keyof T]: ProducedType<T[K]>}> => {
         const config = cb();
 
         const allConfigs = {...this.state.configs};
@@ -59,7 +66,7 @@ export class MacroModule implements Module<MacroConfigState> {
         return producedMacros;
     };
 
-    public createMacro = async <T extends MacroConfigItem>(name: string, configOrCallback: T | (() => T)): Promise<ProducedType<T> > => {
+    public createMacro = async <T extends MacroConfigItem>(name: string, configOrCallback: T | (() => T)): Promise<ProducedType<T>> => {
         const config = typeof configOrCallback === 'function' ? configOrCallback() : configOrCallback;
 
         const moduleId = '';

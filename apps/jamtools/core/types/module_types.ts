@@ -1,6 +1,12 @@
-import {ModuleRegistry} from '~/module_registry/module_registry';
+import {Module, ModuleRegistry} from '~/module_registry/module_registry';
 import {MidiService, QwertyService} from './io_types';
-import {ProducedType, RegisteredMacroConfigItems} from '~/modules/macro_module/macro_module_types';
+
+export type ModuleCallback<T extends object,> = (coreDeps: CoreDependencies, modDependencies: ModuleDependencies) =>
+Promise<Module<T>> | Module<T>;
+export type JamTools = {
+    registerClassModule: <T extends object>(cb: ModuleCallback<T>) => void;
+    registerClassModulee: <T extends object>(cb: ModuleCallback<T>) => void;
+};
 
 export type CoreDependencies = {
     log: (...s: any[]) => void;
