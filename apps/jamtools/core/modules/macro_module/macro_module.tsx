@@ -1,13 +1,14 @@
 import React from 'react';
 import {Module} from '~/module_registry/module_registry';
 
-import {CoreDependencies, ModuleDependencies} from '~/types/module_types';
+import {CoreDependencies, JamTools, ModuleDependencies} from '~/types/module_types';
 import {FullInputConfig, FullProducedOutput, MacroConfigItem, ProducedType, ProducedTypeMap, RegisteredMacroConfigItems} from './macro_module_types';
 import {MusicalKeyboardInputHandler} from './macro_handlers/musical_keyboard_input_macro_handler';
 import {Subject} from 'rxjs';
 import {BaseModule, ModuleHookValue} from '../base_module/base_module';
 import {MacroPage} from './macro_page';
 import {SoundfontPeripheral} from '~/peripherals/outputs/soundfont_peripheral';
+import {jamtools} from '~/engine/register';
 
 type ModuleId = string;
 
@@ -20,23 +21,25 @@ type MacroHookValue = ModuleHookValue<MacroModule>;
 
 const macroContext = React.createContext<MacroHookValue>({} as MacroHookValue);
 
-type ProviderProps = React.PropsWithChildren<{
-    remoteState: MacroConfigState;
-}>;
+jamtools.registerClassModule((coreDeps: CoreDependencies, modDependencies: ModuleDependencies) => {
+    return new MacroModule(coreDeps, modDependencies);
+});
 
-type computeMacros = <T extends RegisteredMacroConfigItems>(cb: () => T) => { [K in keyof T]: ProducedType<T[K]> };
+declare module '~/module_registry/module_registry' {
+    interface AllModules {
+        macro: MacroModule;
+    }
+}
 
 export class MacroModule implements Module<MacroConfigState> {
     moduleId = 'macro';
 
-    constructor(private coreDeps: CoreDependencies, private moduleDeps: ModuleDependencies) {
-        // this.musicalKeyboardHandler = new MusicalKeyboardInputHandler(coreDeps, moduleDeps);
-    }
+    constructor(private coreDeps: CoreDependencies, private moduleDeps: ModuleDependencies) {}
 
     routes = {
         '': () => {
             const mod = MacroModule.use();
-            return <MacroPage state={mod.state}/>;
+            return <MacroPage state={mod.state} />;
         },
     };
 
@@ -45,7 +48,7 @@ export class MacroModule implements Module<MacroConfigState> {
         producedMacros: {},
     };
 
-    public createMacros = async <T extends RegisteredMacroConfigItems>(moduleId: string, cb: () => T): Promise<{ [K in keyof T]: ProducedType<T[K]> }> => {
+    public createMacros = async <T extends RegisteredMacroConfigItems>(moduleId: string, cb: () => T): Promise<{[K in keyof T]: ProducedType<T[K]>}> => {
         const config = cb();
 
         const allConfigs = {...this.state.configs};
@@ -59,7 +62,7 @@ export class MacroModule implements Module<MacroConfigState> {
         return producedMacros;
     };
 
-    public createMacro = async <T extends MacroConfigItem>(name: string, configOrCallback: T | (() => T)): Promise<ProducedType<T> > => {
+    public createMacro = async <T extends MacroConfigItem>(name: string, configOrCallback: T | (() => T)): Promise<ProducedType<T>> => {
         const config = typeof configOrCallback === 'function' ? configOrCallback() : configOrCallback;
 
         const moduleId = '';
@@ -98,12 +101,12 @@ export class MacroModule implements Module<MacroConfigState> {
             switch (conf.type) {
                 case 'musical_keyboard_input': {
                     const handler: ProducedType<typeof conf> = new MusicalKeyboardInputHandler(moduleId, fieldName, this.coreDeps, this.moduleDeps, conf);
-                    producedMacros[fname] = handler as ProducedTypeMap<T[keyof T]['type']>;
+                    producedMacros[fname] = handler as ProducedTypeMap[T[keyof T]['type']];
                     await handler.initialize();
                     break;
                 } case 'musical_keyboard_output': {
                     const handler: ProducedType<typeof conf> = new SoundfontPeripheral(this.coreDeps, this.moduleDeps);
-                    producedMacros[fname] = handler as ProducedTypeMap<T[keyof T]['type']>;
+                    producedMacros[fname] = handler as ProducedTypeMap[T[keyof T]['type']];
                     await handler.initialize?.();
                     break;
                 } default:

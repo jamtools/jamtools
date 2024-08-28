@@ -7,14 +7,14 @@ export class BrowserQwertyService implements QwertyService {
         document.addEventListener('keydown', (event) => {
             this.onInputEvent.next({
                 event: 'keydown',
-                key: event.key,
+                key: event.key.toLowerCase(),
             });
         });
 
         document.addEventListener('keyup', (event) => {
             this.onInputEvent.next({
                 event: 'keyup',
-                key: event.key,
+                key: event.key.toLowerCase(),
             });
         });
     }

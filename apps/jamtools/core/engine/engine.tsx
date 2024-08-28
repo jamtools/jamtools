@@ -1,13 +1,20 @@
+import {CoreDependencies, JamTools, ModuleCallback, ModuleDependencies} from '~/types/module_types';
+
+import {ClassModuleCallback, RegisterModuleOptions, jamtools} from './register';
+
 import React, {createContext, useContext, useState} from 'react';
 
 import {useMount} from '~/hooks/useMount';
 import {Module, ModuleRegistry} from '~/module_registry/module_registry';
-import {HelloModule} from '~/modules/hello/hello_module';
-import {IoModule} from '~/modules/io/io_module';
-import {MacroModule} from '~/modules/macro_module/macro_module';
-import {MidiThruModule} from '~/modules/midi_playback/basic_midi_thru/basic_midi_thru_module';
-import {WledModule} from '~/modules/wled/wled_module';
-import {CoreDependencies, ModuleDependencies} from '~/types/module_types';
+
+import '~/modules/io/io_module';
+import '~/modules/hello/hello_module';
+import '~/modules/macro_module/macro_module';
+import '~/modules/midi_playback/basic_midi_thru/basic_midi_thru_module';
+import '~/modules/wled/wled_module';
+
+type CapturedRegisterModuleCalls = [string, RegisterModuleOptions, ModuleCallback<any>];
+type CapturedRegisterClassModuleCalls = ClassModuleCallback<any>;
 
 export class JamToolsEngine {
     public moduleRegistry!: ModuleRegistry;
@@ -33,29 +40,61 @@ export class JamToolsEngine {
             rpc: this.coreDeps.rpc,
         };
 
-        const modules: Module<any>[] = [
-            new HelloModule(this.coreDeps, modDependencies),
-            new IoModule(this.coreDeps, modDependencies),
-            new MacroModule(this.coreDeps, modDependencies),
-            new WledModule(this.coreDeps, modDependencies),
-            new MidiThruModule(this.coreDeps, modDependencies),
-        ];
+        const registeredClassModuleCallbacks = (jamtools.registerClassModule as unknown as {calls: CapturedRegisterClassModuleCalls[]}).calls || [];
+        jamtools.registerClassModule = this.registerClassModule;
 
-        for (const mod of modules) {
-            if (isModuleEnabled(mod)) {
+        const registeredModuleCallbacks = (jamtools.registerModule as unknown as {calls: CapturedRegisterModuleCalls[]}).calls || [];
+        jamtools.registerModule = this.registerModule;
+
+        const modules: Module<any>[] = [];
+
+        for (const modClassCallback of registeredClassModuleCallbacks) {
+            const mod = await this.registerClassModule(modClassCallback);
+            if (mod) {
+                modules.push(mod);
                 this.moduleRegistry.registerModule(mod);
             }
         }
 
-        for (const mod of modules) {
-            if (isModuleEnabled(mod)) {
-                await mod.initialize?.();
+        for (const modFuncCallback of registeredModuleCallbacks) {
+            const mod = await this.registerModule(modFuncCallback[0], modFuncCallback[1], modFuncCallback[2]);
+            if (mod) {
+                modules.push(mod);
+                this.moduleRegistry.registerModule(mod);
             }
         }
 
         for (const cb of this.initializeCallbacks) {
             cb();
         }
+    };
+
+    public registerModule = async <ModuleOptions extends RegisterModuleOptions, ModuleReturnValue extends object>(
+        moduleName: string,
+        options: ModuleOptions,
+        cb: ModuleCallback<ModuleReturnValue>,
+    ) => {
+        throw new Error('registerModule not implemented');
+    };
+
+    public registerClassModule = async <T extends object,>(cb: ClassModuleCallback<T>): Promise<Module | null> => {
+        const modDependencies: ModuleDependencies = {
+            moduleRegistry: this.moduleRegistry,
+            toast: (options) => {
+                this.coreDeps.log(options.message);
+            },
+            isMaestro: () => true,
+            rpc: this.coreDeps.rpc,
+        };
+
+        const mod = await Promise.resolve(cb(this.coreDeps, modDependencies));
+
+        if (!isModuleEnabled(mod)) {
+            return null;
+        }
+
+        await mod.initialize?.();
+        return mod;
     };
 
     public waitForInitialize = (): Promise<void> => {

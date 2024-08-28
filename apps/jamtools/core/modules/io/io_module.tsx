@@ -2,10 +2,11 @@ import React, {createContext} from 'react';
 
 import {Subject} from 'rxjs';
 
-import {CoreDependencies, ModuleDependencies} from '~/types/module_types';
+import {CoreDependencies, JamTools, ModuleDependencies} from '~/types/module_types';
 import {BaseModule, ModuleHookValue} from '../base_module/base_module';
 import {Module} from '~/module_registry/module_registry';
 import {MidiInputEventPayload, QwertyCallbackPayload} from '~/types/io_types';
+import {jamtools} from '~/engine/register';
 
 type IoState = {
     midiInputDevices: string[];
@@ -15,6 +16,16 @@ type IoState = {
 type IoHookValue = ModuleHookValue<IoModule>;
 
 const ioContext = createContext<IoHookValue>({} as IoHookValue);
+
+jamtools.registerClassModule((coreDeps: CoreDependencies, modDependencies: ModuleDependencies) => {
+    return new IoModule(coreDeps, modDependencies);
+});
+
+declare module '~/module_registry/module_registry' {
+    interface AllModules {
+        io: IoModule;
+    }
+}
 
 export class IoModule implements Module<IoState> {
     moduleId = 'io';

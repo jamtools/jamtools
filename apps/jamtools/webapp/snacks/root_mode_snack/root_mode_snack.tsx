@@ -7,9 +7,17 @@ import {useSubject} from '~/module_registry/module_registry';
 import {ScaleDegreeInfo, cycle, getScaleDegreeFromScaleAndNote} from './root_mode_types';
 
 import {RootModeComponent} from './root_mode_component';
+import {CoreDependencies, JamTools, ModuleDependencies} from '~/types/module_types';
+import {jamtools} from '~/engine/register';
 
-setTimeout(() => {
-    main();
+jamtools.registerClassModule((coreDeps: CoreDependencies, modDependencies: ModuleDependencies) => {
+    return rootModeModule(coreDeps, modDependencies);
+});
+
+setTimeout(async () => {
+    const engine = await startJamToolsAndRenderApp();
+
+    // main();
 });
 
 type State = {
@@ -28,49 +36,8 @@ const rootModeStateSubject: Subject<State> = new Subject();
 // this makes it so all midi and soundfont type stuff is ignored
 // basically disables the io module, or at least makes it so it doesn't dispatch anything
 
-const main = async () => {
-    console.log('running snack: root mode');
-
-    const engine = await startJamToolsAndRenderApp();
-    const macroModule = engine.moduleRegistry.getModule('macro');
-
-    const [input, output] = await Promise.all([
-        macroModule.createMacro('MIDI Input', {type: 'musical_keyboard_input'}),
-        macroModule.createMacro('MIDI Output', {type: 'musical_keyboard_output'}),
-    ]);
-
+const rootModeModule = async (coreDeps: CoreDependencies, modDependencies: ModuleDependencies) => {
     let scale = 0; // C major on page load
-
-    input.onEventSubject.subscribe(evt => {
-        const midiNumber = evt.event.number;
-        const scaleDegreeInfo = getScaleDegreeFromScaleAndNote(scale, midiNumber);
-        if (!scaleDegreeInfo) {
-            return;
-        }
-
-        const chordNotes = getChordFromRootNote(scale, midiNumber);
-        if (!chordNotes.length) {
-            return;
-        }
-
-        for (const noteNumber of chordNotes) {
-            const midiNumberToPlay = noteNumber + 24;
-            output.send({...evt.event, number: midiNumberToPlay});
-        }
-
-        if (evt.event.type === 'noteon') {
-            rootModeStateSubject.next({
-                chord: scaleDegreeInfo,
-                scale,
-            });
-        } else if (evt.event.type === 'noteoff') {
-            // this naive logic is currently causing the second chord to disappear if the first one is released after pressing the second one
-            rootModeStateSubject.next({
-                chord: null,
-                scale,
-            });
-        }
-    });
 
     const setScale = (newScale: number) => {
         scale = newScale;
@@ -80,7 +47,7 @@ const main = async () => {
         });
     }
 
-    engine.moduleRegistry.registerModule({
+    return {
         moduleId: 'root_mode_snack',
         routes: {
             '': () => {
@@ -98,7 +65,50 @@ const main = async () => {
                 );
             },
         },
-    });
+        initialize: async () => {
+            console.log('running snack: root mode');
+
+            const macroModule = modDependencies.moduleRegistry.getModule('macro');
+
+            const [input, output] = await Promise.all([
+                macroModule.createMacro('MIDI Input', {type: 'musical_keyboard_input'}),
+                macroModule.createMacro('MIDI Output', {type: 'musical_keyboard_output'}),
+            ]);
+
+            input.onEventSubject.subscribe(evt => {
+                const midiNumber = evt.event.number;
+                const scaleDegreeInfo = getScaleDegreeFromScaleAndNote(scale, midiNumber);
+                if (!scaleDegreeInfo) {
+                    return;
+                }
+
+                const chordNotes = getChordFromRootNote(scale, midiNumber);
+                if (!chordNotes.length) {
+                    return;
+                }
+
+                for (const noteNumber of chordNotes) {
+                    const midiNumberToPlay = noteNumber + 24;
+                    output.send({...evt.event, number: midiNumberToPlay});
+                }
+
+                if (evt.event.type === 'noteon') {
+                    rootModeStateSubject.next({
+                        chord: scaleDegreeInfo,
+                        scale,
+                    });
+                } else if (evt.event.type === 'noteoff') {
+                    // this naive logic is currently causing the second chord to disappear if the first one is released after pressing the second one
+                    rootModeStateSubject.next({
+                        chord: null,
+                        scale,
+                    });
+                }
+            });
+
+
+        }
+    };
 };
 
 const getChordFromRootNote = (scale: number, rootNote: number): number[] => {

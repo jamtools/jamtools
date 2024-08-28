@@ -2,10 +2,11 @@ import React, {createContext} from 'react';
 
 import {Subject, Subscription} from 'rxjs';
 
-import {CoreDependencies, ModuleDependencies} from '~/types/module_types';
+import {CoreDependencies, JamTools, ModuleDependencies} from '~/types/module_types';
 import {BaseModule, ModuleHookValue} from '../base_module/base_module';
 import {Module} from '~/module_registry/module_registry';
 import {WLEDClient} from 'wled-client';
+import {jamtools} from '~/engine/register';
 
 type WledClientStatus = {
     url: string;
@@ -24,6 +25,16 @@ type WledState = {
 type WledHookValue = ModuleHookValue<WledModule>;
 
 const WledContext = createContext<WledHookValue>({} as WledHookValue);
+
+jamtools.registerClassModule((coreDeps: CoreDependencies, modDependencies: ModuleDependencies) => {
+    return new WledModule(coreDeps, modDependencies);
+});
+
+declare module '~/module_registry/module_registry' {
+    interface AllModules {
+        wled: WledModule;
+    }
+}
 
 export class WledModule implements Module<WledState> {
     moduleId = 'wled';

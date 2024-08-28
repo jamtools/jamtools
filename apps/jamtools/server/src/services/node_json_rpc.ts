@@ -7,6 +7,8 @@ type RpcClient = ModuleDependencies['rpc'];
 export class NodeJsonRpcServer implements RpcClient {
     rpcClient!: JSONRPCClient;
 
+    constructor(private wss: WebSocketServer) {}
+
     callRpc = async <Return, Args>(method: string, args: Args): Promise<Return> => {
         const result = await this.rpcClient.request(method, args);
         return result;
@@ -17,7 +19,8 @@ export class NodeJsonRpcServer implements RpcClient {
     };
 
     initialize = async () => {
-        const wss = new WebSocketServer({port: 8080});
+        const wss = this.wss;
+        // const wss = new WebSocketServer({port: 8080});
 
         const jsonRpcServer = new JSONRPCServer();
 
@@ -78,6 +81,3 @@ export class NodeJsonRpcServer implements RpcClient {
         console.log('WebSocket server is running on ws://localhost:8080');
     };
 }
-
-const service = new NodeJsonRpcServer();
-service.initialize();
