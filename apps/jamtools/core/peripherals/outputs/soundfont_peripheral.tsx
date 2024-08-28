@@ -14,6 +14,12 @@ type HeldDownSoundfontNotes = {
     player: Soundfont.Player
 };
 
+declare module '~/modules/macro_module/macro_module_types' {
+    interface ProducedTypeMap {
+        musical_keyboard_output: OutputMidiDevice;
+    }
+}
+
 export class SoundfontPeripheral implements OutputMidiDevice {
     constructor(private coreDeps: CoreDependencies, private moduleDeps: ModuleDependencies) {
 

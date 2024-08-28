@@ -101,12 +101,12 @@ export class MacroModule implements Module<MacroConfigState> {
             switch (conf.type) {
                 case 'musical_keyboard_input': {
                     const handler: ProducedType<typeof conf> = new MusicalKeyboardInputHandler(moduleId, fieldName, this.coreDeps, this.moduleDeps, conf);
-                    producedMacros[fname] = handler as ProducedTypeMap<T[keyof T]['type']>;
+                    producedMacros[fname] = handler as ProducedTypeMap[T[keyof T]['type']];
                     await handler.initialize();
                     break;
                 } case 'musical_keyboard_output': {
                     const handler: ProducedType<typeof conf> = new SoundfontPeripheral(this.coreDeps, this.moduleDeps);
-                    producedMacros[fname] = handler as ProducedTypeMap<T[keyof T]['type']>;
+                    producedMacros[fname] = handler as ProducedTypeMap[T[keyof T]['type']];
                     await handler.initialize?.();
                     break;
                 } default:

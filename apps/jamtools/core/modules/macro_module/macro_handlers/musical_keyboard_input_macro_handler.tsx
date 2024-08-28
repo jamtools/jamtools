@@ -27,6 +27,12 @@ const useSubject = <T,>(initialData: T, subject: Subject<T>) => {
     return state;
 };
 
+declare module '~/modules/macro_module/macro_module_types' {
+    interface ProducedTypeMap {
+        musical_keyboard_input: MusicalKeyboardInputHandler;
+    }
+}
+
 export class MusicalKeyboardInputHandler {
     configuredMappings: MidiDeviceAndChannelMap<boolean> = {};
 

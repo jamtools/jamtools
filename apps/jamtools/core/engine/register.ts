@@ -19,7 +19,7 @@ type ModuleAPI = {
     states: StatesAPI;
 }
 
-type MacroOptions = {};
+export type MacroOptions = {};
 
 type SnackAPI = {
     createMacro(macroName: string, options: MacroOptions): Promise<void>;
