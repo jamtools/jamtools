@@ -27,7 +27,7 @@ type SnackAPI = {
 }
 
 export type ModuleCallback<ModuleReturnValue extends object> = (moduleAPI: ModuleAPI) =>
-    Promise<ModuleReturnValue> | ModuleReturnValue;
+Promise<ModuleReturnValue> | ModuleReturnValue;
 
 export type ClassModuleCallback<T extends object> = (coreDeps: CoreDependencies, modDependencies: ModuleDependencies) =>
 Promise<Module<T>> | Module<T>;
@@ -55,7 +55,7 @@ const registerModule = <ModuleOptions extends RegisterModuleOptions, ModuleRetur
     const calls = (registerModule as unknown as {calls: CapturedRegisterModuleCalls[]}).calls || [];
     calls.push([moduleName, options, cb]);
     (registerModule as unknown as {calls: CapturedRegisterModuleCalls[]}).calls = calls;
-}
+};
 
 type CapturedRegisterClassModuleCalls = ClassModuleCallback<any>;
 
@@ -63,7 +63,7 @@ const registerClassModule = <T extends object>(cb: ClassModuleCallback<T>) => {
     const calls = (registerClassModule as unknown as {calls: CapturedRegisterClassModuleCalls[]}).calls || [];
     calls.push(cb);
     (registerClassModule as unknown as {calls: CapturedRegisterClassModuleCalls[]}).calls = calls;
-}
+};
 
 export const jamtools: JamTools = {
     registerModule,
