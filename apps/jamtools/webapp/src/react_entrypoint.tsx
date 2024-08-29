@@ -4,10 +4,10 @@ import ReactDOM from 'react-dom/client';
 import {CoreDependencies} from '~/core/types/module_types';
 
 import {Main} from './main';
-import {BrowserQwertyService} from './services/browser_qwerty_service';
-import {BrowserKVStoreService} from './services/browser_kvstore_service';
-import {BrowserMidiService} from './services/browser_midi_service';
-import {BrowserJsonRpcClientAndServer} from './services/browser_json_rpc';
+import {BrowserQwertyService} from '~/platforms/webapp/services/browser_qwerty_service';
+import {BrowserKVStoreService} from '~/platforms/webapp/services/browser_kvstore_service';
+import {BrowserMidiService} from '~/platforms/webapp/services/browser_midi_service';
+import {BrowserJsonRpcClientAndServer} from '~/platforms/webapp/services/browser_json_rpc';
 import {JamToolsEngine} from '~/core/engine/engine';
 
 const waitForPageLoad = () => new Promise<void>(resolve => {
