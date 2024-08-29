@@ -76,7 +76,7 @@ export type ProducedType<T extends keyof ProducedTypeMap> = ProducedTypeMap[T];
 export function stubProducedMacros<T extends RegisteredMacroConfigItems >(
     config: T
 ): { [K in keyof T]: ProducedType<T[K]['type']> } {
-    const result = {} as { [K in keyof T]: ProducedType<T[K]> };
+    const result = {} as { [K in keyof T]: ProducedType<T[K]['type']> };
     return result;
 }
 

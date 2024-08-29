@@ -44,7 +44,7 @@ export class NodeJsonRpcServer implements RpcClient {
 
             ws.on('message', async (data) => {
                 const message = data.toString();
-                console.log(message);
+                // console.log(message);
                 const jsonMessage = JSON.parse(message);
 
                 // if (jsonMessage.jsonrpc === '2.0' && jsonMessage.method) {

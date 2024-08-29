@@ -42,7 +42,7 @@ export class MidiThruModule implements Module<MidiThruState>, MacroModuleClient<
         myMidiOutput: {
             type: 'musical_keyboard_output',
         },
-    } as const satisfies RegisteredMacroConfigItems;
+    } as const;
 
     initialize = async () => {
         this.coreDeps.log(`${this.moduleId} module initializing`);

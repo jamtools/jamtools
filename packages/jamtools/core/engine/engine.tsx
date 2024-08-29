@@ -1,6 +1,6 @@
-import {CoreDependencies, JamTools, ModuleCallback, ModuleDependencies} from '~/core/types/module_types';
+import {CoreDependencies, ModuleDependencies} from '~/core/types/module_types';
 
-import {ClassModuleCallback, RegisterModuleOptions, jamtools} from './register';
+import {ClassModuleCallback, ModuleCallback, RegisterModuleOptions, jamtools} from './register';
 
 import React, {createContext, useContext, useState} from 'react';
 
