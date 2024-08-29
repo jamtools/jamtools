@@ -8,8 +8,6 @@ import {useMount} from '~/core/hooks/useMount';
 import {Module, ModuleRegistry} from '~/core/module_registry/module_registry';
 
 import '../modules';
-import '../../features/modules';
-import '../../features/snacks';
 
 type CapturedRegisterModuleCalls = [string, RegisterModuleOptions, ModuleCallback<any>];
 type CapturedRegisterClassModuleCalls = ClassModuleCallback<any>;
