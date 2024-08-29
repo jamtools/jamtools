@@ -4,7 +4,7 @@ jamtools.registerClassModule((_coreDeps, modDependencies) => {
     return {
         moduleId: 'root_mode_snack',
         initialize: async () => {
-            console.log('running snack: root mode');
+            console.log('running snack: midi thru');
 
             const macroModule = modDependencies.moduleRegistry.getModule('macro');
 
