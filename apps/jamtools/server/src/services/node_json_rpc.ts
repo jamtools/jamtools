@@ -1,6 +1,6 @@
 import {WebSocketServer, WebSocket} from 'ws';
 import {JSONRPCServer, JSONRPCClient, JSONRPCRequest} from 'json-rpc-2.0';
-import {ModuleDependencies} from '~/types/module_types';
+import {ModuleDependencies} from '~/core/types/module_types';
 
 type RpcClient = ModuleDependencies['rpc'];
 

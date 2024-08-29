@@ -1,6 +1,6 @@
 import {Subject} from 'rxjs';
 
-import {QwertyCallbackPayload, QwertyService} from '~/types/io_types';
+import {QwertyCallbackPayload, QwertyService} from '~/core/types/io_types';
 
 export class BrowserQwertyService implements QwertyService {
     constructor(document: Document) {

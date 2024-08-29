@@ -1,5 +1,5 @@
 import {JSONRPCClient, JSONRPCServer} from 'json-rpc-2.0';
-import {ModuleDependencies, RpcArgs} from '~/types/module_types';
+import {ModuleDependencies, RpcArgs} from '~/core/types/module_types';
 
 type RpcClient = ModuleDependencies['rpc'];
 export class BrowserJsonRpcClientAndServer implements RpcClient {

@@ -7,8 +7,8 @@ import {
     RouterProvider,
 } from 'react-router-dom';
 
-import {useJamToolsEngine} from '~/engine/engine';
-import {Module} from '~/module_registry/module_registry';
+import {useJamToolsEngine} from '~/core/engine/engine';
+import {Module} from '~/core/module_registry/module_registry';
 
 import {Layout} from './layout';
 

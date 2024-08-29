@@ -1,6 +1,6 @@
 import {Subject} from 'rxjs';
 
-import {MidiInputEventPayload, MidiService} from '~/types/io_types';
+import {MidiInputEventPayload, MidiService} from '~/core/types/io_types';
 
 export class BrowserMidiService implements MidiService {
     initialize = async () => {
