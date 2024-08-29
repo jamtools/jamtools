@@ -2,7 +2,7 @@ import {jamtools} from '~/core/engine/register';
 
 jamtools.registerClassModule((_coreDeps, modDependencies) => {
     return {
-        moduleId: 'root_mode_snack',
+        moduleId: 'midi_thru_snack',
         initialize: async () => {
             console.log('running snack: midi thru');
 
