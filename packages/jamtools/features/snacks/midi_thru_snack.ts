@@ -17,5 +17,5 @@ jamtools.registerClassModule((_coreDeps, modDependencies) => {
                 output.send(evt.event);
             });
         },
-    }
+    };
 });

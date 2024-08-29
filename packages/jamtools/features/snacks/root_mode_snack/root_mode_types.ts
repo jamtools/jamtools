@@ -32,4 +32,4 @@ export const getScaleDegreeFromScaleAndNote = (scale: number, note: number): Sca
         scaleDegree: scaleDegreeIndex,
         quality: scaleDegreeQuality,
     };
-}
+};

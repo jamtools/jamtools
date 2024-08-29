@@ -1,0 +1,18 @@
+{
+    "name": "jamtools-features",
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1",
+      "check-types": "tsc --noEmit",
+      "lint": "eslint --ext ts --ext tsx .",
+      "fix": "npm run lint -- --fix"
+    },
+    "dependencies": {
+      "jamtools-core": "*"
+    },
+    "devDependencies": {
+      "configs": "*"
+    },
+    "config": {
+      "dir": "../../../configs"
+    }
+  }

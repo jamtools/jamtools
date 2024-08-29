@@ -21,6 +21,8 @@
   "workspaces": [
     "apps/jamtools/*",
     "packages/jamtools/core",
+    "packages/jamtools/features",
+    "packages/jamtools/platforms/*",
     "configs"
   ]
 }

@@ -45,7 +45,7 @@ const rootModeModule = async (coreDeps: CoreDependencies, modDependencies: Modul
             chord: null,
             scale,
         });
-    }
+    };
 
     return {
         moduleId: 'root_mode_snack',
