@@ -8,6 +8,8 @@ import {useMount} from '~/core/hooks/useMount';
 import {Module, ModuleRegistry} from '~/core/module_registry/module_registry';
 
 import '../modules';
+import {SharedStateService} from '../services/states/shared_state_service';
+import {ModuleAPI} from './module_api';
 
 type CapturedRegisterModuleCalls = [string, RegisterModuleOptions, ModuleCallback<any>];
 type CapturedRegisterClassModuleCalls = ClassModuleCallback<any>;
@@ -19,22 +21,20 @@ export class JamToolsEngine {
 
     private initializeCallbacks: (() => void)[] = [];
 
+    private sharedStateService!: SharedStateService;
+
     initialize = async () => {
         // how can we make sure each thing is initialized without adding more stuff here? maybe this is best for now
         await this.coreDeps.inputs.midi.initialize();
-        await this.coreDeps.rpc.initialize();
+        const websocketConnected = await this.coreDeps.rpc.initialize();
+        if (!websocketConnected) {
+            // TODO: implement local browser mode
+            confirm('failed to connect to websocket server. run in local browser mode?');
+        }
+
+        this.sharedStateService = new SharedStateService(this.coreDeps);
 
         this.moduleRegistry = new ModuleRegistry();
-        const modDependencies: ModuleDependencies = {
-            moduleRegistry: this.moduleRegistry,
-            toast: (options) => {
-                this.coreDeps.log(options.message);
-            },
-            // how can we make it so if the maestro refreshes, they can pick up where the jam was at?
-            // maybe we don't support that at first. refreshing maestro is not expected to resume maybe?
-            isMaestro: () => true,
-            rpc: this.coreDeps.rpc,
-        };
 
         const registeredClassModuleCallbacks = (jamtools.registerClassModule as unknown as {calls: CapturedRegisterClassModuleCalls[]}).calls || [];
         jamtools.registerClassModule = this.registerClassModule;
@@ -66,22 +66,38 @@ export class JamToolsEngine {
     };
 
     public registerModule = async <ModuleOptions extends RegisterModuleOptions, ModuleReturnValue extends object>(
-        moduleName: string,
+        moduleId: string,
         options: ModuleOptions,
         cb: ModuleCallback<ModuleReturnValue>,
     ) => {
-        throw new Error('registerModule not implemented');
+        const mod: Module = {moduleId};
+        const moduleAPI = new ModuleAPI(mod, 'engine', this.coreDeps, this.makeDerivedDependencies());
+        const moduleReturnValue = await cb(moduleAPI);
+
+        this.moduleRegistry.registerModule(mod);
+
+        // TODO: expose the arbitrary module callback's return value for usage in other modules
+        // this.moduleRegistry.registerModule({moduleId, api: moduleReturnValue});
     };
 
-    public registerClassModule = async <T extends object,>(cb: ClassModuleCallback<T>): Promise<Module | null> => {
-        const modDependencies: ModuleDependencies = {
+    private makeDerivedDependencies = (): ModuleDependencies => {
+        return {
             moduleRegistry: this.moduleRegistry,
             toast: (options) => {
                 this.coreDeps.log(options.message);
             },
+            // how can we make it so if the maestro refreshes, they can pick up where the jam was at?
+            // maybe we don't support that at first. refreshing maestro is not expected to resume maybe?
             isMaestro: () => true,
             rpc: this.coreDeps.rpc,
-        };
+            services: {
+                sharedStateService: this.sharedStateService,
+            },
+        }
+    }
+
+    public registerClassModule = async <T extends object,>(cb: ClassModuleCallback<T>): Promise<Module | null> => {
+        const modDependencies = this.makeDerivedDependencies();
 
         const mod = await Promise.resolve(cb(this.coreDeps, modDependencies));
 

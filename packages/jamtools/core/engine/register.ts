@@ -1,22 +1,23 @@
 import {Module} from '~/core/module_registry/module_registry';
 import {CoreDependencies, ModuleDependencies} from '~/core/types/module_types';
+import {ModuleAPI} from './module_api';
 
-type RegisterRouteOptions = {};
+export type RegisterRouteOptions = {};
 type RegisterSnackOptions = {};
 type SnackCallback = (snackAPI: SnackAPI) => Promise<void>;
 
+type StateSupervisor<State> = {
+    state: State;
+    setState: (state: State) => Promise<void>;
+    useState: () => State;
+}
+
 type StatesAPI = {
-    createSharedState(stateName: string): void;
+    createSharedState<State>(stateName: string, initialValue: State): Promise<StateSupervisor<State>>;
     createSessionState(stateName: string): void;
     createPersistentState(stateName: string): void;
     createLocalState(stateName: string): void;
     createLocalStorageState(stateName: string): void;
-}
-
-type ModuleAPI = {
-    registerRoute(routePath: string, options: RegisterRouteOptions, component: React.ElementType): void;
-    registerSnack(snackName: string, options: RegisterSnackOptions, cb: SnackCallback): Promise<void>;
-    states: StatesAPI;
 }
 
 export type MacroOptions = {};
@@ -34,7 +35,7 @@ Promise<Module<T>> | Module<T>;
 
 export type JamTools = {
     registerModule: <ModuleOptions extends RegisterModuleOptions, ModuleReturnValue extends object>(
-        moduleName: string,
+        moduleId: string,
         options: ModuleOptions,
         cb: ModuleCallback<ModuleReturnValue>,
     ) => void;

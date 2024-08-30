@@ -41,6 +41,10 @@ export class ModuleRegistry {
         return this.modulesByKey[moduleId] as AllModules[ModuleId];
     }
 
+    refreshModules = () => {
+        this.modulesSubject.next([...this.modules]);
+    }
+
     getModules() {
         return this.modules;
     }
