@@ -17,14 +17,14 @@ export class ModuleAPI {
         const routes = this.module.routes || {};
         routes[routePath] = component;
         this.module.routes = {...routes};
-        if (this.modDeps.moduleRegistry.getModule(this.module.moduleId as any)) {
+        if (this.modDeps.moduleRegistry.getCustomModule(this.module.moduleId)) {
             this.modDeps.moduleRegistry.refreshModules();
         }
     };
 
-    createMacro = () => {
+    // createMacro = () => {
 
-    }
+    // };
 
     // registerSnack(snackName: string, options: RegisterSnackOptions, cb: SnackCallback): Promise<void>;
     // states: StatesAPI;

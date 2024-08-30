@@ -35,11 +35,11 @@ export class SharedStateService {
 
     getCachedValue = <Value>(key: string): Value | undefined => {
         return this.globalState[key];
-    }
+    };
 
     setCachedValue = <Value>(key: string, value: Value): void => {
         this.globalState[key] = value;
-    }
+    };
 
     sendRpcGetAllSharedState = async (): Promise<boolean> => {
         try {
@@ -55,11 +55,11 @@ export class SharedStateService {
             this.coreDeps.log('Error calling RPC get_all_shared_state: ' + (e as Error).toString());
             return false;
         }
-    }
+    };
 
     private receiveRpcGetAllSharedState = async () => {
         return this.globalState;
-    }
+    };
 
     sendRpcSetSharedState = async <State>(key: string, data: State) => {
         this.globalState[key] = data;
@@ -85,7 +85,7 @@ export class SharedStateService {
         for (const sub of subscriptions) {
             sub(args.data);
         }
-    }
+    };
 }
 
 export class SharedStateSupervisor<State> {
@@ -100,16 +100,16 @@ export class SharedStateSupervisor<State> {
 
     public getState = (): State => {
         return this.sharedStateService.getCachedValue(this.key)!;
-    }
+    };
 
     public setState = (state: State): Promise<unknown> => {
         this.subject.next(state);
         return this.sharedStateService.sendRpcSetSharedState(this.key, state);
-    }
+    };
 
     public useState = (): State => {
         return useSubject<State>(this.getState(), this.subject)!;
-    }
+    };
 }
 
 export const useSubject = <T,>(initialData: T, subject: Subject<T>): T => {

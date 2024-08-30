@@ -24,7 +24,7 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
     broadcastRpc = async <Args>(method: string, args: Args, rpcArgs?: RpcArgs | undefined): Promise<void> => {
         console.log('broadcasting rpc', method, JSON.stringify(args));
         return this.rpcClient.notify(method, args);
-    }
+    };
 
     initializeWebsocket = async () => {
         const ws = new WebSocket(this.url);
@@ -81,7 +81,7 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
                 setTimeout(() => {
                     this.initializeWebsocket();
                 }, 5000);
-            }
+            };
         });
     };
 

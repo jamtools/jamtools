@@ -1,6 +1,6 @@
 import {WebSocketServer, WebSocket} from 'ws';
 import {JSONRPCServer, JSONRPCClient, JSONRPCRequest} from 'json-rpc-2.0';
-import {ModuleDependencies} from '~/core/types/module_types';
+import {ModuleDependencies, RpcArgs} from '~/core/types/module_types';
 
 type RpcClient = ModuleDependencies['rpc'];
 
@@ -18,7 +18,12 @@ export class NodeJsonRpcServer implements RpcClient {
         return cb;
     };
 
-    initialize = async () => {
+    broadcastRpc = async <Args>(name: string, args: Args, rpcArgs?: RpcArgs | undefined): Promise<void> => {
+        this.rpcClient.notify(name, args);
+        return;
+    };
+
+    initialize = async (): Promise<boolean> => {
         const wss = this.wss;
         // const wss = new WebSocketServer({port: 8080});
 
@@ -84,8 +89,10 @@ export class NodeJsonRpcServer implements RpcClient {
                 delete incomingClients[clientId];
                 delete outgoingClients[clientId];
             });
+
         });
 
         console.log('WebSocket server is running on ws://localhost:8080');
+        return true;
     };
 }

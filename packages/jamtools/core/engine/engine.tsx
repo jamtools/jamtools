@@ -69,12 +69,12 @@ export class JamToolsEngine {
         moduleId: string,
         options: ModuleOptions,
         cb: ModuleCallback<ModuleReturnValue>,
-    ) => {
+    ): Promise<Module> => {
         const mod: Module = {moduleId};
         const moduleAPI = new ModuleAPI(mod, 'engine', this.coreDeps, this.makeDerivedDependencies());
         const moduleReturnValue = await cb(moduleAPI);
 
-        this.moduleRegistry.registerModule(mod);
+        return mod;
 
         // TODO: expose the arbitrary module callback's return value for usage in other modules
         // this.moduleRegistry.registerModule({moduleId, api: moduleReturnValue});
@@ -93,8 +93,8 @@ export class JamToolsEngine {
             services: {
                 sharedStateService: this.sharedStateService,
             },
-        }
-    }
+        };
+    };
 
     public registerClassModule = async <T extends object,>(cb: ClassModuleCallback<T>): Promise<Module | null> => {
         const modDependencies = this.makeDerivedDependencies();

@@ -41,9 +41,13 @@ export class ModuleRegistry {
         return this.modulesByKey[moduleId] as AllModules[ModuleId];
     }
 
+    getCustomModule(moduleId: string): Module | undefined {
+        return this.modulesByKey[moduleId];
+    }
+
     refreshModules = () => {
         this.modulesSubject.next([...this.modules]);
-    }
+    };
 
     getModules() {
         return this.modules;
