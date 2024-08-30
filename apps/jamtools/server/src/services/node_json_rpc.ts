@@ -1,6 +1,6 @@
 import {WebSocketServer, WebSocket} from 'ws';
 import {JSONRPCServer, JSONRPCClient, JSONRPCRequest} from 'json-rpc-2.0';
-import {ModuleDependencies} from '~/types/module_types';
+import {ModuleDependencies} from '~/core/types/module_types';
 
 type RpcClient = ModuleDependencies['rpc'];
 
@@ -44,7 +44,7 @@ export class NodeJsonRpcServer implements RpcClient {
 
             ws.on('message', async (data) => {
                 const message = data.toString();
-                console.log(message);
+                // console.log(message);
                 const jsonMessage = JSON.parse(message);
 
                 // if (jsonMessage.jsonrpc === '2.0' && jsonMessage.method) {
