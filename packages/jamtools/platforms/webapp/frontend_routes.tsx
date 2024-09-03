@@ -1,7 +1,7 @@
 import React from 'react';
 
 import {
-    createBrowserRouter,
+    createHashRouter,
     Link,
     RouteObject,
     RouterProvider,
@@ -41,7 +41,7 @@ export const FrontendRoutes = () => {
         element: <span/>,
     });
 
-    const router = createBrowserRouter([
+    const router = createHashRouter([
         {
             path: '/',
             element: <Layout><RootPath mods={mods}/></Layout>

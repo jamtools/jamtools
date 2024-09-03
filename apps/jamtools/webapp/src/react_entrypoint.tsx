@@ -20,7 +20,7 @@ export const startJamToolsAndRenderApp = async (): Promise<JamToolsEngine> => {
     const qwertyService = new BrowserQwertyService(document);
     const kvStore = new BrowserKVStoreService(localStorage);
     const midiService = new BrowserMidiService();
-    const rpc = new BrowserJsonRpcClientAndServer('ws://localhost:8080');
+    const rpc = new BrowserJsonRpcClientAndServer('ws://jam.local:8080');
 
     const coreDeps: CoreDependencies = {
         log: console.log,

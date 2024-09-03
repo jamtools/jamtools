@@ -26,7 +26,7 @@ export class ModuleRegistry {
         this.modules.push(mod);
         this.modulesByKey[mod.moduleId] = mod;
 
-        this.modulesSubject.next([...this.modules]);
+        this.refreshModules();
     }
 
     async registerAndInitializeModule(mod: Module<any>) {
@@ -34,7 +34,7 @@ export class ModuleRegistry {
         this.modulesByKey[mod.moduleId] = mod;
         await mod.initialize?.();
 
-        this.modulesSubject.next([...this.modules]);
+        this.refreshModules();
     }
 
     getModule<ModuleId extends keyof AllModules>(moduleId: ModuleId): AllModules[ModuleId] {

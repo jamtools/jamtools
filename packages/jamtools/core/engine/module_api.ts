@@ -41,8 +41,27 @@ export class StatesAPI {
         return supervisor;
     };
 
+    public createPersistentState = async <State>(stateName: string, initialValue: State): Promise<SharedStateSupervisor<State>> => {
+        const fullKey = `${this.prefix}|state.persistent|${stateName}`;
+
+        const storedValue = await this.coreDeps.kvStore.get<State>(fullKey);
+        if (storedValue) {
+            initialValue = storedValue;
+        }
+
+        const supervisor = new SharedStateSupervisor(fullKey, initialValue, this.modDeps.services.sharedStateService);
+
+        // TODO: unsubscribe through onDestroy lifecycle of StatesAPI
+        // this createPersistentState function is not Maestro friendly
+        // every time you access coreDeps, that's the case
+        // persistent state has been a weird thing
+        supervisor.subject.subscribe(async value => {
+            await this.coreDeps.kvStore.set(fullKey, value);
+        });
+
+        return supervisor;
+    };
     // createSessionState(stateName: string): void;
-    // createPersistentState(stateName: string): void;
     // createLocalState(stateName: string): void;
     // createLocalStorageState(stateName: string): void;
 }

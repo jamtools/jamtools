@@ -1,11 +1,33 @@
 import {JSONRPCClient, JSONRPCServer} from 'json-rpc-2.0';
 import {ModuleDependencies, Rpc, RpcArgs} from '~/core/types/module_types';
 
+type ClientParams = {
+    clientId: string;
+}
+
 export class BrowserJsonRpcClientAndServer implements Rpc {
-    rpcClient!: JSONRPCClient;
+    rpcClient!: JSONRPCClient<ClientParams>;
     rpcServer!: JSONRPCServer;
 
     constructor (private url: string) {}
+
+    private clientId = '';
+
+    getClientId = () => {
+        if (this.clientId) {
+            return this.clientId;
+        }
+
+        const fromStorage = sessionStorage.getItem('ws-client-id');
+        if (fromStorage) {
+            this.clientId = fromStorage;
+            return this.clientId;
+        }
+
+        const newClientId = Math.random().toString().slice(2);
+        this.clientId = newClientId;
+        return this.clientId;
+    }
 
     registerRpc = <Args, Return>(method: string, cb: (args: Args) => Promise<Return>) => {
         this.rpcServer.addMethod(method, async (args) => {
@@ -17,17 +39,25 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
 
     callRpc = async <Return, Args>(method: string, args: Args): Promise<Return> => {
         console.log('calling rpc', method, JSON.stringify(args));
-        const result = await this.rpcClient.request(method, args);
+        alert('call')
+
+        const params = {clientId: this.getClientId()};
+        const result = await this.rpcClient.request(method, args, params);
         return result;
     };
 
     broadcastRpc = async <Args>(method: string, args: Args, rpcArgs?: RpcArgs | undefined): Promise<void> => {
         console.log('broadcasting rpc', method, JSON.stringify(args));
-        return this.rpcClient.notify(method, args);
+        alert('broadcast')
+
+        const params = {clientId: this.getClientId()};
+        return this.rpcClient.notify(method, args, params);
     };
 
     initializeWebsocket = async () => {
-        const ws = new WebSocket(this.url);
+        const fullUrl = `${this.url}?clientId=${this.getClientId()}`;
+        const ws = new WebSocket(fullUrl);
+
         ws.onclose = async () => {
             console.error('websocket disconnected');
             console.log('retrying websocket in 5 seconds');
@@ -42,6 +72,9 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
             if (jsonMessage.jsonrpc === '2.0' && jsonMessage.method) {
                 // Handle incoming RPC requests coming from the server to run in this client
                 const result = await this.rpcServer.receive(jsonMessage);
+                if (result) {
+                    (result as any).clientId = (jsonMessage as unknown as any).clientId;
+                }
                 ws.send(JSON.stringify(result));
             } else {
                 // Handle incoming RPC responses after calling an rpc method on the server
@@ -57,6 +90,7 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
                 connected = true;
                 console.log('websocket connected');
                 this.rpcClient = new JSONRPCClient((request) => {
+                    request.clientId = this.getClientId();
                     if (ws.readyState === WebSocket.OPEN) {
                         ws.send(JSON.stringify(request));
                         return Promise.resolve();

@@ -12,17 +12,22 @@ type TestSharedState = {
 const randomString = () => Math.random().toString().slice(2, 4);
 
 jamtools.registerModule('data_sync_test', {}, async (moduleAPI) => {
-    const sharedState = await moduleAPI.states.createSharedState<TestSharedState>(
-        'test_shared_state',
+    const myState = await moduleAPI.states.createPersistentState<TestSharedState>(
+        'my_shared_state',
         {myvalue: '50'},
     );
 
+    const onClick = (value?: string) => {
+        myState.setState({myvalue: value || randomString()});
+    };
+
     moduleAPI.registerRoute('', {}, () => {
-        const reactState = sharedState.useState();
+        const reactState = myState.useState();
+
         return (
             <DataSyncRootRoute
                 value={reactState}
-                onClick={(value?: string) => sharedState.setState({myvalue: value || randomString()})}
+                onClick={onClick}
             />
         );
     });
