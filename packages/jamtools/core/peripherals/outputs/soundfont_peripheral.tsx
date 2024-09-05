@@ -16,14 +16,6 @@ declare module '~/core/modules/macro_module/macro_module_types' {
             output: OutputMidiDevice;
         }
     }
-
-    interface ProducedTypeMap {
-        musical_keyboard_output: OutputMidiDevice;
-    }
-
-    interface MacroInputConfigs {
-        musical_keyboard_output: MusicalKeyboardOutputMacroConfig;
-    }
 }
 
 type MusicalKeyboardOutputMacroConfig = object;

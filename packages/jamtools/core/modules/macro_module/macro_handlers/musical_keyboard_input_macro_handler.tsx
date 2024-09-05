@@ -37,19 +37,11 @@ type MusicalKeyboardInputResult = {
 };
 
 declare module '~/core/modules/macro_module/macro_module_types' {
-    interface ProducedTypeMap {
-        musical_keyboard_input: MusicalKeyboardInputResult;
-    }
-
     interface MacroTypeConfigs {
         musical_keyboard_input: {
             input: MacroConfigItemMusicalKeyboardInput;
             output: MusicalKeyboardInputResult;
         }
-    }
-
-    interface MacroInputConfigs {
-        musical_keyboard_input: MacroConfigItemMusicalKeyboardInput;
     }
 }
 

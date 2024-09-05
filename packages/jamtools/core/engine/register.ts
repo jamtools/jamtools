@@ -1,7 +1,7 @@
 import {Module} from '~/core/module_registry/module_registry';
 import {CoreDependencies, ModuleDependencies} from '~/core/types/module_types';
 import {ModuleAPI} from './module_api';
-import {MacroInputConfigs, MacroTypeConfigs, ProducedTypeMap} from '~/core/modules/macro_module/macro_module_types';
+import {MacroTypeConfigs} from '~/core/modules/macro_module/macro_module_types';
 
 export type RegisterRouteOptions = {};
 type RegisterSnackOptions = {};
@@ -61,7 +61,7 @@ Promise<MacroReturnValue> | MacroReturnValue;
 type RegisterMacroType = <MacroTypeId extends keyof MacroTypeConfigs, MacroTypeOptions extends object>(
     macroTypeId: MacroTypeId,
     options: MacroTypeOptions,
-    cb: MacroCallback<MacroInputConfigs[MacroTypeId], MacroTypeConfigs[MacroTypeId]['output']>,
+    cb: MacroCallback<MacroTypeConfigs[MacroTypeId]['input'], MacroTypeConfigs[MacroTypeId]['output']>,
 ) => void;
 
 export type CapturedRegisterMacroTypeCall = [string, RegisterMacroTypeOptions, MacroCallback<any, any>];

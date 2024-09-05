@@ -1,10 +1,10 @@
 import {jamtools} from '../../core/engine/register';
 
-jamtools.registerClassModule(async (coreDeps, modDeps) => {
-    const macroModule = modDeps.moduleRegistry.getModule('macro');
+jamtools.registerModule('random_note', {}, async (moduleAPI) => {
+    const macroModule = moduleAPI.deps.module.moduleRegistry.getModule('macro');
 
-    const inputTrigger = await macroModule.createMacro('Input trigger', {type: 'musical_keyboard_input'});
-    const output = await macroModule.createMacro('Random output', {type: 'musical_keyboard_output'});
+    const inputTrigger = await macroModule.createMacro(moduleAPI, 'Input trigger', 'musical_keyboard_input', {});
+    const output = await macroModule.createMacro(moduleAPI, 'Random output', 'musical_keyboard_output', {});
 
     let playing = false;
     let currentInterval: NodeJS.Timeout | undefined;

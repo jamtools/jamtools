@@ -2,7 +2,7 @@ import React from 'react';
 import {Module} from '~/core/module_registry/module_registry';
 
 import {CoreDependencies, ModuleDependencies} from '~/core/types/module_types';
-import {FullInputConfig, FullProducedOutput, MacroConfigItem, MacroConfigItemMusicalKeyboardInput, MacroConfigItemMusicalKeyboardOutput, MacroInputConfigs, MacroTypeConfigs, ProducedType, ProducedTypeMap, RegisteredMacroConfigItems} from './macro_module_types';
+import {MacroConfigItem, MacroTypeConfigs} from './macro_module_types';
 import {Subject} from 'rxjs';
 import {BaseModule, ModuleHookValue} from '../base_module/base_module';
 import {MacroPage} from './macro_page';
@@ -15,8 +15,12 @@ import '~/core/peripherals/outputs/soundfont_peripheral';
 type ModuleId = string;
 
 export type MacroConfigState = {
-    configs: Record<ModuleId, RegisteredMacroConfigItems>;
-    producedMacros: Record<ModuleId, FullProducedOutput<FullInputConfig>>;
+    // TODO: fix this type
+    configs: Record<ModuleId, any>;
+
+    // TODO: fix this type
+    producedMacros: Record<ModuleId, any>;
+    // producedMacros: Record<ModuleId, FullProducedOutput<FullInputConfig>>;
 };
 
 type MacroHookValue = ModuleHookValue<MacroModule>;
@@ -58,10 +62,15 @@ export class MacroModule implements Module<MacroConfigState> {
         const tempConfig = {[name]: {...config, type: macroType}};
         this.state.configs = {...this.state.configs, [moduleId]: {...this.state.configs[moduleId], ...tempConfig}};
 
-        const producedMacros = await this.registerModuleMacroConfig(moduleAPI, tempConfig);
-        this.state.producedMacros = {...this.state.producedMacros, [moduleId]: {...this.state.producedMacros[moduleId], ...producedMacros}};
+        const result = await this.createMacroFromConfigItem(moduleAPI, macroType, config, name);
 
-        return producedMacros[name];
+        this.state.producedMacros = {...this.state.producedMacros, [moduleId]: {...this.state.producedMacros[moduleId], [name]: result}};
+
+        if (!result) {
+            alert('unknown macro type ' + macroType);
+        }
+
+        return result!;
     };
 
     public registerMacroType = <MacroTypeOptions extends object, MacroInputConf extends object, MacroReturnValue extends object>(
@@ -82,34 +91,7 @@ export class MacroModule implements Module<MacroConfigState> {
 
         const allConfigs = {...this.state.configs};
         const allProducedMacros = {...this.state.producedMacros};
-
-        const mods = this.moduleDeps.moduleRegistry.getModules();
-        for (const mod of mods) {
-            if (mod.macroConfig) {
-                allConfigs[mod.moduleId] = mod.macroConfig;
-                const producedMacros = await this.registerModuleMacroConfig(mod.moduleId, mod.macroConfig);
-                allProducedMacros[mod.moduleId] = producedMacros;
-            }
-        }
-
         this.setState({configs: allConfigs, producedMacros: allProducedMacros});
-    };
-
-    private registerModuleMacroConfig = async <T extends RegisteredMacroConfigItems>(moduleAPI: ModuleAPI, macroConfig: T) => {
-        const producedMacros = {} as FullProducedOutput<typeof macroConfig>;
-
-        const fieldNames = Object.keys(macroConfig);
-        for (const fieldName of fieldNames) {
-            const fname = fieldName as keyof typeof macroConfig;
-            const conf = macroConfig[fieldName];
-
-            const result = await this.createMacroFromConfigItem(moduleAPI, conf.type, conf, fieldName);
-            if (result) {
-                producedMacros[fname] = result as ProducedTypeMap[T[keyof T]['type']];
-            }
-        }
-
-        return producedMacros;
     };
 
     private createMacroFromConfigItem = async <MacroType extends keyof MacroTypeConfigs>(moduleAPI: ModuleAPI, macroType: MacroType, conf: MacroConfigItem<typeof macroType>, fieldName: string): Promise<MacroTypeConfigs[MacroType]['output'] | undefined> => {

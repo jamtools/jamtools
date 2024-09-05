@@ -49,60 +49,11 @@ export type MacroConfigItemMusicalKeyboardOutput = {
 };
 
 export type MacroConfigItem<MacroTypeId extends keyof MacroTypeConfigs> = MacroTypeConfigs[MacroTypeId]['input'];
-// MacroConfigItemMusicalKeyboardInput | MacroConfigItemMusicalKeyboardOutput;
-
-export type RegisteredMacroConfigItems = {
-    [fieldName: string]: MacroConfigItem<any> & {type: keyof MacroInputConfigs};
-};
-
-export type MacroModuleClient<T extends RegisteredMacroConfigItems> = {
-    macroConfig: T;
-    updateMacroState(state: FullProducedOutput<T>): void
-}
 
 export interface OutputMidiDevice {
     send(midiEvent: MidiEvent): void;
     initialize?: () => Promise<void>;
 }
 
-// this interface is meant to be extended by each individual macro type through interface merging
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ProducedTypeMap {}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface MacroInputConfigs {}
-
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MacroTypeConfigs {}
-
-export type ProducedType<T extends keyof ProducedTypeMap> = ProducedTypeMap[T];
-
-export function stubProducedMacros<T extends RegisteredMacroConfigItems >(
-    config: T
-): { [K in keyof T]: ProducedType<T[K]['type']> } {
-    const result = {} as { [K in keyof T]: ProducedType<T[K]['type']> };
-    return result;
-}
-
-const createMacro = async <MacroType extends keyof ProducedTypeMap>(
-    macroName: string,
-    macroType: MacroType,
-    macroOptions: MacroOptions
-): Promise<ProducedTypeMap[MacroType]> => {
-    return {} as ProducedTypeMap[MacroType];
-};
-
-// just testing out the api types
-// setTimeout(async () => {
-//     const myMacro = await createMacro('yo', 'musical_keyboard_input', {});
-//     myMacro.onEventSubject.subscribe
-//     const myMacro2 = await createMacro('yo', 'musical_keyboard_output', {});
-// });
-
-export type FullInputConfig = {
-    [fieldName: string]: MacroConfigItem;
-}
-
-export type FullProducedOutput<T extends FullInputConfig> = {
-    [K in keyof T]: ProducedType<T[K]['type']>;
-}
