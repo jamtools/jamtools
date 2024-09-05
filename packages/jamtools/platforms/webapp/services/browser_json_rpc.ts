@@ -1,5 +1,5 @@
 import {JSONRPCClient, JSONRPCServer} from 'json-rpc-2.0';
-import {ModuleDependencies, Rpc, RpcArgs} from '~/core/types/module_types';
+import {Rpc, RpcArgs} from '~/core/types/module_types';
 
 type ClientParams = {
     clientId: string;
@@ -45,7 +45,7 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
         return result;
     };
 
-    broadcastRpc = async <Args>(method: string, args: Args, rpcArgs?: RpcArgs | undefined): Promise<void> => {
+    broadcastRpc = async <Args>(method: string, args: Args, _rpcArgs?: RpcArgs | undefined): Promise<void> => {
         console.log('broadcasting rpc', method, JSON.stringify(args));
 
         const params = {clientId: this.getClientId()};
@@ -81,7 +81,7 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
             }
         };
 
-        return new Promise<boolean>((resolve, reject) => {
+        return new Promise<boolean>((resolve, _reject) => {
             let connected = false;
 
             ws.onopen = () => {
@@ -102,7 +102,7 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
             ws.onerror = async (e) => {
                 if (!connected) {
                     console.error('failed to connect to websocket');
-                    this.rpcClient = new JSONRPCClient((request) => {
+                    this.rpcClient = new JSONRPCClient(() => {
                         return Promise.reject(new Error('WebSocket is not open'));
                     });
                     resolve(false);

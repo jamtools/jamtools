@@ -6,7 +6,7 @@ import {MacroConfigItem, MacroTypeConfigs} from './macro_module_types';
 import {Subject} from 'rxjs';
 import {BaseModule, ModuleHookValue} from '../base_module/base_module';
 import {MacroPage} from './macro_page';
-import {CapturedRegisterMacroTypeCall, MacroAPI, MacroCallback, RegisterMacroTypeOptions, jamtools} from '~/core/engine/register';
+import {CapturedRegisterMacroTypeCall, MacroAPI, MacroCallback, jamtools} from '~/core/engine/register';
 import {ModuleAPI} from '~/core/engine/module_api';
 
 import './macro_handlers/musical_keyboard_input_macro_handler';
@@ -15,12 +15,8 @@ import '~/core/peripherals/outputs/soundfont_peripheral';
 type ModuleId = string;
 
 export type MacroConfigState = {
-    // TODO: fix this type
-    configs: Record<ModuleId, any>;
-
-    // TODO: fix this type
-    producedMacros: Record<ModuleId, any>;
-    // producedMacros: Record<ModuleId, FullProducedOutput<FullInputConfig>>;
+    configs: Record<ModuleId, Record<string, {type: keyof MacroTypeConfigs}>>;
+    producedMacros: Record<ModuleId, Record<string, any>>;
 };
 
 type MacroHookValue = ModuleHookValue<MacroModule>;

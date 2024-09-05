@@ -47,7 +47,7 @@ export const GuitarComponent = (props: Props) => {
                         key={i}
                         className='guitar'
                         strings={strings}
-                        renderFinger={(v, f) => {
+                        renderFinger={(v, _f) => {
                             const key = `${v+1}-${i}`;
                             const index = chosen.findIndex(k => k === key);
                             return <span>{index + 1}</span>;

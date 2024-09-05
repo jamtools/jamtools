@@ -2,7 +2,7 @@ import React, {createContext} from 'react';
 
 import {Subject} from 'rxjs';
 
-import {CoreDependencies, JamTools, ModuleDependencies} from '~/core/types/module_types';
+import {CoreDependencies, ModuleDependencies} from '~/core/types/module_types';
 import {BaseModule, ModuleHookValue} from '../base_module/base_module';
 import {Module} from '~/core/module_registry/module_registry';
 import {MidiInputEventPayload, QwertyCallbackPayload} from '~/core/types/io_types';

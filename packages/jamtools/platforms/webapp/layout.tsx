@@ -106,7 +106,7 @@ const Tabs = (props: TabsProps) => {
 
             <SlTabPanel name={m.moduleId}>
                 <SlTabGroup>
-                    {Object.keys(m.routes!).map(route => (
+                    {Object.keys((m.routes || {})).map(route => (
                         <React.Fragment key={route}>
                             <SlTab
                                 slot={'nav'}

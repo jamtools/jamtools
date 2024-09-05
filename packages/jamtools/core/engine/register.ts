@@ -4,8 +4,6 @@ import {ModuleAPI} from './module_api';
 import {MacroTypeConfigs} from '~/core/modules/macro_module/macro_module_types';
 
 export type RegisterRouteOptions = {};
-type RegisterSnackOptions = {};
-type SnackCallback = (snackAPI: SnackAPI) => Promise<void>;
 
 type StateSupervisor<State> = {
     state: State;
@@ -22,11 +20,6 @@ type StatesAPI = {
 }
 
 export type MacroOptions = {};
-
-type SnackAPI = {
-    createMacro(macroName: string, options: MacroOptions): Promise<void>;
-    states: StatesAPI;
-}
 
 export type ModuleCallback<ModuleReturnValue extends object> = (moduleAPI: ModuleAPI) =>
 Promise<ModuleReturnValue> | ModuleReturnValue;

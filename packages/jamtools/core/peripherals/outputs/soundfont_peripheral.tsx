@@ -24,14 +24,14 @@ jamtools.registerMacroType(
     'musical_keyboard_output',
     {x: ''},
     (async (macroAPI, inputConf) => {
-        const soundfontResult = new SoundfontPeripheral({} as any, {} as any);
+        const soundfontResult = new SoundfontPeripheral();
         await soundfontResult.initialize();
         return soundfontResult;
     }),
 );
 
 export class SoundfontPeripheral implements OutputMidiDevice {
-    constructor(private coreDeps: CoreDependencies, private moduleDeps: ModuleDependencies) {
+    constructor() {
 
     }
 

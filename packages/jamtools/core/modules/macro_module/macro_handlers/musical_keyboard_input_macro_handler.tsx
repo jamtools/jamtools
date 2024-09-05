@@ -6,7 +6,7 @@ import {QwertyCallbackPayload} from '~/core/types/io_types';
 import {Subject} from 'rxjs';
 import {QWERTY_TO_MIDI_MAPPINGS} from '~/core/constants/qwerty_to_midi_mappings';
 import {MIDI_NUMBER_TO_NOTE_NAME_MAPPINGS} from '~/core/constants/midi_number_to_note_name_mappings';
-import {MacroAPI, jamtools} from '~/core/engine/register';
+import {jamtools} from '~/core/engine/register';
 import {SharedStateSupervisor} from '~/core/services/states/shared_state_service';
 
 type StoredMusicalKeyboardData = MidiDeviceAndChannel[];
@@ -139,7 +139,7 @@ jamtools.registerMacroType(
                     return;
                 }
 
-                const deviceAndChannel = makeHashedMidiDeviceAndChannel({device: event.device.name!, channel: event.event.channel});
+                const deviceAndChannel = makeHashedMidiDeviceAndChannel({device: event.device.name || '', channel: event.event.channel});
                 const storedUserData = dataService.getState();
                 if (!storedUserData[deviceAndChannel]) {
                     return;
@@ -176,7 +176,7 @@ const qwertyEventToMidiEvent = (event: QwertyCallbackPayload, localStateService:
     }
 
     const fullEvent: MidiEventFull = {
-        device: null as any,
+        device: {name: 'qwerty'} as any,
         deviceInfo: {type: 'midi', subtype: 'midi_input'},
         event: {
             channel: 0,
@@ -484,7 +484,7 @@ export class MusicalKeyboardInputHandlerOld {
     };
 
     onMidiMessage = (midiEvent: MidiEventFull) => {
-        const device = midiEvent.device.name!;
+        const device = midiEvent.device.name || '';
         const channel = midiEvent.event.channel;
         const hashedKey = makeHashedMidiDeviceAndChannel({device, channel});
 
@@ -563,7 +563,7 @@ export class MusicalKeyboardInputHandlerOld {
     // it "just works"
     // this allows the maestro to navigate people around
 
-    dotMenuEdit = async (args: {clicked: boolean}) => {
+    dotMenuEdit = async (_args: {clicked: boolean}) => {
         // set some local state to start listening for the next incoming midi note
 
         return 'hey';
@@ -572,7 +572,7 @@ export class MusicalKeyboardInputHandlerOld {
     submitEditForm = async () => {
         // call maestro action, which will use persistent state to store this
 
-        const res = await this.saveConfig({} as any);
+        // const res = await this.saveConfig({} as any);
         // user confirmed
     };
 
