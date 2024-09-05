@@ -39,7 +39,6 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
 
     callRpc = async <Return, Args>(method: string, args: Args): Promise<Return> => {
         console.log('calling rpc', method, JSON.stringify(args));
-        alert('call')
 
         const params = {clientId: this.getClientId()};
         const result = await this.rpcClient.request(method, args, params);
@@ -48,7 +47,6 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
 
     broadcastRpc = async <Args>(method: string, args: Args, rpcArgs?: RpcArgs | undefined): Promise<void> => {
         console.log('broadcasting rpc', method, JSON.stringify(args));
-        alert('broadcast')
 
         const params = {clientId: this.getClientId()};
         return this.rpcClient.notify(method, args, params);

@@ -1,12 +1,13 @@
 {
   "name": "jamtools-core",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "check-types": "tsc --noEmit",
     "lint": "eslint --ext ts --ext tsx  ./",
     "fix": "npm run lint -- --fix"
   },
   "dependencies": {
+    "@shoelace-style/shoelace": "^2.16.0",
     "json-rpc-2.0": "^1.7.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

@@ -15,7 +15,7 @@ export type MidiDeviceAndChannelMap<Value> = {
 }
 
 export type MidiEvent = {
-    type: 'noteon' | 'noteoff';
+    type: 'noteon' | 'noteoff' | 'cc';
     number: number;
     channel: number;
     velocity: number;
@@ -42,19 +42,17 @@ export type MidiEventFull = {
 }
 
 export type MacroConfigItemMusicalKeyboardInput = {
-    type: 'musical_keyboard_input';
     onTrigger?(midiEvent: MidiEventFull): void;
 }
 
 export type MacroConfigItemMusicalKeyboardOutput = {
-    type: 'musical_keyboard_output';
 };
 
-export type MacroConfigItem = {type: keyof ProducedTypeMap}
+export type MacroConfigItem<MacroTypeId extends keyof MacroTypeConfigs> = MacroTypeConfigs[MacroTypeId]['input'];
 // MacroConfigItemMusicalKeyboardInput | MacroConfigItemMusicalKeyboardOutput;
 
 export type RegisteredMacroConfigItems = {
-    [fieldName: string]: MacroConfigItem;
+    [fieldName: string]: MacroConfigItem<any> & {type: keyof MacroInputConfigs};
 };
 
 export type MacroModuleClient<T extends RegisteredMacroConfigItems> = {
@@ -70,6 +68,10 @@ export interface OutputMidiDevice {
 // this interface is meant to be extended by each individual macro type through interface merging
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ProducedTypeMap {}
+
+export interface MacroInputConfigs {}
+
+export interface MacroTypeConfigs {}
 
 export type ProducedType<T extends keyof ProducedTypeMap> = ProducedTypeMap[T];
 

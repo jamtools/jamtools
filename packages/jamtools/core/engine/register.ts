@@ -1,6 +1,7 @@
 import {Module} from '~/core/module_registry/module_registry';
 import {CoreDependencies, ModuleDependencies} from '~/core/types/module_types';
 import {ModuleAPI} from './module_api';
+import {MacroInputConfigs, MacroTypeConfigs, ProducedTypeMap} from '~/core/modules/macro_module/macro_module_types';
 
 export type RegisterRouteOptions = {};
 type RegisterSnackOptions = {};
@@ -40,22 +41,55 @@ export type JamTools = {
         cb: ModuleCallback<ModuleReturnValue>,
     ) => void;
     registerClassModule: <T extends object>(cb: ClassModuleCallback<T>) => void;
+    registerMacroType: RegisterMacroType;
+    reset: () => void;
+};
+
+export type MacroAPI = {
+    moduleAPI: ModuleAPI;
+    reloadMacro: () => void;
+    onDestroy: (cb: () => void) => void;
+};
+
+export type RegisterMacroTypeOptions = {
+
+}
+
+export type MacroCallback<MacroInputConf extends object, MacroReturnValue extends object> = (macroAPI: MacroAPI, macroInputConf: MacroInputConf, fieldName: string) =>
+Promise<MacroReturnValue> | MacroReturnValue;
+
+type RegisterMacroType = <MacroTypeId extends keyof MacroTypeConfigs, MacroTypeOptions extends object>(
+    macroTypeId: MacroTypeId,
+    options: MacroTypeOptions,
+    cb: MacroCallback<MacroInputConfigs[MacroTypeId], MacroTypeConfigs[MacroTypeId]['output']>,
+) => void;
+
+export type CapturedRegisterMacroTypeCall = [string, RegisterMacroTypeOptions, MacroCallback<any, any>];
+
+const registerMacroType = <MacroOptions extends RegisterMacroTypeOptions, MacroInputConf extends object, MacroReturnValue extends object>(
+    macroName: string,
+    options: MacroOptions,
+    cb: MacroCallback<MacroInputConf, MacroReturnValue>,
+) => {
+    const calls = (registerMacroType as unknown as {calls: CapturedRegisterMacroTypeCall[]}).calls || [];
+    calls.push([macroName, options, cb]);
+    (registerMacroType as unknown as {calls: CapturedRegisterMacroTypeCall[]}).calls = calls;
 };
 
 export type RegisterModuleOptions = {
 
 };
 
-type CapturedRegisterModuleCalls = [string, RegisterModuleOptions, ModuleCallback<any>];
+type CapturedRegisterModuleCall = [string, RegisterModuleOptions, ModuleCallback<any>];
 
 const registerModule = <ModuleOptions extends RegisterModuleOptions, ModuleReturnValue extends object>(
     moduleName: string,
     options: ModuleOptions,
     cb: ModuleCallback<ModuleReturnValue>,
 ) => {
-    const calls = (registerModule as unknown as {calls: CapturedRegisterModuleCalls[]}).calls || [];
+    const calls = (registerModule as unknown as {calls: CapturedRegisterModuleCall[]}).calls || [];
     calls.push([moduleName, options, cb]);
-    (registerModule as unknown as {calls: CapturedRegisterModuleCalls[]}).calls = calls;
+    (registerModule as unknown as {calls: CapturedRegisterModuleCall[]}).calls = calls;
 };
 
 type CapturedRegisterClassModuleCalls = ClassModuleCallback<any>;
@@ -69,6 +103,12 @@ const registerClassModule = <T extends object>(cb: ClassModuleCallback<T>) => {
 export const jamtools: JamTools = {
     registerModule,
     registerClassModule,
+    registerMacroType,
+    reset: () => {
+        jamtools.registerModule = registerModule;
+        jamtools.registerClassModule = registerClassModule;
+        jamtools.registerMacroType = registerMacroType;
+    },
 };
 
 (globalThis as unknown as {jamtools: JamTools}).jamtools = jamtools;

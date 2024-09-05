@@ -28,10 +28,12 @@ export const GuitarComponent = (props: Props) => {
                     display: inline-block;
                     margin: 0;
                     padding: 0;
-                }`}
+                }
+                .fret .counter {display: none !important;}
+                `}
             </style>
             {frets.map((fret, i) => {
-                const strings: string[] = [];
+                const strings: number[] = [];
                 fret.forEach((f, j) => {
                     const key = `${j+1}-${i}`;
                     if (chosen.includes(key)) {
@@ -48,10 +50,10 @@ export const GuitarComponent = (props: Props) => {
                         renderFinger={(v, f) => {
                             const key = `${v+1}-${i}`;
                             const index = chosen.findIndex(k => k === key);
-                            return index + 1;
+                            return <span>{index + 1}</span>;
                             // return ['A', 'B', 'C', 'D'][index];
                         }}
-                        frets={{from: i, amount: 0}}
+                        frets={{from: 1, amount: 0}}
                     />
                 );
             })}

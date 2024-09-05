@@ -1,10 +1,5 @@
-// this file should implement a midi output interface
-// and allow the user to choose the soundfont patch to be used, in the UI of the macro chooser
-// where does the music_keyboard_input provider come into play here?
-// need separation of concerns
-// also start doing test driven development
-
 import Soundfont from 'soundfont-player';
+import {jamtools} from '~/core/engine/register';
 
 import {MidiEvent, OutputMidiDevice, convertMidiNumberToNoteAndOctave} from '~/core/modules/macro_module/macro_module_types';
 import {CoreDependencies, ModuleDependencies} from '~/core/types/module_types';
@@ -15,10 +10,33 @@ type HeldDownSoundfontNotes = {
 };
 
 declare module '~/core/modules/macro_module/macro_module_types' {
+    interface MacroTypeConfigs {
+        musical_keyboard_output: {
+            input: MusicalKeyboardOutputMacroConfig;
+            output: OutputMidiDevice;
+        }
+    }
+
     interface ProducedTypeMap {
         musical_keyboard_output: OutputMidiDevice;
     }
+
+    interface MacroInputConfigs {
+        musical_keyboard_output: MusicalKeyboardOutputMacroConfig;
+    }
 }
+
+type MusicalKeyboardOutputMacroConfig = object;
+
+jamtools.registerMacroType(
+    'musical_keyboard_output',
+    {x: ''},
+    (async (macroAPI, inputConf) => {
+        const soundfontResult = new SoundfontPeripheral({} as any, {} as any);
+        await soundfontResult.initialize();
+        return soundfontResult;
+    }),
+)
 
 export class SoundfontPeripheral implements OutputMidiDevice {
     constructor(private coreDeps: CoreDependencies, private moduleDeps: ModuleDependencies) {
@@ -44,7 +62,7 @@ export class SoundfontPeripheral implements OutputMidiDevice {
 
         if (midiEvent.type === 'noteon') {
             const noteAndOctave = convertMidiNumberToNoteAndOctave(midiNumber);
-            const playingNote = this.soundfont.start(noteAndOctave);
+            const playingNote = this.soundfont.start(noteAndOctave, undefined, {gain: midiEvent.velocity / 32});
 
             this.heldDownNotes.push({number: midiNumber, player: playingNote});
             return;

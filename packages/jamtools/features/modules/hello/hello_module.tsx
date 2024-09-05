@@ -30,8 +30,6 @@ declare module '~/core/module_registry/module_registry' {
 export class HelloModule implements Module<HelloState> {
     moduleId = 'hello';
 
-    // enabled = false;
-
     routes: Record<string, React.ElementType> = {
         '': HelloComponent,
         'actions': HelloComponent,
@@ -47,6 +45,7 @@ export class HelloModule implements Module<HelloState> {
     };
 
     initialize = async () => {
+        return;
         this.coreDeps.log('hello module initializing');
 
         this.moduleDeps.rpc.registerRpc('hello', async (args) => {

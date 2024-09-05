@@ -46,10 +46,10 @@ const DataSyncRootRoute = ({value, onClick}: {value: TestSharedState; onClick: (
             <GuitarComponent
                 numberOfStrings={4}
                 chosenFrets={[
-                    '4-0',
-                    '4-2',
-                    '3-0',
-                    '3-2',
+                    // '4-0',
+                    // '4-2',
+                    // '3-0',
+                    // '3-2',
                 ]}
             />
         </div>

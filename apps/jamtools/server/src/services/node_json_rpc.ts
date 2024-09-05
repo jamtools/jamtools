@@ -73,7 +73,7 @@ export class NodeJsonRpcServer implements RpcClient {
                     return;
                 }
 
-                console.log(jsonMessage);
+                // console.log(jsonMessage);
 
                 if (jsonMessage.jsonrpc !== '2.0') {
                     return;
@@ -83,19 +83,19 @@ export class NodeJsonRpcServer implements RpcClient {
                     // this is a response
                     const clientId = jsonMessage.clientId as string | undefined;
                     if (clientId) {
-                        incomingClients[clientId].send(message);
+                        incomingClients[clientId]?.send(message);
                     }
 
                     return;
                 }
 
                 if (clientId !== this.maestroClientId) {
-                    incomingClients[this.maestroClientId].send(message);
+                    incomingClients[this.maestroClientId]?.send(message);
                     return;
                 }
 
                 if (jsonMessage.id) {
-                    console.log('this shouldnt happen')
+                    // console.log('this shouldnt happen')
                     return;
                 }
 
@@ -109,7 +109,7 @@ export class NodeJsonRpcServer implements RpcClient {
                     const method = jsonMessage.method;
                     const args = jsonMessage.params;
 
-                    incomingClients[c].send(message);
+                    incomingClients[c]?.send(message);
 
                     // const result = await outgoingClients[c].request(method, args);
                     // client.send(result);
@@ -121,7 +121,7 @@ export class NodeJsonRpcServer implements RpcClient {
             });
 
             jsonRpcServer.addMethod('echo-to-server', ({text}: {text: string}) => {
-                console.log(`Received from client: ${text}`);
+                // console.log(`Received from client: ${text}`);
                 return `Echoed by server: ${text}`;
             });
 

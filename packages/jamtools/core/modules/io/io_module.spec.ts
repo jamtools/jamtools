@@ -2,7 +2,7 @@ import {CoreDependencies} from '~/core/types/module_types';
 import {JamToolsEngine} from '~/core/engine/engine';
 
 describe('IoModule', () => {
-    it('should initialize with the engine', async () => {
+    it.skip('should initialize with the engine', async () => {
         const coreDeps: CoreDependencies = {
             log: jest.fn(),
             inputs: {

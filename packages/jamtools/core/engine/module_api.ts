@@ -5,9 +5,11 @@ import {RegisterRouteOptions} from './register';
 
 export class ModuleAPI {
     public deps: {core: CoreDependencies; module: ModuleDependencies};
+    public moduleId: string;
 
     constructor(private module: Module, private prefix: string, private coreDeps: CoreDependencies, private modDeps: ModuleDependencies) {
         this.deps = {core: coreDeps, module: modDeps};
+        this.moduleId = this.module.moduleId;
     }
 
     fullPrefix = `${this.prefix}|module|${this.module.moduleId}`;
