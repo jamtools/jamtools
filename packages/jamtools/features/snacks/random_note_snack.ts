@@ -36,7 +36,7 @@ jamtools.registerClassModule(async (coreDeps, modDeps) => {
     const startPlaying = () => {
         currentInterval = setInterval(() => {
             // if (Math.random() < 0.7) {
-                playRandomNote();
+            playRandomNote();
             // }
         }, 50);
     };

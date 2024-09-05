@@ -69,8 +69,10 @@ export interface OutputMidiDevice {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ProducedTypeMap {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MacroInputConfigs {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MacroTypeConfigs {}
 
 export type ProducedType<T extends keyof ProducedTypeMap> = ProducedTypeMap[T];

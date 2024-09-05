@@ -58,7 +58,7 @@ const ToggleThemeButton = () => {
             Toggle theme
         </SlButton>
     );
-}
+};
 
 import SlTab from '@shoelace-style/shoelace/dist/react/tab/index.js';
 import SlTabGroup from '@shoelace-style/shoelace/dist/react/tab-group/index.js';
@@ -91,7 +91,7 @@ const Tabs = (props: TabsProps) => {
 
     const showRoute = (modId: string, route: string) => {
         navigate(`/modules/${modId}/${route}`);
-    }
+    };
 
     const modulesWithRoutes = props.modules.filter(m => m.routes).map(m => (
         <React.Fragment key={m.moduleId}>

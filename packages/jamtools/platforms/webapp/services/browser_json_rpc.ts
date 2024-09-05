@@ -27,7 +27,7 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
         const newClientId = Math.random().toString().slice(2);
         this.clientId = newClientId;
         return this.clientId;
-    }
+    };
 
     registerRpc = <Args, Return>(method: string, cb: (args: Args) => Promise<Return>) => {
         this.rpcServer.addMethod(method, async (args) => {

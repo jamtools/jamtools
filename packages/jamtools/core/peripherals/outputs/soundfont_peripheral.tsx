@@ -36,7 +36,7 @@ jamtools.registerMacroType(
         await soundfontResult.initialize();
         return soundfontResult;
     }),
-)
+);
 
 export class SoundfontPeripheral implements OutputMidiDevice {
     constructor(private coreDeps: CoreDependencies, private moduleDeps: ModuleDependencies) {

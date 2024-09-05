@@ -32,6 +32,7 @@ module.exports = {
         '@typescript-eslint/no-explicit-any': 'off',
         'no-empty-function': ['warn'],
         '@typescript-eslint/ban-types': 'off',
+        '@typescript-eslint/no-empty-function': 'off',
         quotes: [
             'error',
             'single'

@@ -18,11 +18,11 @@ class MockQwertyService implements QwertyService {
 class MockKVStore implements KVStore {
     get = async <T>(key: string) => {
         return {} as T;
-    }
+    };
 
     set = async <T>(key: string, value: T): Promise<void> => {
 
-    }
+    };
 }
 
 class MockRpcService implements Rpc {
@@ -32,15 +32,15 @@ class MockRpcService implements Rpc {
 
     broadcastRpc = async <Args>(name: string, args: Args, rpcArgs?: RpcArgs | undefined) => {
 
-    }
+    };
 
     registerRpc = async <Args, Return>(name: string, cb: (args: Args) => Promise<Return>) => {
 
-    }
+    };
 
     initialize = async () => {
         return true;
-    }
+    };
 }
 
 export const makeMockCoreDependencies = () => {
@@ -53,4 +53,4 @@ export const makeMockCoreDependencies = () => {
         kvStore: new MockKVStore(),
         rpc: new MockRpcService(),
     };
-}
+};

@@ -128,7 +128,7 @@ export class MacroModule implements Module<MacroConfigState> {
 
         const result = await registeredMacroType[2](macroAPI, conf, fieldName);
         return result;
-    }
+    };
 
     subject: Subject<MacroConfigState> = new Subject();
 

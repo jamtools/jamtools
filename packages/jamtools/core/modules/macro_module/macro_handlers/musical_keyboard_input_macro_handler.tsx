@@ -83,11 +83,11 @@ jamtools.registerMacroType(
 
             await dataService.setState(newPersistentState);
             macroAPI.reloadMacro();
-        }
+        };
 
         const onQwertyConfigToggle = async () => {
             return onSelectedMidiMacroToggle(QWERTY_DEVICE_NAME, QWERTY_CHANNEL_NUMBER);
-        }
+        };
 
         const components = {
             edit: () => {
@@ -108,7 +108,7 @@ jamtools.registerMacroType(
         const returnValue: MusicalKeyboardInputResult = {
             onEventSubject: resultEventSubject,
             components,
-        }
+        };
 
         const isMaestro = macroAPI.moduleAPI.deps.module.isMaestro();
         if (!isMaestro) {
@@ -212,7 +212,7 @@ const EditComponent = (props: EditComponentProps) => {
             </button>
         </div>
     );
-}
+};
 
 // export class MusicalKeyboardInputHandler {
 //     configuredMappings: MidiDeviceAndChannelMap<boolean> = {};
