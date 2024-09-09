@@ -7,7 +7,8 @@
   },
   "dependencies": {
     "jamtools-core": "*",
-    "react-router-dom": "^6.25.0"
+    "react-router-dom": "^6.25.0",
+    "webmidi": "^3.1.11"
   },
   "devDependencies": {
     "configs": "*"

@@ -7,10 +7,6 @@ type ActionOptions = object;
 
 type ActionCallback<Args extends object, ReturnValue=any> = (args: Args) => Promise<ReturnValue>;
 
-const reg = <Args extends object, ReturnValue>(cb: ActionCallback<Args, ReturnValue>): typeof cb => {
-    return cb;
-}
-
 export class ModuleAPI {
     public deps: {core: CoreDependencies; module: ModuleDependencies};
     public moduleId: string;
@@ -52,10 +48,21 @@ export class ModuleAPI {
 
                     throw e;
                 }
-            }
+            };
         }
 
         return async (args: Args) => {
+            if (this.coreDeps.isMaestro()) {
+                try {
+                    return cb(args) as ReturnValue;
+                } catch (e) {
+                    const errorMessage = `Error running action '${fullActionName}': ${new String(e)}`;
+                    this.coreDeps.showError(errorMessage);
+
+                    throw e;
+                }
+            }
+
             try {
                 const result = await this.coreDeps.rpc.callRpc<Args, ReturnValue>(fullActionName, args);
                 if (typeof result === 'string') {
@@ -70,7 +77,7 @@ export class ModuleAPI {
 
                 throw e;
             }
-        }
+        };
     };
 
     // createMacro = () => {

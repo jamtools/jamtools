@@ -59,7 +59,7 @@ export class NodeJsonRpcClientAndServer implements Rpc {
     };
 
     broadcastRpc = async <Args>(method: string, args: Args, _rpcArgs?: RpcArgs | undefined): Promise<void> => {
-        console.log('broadcasting rpc', method, JSON.stringify(args));
+        // console.log('broadcasting rpc', method, JSON.stringify(args));
 
         const params = {clientId: this.clientId};
         return this.rpcClient.notify(method, args, params);

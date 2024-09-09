@@ -6,7 +6,7 @@ type ClientParams = {
 }
 
 export class BrowserJsonRpcClientAndServer implements Rpc {
-    rpcClient!: JSONRPCClient<ClientParams>;
+    rpcClient?: JSONRPCClient<ClientParams>;
     rpcServer!: JSONRPCServer;
 
     constructor (private url: string) {}
@@ -41,18 +41,28 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
         console.log('calling rpc', method, JSON.stringify(args));
 
         const params = {clientId: this.getClientId()};
-        const result = await this.rpcClient.request(method, args, params);
+        const result = await this.rpcClient?.request(method, args, params);
         return result;
     };
 
     broadcastRpc = async <Args>(method: string, args: Args, _rpcArgs?: RpcArgs | undefined): Promise<void> => {
-        console.log('broadcasting rpc', method, JSON.stringify(args));
+        if (!this.rpcClient) {
+            // throw new Error(`tried to broadcast rpc but not connected to websocket`);
+            return;
+        }
+
+        // console.log('broadcasting rpc', method, JSON.stringify(args));
 
         const params = {clientId: this.getClientId()};
         return this.rpcClient.notify(method, args, params);
     };
 
     initializeWebsocket = async () => {
+        const forceError = true;
+        if (forceError) {
+            return false;
+        }
+
         const fullUrl = `${this.url}?clientId=${this.getClientId()}`;
         const ws = new WebSocket(fullUrl);
 
@@ -77,7 +87,7 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
             } else {
                 // Handle incoming RPC responses after calling an rpc method on the server
                 // console.log(jsonMessage);
-                this.rpcClient.receive(jsonMessage);
+                this.rpcClient?.receive(jsonMessage);
             }
         };
 
@@ -119,7 +129,11 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
 
     initialize = async (): Promise<boolean> => {
         this.rpcServer = new JSONRPCServer();
-        const connected = await this.initializeWebsocket();
-        return connected;
+        try {
+            return this.initializeWebsocket();
+        } catch (e) {
+            // console.error(`failed to connect to websocket server`, e);
+            return false;
+        }
     };
 }

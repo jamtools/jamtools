@@ -28,9 +28,10 @@ export class JamToolsEngine {
         await this.coreDeps.inputs.midi.initialize();
         const websocketConnected = await this.coreDeps.rpc.initialize();
         if (!websocketConnected) {
-            // TODO: implement local browser mode
             if ('confirm' in globalThis) {
-                confirm('failed to connect to websocket server. run in local browser mode?');
+                if (confirm('failed to connect to websocket server. run in local browser mode?')) {
+                    this.coreDeps.isMaestro = () => true;
+                }
             }
         }
 

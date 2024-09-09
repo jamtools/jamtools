@@ -28,17 +28,19 @@ const savedMidiEventsAreEqual = (event1: MidiEventFull, event2: MidiEventFull): 
     const key1 = getKeyForMidiEvent(event1);
     const key2 = getKeyForMidiEvent(event2);
     return key1 === key2;
-}
+};
 
 const getKeyForMidiEvent = (event: MidiEventFull) => {
     return `${event.deviceInfo.name}|${event.event.channel}|${event.event.number}`;
-}
+};
 
 jamtools.registerMacroType('midi_control_change_input', {}, async (macroAPI, conf, fieldName) => {
-    const waitingForConfiguration = await macroAPI.moduleAPI.states.createSharedState('waiting_for_configuration', false);
-    const capturedMidiEvent = await macroAPI.moduleAPI.states.createSharedState<MidiEventFull | null>('captured_midi_event', null);
+    const getKey = (key: string) => `macro|${fieldName}|${key}`;
 
-    const savedMidiEvents = await macroAPI.moduleAPI.states.createPersistentState<MidiEventFull[]>('saved_midi_event', []);
+    const waitingForConfiguration = await macroAPI.moduleAPI.states.createSharedState(getKey('waiting_for_configuration'), false);
+    const capturedMidiEvent = await macroAPI.moduleAPI.states.createSharedState<MidiEventFull | null>(getKey('captured_midi_event'), null);
+
+    const savedMidiEvents = await macroAPI.moduleAPI.states.createPersistentState<MidiEventFull[]>(getKey('saved_midi_event'), []);
 
     const subject = new Subject<MidiEventFull>();
 
@@ -46,7 +48,7 @@ jamtools.registerMacroType('midi_control_change_input', {}, async (macroAPI, con
         return macroAPI.moduleAPI.createAction(`macro|midi_control_change_input|${fieldName}|${actionName}`, {}, async (args: Args) => {
             return cb(args);
         });
-    }
+    };
 
     const toggleWaiting = createAction('toggle_waiting_input', async () => {
         waitingForConfiguration.setState(!waitingForConfiguration.getState());
@@ -86,7 +88,7 @@ jamtools.registerMacroType('midi_control_change_input', {}, async (macroAPI, con
         }
 
         deleteSavedValue(event);
-    }
+    };
 
     const returnValue: MidiControlChangeInputResult = {
         subject,
@@ -227,4 +229,4 @@ const SavedMacroValues = ({saved, onClickDelete}: SavedMacroValues) => {
             })}
         </ul>
     );
-}
+};

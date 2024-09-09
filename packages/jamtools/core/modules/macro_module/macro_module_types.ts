@@ -43,10 +43,6 @@ export type MidiEventFull = {
     event: MidiEvent;
 }
 
-export type MacroConfigItemMusicalKeyboardInput = {
-    onTrigger?(midiEvent: MidiEventFull): void;
-}
-
 export type MacroConfigItemMusicalKeyboardOutput = {
 };
 

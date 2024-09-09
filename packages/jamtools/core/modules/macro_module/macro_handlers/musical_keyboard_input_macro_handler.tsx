@@ -1,31 +1,11 @@
 import React, {useEffect, useState} from 'react';
 
-import {MidiDeviceAndChannel, MidiDeviceAndChannelMap, MidiEventFull, makeHashedMidiDeviceAndChannel} from '../macro_module_types';
+import {MidiDeviceAndChannelMap, MidiEventFull, makeHashedMidiDeviceAndChannel} from '../macro_module_types';
 import {QwertyCallbackPayload} from '~/core/types/io_types';
 import {Subject} from 'rxjs';
 import {QWERTY_TO_MIDI_MAPPINGS} from '~/core/constants/qwerty_to_midi_mappings';
 import {jamtools} from '~/core/engine/register';
 import {SharedStateSupervisor} from '~/core/services/states/shared_state_service';
-
-type StoredMusicalKeyboardData = MidiDeviceAndChannel[];
-
-const makeStoredKeyForMusicalKeyboard = (moduleId: string, fieldName: string) => {
-    return `${moduleId}-${fieldName}-musical_keyboard`;
-};
-
-const useSubject = <T,>(initialData: T, subject: Subject<T>) => {
-    const [state, setState] = useState(initialData);
-
-    useEffect(() => {
-        const subscription = subject.subscribe((data) => {
-            setState(data);
-        });
-
-        return () => subscription.unsubscribe();
-    }, []);
-
-    return state;
-};
 
 type MusicalKeyboardInputResult = {
     onEventSubject: Subject<MidiEventFull>;
@@ -33,6 +13,11 @@ type MusicalKeyboardInputResult = {
         edit: React.ElementType;
     };
 };
+
+type MacroConfigItemMusicalKeyboardInput = {
+    onTrigger?(midiEvent: MidiEventFull): void;
+    enableQwerty?: boolean;
+}
 
 declare module '~/core/modules/macro_module/macro_module_types' {
     interface MacroTypeConfigs {
@@ -111,7 +96,7 @@ jamtools.registerMacroType(
         // const isQwertyEnabled = true;
 
         // TODO: uncomment this once UI is done here
-        const isQwertyEnabled = Boolean(storedUserConfig[QWERTY_DEVICE_AND_CHANNEL]);
+        const isQwertyEnabled = Boolean(storedUserConfig[QWERTY_DEVICE_AND_CHANNEL] || conf.enableQwerty);
         if (isQwertyEnabled) {
             // TODO: subscribe should require a second parameter, the garbage cleanup callback
             ioModule.qwertyInputSubject.subscribe(event => {
@@ -177,9 +162,9 @@ const qwertyEventToMidiEvent = (event: QwertyCallbackPayload, localStateService:
         deviceInfo: {type: 'midi', subtype: 'midi_input', name: 'qwerty', manufacturer: ''},
         event: {
             channel: 0,
-            number: midiNumber,
+            number: midiNumber + 24,
             type: event.event === 'keydown' ? 'noteon' : 'noteoff',
-            velocity: 127,
+            velocity: 100, // maybe make this random or gradually change or something
         },
         type: 'midi',
     };

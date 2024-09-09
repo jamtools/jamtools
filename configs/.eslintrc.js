@@ -39,6 +39,12 @@ module.exports = {
                 "argsIgnorePattern": "^_",
             }
         ],
+        "@typescript-eslint/ban-ts-comment": [
+            "error",
+            {
+                "ts-ignore": "allow-with-description"
+            }
+        ],
         quotes: [
             'error',
             'single'

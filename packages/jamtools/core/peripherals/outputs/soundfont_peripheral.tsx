@@ -20,6 +20,11 @@ declare module '~/core/modules/macro_module/macro_module_types' {
 
 type MusicalKeyboardOutputMacroConfig = object;
 
+// relocate this to musical_keyboard_output_macro_handler and support actually midi output
+// we'll need to show the available midi output devices
+// and also poll for newly connected ones
+// get toast working too. instead of alert
+// support broadcasting toasts
 jamtools.registerMacroType(
     'musical_keyboard_output',
     {x: ''},
@@ -35,7 +40,7 @@ export class SoundfontPeripheral implements OutputMidiDevice {
 
     }
 
-    soundfont!: Soundfont.Player;
+    soundfont?: Soundfont.Player;
 
     private heldDownNotes: HeldDownSoundfontNotes[] = [];
 
@@ -50,7 +55,6 @@ export class SoundfontPeripheral implements OutputMidiDevice {
         if ('AudioContext' in globalThis) {
             this.soundfont = await Soundfont.instrument(new AudioContext(), 'acoustic_grand_piano');
         }
-
     };
 
     public send = (midiEvent: MidiEvent) => {
@@ -62,8 +66,20 @@ export class SoundfontPeripheral implements OutputMidiDevice {
         const midiNumber = midiEvent.number;
 
         if (midiEvent.type === 'noteon') {
+            const playingNoteIndex = this.heldDownNotes.findIndex(p => p.number === midiNumber);
+
+            if (playingNoteIndex !== -1) {
+                console.log('trying to play a note thats already being played');
+                return;
+            }
+
+            if (midiNumber % 1 !== 0) {
+                console.log('trying to play decimal midi number');
+                return;
+            }
+
             const noteAndOctave = convertMidiNumberToNoteAndOctave(midiNumber);
-            const playingNote = this.soundfont.start(noteAndOctave, undefined, {gain: midiEvent.velocity / 32});
+            const playingNote = this.soundfont.start(noteAndOctave, undefined, {gain: (midiEvent.velocity || 0) / 32});
 
             this.heldDownNotes.push({number: midiNumber, player: playingNote});
             return;
@@ -77,7 +93,7 @@ export class SoundfontPeripheral implements OutputMidiDevice {
             }
 
             const playingNote = this.heldDownNotes[playingNoteIndex];
-            playingNote.player.stop();
+            playingNote?.player?.stop();
 
             this.heldDownNotes = [
                 ...this.heldDownNotes.slice(0, playingNoteIndex),

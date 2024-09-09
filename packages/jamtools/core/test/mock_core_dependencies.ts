@@ -45,6 +45,8 @@ class MockRpcService implements Rpc {
 
 export const makeMockCoreDependencies = () => {
     return {
+        isMaestro: () => true,
+        showError: console.error,
         log: jest.fn(),
         inputs: {
             midi: new MockMidiService(),
@@ -52,5 +54,5 @@ export const makeMockCoreDependencies = () => {
         },
         kvStore: new MockKVStore(),
         rpc: new MockRpcService(),
-    };
+    } satisfies CoreDependencies;
 };

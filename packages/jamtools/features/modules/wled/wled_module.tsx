@@ -2,10 +2,13 @@ import React, {createContext} from 'react';
 
 import {Subject} from 'rxjs';
 
+// @ts-ignore: This line suppresses an issue with missing types in wled-client
+import {WLEDClient} from 'wled-client';
+
 import {CoreDependencies, ModuleDependencies} from '~/core/types/module_types';
 import {BaseModule, ModuleHookValue} from '~/core/modules/base_module/base_module';
 import {Module} from '~/core/module_registry/module_registry';
-import {WLEDClient} from 'wled-client';
+
 import {jamtools} from '~/core/engine/register';
 
 type WledClientStatus = {

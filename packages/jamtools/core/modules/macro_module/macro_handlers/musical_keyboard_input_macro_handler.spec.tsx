@@ -7,7 +7,6 @@ import {MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
 import {jamtools} from '~/core/engine/register';
 
 describe('MusicalKeyboardInputMacroHandler', () => {
-
     beforeEach(() => {
         jamtools.reset();
     });
@@ -45,7 +44,7 @@ describe('MusicalKeyboardInputMacroHandler', () => {
 
         await engine.registerModule('Test_MusicalKeyboardInputMacro', {}, async (moduleAPI) => {
             const macroModule = moduleAPI.deps.module.moduleRegistry.getModule('macro');
-            const midiInput = await macroModule.createMacro(moduleAPI, 'myinput', 'musical_keyboard_input', {});
+            const midiInput = await macroModule.createMacro(moduleAPI, 'myinput', 'musical_keyboard_input', {enableQwerty: true});
             midiInput.onEventSubject.subscribe(event => {
                 calls.push(event);
             });
@@ -56,6 +55,7 @@ describe('MusicalKeyboardInputMacroHandler', () => {
         expect(calls).toHaveLength(0);
 
         qwertySubject.next({event: 'keydown', key: 'a'});
+        await new Promise(r => setTimeout(r, 1000));
         expect(calls).toHaveLength(1);
     });
 

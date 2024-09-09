@@ -61,7 +61,7 @@ jamtools.registerModule('root_mode_module', {}, async (moduleAPI) => {
         }
 
         for (const noteNumber of chordNotes) {
-            const midiNumberToPlay = noteNumber + 24;
+            const midiNumberToPlay = noteNumber;
             output.send({...evt.event, number: midiNumberToPlay});
         }
 

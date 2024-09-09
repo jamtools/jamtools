@@ -84,7 +84,7 @@ export class NodeMidiService implements MidiService {
             });
 
             this.inputs.push(input);
-            console.log('initialized midi input:', input.name);
+            // console.log('initialized midi input:', input.name);
 
         } catch (e) {
             console.error('failed to initialize midi input device', e);
@@ -103,7 +103,7 @@ export class NodeMidiService implements MidiService {
 
             const output = new easymidi.Output(outputName);
             this.outputs.push(output);
-            console.log('initialized midi output:', output.name);
+            // console.log('initialized midi output:', output.name);
         } catch (e) {
             console.error('failed to initialize midi output device', e);
         }
@@ -116,13 +116,23 @@ export class NodeMidiService implements MidiService {
             return;
         }
 
-        const note: easymidi.Note = {
-            channel: midiEvent.channel as Channel,
-            note: midiEvent.number,
-            velocity: midiEvent.velocity,
-        };
+        if (midiEvent.type === 'noteon' || midiEvent.type === 'noteoff') {
+            const note: easymidi.Note = {
+                channel: midiEvent.channel as Channel,
+                note: midiEvent.number,
+                velocity: midiEvent.velocity!,
+            };
 
-        (output as any).send(midiEvent.type, note);
+            output.send(midiEvent.type as 'noteon', note);
+        } else if (midiEvent.type === 'cc') {
+            const cc: easymidi.ControlChange = {
+                channel: midiEvent.channel as Channel,
+                controller: midiEvent.number,
+                value: midiEvent.value!,
+            };
+
+            output.send(midiEvent.type, cc);
+        }
     };
 
     onDeviceStatusChange = new Subject<DeviceInfo>();
