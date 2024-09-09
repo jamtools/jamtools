@@ -54,7 +54,7 @@ export class NodeMidiService implements MidiService {
                 };
 
                 this.onInputEvent.next(fullEvent);
-            }
+            };
 
             input.on('noteon', (event) => {
                 handleNoteEvent('noteon', event);
@@ -70,7 +70,7 @@ export class NodeMidiService implements MidiService {
         } catch (e) {
             console.error('failed to initialize midi input device', e);
         }
-    }
+    };
 
     private initializeMidiOutputDevice = (outputName: string) => {
         try {
@@ -88,7 +88,7 @@ export class NodeMidiService implements MidiService {
         } catch (e) {
             console.error('failed to initialize midi output device', e);
         }
-    }
+    };
 
     public send = (deviceName: string, midiEvent: MidiEvent) => {
         const output = this.outputs.find(device => device.name === deviceName);
@@ -104,7 +104,7 @@ export class NodeMidiService implements MidiService {
         };
 
         (output as any).send(midiEvent.type, note);
-    }
+    };
 
     onDeviceStatusChange = new Subject<DeviceInfo>();
 

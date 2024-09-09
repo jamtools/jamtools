@@ -18,7 +18,6 @@ jamtools.registerModule('data_sync_test', {}, async (moduleAPI) => {
     );
 
     moduleAPI.deps.core.rpc.registerRpc('doit', async () => {
-        console.log('hurray')
         myState.setState({myvalue: randomString()});
     });
 

@@ -18,7 +18,7 @@ export class NodeKVStoreService implements KVStore {
 
     public getAllEntries = async () => {
         return allKVData[this.databaseName] || {};
-    }
+    };
 
     public get = async <T>(key: string) => {
         const db = allKVData[this.databaseName];

@@ -40,7 +40,6 @@ export type JamTools = {
 
 export type MacroAPI = {
     moduleAPI: ModuleAPI;
-    reloadMacro: () => void;
     onDestroy: (cb: () => void) => void;
 };
 

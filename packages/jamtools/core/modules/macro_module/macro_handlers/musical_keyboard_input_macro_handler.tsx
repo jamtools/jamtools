@@ -72,7 +72,6 @@ jamtools.registerMacroType(
             }
 
             await dataService.setState(newPersistentState);
-            macroAPI.reloadMacro();
         };
 
         const onQwertyConfigToggle = async () => {

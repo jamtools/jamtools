@@ -29,7 +29,7 @@ export class JamToolsEngine {
         const websocketConnected = await this.coreDeps.rpc.initialize();
         if (!websocketConnected) {
             // TODO: implement local browser mode
-            if (globalThis.confirm) {
+            if ('confirm' in globalThis) {
                 confirm('failed to connect to websocket server. run in local browser mode?');
             }
         }
@@ -66,7 +66,7 @@ export class JamToolsEngine {
         api: ModuleReturnValue
     }> => {
         const mod: Module = {moduleId};
-        const moduleAPI = new ModuleAPI(mod, 'engine', this.coreDeps, this.makeDerivedDependencies(), () => this.registerModule(moduleId, options, cb));
+        const moduleAPI = new ModuleAPI(mod, 'engine', this.coreDeps, this.makeDerivedDependencies());
         const moduleReturnValue = await cb(moduleAPI);
 
         this.moduleRegistry.registerModule(mod);
