@@ -54,14 +54,14 @@ export class IoModule implements Module<IoState> {
         }); this.cleanup.push(midiSubscription.unsubscribe);
     };
 
-    onNewMidiDeviceFound = (device: {name: string}) => {
+    onNewMidiDeviceFound = (deviceInfo: {name: string}) => {
         const existsInConfig = false;
         if (!existsInConfig) {
             this.moduleDeps.toast({
                 target: 'all',
-                message: `Found new midi device ${device.name}. Want to configure it?`,
+                message: `Found new midi device ${deviceInfo.name}. Want to configure it?`,
                 variant: 'info',
-                onClick: ['react_gotoMidiDeviceConfigPage', [device.name]],
+                onClick: ['react_gotoMidiDeviceConfigPage', [deviceInfo.name]],
             });
         }
     };

@@ -29,7 +29,9 @@ export class JamToolsEngine {
         const websocketConnected = await this.coreDeps.rpc.initialize();
         if (!websocketConnected) {
             // TODO: implement local browser mode
-            confirm('failed to connect to websocket server. run in local browser mode?');
+            if (globalThis.confirm) {
+                confirm('failed to connect to websocket server. run in local browser mode?');
+            }
         }
 
         this.sharedStateService = new SharedStateService(this.coreDeps);
@@ -42,22 +44,12 @@ export class JamToolsEngine {
         const registeredModuleCallbacks = (jamtools.registerModule as unknown as {calls: CapturedRegisterModuleCalls[]}).calls || [];
         jamtools.registerModule = this.registerModule;
 
-        const modules: Module<any>[] = [];
-
         for (const modClassCallback of registeredClassModuleCallbacks) {
-            const mod = await this.registerClassModule(modClassCallback);
-            if (mod) {
-                modules.push(mod);
-                this.moduleRegistry.registerModule(mod);
-            }
+            await this.registerClassModule(modClassCallback);
         }
 
         for (const modFuncCallback of registeredModuleCallbacks) {
-            const mod = await this.registerModule(modFuncCallback[0], modFuncCallback[1], modFuncCallback[2]);
-            if (mod) {
-                modules.push(mod.module);
-                this.moduleRegistry.registerModule(mod.module);
-            }
+            await this.registerModule(modFuncCallback[0], modFuncCallback[1], modFuncCallback[2]);
         }
 
         for (const cb of this.initializeCallbacks) {
@@ -74,13 +66,11 @@ export class JamToolsEngine {
         api: ModuleReturnValue
     }> => {
         const mod: Module = {moduleId};
-        const moduleAPI = new ModuleAPI(mod, 'engine', this.coreDeps, this.makeDerivedDependencies());
+        const moduleAPI = new ModuleAPI(mod, 'engine', this.coreDeps, this.makeDerivedDependencies(), () => this.registerModule(moduleId, options, cb));
         const moduleReturnValue = await cb(moduleAPI);
 
+        this.moduleRegistry.registerModule(mod);
         return {module: mod, api: moduleReturnValue};
-
-        // TODO: expose the arbitrary module callback's return value for usage in other modules
-        // this.moduleRegistry.registerModule({moduleId, api: moduleReturnValue});
     };
 
     private makeDerivedDependencies = (): ModuleDependencies => {
@@ -109,6 +99,9 @@ export class JamToolsEngine {
         }
 
         await mod.initialize?.();
+
+        this.moduleRegistry.registerModule(mod);
+
         return mod;
     };
 

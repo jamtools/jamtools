@@ -36,16 +36,18 @@ export class NodeJsonRpcServer implements RpcClient {
 
         wss.on('connection', (ws: WebSocket, req) => {
             let providedClientId = '';
+            let isMaestro = false;
 
             if (req.url?.includes('?')) {
                 const urlParams = new URLSearchParams(req.url.substring(req.url.indexOf('?')));
                 providedClientId = urlParams.get('clientId') || '';
+                isMaestro = urlParams.get('is_maestro') === 'true';
             }
 
             const clientId = providedClientId || `${Date.now()}`;
             incomingClients[clientId] = ws;
 
-            if (!this.maestroClientId) {
+            if (isMaestro || !this.maestroClientId) {
                 this.maestroClientId = clientId;
             }
 

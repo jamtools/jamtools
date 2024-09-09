@@ -86,7 +86,6 @@ describe('MusicalKeyboardInputMacroHandler', () => {
         expect(calls).toHaveLength(0);
 
         midiSubject.next({
-            device: {name: 'a'} as any,
             deviceInfo: {} as any,
             event: {} as any,
             type: 'midi',

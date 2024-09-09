@@ -17,8 +17,14 @@ jamtools.registerModule('data_sync_test', {}, async (moduleAPI) => {
         {myvalue: '50'},
     );
 
+    moduleAPI.deps.core.rpc.registerRpc('doit', async () => {
+        console.log('hurray')
+        myState.setState({myvalue: randomString()});
+    });
+
     const onClick = (value?: string) => {
-        myState.setState({myvalue: value || randomString()});
+        moduleAPI.deps.core.rpc.callRpc('doit', {});
+        // myState.setState({myvalue: value || randomString()});
     };
 
     moduleAPI.registerRoute('', {}, () => {

@@ -1,0 +1,20 @@
+{
+  "name": "jamtools-platforms-node",
+  "scripts": {
+    "check-types": "tsc --noEmit",
+    "lint": "eslint --ext ts --ext tsx .",
+    "fix": "npm run lint -- --fix"
+  },
+  "dependencies": {
+    "easymidi": "^3.0.1",
+    "isomorphic-ws": "^5.0.0",
+    "jamtools-core": "*",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "configs": "*"
+  },
+  "config": {
+    "dir": "../../../../configs"
+  }
+}

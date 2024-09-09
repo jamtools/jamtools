@@ -46,10 +46,19 @@ export class SoundfontPeripheral implements OutputMidiDevice {
     public initialize = async () => {
         // TODO: serve the soundfont file from origin instead of fetching from CDN. would probably need to fork or do babel transformation since the url is hardcoded
         // https://github.com/danigb/soundfont-player/blob/2b89587d7cc396c5c7b91056f8cb78831ead7436/dist/soundfont-player.js#L76
-        this.soundfont = await Soundfont.instrument(new AudioContext(), 'acoustic_grand_piano');
+
+        if (globalThis.AudioContext) {
+            this.soundfont = await Soundfont.instrument(new AudioContext(), 'acoustic_grand_piano');
+        }
+
     };
 
     public send = (midiEvent: MidiEvent) => {
+        if (!this.soundfont) {
+            console.log('sending midi event from node process');
+            return;
+        }
+
         const midiNumber = midiEvent.number;
 
         if (midiEvent.type === 'noteon') {

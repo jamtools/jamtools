@@ -1,7 +1,10 @@
 import React from 'react';
 
 import {
-    createHashRouter,
+    createBrowserRouter,
+
+    // use hash router for electron
+    // createHashRouter,
     Link,
     RouteObject,
     RouterProvider,
@@ -41,7 +44,7 @@ export const FrontendRoutes = () => {
         element: <span/>,
     });
 
-    const router = createHashRouter([
+    const router = createBrowserRouter([
         {
             path: '/',
             element: <Layout modules={mods}><RootPath modules={mods}/></Layout>

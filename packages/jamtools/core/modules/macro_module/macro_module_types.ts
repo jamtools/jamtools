@@ -32,12 +32,13 @@ export const convertMidiNumberToNoteAndOctave = (midiNumber: number): string => 
 export type DeviceInfo = {
     type: 'midi';
     subtype: 'midi_input' | 'midi_output';
+    name: string;
+    manufacturer: string;
 }
 
 export type MidiEventFull = {
     type: 'midi';
     deviceInfo: DeviceInfo;
-    device: MIDIInput | MIDIOutput;
     event: MidiEvent;
 }
 
