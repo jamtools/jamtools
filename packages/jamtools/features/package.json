@@ -1,0 +1,20 @@
+{
+    "name": "jamtools-features",
+    "scripts": {
+        "check-types": "tsc --noEmit",
+        "lint": "eslint --ext ts --ext tsx .",
+        "fix": "npm run lint -- --fix"
+    },
+    "dependencies": {
+        "chordsheetjs": "^10.2.0",
+        "he": "^1.2.0",
+        "jamtools-core": "*",
+        "jsdom": "^25.0.0"
+    },
+    "devDependencies": {
+        "configs": "*"
+    },
+    "config": {
+        "dir": "../../../configs"
+    }
+}

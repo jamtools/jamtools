@@ -5,9 +5,9 @@
   "main": "index.js",
   "packageManager": "npm@10.2.4",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "turbo run dev",
-    "ci": "turbo run lint check-types build --output-logs errors-only"
+    "test": "turbo run test",
+    "ci": "turbo run lint check-types build test --output-logs errors-only"
   },
   "keywords": [],
   "author": "",
@@ -20,6 +20,9 @@
   },
   "workspaces": [
     "apps/jamtools/*",
+    "packages/jamtools/core",
+    "packages/jamtools/features",
+    "packages/jamtools/platforms/*",
     "configs"
   ]
 }

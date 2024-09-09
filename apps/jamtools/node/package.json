@@ -1,0 +1,23 @@
+{
+  "name": "jamtools-node",
+  "scripts": {
+    "build:watch": "nodemon dist/local-server.js",
+    "run:watch": "npm run build-local-server -- --watch",
+    "dev": "npm-run-all --parallel build:watch run:watch",
+    "build": "npm run build-local-server",
+    "build-local-server": "esbuild src/index.ts --outfile=dist/local-server.js --bundle --platform=node --external:@julusian/midi --external:easymidi",
+    "check-types": "tsc --noEmit",
+    "lint": "eslint --ext ts --ext tsx src/",
+    "fix": "npm run lint -- --fix"
+  },
+  "dependencies": {
+    "jamtools-core": "*",
+    "jamtools-platforms-node": "*"
+  },
+  "devDependencies": {
+    "configs": "*"
+  },
+  "config": {
+    "dir": "../../../configs"
+  }
+}

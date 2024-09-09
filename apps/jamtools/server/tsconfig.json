@@ -2,7 +2,7 @@
   "extends": "../../../tsconfig.json",
   "compilerOptions": {
     "paths": {
-      "~/*": ["../core/*"],
+      "~/*": ["../../../packages/jamtools/*"],
       "@/*": ["./src/*"],
     },
     "baseUrl": "."

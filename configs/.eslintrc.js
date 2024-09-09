@@ -30,6 +30,21 @@ module.exports = {
         indent: 'off',
         '@typescript-eslint/indent': ['error'],
         '@typescript-eslint/no-explicit-any': 'off',
+        '@typescript-eslint/ban-types': 'off',
+        '@typescript-eslint/no-empty-function': 'off',
+        'no-empty-function': 'off',
+        "@typescript-eslint/no-unused-vars": [
+            "warn",
+            {
+                "argsIgnorePattern": "^_",
+            }
+        ],
+        "@typescript-eslint/ban-ts-comment": [
+            "error",
+            {
+                "ts-ignore": "allow-with-description"
+            }
+        ],
         quotes: [
             'error',
             'single'

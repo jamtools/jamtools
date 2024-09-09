@@ -1,17 +1,16 @@
 import React from 'react';
 
-import {JamToolsProvider} from '~/engine/engine';
+import {JamToolsEngine, JamToolsProvider} from '~/core/engine/engine';
 
-import {FrontendRoutes} from './frontend_routes';
-import {CoreDependencies} from '~/types/module_types';
+import {FrontendRoutes} from '~/platforms/webapp/frontend_routes';
 
 type Props = {
-    coreDeps: CoreDependencies;
+    engine: JamToolsEngine;
 }
 
 export const Main = (props: Props) => {
     return (
-        <JamToolsProvider coreDeps={props.coreDeps}>
+        <JamToolsProvider engine={props.engine}>
             <FrontendRoutes/>
         </JamToolsProvider>
     );
