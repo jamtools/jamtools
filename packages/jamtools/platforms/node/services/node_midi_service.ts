@@ -36,8 +36,9 @@ export class NodeMidiService implements MidiService {
 
             const input = new easymidi.Input(inputName);
 
-            const handleNoteEvent = (eventType: 'noteon' | 'noteoff', event: easymidi.Note) => {
+            const publishMidiEvent = (event: MidiEvent) => {
                 const fullEvent: MidiEventFull = {
+                    event,
                     type: 'midi',
                     deviceInfo: {
                         type: 'midi',
@@ -45,15 +46,20 @@ export class NodeMidiService implements MidiService {
                         name: input.name,
                         manufacturer: '',
                     },
-                    event: {
-                        type: eventType,
-                        channel: event.channel,
-                        number: event.note,
-                        velocity: event.velocity,
-                    },
                 };
 
                 this.onInputEvent.next(fullEvent);
+            };
+
+            const handleNoteEvent = (eventType: 'noteon' | 'noteoff', event: easymidi.Note) => {
+                const midiEvent: MidiEvent = {
+                    type: eventType,
+                    channel: event.channel,
+                    number: event.note,
+                    velocity: event.velocity,
+                };
+
+                publishMidiEvent(midiEvent);
             };
 
             input.on('noteon', (event) => {
@@ -62,6 +68,19 @@ export class NodeMidiService implements MidiService {
 
             input.on('noteoff', (event) => {
                 handleNoteEvent('noteoff', event);
+            });
+
+            // probably want to use a generic on MidiEvent and MidiEventFull for event types. to have accurate object shapes to expect
+            input.on('cc', (event) => {
+                const midiEvent: MidiEvent = {
+                    type: 'cc',
+                    channel: event.channel,
+                    number: event.controller,
+                    value: event.value,
+                    velocity: 0,
+                };
+
+                publishMidiEvent(midiEvent);
             });
 
             this.inputs.push(input);

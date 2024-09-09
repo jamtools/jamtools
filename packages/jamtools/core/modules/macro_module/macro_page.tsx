@@ -24,7 +24,7 @@ export const MacroPage = (props: Props) => {
                                 const maybeComponents = (producedMacro as {components?: {edit: React.ElementType}} | undefined);
 
                                 return (
-                                    <li key={fieldName}>
+                                    <li key={fieldName} style={{margin: '20px', border: '1px solid', padding: '20px'}}>
                                         {maybeComponents?.components && <maybeComponents.components.edit/>}
                                         {fieldName} - {mapping.type}
                                     </li>

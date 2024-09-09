@@ -10,6 +10,7 @@ import {CapturedRegisterMacroTypeCall, MacroAPI, MacroCallback, jamtools} from '
 import {ModuleAPI} from '~/core/engine/module_api';
 
 import './macro_handlers/musical_keyboard_input_macro_handler';
+import './macro_handlers/midi_control_change_input_macro_handler';
 import '~/core/peripherals/outputs/soundfont_peripheral';
 
 type ModuleId = string;
@@ -63,7 +64,8 @@ export class MacroModule implements Module<MacroConfigState> {
         this.state.producedMacros = {...this.state.producedMacros, [moduleId]: {...this.state.producedMacros[moduleId], [name]: result}};
 
         if (!result) {
-            alert('unknown macro type ' + macroType);
+            const errorMessage = `Error: unknown macro type '${macroType}'`;
+            this.coreDeps.showError(errorMessage);
         }
 
         return result!;

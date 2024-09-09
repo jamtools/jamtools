@@ -3,6 +3,14 @@ import {SharedStateSupervisor} from '../services/states/shared_state_service';
 import {CoreDependencies, ModuleDependencies} from '../types/module_types';
 import {RegisterRouteOptions} from './register';
 
+type ActionOptions = object;
+
+type ActionCallback<Args extends object, ReturnValue=any> = (args: Args) => Promise<ReturnValue>;
+
+const reg = <Args extends object, ReturnValue>(cb: ActionCallback<Args, ReturnValue>): typeof cb => {
+    return cb;
+}
+
 export class ModuleAPI {
     public deps: {core: CoreDependencies; module: ModuleDependencies};
     public moduleId: string;
@@ -21,6 +29,47 @@ export class ModuleAPI {
         this.module.routes = {...routes};
         if (this.modDeps.moduleRegistry.getCustomModule(this.module.moduleId)) {
             this.modDeps.moduleRegistry.refreshModules();
+        }
+    };
+
+    createAction = <Options extends ActionOptions, Args extends object, ReturnValue>(actionName: string, options: Options, cb: ActionCallback<Args, ReturnValue>): typeof cb => {
+        const fullActionName = `${this.fullPrefix}|action|${actionName}`;
+
+        // if (options.broadcast) {
+        //  // TODO: do conditional non-maestro broadcasting or something
+        // }
+
+        this.coreDeps.rpc.registerRpc(fullActionName, cb);
+
+        if (this.coreDeps.isMaestro()) {
+            // TODO: make error handling better in actions. we probably shouldn't log stack traces to the console if it's a user error
+            return async (args: Args) => {
+                try {
+                    return cb(args) as ReturnValue;
+                } catch (e) {
+                    const errorMessage = `Error running action '${fullActionName}': ${new String(e)}`;
+                    this.coreDeps.showError(errorMessage);
+
+                    throw e;
+                }
+            }
+        }
+
+        return async (args: Args) => {
+            try {
+                const result = await this.coreDeps.rpc.callRpc<Args, ReturnValue>(fullActionName, args);
+                if (typeof result === 'string') {
+                    this.coreDeps.showError(result);
+                    throw new Error(result);
+                }
+
+                return result;
+            } catch (e) {
+                const errorMessage = `Error running action '${fullActionName}': ${new String(e)}`;
+                this.coreDeps.showError(errorMessage);
+
+                throw e;
+            }
         }
     };
 

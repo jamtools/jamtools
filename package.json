@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "turbo run dev",
     "test": "turbo run test",
-    "ci": "turbo run lint check-types build --output-logs errors-only"
+    "ci": "turbo run lint check-types build test --output-logs errors-only"
   },
   "keywords": [],
   "author": "",

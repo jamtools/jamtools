@@ -31,8 +31,9 @@ export const FrontendRoutes = () => {
             path: mod.moduleId,
             children: Object.keys(routes).map((path): RouteObject => {
                 const Component = routes[path];
+                const fixedPath = path.startsWith('/') ? path.slice(1) : path;
                 return {
-                    path,
+                    path: fixedPath,
                     element: <Layout modules={mods}><Component/></Layout>,
                 };
             }),

@@ -2,7 +2,7 @@ import fs from 'node:fs';
 
 import {KVStore} from '~/core/types/module_types';
 
-const DATA_FILE_NAME = './kv_data.json';
+const DATA_FILE_NAME = '../../../data/kv_data.json';
 
 let allKVData: Record<string, Record<string, string>> = {};
 

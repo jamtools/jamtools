@@ -28,12 +28,14 @@ export const startJamToolsAndRenderApp = async (): Promise<JamToolsEngine> => {
 
     const coreDeps: CoreDependencies = {
         log: console.log,
+        showError: (error: string) => alert(error),
         inputs: {
             qwerty: qwertyService,
             midi: midiService,
         },
         kvStore,
         rpc,
+        isMaestro: () => false,
     };
 
     const engine = new JamToolsEngine(coreDeps);

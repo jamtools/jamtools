@@ -18,7 +18,8 @@ export type MidiEvent = {
     type: 'noteon' | 'noteoff' | 'cc';
     number: number;
     channel: number;
-    velocity: number;
+    velocity?: number;
+    value?: number;
 }
 
 export const convertMidiNumberToNoteAndOctave = (midiNumber: number): string => {

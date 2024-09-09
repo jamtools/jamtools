@@ -16,12 +16,14 @@ export const startJamTools = async (): Promise<JamToolsEngine> => {
 
     const coreDeps: CoreDependencies = {
         log: console.log,
+        showError: console.error,
         inputs: {
             qwerty: qwertyService,
             midi: midiService,
         },
         kvStore,
         rpc,
+        isMaestro: () => true,
     };
 
     const engine = new JamToolsEngine(coreDeps);

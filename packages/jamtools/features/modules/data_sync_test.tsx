@@ -5,40 +5,39 @@ import React from 'react';
 import {jamtools} from '~/core/engine/register';
 import {GuitarComponent} from './song_structures/components/guitar';
 
-type TestSharedState = {
+type TestPersistentState = {
     myvalue: string;
 }
 
 const randomString = () => Math.random().toString().slice(2, 4);
 
 jamtools.registerModule('data_sync_test', {}, async (moduleAPI) => {
-    const myState = await moduleAPI.states.createPersistentState<TestSharedState>(
-        'my_shared_state',
+    const myState = await moduleAPI.states.createPersistentState<TestPersistentState>(
+        'my_persistent_state',
         {myvalue: '50'},
     );
 
-    moduleAPI.deps.core.rpc.registerRpc('doit', async () => {
+    const myAction = moduleAPI.createAction('change_persistent', {}, async () => {
         myState.setState({myvalue: randomString()});
     });
 
-    const onClick = (value?: string) => {
-        moduleAPI.deps.core.rpc.callRpc('doit', {});
-        // myState.setState({myvalue: value || randomString()});
-    };
+    const ccMacro = moduleAPI.deps.module.moduleRegistry.getModule('macro').createMacro(moduleAPI, 'test_cc', 'midi_control_change_input', {onTrigger: (evt => {
+        // console.log('received event from macro', evt.event.value);
+    })});
 
-    moduleAPI.registerRoute('', {}, () => {
+    moduleAPI.registerRoute('/', {}, () => {
         const reactState = myState.useState();
 
         return (
             <DataSyncRootRoute
                 value={reactState}
-                onClick={onClick}
+                onClick={() => myAction({})}
             />
         );
     });
 });
 
-const DataSyncRootRoute = ({value, onClick}: {value: TestSharedState; onClick: (value?: string) => void}) => {
+const DataSyncRootRoute = ({value, onClick}: {value: TestPersistentState; onClick: (value?: string) => void}) => {
     return (
         <div>
             <pre>

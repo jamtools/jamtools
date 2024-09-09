@@ -79,9 +79,6 @@ export class JamToolsEngine {
             toast: (options) => {
                 this.coreDeps.log(options.message);
             },
-            // how can we make it so if the maestro refreshes, they can pick up where the jam was at?
-            // maybe we don't support that at first. refreshing maestro is not expected to resume maybe?
-            isMaestro: () => true,
             rpc: this.coreDeps.rpc,
             services: {
                 sharedStateService: this.sharedStateService,

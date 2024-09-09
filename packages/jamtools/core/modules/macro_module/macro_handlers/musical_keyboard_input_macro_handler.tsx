@@ -99,7 +99,7 @@ jamtools.registerMacroType(
             components,
         };
 
-        const isMaestro = macroAPI.moduleAPI.deps.module.isMaestro();
+        const isMaestro = macroAPI.moduleAPI.deps.core.isMaestro();
         if (!isMaestro) {
             return returnValue;
         }

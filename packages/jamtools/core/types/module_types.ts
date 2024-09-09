@@ -11,12 +11,14 @@ export type JamTools = {
 
 export type CoreDependencies = {
     log: (...s: any[]) => void;
+    showError: (error: string) => void;
     inputs: {
         qwerty: QwertyService;
         midi: MidiService;
     }
     kvStore: KVStore;
     rpc: Rpc;
+    isMaestro: () => boolean;
 }
 
 export type KVStore = {
@@ -47,7 +49,6 @@ type ToastOptions = {
 export type ModuleDependencies = {
     moduleRegistry: ModuleRegistry;
     toast: (toastOptions: ToastOptions) => void;
-    isMaestro: () => boolean;
     rpc: Rpc;
     services: {
         sharedStateService: SharedStateService;
