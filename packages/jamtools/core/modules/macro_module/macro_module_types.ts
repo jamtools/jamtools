@@ -15,10 +15,11 @@ export type MidiDeviceAndChannelMap<Value> = {
 }
 
 export type MidiEvent = {
-    type: 'noteon' | 'noteoff';
+    type: 'noteon' | 'noteoff' | 'cc';
     number: number;
     channel: number;
-    velocity: number;
+    velocity?: number;
+    value?: number;
 }
 
 export const convertMidiNumberToNoteAndOctave = (midiNumber: number): string => {
@@ -32,73 +33,25 @@ export const convertMidiNumberToNoteAndOctave = (midiNumber: number): string => 
 export type DeviceInfo = {
     type: 'midi';
     subtype: 'midi_input' | 'midi_output';
+    name: string;
+    manufacturer: string;
 }
 
 export type MidiEventFull = {
     type: 'midi';
     deviceInfo: DeviceInfo;
-    device: MIDIInput | MIDIOutput;
     event: MidiEvent;
 }
 
-export type MacroConfigItemMusicalKeyboardInput = {
-    type: 'musical_keyboard_input';
-    onTrigger?(midiEvent: MidiEventFull): void;
-}
-
 export type MacroConfigItemMusicalKeyboardOutput = {
-    type: 'musical_keyboard_output';
 };
 
-export type MacroConfigItem = {type: keyof ProducedTypeMap}
-// MacroConfigItemMusicalKeyboardInput | MacroConfigItemMusicalKeyboardOutput;
-
-export type RegisteredMacroConfigItems = {
-    [fieldName: string]: MacroConfigItem;
-};
-
-export type MacroModuleClient<T extends RegisteredMacroConfigItems> = {
-    macroConfig: T;
-    updateMacroState(state: FullProducedOutput<T>): void
-}
+export type MacroConfigItem<MacroTypeId extends keyof MacroTypeConfigs> = MacroTypeConfigs[MacroTypeId]['input'];
 
 export interface OutputMidiDevice {
     send(midiEvent: MidiEvent): void;
     initialize?: () => Promise<void>;
 }
 
-// this interface is meant to be extended by each individual macro type through interface merging
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ProducedTypeMap {}
-
-export type ProducedType<T extends keyof ProducedTypeMap> = ProducedTypeMap[T];
-
-export function stubProducedMacros<T extends RegisteredMacroConfigItems >(
-    config: T
-): { [K in keyof T]: ProducedType<T[K]['type']> } {
-    const result = {} as { [K in keyof T]: ProducedType<T[K]['type']> };
-    return result;
-}
-
-const createMacro = async <MacroType extends keyof ProducedTypeMap>(
-    macroName: string,
-    macroType: MacroType,
-    macroOptions: MacroOptions
-): Promise<ProducedTypeMap[MacroType]> => {
-    return {} as ProducedTypeMap[MacroType];
-};
-
-// just testing out the api types
-// setTimeout(async () => {
-//     const myMacro = await createMacro('yo', 'musical_keyboard_input', {});
-//     myMacro.onEventSubject.subscribe
-//     const myMacro2 = await createMacro('yo', 'musical_keyboard_output', {});
-// });
-
-export type FullInputConfig = {
-    [fieldName: string]: MacroConfigItem;
-}
-
-export type FullProducedOutput<T extends FullInputConfig> = {
-    [K in keyof T]: ProducedType<T[K]['type']>;
-}
+export interface MacroTypeConfigs {}

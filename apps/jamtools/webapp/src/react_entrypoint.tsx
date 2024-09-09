@@ -1,6 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 
+import {setBasePath} from '@shoelace-style/shoelace/dist/utilities/base-path.js';
+
+setBasePath('https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.16.0/cdn/');
+
 import {CoreDependencies} from '~/core/types/module_types';
 
 import {Main} from './main';
@@ -20,16 +24,18 @@ export const startJamToolsAndRenderApp = async (): Promise<JamToolsEngine> => {
     const qwertyService = new BrowserQwertyService(document);
     const kvStore = new BrowserKVStoreService(localStorage);
     const midiService = new BrowserMidiService();
-    const rpc = new BrowserJsonRpcClientAndServer('ws://localhost:8080');
+    const rpc = new BrowserJsonRpcClientAndServer('ws://jam.local:8080');
 
     const coreDeps: CoreDependencies = {
         log: console.log,
+        showError: (error: string) => alert(error),
         inputs: {
             qwerty: qwertyService,
             midi: midiService,
         },
         kvStore,
         rpc,
+        isMaestro: () => false,
     };
 
     const engine = new JamToolsEngine(coreDeps);

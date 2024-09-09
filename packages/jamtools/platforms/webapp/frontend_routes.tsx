@@ -2,6 +2,9 @@ import React from 'react';
 
 import {
     createBrowserRouter,
+
+    // use hash router for electron
+    // createHashRouter,
     Link,
     RouteObject,
     RouterProvider,
@@ -28,9 +31,10 @@ export const FrontendRoutes = () => {
             path: mod.moduleId,
             children: Object.keys(routes).map((path): RouteObject => {
                 const Component = routes[path];
+                const fixedPath = path.startsWith('/') ? path.slice(1) : path;
                 return {
-                    path,
-                    element: <Layout><Component/></Layout>,
+                    path: fixedPath,
+                    element: <Layout modules={mods}><Component/></Layout>,
                 };
             }),
         });
@@ -44,7 +48,7 @@ export const FrontendRoutes = () => {
     const router = createBrowserRouter([
         {
             path: '/',
-            element: <Layout><RootPath mods={mods}/></Layout>
+            element: <Layout modules={mods}><RootPath modules={mods}/></Layout>
         },
         {
             path: '/modules',
@@ -57,10 +61,10 @@ export const FrontendRoutes = () => {
     );
 };
 
-const RootPath = (props: {mods: Module[]}) => {
+const RootPath = (props: {modules: Module[]}) => {
     return (
         <ul>
-            {props.mods.map(mod => (
+            {props.modules.map(mod => (
                 <RenderModuleRoutes
                     key={mod.moduleId}
                     mod={mod}

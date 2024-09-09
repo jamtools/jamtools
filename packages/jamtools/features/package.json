@@ -1,18 +1,20 @@
 {
     "name": "jamtools-features",
     "scripts": {
-      "test": "echo \"Error: no test specified\" && exit 1",
-      "check-types": "tsc --noEmit",
-      "lint": "eslint --ext ts --ext tsx .",
-      "fix": "npm run lint -- --fix"
+        "check-types": "tsc --noEmit",
+        "lint": "eslint --ext ts --ext tsx .",
+        "fix": "npm run lint -- --fix"
     },
     "dependencies": {
-      "jamtools-core": "*"
+        "chordsheetjs": "^10.2.0",
+        "he": "^1.2.0",
+        "jamtools-core": "*",
+        "jsdom": "^25.0.0"
     },
     "devDependencies": {
-      "configs": "*"
+        "configs": "*"
     },
     "config": {
-      "dir": "../../../configs"
+        "dir": "../../../configs"
     }
-  }
+}

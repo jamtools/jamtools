@@ -2,7 +2,7 @@ import React, {createContext} from 'react';
 
 import {Subject} from 'rxjs';
 
-import {CoreDependencies, JamTools, ModuleDependencies} from '~/core/types/module_types';
+import {CoreDependencies, ModuleDependencies} from '~/core/types/module_types';
 import {BaseModule, ModuleHookValue} from '../base_module/base_module';
 import {Module} from '~/core/module_registry/module_registry';
 import {MidiInputEventPayload, QwertyCallbackPayload} from '~/core/types/io_types';
@@ -54,14 +54,14 @@ export class IoModule implements Module<IoState> {
         }); this.cleanup.push(midiSubscription.unsubscribe);
     };
 
-    onNewMidiDeviceFound = (device: {name: string}) => {
+    onNewMidiDeviceFound = (deviceInfo: {name: string}) => {
         const existsInConfig = false;
         if (!existsInConfig) {
             this.moduleDeps.toast({
                 target: 'all',
-                message: `Found new midi device ${device.name}. Want to configure it?`,
+                message: `Found new midi device ${deviceInfo.name}. Want to configure it?`,
                 variant: 'info',
-                onClick: ['react_gotoMidiDeviceConfigPage', [device.name]],
+                onClick: ['react_gotoMidiDeviceConfigPage', [deviceInfo.name]],
             });
         }
     };

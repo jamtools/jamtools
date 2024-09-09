@@ -1,14 +1,14 @@
 {
   "name": "jamtools-platforms-webapp",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "check-types": "tsc --noEmit",
     "lint": "eslint --ext ts --ext tsx .",
     "fix": "npm run lint -- --fix"
   },
   "dependencies": {
     "jamtools-core": "*",
-    "react-router-dom": "^6.25.0"
+    "react-router-dom": "^6.25.0",
+    "webmidi": "^3.1.11"
   },
   "devDependencies": {
     "configs": "*"

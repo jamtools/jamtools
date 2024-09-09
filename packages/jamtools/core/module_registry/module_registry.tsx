@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from 'react';
 
 import {Subject} from 'rxjs';
-import {MacroModuleClient} from '~/core/modules/macro_module/macro_module_types';
 
 export type Module<State extends object = any> = {
     moduleId: string;
@@ -10,7 +9,7 @@ export type Module<State extends object = any> = {
     state?: State;
     subject?: Subject<State>;
     routes?: Record<string, React.ElementType>;
-} & Partial<MacroModuleClient<any>>
+};
 
 // this interface is meant to be extended by each individual module file through interface merging
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -26,7 +25,7 @@ export class ModuleRegistry {
         this.modules.push(mod);
         this.modulesByKey[mod.moduleId] = mod;
 
-        this.modulesSubject.next([...this.modules]);
+        this.refreshModules();
     }
 
     async registerAndInitializeModule(mod: Module<any>) {
@@ -34,12 +33,20 @@ export class ModuleRegistry {
         this.modulesByKey[mod.moduleId] = mod;
         await mod.initialize?.();
 
-        this.modulesSubject.next([...this.modules]);
+        this.refreshModules();
     }
 
     getModule<ModuleId extends keyof AllModules>(moduleId: ModuleId): AllModules[ModuleId] {
         return this.modulesByKey[moduleId] as AllModules[ModuleId];
     }
+
+    getCustomModule(moduleId: string): Module | undefined {
+        return this.modulesByKey[moduleId];
+    }
+
+    refreshModules = () => {
+        this.modulesSubject.next([...this.modules]);
+    };
 
     getModules() {
         return this.modules;

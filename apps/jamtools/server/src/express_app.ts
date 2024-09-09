@@ -1,5 +1,5 @@
 import path from 'path';
-import {WebSocketServer, WebSocket} from 'ws';
+import {WebSocketServer} from 'ws';
 
 import express from 'express';
 

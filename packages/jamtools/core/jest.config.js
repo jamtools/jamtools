@@ -4,6 +4,13 @@ module.exports = {
     testEnvironment: 'jsdom',
     moduleNameMapper: {
       "\\.(css)$": "identity-obj-proxy",
-      "~/(.*)": "<rootDir>/$1"
-    }
+      "~/core/(.*)": "<rootDir>/$1"
+    },
+    globals: {
+      'ts-jest': {
+        diagnostics: {
+          exclude: ['**'],
+        },
+      },
+    },
   };

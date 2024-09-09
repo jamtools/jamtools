@@ -21,11 +21,11 @@ export const MacroPage = (props: Props) => {
                             {fieldNames.map((fieldName) => {
                                 const mapping = c[fieldName];
                                 const producedMacro = props.state.producedMacros[moduleId][fieldName];
-                                const Component = ((producedMacro as {Component?: React.ElementType}).Component);
+                                const maybeComponents = (producedMacro as {components?: {edit: React.ElementType}} | undefined);
 
                                 return (
-                                    <li key={fieldName}>
-                                        {Component && <Component />}
+                                    <li key={fieldName} style={{margin: '20px', border: '1px solid', padding: '20px'}}>
+                                        {maybeComponents?.components && <maybeComponents.components.edit/>}
                                         {fieldName} - {mapping.type}
                                     </li>
                                 );
