@@ -1,7 +1,7 @@
 import {jamtools} from '~/core/engine/register';
 
 jamtools.registerModule('midi_thru_cc', {}, async (moduleAPI) => {
-    console.log('running snack: midi thru');
+    console.log('running snack: midi thru cc');
 
     const macroModule = moduleAPI.deps.module.moduleRegistry.getModule('macro');
 
@@ -10,7 +10,6 @@ jamtools.registerModule('midi_thru_cc', {}, async (moduleAPI) => {
         // macroModule.createMacro(moduleAPI, 'MIDI Input', 'musical_keyboard_input', {}),
         macroModule.createMacro(moduleAPI, 'MIDI Output', 'musical_keyboard_output', {}),
     ]);
-
 
     input.subject.subscribe(evt => {
         if (evt.event.value && evt.event.value % 2 === 1) {

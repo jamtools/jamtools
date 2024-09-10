@@ -57,8 +57,10 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
         return this.rpcClient.notify(method, args, params);
     };
 
+    retrying = false;
+
     initializeWebsocket = async () => {
-        const forceError = true;
+        const forceError = false;
         if (forceError) {
             return false;
         }
@@ -69,8 +71,15 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
         ws.onclose = async () => {
             console.error('websocket disconnected');
             console.log('retrying websocket in 5 seconds');
+
+            if (this.retrying) {
+                return;
+            }
+            this.retrying = true;
+
             setTimeout(() => {
                 this.initializeWebsocket();
+                this.retrying = false;
             }, 5000);
         };
 
@@ -120,8 +129,15 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
 
                 console.error('Error with websocket', e);
                 console.log('retrying websocket in 5 seconds');
+
+                if (this.retrying) {
+                    return;
+                }
+                this.retrying = true;
+
                 setTimeout(() => {
                     this.initializeWebsocket();
+                    this.retrying = false;
                 }, 5000);
             };
         });

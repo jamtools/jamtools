@@ -48,7 +48,7 @@ jamtools.registerModule('root_mode_module', {}, async (moduleAPI) => {
         macroModule.createMacro(moduleAPI, 'MIDI Output', 'musical_keyboard_output', {}),
     ]);
 
-    input.onEventSubject.subscribe(evt => {
+    input.subject.subscribe(evt => {
         const midiNumber = evt.event.number;
         const scaleDegreeInfo = getScaleDegreeFromScaleAndNote(scale, midiNumber);
         if (!scaleDegreeInfo) {

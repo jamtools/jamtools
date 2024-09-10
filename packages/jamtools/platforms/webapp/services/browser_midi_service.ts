@@ -7,16 +7,17 @@ import {MidiEvent, MidiEventFull} from '~/core/modules/macro_module/macro_module
 
 export class BrowserMidiService implements MidiService {
     private midi!: typeof WebMidi;
-    private inputs: typeof WebMidi['inputs'] = [];
-    private outputs: typeof WebMidi['outputs'] = [];
+    private inputs: Record<string, typeof WebMidi['inputs'][0]> = {};
+    private outputs: Record<string, typeof WebMidi['outputs'][0]> = {};
 
     public onInputEvent = new Subject<MidiInputEventPayload>();
+    public onNewInputDevice = new Subject<{newDevice: string; allDevices: string[]}>();
 
     initialize = async () => {
         try {
             this.midi = await WebMidi.enable();
         } catch (e) {
-            alert('could nto enable midi: ' + e);
+            alert('couldnt enable midi: ' + e);
             return;
         }
 
@@ -25,21 +26,88 @@ export class BrowserMidiService implements MidiService {
         }
 
         for (const output of this.midi.outputs) {
-            // this.initializeMidiOutputDevice(output.name);
+            this.initializeMidiOutputDevice(output.name);
         }
+
+        this.pollForNewDevices();
     };
+
+    pollForNewDevices = async () => {
+        const pluggedInInputs = this.midi.inputs;
+        // console.log(pluggedInInputs);
+
+        for (const input of pluggedInInputs) {
+            // TODO: implement polling for new devices
+        }
+
+        setTimeout(this.pollForNewDevices, 5000);
+    }
+
+    private handleNewInput = (inputName: string) => {
+        // this.onNewInputDevice.next({newDevice: inputName, allDevices: this.getInputs()});
+    }
+
+    private handleNewOutput = (inputName: string) => {
+        // this.onNewInputDevice.next({newDevice: inputName, allDevices: this.getInputs()});
+    }
+
+    getInputs = (): string[] => {
+        return Object.keys(this.inputs);
+    }
+
+    getOutputs = (): string[] => {
+        return Object.keys(this.outputs);
+    }
+
+    private initializeMidiOutputDevice = (outputName: string) => {
+        try {
+            const existingOutput = this.outputs[outputName];
+
+            if (existingOutput) {
+                existingOutput?.close();
+            }
+
+            const output = this.midi.outputs.find(o => o.name === outputName)!;
+            this.outputs[outputName] = output;
+        } catch (e) {
+            console.error('failed to initialize midi input device', e);
+        }
+    }
+
+    public send = (outputName: string, event: MidiEvent) => {
+        const output = this.outputs[outputName];
+        if (!output) {
+            alert('no midi output found for name', outputName);
+            return;
+        }
+
+        if (event.type === 'noteon') {
+            // TODO: support sending multiple midi notes at once. webmidi library supports this it seems
+            output.sendNoteOn(event.number, {
+                channels: event.channel,
+                rawAttack: event.velocity,
+            });
+        } else if (event.type === 'noteoff') {
+            output.sendNoteOff(event.number, {
+                channels: event.channel,
+            });
+        } else if (event.type === 'cc') {
+            output.sendControlChange(event.number, event.value, {
+                channels: event.channel,
+            });
+        }
+    }
 
     private initializeMidiInputDevice = (inputName: string) => {
         try {
-            const existingInputIndex = this.inputs.findIndex(i => i.name === inputName);
+            const existingInput = this.inputs[inputName];
 
-            if (existingInputIndex !== -1) {
-                const existingInput = this.inputs[existingInputIndex];
+            if (existingInput) {
                 existingInput?.close();
-                this.inputs = [...this.inputs.slice(0, existingInputIndex), ...this.inputs.slice(existingInputIndex + 1)];
             }
 
             const input = this.midi.inputs.find(i => i.name === inputName)!;
+            this.inputs[inputName] = input;
 
             const publishMidiEvent = (event: MidiEvent) => {
                 const fullEvent: MidiEventFull = {
@@ -91,9 +159,6 @@ export class BrowserMidiService implements MidiService {
 
                 publishMidiEvent(midiEvent);
             });
-
-            this.inputs.push(input);
-            // console.log('initialized midi input:', input.name);
 
         } catch (e) {
             console.error('failed to initialize midi input device', e);

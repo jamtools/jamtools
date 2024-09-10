@@ -15,5 +15,7 @@ export type MidiInputEventPayload = MidiEventFull;
 export type MidiService = {
     onInputEvent: Subject<MidiInputEventPayload>;
     initialize: () => Promise<void>;
-    // getAvailableDevices: Subject<MidiInputEventPayload>;
+    getInputs: () => string[];
+    getOutputs: () => string[];
+    send: (outputName: string, event: MidiEvent) => void;
 }

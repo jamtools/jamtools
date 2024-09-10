@@ -92,11 +92,13 @@ export class JamToolsEngine {
 
         const mod = await Promise.resolve(cb(this.coreDeps, modDependencies));
 
+        const moduleAPI = new ModuleAPI(mod, 'engine', this.coreDeps, modDependencies);
+
         if (!isModuleEnabled(mod)) {
             return null;
         }
 
-        await mod.initialize?.();
+        await mod.initialize?.(moduleAPI);
 
         this.moduleRegistry.registerModule(mod);
 

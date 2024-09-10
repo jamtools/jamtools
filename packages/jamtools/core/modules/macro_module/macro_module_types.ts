@@ -1,5 +1,4 @@
 import {MIDI_NUMBER_TO_NOTE_NAME_MAPPINGS} from '~/core/constants/midi_number_to_note_name_mappings';
-import {MacroOptions} from '~/core/engine/register';
 
 export type MidiDeviceAndChannel = {
     device: string;
@@ -47,11 +46,6 @@ export type MacroConfigItemMusicalKeyboardOutput = {
 };
 
 export type MacroConfigItem<MacroTypeId extends keyof MacroTypeConfigs> = MacroTypeConfigs[MacroTypeId]['input'];
-
-export interface OutputMidiDevice {
-    send(midiEvent: MidiEvent): void;
-    initialize?: () => Promise<void>;
-}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MacroTypeConfigs {}

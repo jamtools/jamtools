@@ -3,15 +3,14 @@ import {Module} from '~/core/module_registry/module_registry';
 
 import {CoreDependencies, ModuleDependencies} from '~/core/types/module_types';
 import {MacroConfigItem, MacroTypeConfigs} from './macro_module_types';
-import {Subject} from 'rxjs';
 import {BaseModule, ModuleHookValue} from '../base_module/base_module';
 import {MacroPage} from './macro_page';
 import {CapturedRegisterMacroTypeCall, MacroAPI, MacroCallback, jamtools} from '~/core/engine/register';
 import {ModuleAPI} from '~/core/engine/module_api';
 
-import './macro_handlers/musical_keyboard_input_macro_handler';
-import './macro_handlers/midi_control_change_input_macro_handler';
-import '~/core/peripherals/outputs/soundfont_peripheral';
+import './macro_handlers/inputs/musical_keyboard_input_macro_handler';
+import './macro_handlers/inputs/midi_control_change_input_macro_handler';
+import './macro_handlers/outputs/musical_keyboard_output_macro_handler';
 
 type ModuleId = string;
 
@@ -114,8 +113,6 @@ export class MacroModule implements Module<MacroConfigState> {
         const result = await registeredMacroType[2](macroAPI, conf, fieldName);
         return result;
     };
-
-    subject: Subject<MacroConfigState> = new Subject();
 
     Provider: React.ElementType = BaseModule.Provider(this, macroContext);
     static use = BaseModule.useModule(macroContext);

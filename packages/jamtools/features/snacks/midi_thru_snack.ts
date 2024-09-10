@@ -10,7 +10,7 @@ jamtools.registerModule('midi_thru', {}, async (moduleAPI) => {
         macroModule.createMacro(moduleAPI, 'MIDI Output', 'musical_keyboard_output', {}),
     ]);
 
-    input.onEventSubject.subscribe(evt => {
+    input.subject.subscribe(evt => {
         output.send(evt.event);
     });
 });

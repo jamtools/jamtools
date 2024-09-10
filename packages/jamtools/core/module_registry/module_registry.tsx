@@ -1,10 +1,11 @@
 import React, {useEffect, useState} from 'react';
 
 import {Subject} from 'rxjs';
+import type {ModuleAPI} from '../engine/module_api';
 
 export type Module<State extends object = any> = {
     moduleId: string;
-    initialize?: () => void | Promise<void>;
+    initialize?: (moduleAPI: ModuleAPI) => void | Promise<void>;
     Provider?: React.ElementType;
     state?: State;
     subject?: Subject<State>;

@@ -113,8 +113,6 @@ export class WledModule implements Module<WledState> {
         }
     };
 
-    subject: Subject<WledState> = new Subject();
-
     Provider: React.ElementType = BaseModule.Provider(this, WledContext);
     static use = BaseModule.useModule(WledContext);
     private setState = BaseModule.setState(this);

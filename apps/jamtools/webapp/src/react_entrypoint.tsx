@@ -35,7 +35,7 @@ export const startJamToolsAndRenderApp = async (): Promise<JamToolsEngine> => {
         },
         kvStore,
         rpc,
-        isMaestro: () => false,
+        isMaestro: () => true,
     };
 
     const engine = new JamToolsEngine(coreDeps);

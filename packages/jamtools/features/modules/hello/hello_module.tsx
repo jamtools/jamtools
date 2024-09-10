@@ -1,7 +1,5 @@
 import React, {createContext} from 'react';
 
-import {Subject} from 'rxjs';
-
 import {CoreDependencies, ModuleDependencies} from '~/core/types/module_types';
 import {BaseModule, ModuleHookValue} from '../../../core/modules/base_module/base_module';
 import {Module} from '~/core/module_registry/module_registry';
@@ -64,8 +62,6 @@ export class HelloModule implements Module<HelloState> {
             hello: !this.state.hello,
         });
     };
-
-    subject: Subject<HelloState> = new Subject();
 
     Provider: React.ElementType = BaseModule.Provider(this, helloContext);
     static use = BaseModule.useModule(helloContext);

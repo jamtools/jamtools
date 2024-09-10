@@ -1,44 +1,14 @@
 import Soundfont from 'soundfont-player';
-import {jamtools} from '~/core/engine/register';
 
 import {MidiEvent, OutputMidiDevice, convertMidiNumberToNoteAndOctave} from '~/core/modules/macro_module/macro_module_types';
-import {CoreDependencies, ModuleDependencies} from '~/core/types/module_types';
 
 type HeldDownSoundfontNotes = {
     number: number;
     player: Soundfont.Player
 };
 
-declare module '~/core/modules/macro_module/macro_module_types' {
-    interface MacroTypeConfigs {
-        musical_keyboard_output: {
-            input: MusicalKeyboardOutputMacroConfig;
-            output: OutputMidiDevice;
-        }
-    }
-}
-
-type MusicalKeyboardOutputMacroConfig = object;
-
-// relocate this to musical_keyboard_output_macro_handler and support actually midi output
-// we'll need to show the available midi output devices
-// and also poll for newly connected ones
-// get toast working too. instead of alert
-// support broadcasting toasts
-jamtools.registerMacroType(
-    'musical_keyboard_output',
-    {x: ''},
-    (async (macroAPI, inputConf) => {
-        const soundfontResult = new SoundfontPeripheral();
-        await soundfontResult.initialize();
-        return soundfontResult;
-    }),
-);
-
 export class SoundfontPeripheral implements OutputMidiDevice {
-    constructor() {
-
-    }
+    constructor() { }
 
     soundfont?: Soundfont.Player;
 
@@ -53,7 +23,7 @@ export class SoundfontPeripheral implements OutputMidiDevice {
         // https://github.com/danigb/soundfont-player/blob/2b89587d7cc396c5c7b91056f8cb78831ead7436/dist/soundfont-player.js#L76
 
         if ('AudioContext' in globalThis) {
-            this.soundfont = await Soundfont.instrument(new AudioContext(), 'acoustic_grand_piano');
+            this.soundfont = await Soundfont.instrument(new AudioContext(), 'percussive_organ');
         }
     };
 
