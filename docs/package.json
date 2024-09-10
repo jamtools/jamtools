@@ -9,7 +9,8 @@
     "mkdocs": "mkdocs build",
     "mkdocs:watch": "mkdocs serve --dev-addr=0.0.0.0:8000 --watch typedoc_docs",
     "serve": "concurrently \"npm run typedoc:watch\" \"npm run mkdocs:watch\"",
-    "build": "npm run typedoc && npm run mkdocs"
+    "build": "npm run typedoc && npm run mkdocs",
+    "install-deps": "npm i && pip install mkdocs mkdocs-material"
   },
   "keywords": [],
   "author": "",
