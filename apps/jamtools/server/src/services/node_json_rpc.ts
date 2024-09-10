@@ -1,8 +1,7 @@
 import express from 'express';
 
-import {WebSocketServer, WebSocket} from 'ws';
+import {WebSocket} from 'ws';
 import {JSONRPCServer, JSONRPCClient, JSONRPCRequest} from 'json-rpc-2.0';
-import {ModuleDependencies, RpcArgs} from '~/core/types/module_types';
 
 export class NodeJsonRpcServer {
     rpcClient!: JSONRPCClient;
