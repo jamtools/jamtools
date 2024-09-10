@@ -1,6 +1,10 @@
 import {initApp} from '../express_app';
 
-const app = initApp();
-app.listen(1337, () => {
-    console.log('http://localhost:1337');
+
+const port = process.env.PORT || '1337';
+
+const app = initApp(port);
+
+app.listen(port, () => {
+    console.log(`http://localhost:${port}`);
 });

@@ -5,6 +5,8 @@
   "main": "index.js",
   "packageManager": "npm@10.2.4",
   "scripts": {
+    "start": "turbo run start",
+    "build": "turbo run build",
     "dev": "turbo run dev",
     "test": "turbo run test",
     "ci": "turbo run lint check-types build test --output-logs errors-only"

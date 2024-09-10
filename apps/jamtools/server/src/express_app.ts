@@ -1,21 +1,25 @@
 import path from 'path';
-import {WebSocketServer} from 'ws';
 
 import express from 'express';
+import expressWS from 'express-ws';
 
 import {NodeJsonRpcServer} from './services/node_json_rpc';
 
-export const initApp = () => {
+export const initApp = (port: string) => {
     const app = express();
+
+    const ws = expressWS(app);
 
     const router = express.Router();
 
     const webappFolder = path.join(__dirname, '../../webapp');
     const webappDistFolder = path.join(webappFolder, './dist');
 
-    const wss = new WebSocketServer({port: 8080});
-    const service = new NodeJsonRpcServer(wss);
-    service.initialize();
+    const service = new NodeJsonRpcServer();
+
+    ws.app.ws('/ws', (ws, req) => {
+        service.handleConnection(ws, req);
+    });
 
     router.get('/', (req, res) => {
         res.setHeader('Content-Type', 'text/html');

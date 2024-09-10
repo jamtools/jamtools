@@ -20,11 +20,13 @@ const waitForPageLoad = () => new Promise<void>(resolve => {
     });
 });
 
+const WS_HOST = process.env.WS_HOST || 'ws://jam.local:1337';
+
 export const startJamToolsAndRenderApp = async (): Promise<JamToolsEngine> => {
     const qwertyService = new BrowserQwertyService(document);
     const kvStore = new BrowserKVStoreService(localStorage);
     const midiService = new BrowserMidiService();
-    const rpc = new BrowserJsonRpcClientAndServer('ws://jam.local:8080');
+    const rpc = new BrowserJsonRpcClientAndServer(`${WS_HOST}/ws`);
 
     const coreDeps: CoreDependencies = {
         log: console.log,
