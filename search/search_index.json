@@ -1,0 +1,1 @@
+{"config":{"lang":["en"],"separator":"[\\s\\-]+","pipeline":["stopWordFilter"]},"docs":[{"location":"","title":"Welcome home","text":"<p>Come on in!</p> <p>Yay</p>"},{"location":"getting-started/configuration/","title":"Index","text":"<p>iwjfin</p>"}]}
