@@ -6,4 +6,4 @@ services:
       - ..:/app
     ports:
       - "8000:8000"
-    command: npm run serve
+    command: bash -c "npm run install-deps && npm run serve"

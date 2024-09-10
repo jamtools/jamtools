@@ -10,11 +10,15 @@ RUN apt-get update && apt-get install -y curl \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip install mkdocs mkdocs-material mkdocs-typedoc
+RUN pip install mkdocs mkdocs-material mkdocs-typedoc mkdocs-include-markdown-plugin
+
+RUN mkdir docs
 
 COPY .. .
 
 WORKDIR docs
+
+RUN npm i
 
 EXPOSE 8000
 

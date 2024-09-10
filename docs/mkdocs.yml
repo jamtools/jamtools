@@ -10,7 +10,11 @@ extra_css:
   - stylesheets/custom.css
 
 nav:
-  - Home: ./typedoc_docs/README.md
+  - Home: ./index.md
   - Developer Documentation:
     - Module API: ./typedoc_docs/module_api/classes/ModuleAPI.md
     - States API: ./typedoc_docs/module_api/classes/StatesAPI.md
+
+plugins:
+  - search
+  - include-markdown

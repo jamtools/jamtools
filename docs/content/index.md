@@ -1,5 +1,9 @@
-# Welcome home
+Developer Documentation
 
-Come on in!
+- [ModuleAPI](typedoc_docs/module_api/classes/ModuleAPI)
+- [StatesAPI](typedoc_docs/module_api/classes/StatesAPI)
 
-Yay
+{%
+    include-markdown "typedoc_docs/README.md"
+    heading-offset=1
+%}
