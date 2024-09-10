@@ -12,11 +12,11 @@ import {MidiService, QwertyService} from '~/core/types/io_types';
 const WS_HOST = process.env.WS_HOST || 'ws://jam.local:1337';
 
 export const startJamTools = async (): Promise<JamToolsEngine> => {
-    let qwertyService: QwertyService = {
+    const qwertyService: QwertyService = {
         onInputEvent: new Subject(),
     };
 
-    let midiService: MidiService = {
+    const midiService: MidiService = {
         getInputs: () => [],
         getOutputs: () => [],
         initialize: async () => {},
