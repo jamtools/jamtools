@@ -105,7 +105,7 @@ export class ModuleAPI {
 }
 
 /**
- * The States API is used for creating shared, persistent, and user-scoped states. Yay
+ * The States API is used for creating shared, persistent, and user-scoped states.
  * @see {@link https://github.com/your-repo/your-project/blob/main/src/MyClass.js}
  * @hideconstructor
 */
