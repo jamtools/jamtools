@@ -3,7 +3,7 @@ services:
   mkdocs:
     build: .
     volumes:
-      - .:/app
+      - ..:/app
     ports:
       - "8000:8000"
-    command: mkdocs serve --dev-addr=0.0.0.0:8000
+    command: npm run serve

@@ -5,8 +5,14 @@ import {RegisterRouteOptions} from './register';
 
 type ActionOptions = object;
 
-type ActionCallback<Args extends object, ReturnValue=any> = (args: Args) => Promise<ReturnValue>;
+/**
+ * The Action callback
+*/
+type ActionCallback<Args extends object, ReturnValue = any> = (args: Args) => Promise<ReturnValue>;
 
+/**
+ * The API provided in the callback when calling jamtools.registerModule. The ModuleAPI is the entrypoint in the framework for everything pertaining to creating a module.
+*/
 export class ModuleAPI {
     public deps: {core: CoreDependencies; module: ModuleDependencies};
     public moduleId: string;
@@ -17,8 +23,15 @@ export class ModuleAPI {
     }
 
     fullPrefix = `${this.prefix}|module|${this.module.moduleId}`;
-    states = new StatesAPI(this.fullPrefix, this.coreDeps, this.modDeps);
 
+    /**
+     * Create shared and persistent pieces of state, scoped to this specific module.
+    */
+    statesAPI = new StatesAPI(this.fullPrefix, this.coreDeps, this.modDeps);
+
+    /**
+     * Register a route with the application's React router. The route will be accessible from the browser at [myserver.com/modules/(module_id)/(route)](). The route will also be registered to the application's navigation bar.
+    */
     registerRoute = (routePath: string, options: RegisterRouteOptions, component: React.ElementType) => {
         const routes = this.module.routes || {};
         routes[routePath] = component;
@@ -28,6 +41,9 @@ export class ModuleAPI {
         }
     };
 
+    /**
+     * Create an action to be run on the Maestro device. If the produced action is called from the Maestro device, the framework just calls the provided callback. If it is called from another device, the framework calls the action via RPC to the Maestro device. In most cases, any main logic or calls to shared state changes should be done in an action.
+    */
     createAction = <Options extends ActionOptions, Args extends object, ReturnValue>(actionName: string, options: Options, cb: ActionCallback<Args, ReturnValue>): typeof cb => {
         const fullActionName = `${this.fullPrefix}|action|${actionName}`;
 
@@ -88,6 +104,11 @@ export class ModuleAPI {
     // states: StatesAPI;
 }
 
+/**
+ * The States API is used for creating shared, persistent, and user-scoped states. Yay
+ * @see {@link https://github.com/your-repo/your-project/blob/main/src/MyClass.js}
+ * @hideconstructor
+*/
 export class StatesAPI {
     constructor(private prefix: string, private coreDeps: CoreDependencies, private modDeps: ModuleDependencies) {
 

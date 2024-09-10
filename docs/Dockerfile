@@ -4,9 +4,17 @@ FROM python:3.9-slim
 
 WORKDIR /app
 
-RUN pip install mkdocs mkdocs-material
+RUN apt-get update && apt-get install -y curl \
+    && curl -fsSL https://deb.nodesource.com/setup_16.x | bash - \
+    && apt-get install -y nodejs \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-COPY . .
+RUN pip install mkdocs mkdocs-material mkdocs-typedoc
+
+COPY .. .
+
+WORKDIR docs
 
 EXPOSE 8000
 

@@ -1,0 +1,22 @@
+{
+  "name": "docs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "typedoc": "npx typedoc --out content/typedoc_docs",
+    "typedoc:watch": "npm run typedoc -- -watch",
+    "mkdocs": "mkdocs build",
+    "mkdocs:watch": "mkdocs serve --dev-addr=0.0.0.0:8000 --watch typedoc_docs",
+    "serve": "concurrently \"npm run typedoc:watch\" \"npm run mkdocs:watch\"",
+    "build": "npm run typedoc && npm run mkdocs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^9.0.0",
+    "typedoc": "^0.26.7",
+    "typedoc-plugin-markdown": "^4.2.7"
+  }
+}

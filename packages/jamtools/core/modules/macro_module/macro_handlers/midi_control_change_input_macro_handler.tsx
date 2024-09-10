@@ -37,10 +37,10 @@ const getKeyForMidiEvent = (event: MidiEventFull) => {
 jamtools.registerMacroType('midi_control_change_input', {}, async (macroAPI, conf, fieldName) => {
     const getKey = (key: string) => `macro|${fieldName}|${key}`;
 
-    const waitingForConfiguration = await macroAPI.moduleAPI.states.createSharedState(getKey('waiting_for_configuration'), false);
-    const capturedMidiEvent = await macroAPI.moduleAPI.states.createSharedState<MidiEventFull | null>(getKey('captured_midi_event'), null);
+    const waitingForConfiguration = await macroAPI.moduleAPI.statesAPI.createSharedState(getKey('waiting_for_configuration'), false);
+    const capturedMidiEvent = await macroAPI.moduleAPI.statesAPI.createSharedState<MidiEventFull | null>(getKey('captured_midi_event'), null);
 
-    const savedMidiEvents = await macroAPI.moduleAPI.states.createPersistentState<MidiEventFull[]>(getKey('saved_midi_event'), []);
+    const savedMidiEvents = await macroAPI.moduleAPI.statesAPI.createPersistentState<MidiEventFull[]>(getKey('saved_midi_event'), []);
 
     const subject = new Subject<MidiEventFull>();
 

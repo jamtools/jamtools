@@ -41,8 +41,8 @@ jamtools.registerMacroType(
     {},
     async (macroAPI, conf, fieldName): Promise<MusicalKeyboardInputResult> => {
         const id = 'macro|musical_keyboard_input|' + fieldName;
-        const dataService = await macroAPI.moduleAPI.states.createPersistentState<MusicalKeyboardInputHandlerSavedData>(id, {});
-        const localQwertyData = await macroAPI.moduleAPI.states.createSharedState<LocalState>(id, {});
+        const dataService = await macroAPI.moduleAPI.statesAPI.createPersistentState<MusicalKeyboardInputHandlerSavedData>(id, {});
+        const localQwertyData = await macroAPI.moduleAPI.statesAPI.createSharedState<LocalState>(id, {});
 
         const onSelectedMidiMacroToggle = async (midiDeviceName: string, midiChannel: number) => {
             const newPersistentState = {...dataService.getState()};
