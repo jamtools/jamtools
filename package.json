@@ -10,7 +10,7 @@
     "dev": "turbo run dev",
     "test": "turbo run test",
     "ci": "turbo run lint check-types build test --output-logs errors-only",
-    "heroku-postbuild": "NODE_ENV=development npm i && NODE_ENV=production npm run build"
+    "heroku-postbuild": "npm i -g turbo && NODE_ENV=development npm i && NODE_ENV=production npm run build"
   },
   "keywords": [],
   "author": "",
