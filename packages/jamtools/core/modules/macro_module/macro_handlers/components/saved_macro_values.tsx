@@ -1,9 +1,6 @@
-import React from "react";
-import {MidiEventFull} from "~/core/modules/macro_module/macro_module_types";
-import {getKeyForMidiEvent} from '../macro_handler_utils';
-
+import React from 'react';
 import {MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
-
+import {getKeyForMidiEvent} from '../macro_handler_utils';
 
 export type SavedMacroValues = {
     saved: MidiEventFull[];

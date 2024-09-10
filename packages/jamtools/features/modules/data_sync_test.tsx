@@ -4,12 +4,6 @@ import {jamtools} from '~/core/engine/register';
 
 // import {GuitarComponent} from './song_structures/components/guitar';
 
-type TestPersistentState = {
-    myvalue: string;
-}
-
-const randomString = () => Math.random().toString().slice(2, 4);
-
 jamtools.registerModule('data_sync_test', {}, async (moduleAPI) => {
     const sliderPositionState1 = await moduleAPI.statesAPI.createSharedState('slider_position_1', 0);
     const sliderPositionState2 = await moduleAPI.statesAPI.createSharedState('slider_position_2', 0);
@@ -30,10 +24,10 @@ jamtools.registerModule('data_sync_test', {}, async (moduleAPI) => {
         }),
     });
 
-    const handleSliderDrag = (index: 0 | 1, value: number) => {
-        const state = [sliderPositionState1, sliderPositionState2][index];
-        state.setState(value);
-    }
+    const handleSliderDrag = moduleAPI.createAction('slider_drag', {}, async (args: {index: 0 | 1, value: number}) => {
+        const state = [sliderPositionState1, sliderPositionState2][args.index];
+        state.setState(args.value);
+    });
 
     moduleAPI.registerRoute('/', {}, () => {
         const sliderPosition1 = sliderPositionState1.useState();
@@ -43,7 +37,7 @@ jamtools.registerModule('data_sync_test', {}, async (moduleAPI) => {
             <DataSyncRootRoute
                 sliderPosition1={sliderPosition1}
                 sliderPosition2={sliderPosition2}
-                handleSliderDrag={handleSliderDrag}
+                handleSliderDrag={(index, value) => handleSliderDrag({index, value})}
             />
         );
     });
@@ -80,6 +74,7 @@ const DataSyncRootRoute = ({sliderPosition1, sliderPosition2, handleSliderDrag}:
             style={{
                 display: 'inline-block',
                 width: '400px',
+                maxWidth: '50%'
             }}
         >
             <img

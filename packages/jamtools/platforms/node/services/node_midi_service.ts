@@ -24,6 +24,14 @@ export class NodeMidiService implements MidiService {
         }
     };
 
+    getInputs = () => {
+        return this.inputs.map(i => i.name);
+    };
+
+    getOutputs = () => {
+        return this.outputs.map(o => o.name);
+    };
+
     private initializeMidiInputDevice = (inputName: string) => {
         try {
             const existingInputIndex = this.inputs.findIndex(i => i.name === inputName);

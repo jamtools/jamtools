@@ -29,14 +29,6 @@ export class ModuleRegistry {
         this.refreshModules();
     }
 
-    async registerAndInitializeModule(mod: Module<any>) {
-        this.modules.push(mod);
-        this.modulesByKey[mod.moduleId] = mod;
-        await mod.initialize?.();
-
-        this.refreshModules();
-    }
-
     getModule<ModuleId extends keyof AllModules>(moduleId: ModuleId): AllModules[ModuleId] {
         return this.modulesByKey[moduleId] as AllModules[ModuleId];
     }

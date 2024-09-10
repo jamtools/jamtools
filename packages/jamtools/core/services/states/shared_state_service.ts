@@ -74,7 +74,7 @@ export class SharedStateService {
     };
 
     private receiveRpcSetSharedState = async (args: SharedStateMessage) => {
-        console.log('received shared state', JSON.stringify(args));
+        // console.log('received shared state', JSON.stringify(args));
 
         const subscriptions = this.subscriptions[args.key];
         if (!subscriptions) {

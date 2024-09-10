@@ -11,7 +11,7 @@ jamtools.registerModule('phone_jam', {}, async (moduleAPI) => {
         setTimeout(() => {
             outputMacro.send({type: 'noteoff', channel: 0, number: 36});
         }, 100);
-    }
+    };
 
     moduleAPI.registerRoute('/', {}, () => {
         return (

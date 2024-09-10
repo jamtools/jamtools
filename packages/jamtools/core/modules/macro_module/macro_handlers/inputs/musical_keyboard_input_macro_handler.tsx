@@ -123,7 +123,7 @@ export const getKeyForInputDevice = (event: MidiEventFull) => {
 
 const savedMidiInputsAreEqual = (event1: MidiEventFull, event2: MidiEventFull): boolean => {
     return getKeyForInputDevice(event1) === getKeyForInputDevice(event2);
-}
+};
 
 const qwertyEventToMidiEvent = (event: QwertyCallbackPayload, localStateService: SharedStateSupervisor<LocalState>): MidiEventFull | undefined => {
     const midiNumber = QWERTY_TO_MIDI_MAPPINGS[event.key as keyof typeof QWERTY_TO_MIDI_MAPPINGS];

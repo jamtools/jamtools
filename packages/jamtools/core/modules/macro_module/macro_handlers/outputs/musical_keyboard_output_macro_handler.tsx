@@ -105,7 +105,7 @@ jamtools.registerMacroType(
             if (confirm('delete thing ' + device.device + '|' + device.channel)) {
                 onConfirmDeleteSavedDevice(device);
             }
-        }
+        };
 
         const onEdit = createAction('begin_edit', () => {
             editingState.setState(true);
@@ -154,7 +154,7 @@ jamtools.registerMacroType(
                     channel: device.channel,
                 });
             }
-        }
+        };
 
         return {
             send,
@@ -184,7 +184,7 @@ const Edit = (props: EditProps) => {
                 <button
                     type='button'
                     onClick={props.onEdit}
-                    >
+                >
                     Edit
                 </button>
                 {props.savedDevices.length}

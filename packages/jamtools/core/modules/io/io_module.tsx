@@ -71,7 +71,7 @@ export class IoModule implements Module<IoState> {
 
     public sendMidiEvent = (outputName: string, midiEvent: MidiEvent) => {
         this.coreDeps.inputs.midi.send(outputName, midiEvent);
-    }
+    };
 
     onNewMidiDeviceFound = (deviceInfo: {name: string}) => {
         const existsInConfig = false;

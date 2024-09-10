@@ -41,23 +41,23 @@ export class BrowserMidiService implements MidiService {
         }
 
         setTimeout(this.pollForNewDevices, 5000);
-    }
+    };
 
     private handleNewInput = (inputName: string) => {
         // this.onNewInputDevice.next({newDevice: inputName, allDevices: this.getInputs()});
-    }
+    };
 
     private handleNewOutput = (inputName: string) => {
         // this.onNewInputDevice.next({newDevice: inputName, allDevices: this.getInputs()});
-    }
+    };
 
     getInputs = (): string[] => {
         return Object.keys(this.inputs);
-    }
+    };
 
     getOutputs = (): string[] => {
         return Object.keys(this.outputs);
-    }
+    };
 
     private initializeMidiOutputDevice = (outputName: string) => {
         try {
@@ -72,7 +72,7 @@ export class BrowserMidiService implements MidiService {
         } catch (e) {
             console.error('failed to initialize midi input device', e);
         }
-    }
+    };
 
     public send = (outputName: string, event: MidiEvent) => {
         const output = this.outputs[outputName];
@@ -96,7 +96,7 @@ export class BrowserMidiService implements MidiService {
                 channels: event.channel,
             });
         }
-    }
+    };
 
     private initializeMidiInputDevice = (inputName: string) => {
         try {
