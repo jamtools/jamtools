@@ -1,6 +1,7 @@
 {
   "name": "jamtools-node",
   "scripts": {
+    "start": "node dist/local-server.js",
     "build:watch": "nodemon dist/local-server.js",
     "run:watch": "npm run build-local-server -- --watch",
     "dev": "npm-run-all --parallel build:watch run:watch",
