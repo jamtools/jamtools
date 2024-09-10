@@ -18,7 +18,7 @@ describe('MusicalKeyboardInputMacroHandler', () => {
         await engine.initialize();
 
         const mod = await engine.registerModule('Test_MusicalKeyboardInputMacro', {}, async (moduleAPI) => {
-            const state = await moduleAPI.states.createSharedState('hey', {yep: 'yeah'});
+            const state = await moduleAPI.statesAPI.createSharedState('hey', {yep: 'yeah'});
             return {
                 state,
             };

@@ -1,0 +1,18 @@
+{
+    "entryPoints": [
+        "../packages/jamtools/core/engine/module_api.ts",
+        "../packages/jamtools/core/engine/register.ts",
+    ],
+    "entryPointStrategy": "expand",
+    "tsconfig": "../packages/jamtools/tsconfig.json",
+    // "entryPoints": ["src/index.ts"], // Adjust to your entry point files
+    // "out": "docs/typedoc_docs", // Set the output directory within your MkDocs docs folder
+    "plugin": ["typedoc-plugin-markdown"], // Specify the markdown plugin
+    // "entryPointStrategy": "resolve", // Ensure correct handling of entry points
+    // "excludeExternals": true, // Optional: exclude external libraries from documentation
+    // "excludePrivate": true, // Optional: exclude private members
+    // "excludeProtected": true // Optional: exclude protected members
+    "excludeNotDocumented": true, // Excludes items without JSDoc comments
+    "excludePrivate": true, // Optional: Excludes private members
+    // "excludeProtected": true // Optional: Excludes protected members
+}

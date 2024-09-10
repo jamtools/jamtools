@@ -11,13 +11,13 @@ type TestPersistentState = {
 const randomString = () => Math.random().toString().slice(2, 4);
 
 jamtools.registerModule('data_sync_test', {}, async (moduleAPI) => {
-    const myState = await moduleAPI.states.createPersistentState<TestPersistentState>(
+    const myState = await moduleAPI.statesAPI.createPersistentState<TestPersistentState>(
         'my_persistent_state',
         {myvalue: '50'},
     );
 
-    const sliderPositionState1 = await moduleAPI.states.createSharedState('slider_position_1', 0);
-    const sliderPositionState2 = await moduleAPI.states.createSharedState('slider_position_2', 0);
+    const sliderPositionState1 = await moduleAPI.statesAPI.createSharedState('slider_position_1', 0);
+    const sliderPositionState2 = await moduleAPI.statesAPI.createSharedState('slider_position_2', 0);
 
     const myAction = moduleAPI.createAction('change_persistent', {}, async () => {
         myState.setState({myvalue: randomString()});

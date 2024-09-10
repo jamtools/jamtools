@@ -14,7 +14,7 @@ jamtools.registerModule('root_mode_module', {}, async (moduleAPI) => {
     // C major on page load
     let scale = 0;
 
-    const rootModeState = await moduleAPI.states.createSharedState<State>('state', {chord: null, scale});
+    const rootModeState = await moduleAPI.statesAPI.createSharedState<State>('state', {chord: null, scale});
 
     const setScale = (newScale: number) => {
         scale = newScale;
