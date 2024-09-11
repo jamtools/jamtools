@@ -9,6 +9,7 @@ jamtools.registerModule('data_sync_test', {}, async (moduleAPI) => {
     const sliderPositionState2 = await moduleAPI.statesAPI.createSharedState('slider_position_2', 0);
 
     moduleAPI.deps.module.moduleRegistry.getModule('macro').createMacro(moduleAPI, 'test_cc_1', 'midi_control_change_input', {
+        allowLocal: true,
         onTrigger: (event => {
             if (event.event.value) {
                 sliderPositionState1.setState(event.event.value);
@@ -17,6 +18,7 @@ jamtools.registerModule('data_sync_test', {}, async (moduleAPI) => {
     });
 
     moduleAPI.deps.module.moduleRegistry.getModule('macro').createMacro(moduleAPI, 'test_cc_2', 'midi_control_change_input', {
+        allowLocal: true,
         onTrigger: (event => {
             if (event.event.value) {
                 sliderPositionState2.setState(event.event.value);

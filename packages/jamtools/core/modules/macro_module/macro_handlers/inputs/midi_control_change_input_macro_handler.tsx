@@ -7,6 +7,7 @@ import {getKeyForMacro, MacroStateHolders, useMacroWaiterAndSaver, savedMidiEven
 
 type MacroConfigItemMidiControlChangeInput = {
     onTrigger?(midiEvent: MidiEventFull): void;
+    allowLocal?: boolean;
 }
 
 export type MidiControlChangeInputResult = {
@@ -39,7 +40,7 @@ jamtools.registerMacroType('midi_control_change_input', {}, async (macroAPI, con
 
     const macroReturnValue = await useMacroWaiterAndSaver(macroAPI, states, {}, fieldName, savedMidiEventsAreEqual);
 
-    if (!macroAPI.moduleAPI.deps.core.isMaestro()) {
+    if (!macroAPI.moduleAPI.deps.core.isMaestro() && !conf.allowLocal) {
         return macroReturnValue;
     }
 

@@ -6,7 +6,7 @@ import {MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
 import {SharedStateSupervisor} from '~/core/services/states/shared_state_service';
 
 import {Edit} from './components/edit_macro';
-import {MidiControlChangeInputResult} from './midi_control_change_input_macro_handler';
+import type {MidiControlChangeInputResult} from './inputs/midi_control_change_input_macro_handler';
 
 export const savedMidiEventsAreEqual = (event1: MidiEventFull, event2: MidiEventFull): boolean => {
     const key1 = getKeyForMidiEvent(event1);
