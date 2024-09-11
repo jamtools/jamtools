@@ -51,7 +51,7 @@ export class NodeJsonRpcClientAndServer implements Rpc {
     };
 
     callRpc = async <Return, Args>(method: string, args: Args): Promise<Return> => {
-        console.log('calling rpc', method, JSON.stringify(args));
+        // console.log('calling rpc', method, JSON.stringify(args));
 
         const params = {clientId: this.clientId};
         const result = await this.rpcClient.request(method, args, params);

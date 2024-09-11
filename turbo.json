@@ -3,7 +3,8 @@
     "tasks": {
       "build": {
         "dependsOn": ["^build"],
-        "outputs": ["dist"]
+        "outputs": ["dist"],
+        "env": ["WS_HOST"]
       },
       "check-types": {
         "dependsOn": ["^check-types"]
@@ -20,6 +21,11 @@
       "dev": {
         "persistent": true,
         "cache": false
+      },
+      "start": {
+        "persistent": true,
+        "cache": false,
+        "env": ["PORT"]
       }
     }
   }

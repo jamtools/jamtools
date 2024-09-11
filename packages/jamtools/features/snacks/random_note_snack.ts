@@ -12,7 +12,7 @@ jamtools.registerModule('random_note', {}, async (moduleAPI) => {
     const playRandomNote = () => {
         const randomNumber = Math.random();
         const scaled = Math.round(randomNumber * 48);
-        const inOctave = scaled + 12;
+        const inOctave = scaled + 36;
 
         const randomVelocity = Math.floor(Math.random() * 128);
 
@@ -45,7 +45,7 @@ jamtools.registerModule('random_note', {}, async (moduleAPI) => {
         clearInterval(currentInterval);
     };
 
-    inputTrigger.onEventSubject.subscribe((evt) => {
+    inputTrigger.subject.subscribe((evt) => {
         if (evt.event.type !== 'noteon') {
             return;
         }

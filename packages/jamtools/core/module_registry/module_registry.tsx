@@ -1,10 +1,11 @@
 import React, {useEffect, useState} from 'react';
 
 import {Subject} from 'rxjs';
+import type {ModuleAPI} from '../engine/module_api';
 
 export type Module<State extends object = any> = {
     moduleId: string;
-    initialize?: () => void | Promise<void>;
+    initialize?: (moduleAPI: ModuleAPI) => void | Promise<void>;
     Provider?: React.ElementType;
     state?: State;
     subject?: Subject<State>;
@@ -24,14 +25,6 @@ export class ModuleRegistry {
     registerModule(mod: Module<any>) {
         this.modules.push(mod);
         this.modulesByKey[mod.moduleId] = mod;
-
-        this.refreshModules();
-    }
-
-    async registerAndInitializeModule(mod: Module<any>) {
-        this.modules.push(mod);
-        this.modulesByKey[mod.moduleId] = mod;
-        await mod.initialize?.();
 
         this.refreshModules();
     }

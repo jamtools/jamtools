@@ -1,5 +1,5 @@
 import {Subject} from 'rxjs';
-import {MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
+import {MidiEvent, MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
 import {MidiService, QwertyCallbackPayload, QwertyService} from '../types/io_types';
 import {CoreDependencies, KVStore, Rpc, RpcArgs} from '../types/module_types';
 
@@ -7,6 +7,10 @@ class MockMidiService implements MidiService {
     onInputEvent = new Subject<MidiEventFull>();
 
     initialize = async () => {};
+
+    getInputs = () => [];
+    getOutputs = () => [];
+    send = (outputName: string, event: MidiEvent) => {};
 }
 
 class MockQwertyService implements QwertyService {
