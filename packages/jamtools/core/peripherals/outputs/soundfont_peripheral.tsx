@@ -1,13 +1,13 @@
 import Soundfont from 'soundfont-player';
 
-import {MidiEvent, OutputMidiDevice, convertMidiNumberToNoteAndOctave} from '~/core/modules/macro_module/macro_module_types';
+import {MidiEvent, convertMidiNumberToNoteAndOctave} from '~/core/modules/macro_module/macro_module_types';
 
 type HeldDownSoundfontNotes = {
     number: number;
     player: Soundfont.Player
 };
 
-export class SoundfontPeripheral implements OutputMidiDevice {
+export class SoundfontPeripheral {
     constructor() { }
 
     soundfont?: Soundfont.Player;

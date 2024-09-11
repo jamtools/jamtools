@@ -20,7 +20,7 @@ const waitForPageLoad = () => new Promise<void>(resolve => {
     });
 });
 
-const WS_HOST = process.env.WS_HOST || 'ws://jam.local:1337';
+const WS_HOST = process.env.WS_HOST || `ws://${location.host}`;
 
 export const startJamToolsAndRenderApp = async (): Promise<JamToolsEngine> => {
     const qwertyService = new BrowserQwertyService(document);

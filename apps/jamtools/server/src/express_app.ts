@@ -32,6 +32,30 @@ export const initApp = (port: string) => {
         res.sendFile('index.js', { root: webappDistFolder });
     });
 
+    router.post('/v1/traces', express.json(), async (req, res) => {
+        const host = process.env.OTEL_HOST;
+        if (!host) {
+            res.json({message: 'No otel host set up via env var'});
+            return;
+        }
+
+        try {
+            const response = await fetch(`${host}/v1/traces`, {
+                method: 'POST',
+                body: JSON.stringify(req.body),
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                signal: AbortSignal.timeout(1000),
+            });
+
+            const responseText = await response.text();
+            res.send(responseText);
+        } catch (e) {
+            res.json({message: 'failed to contact otel host'});
+        }
+    });
+
     router.get('*', (req, res) => {
         res.setHeader('Content-Type', 'text/html');
         res.sendFile('index.html', { root: webappFolder });

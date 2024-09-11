@@ -1,5 +1,5 @@
 import {Subject} from 'rxjs';
-import {MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
+import {MidiEvent, MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
 
 export type QwertyCallbackPayload = {
     event: 'keydown' | 'keyup';
