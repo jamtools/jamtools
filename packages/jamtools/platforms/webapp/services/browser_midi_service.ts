@@ -15,9 +15,11 @@ export class BrowserMidiService implements MidiService {
 
     initialize = async () => {
         try {
-            this.midi = await WebMidi.enable();
+            this.midi = await WebMidi.enable({
+                sysex: false,
+            });
         } catch (e) {
-            alert('couldnt enable midi: ' + e);
+            console.error('couldnt enable midi: ' + e);
             return;
         }
 
@@ -77,7 +79,7 @@ export class BrowserMidiService implements MidiService {
     public send = (outputName: string, event: MidiEvent) => {
         const output = this.outputs[outputName];
         if (!output) {
-            alert('no midi output found for name', outputName);
+            alert('no midi output found for name ' + outputName);
             return;
         }
 
