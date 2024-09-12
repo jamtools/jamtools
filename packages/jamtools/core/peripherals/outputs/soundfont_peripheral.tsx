@@ -23,7 +23,11 @@ export class SoundfontPeripheral {
         // https://github.com/danigb/soundfont-player/blob/2b89587d7cc396c5c7b91056f8cb78831ead7436/dist/soundfont-player.js#L76
 
         if ('AudioContext' in globalThis) {
-            this.soundfont = await Soundfont.instrument(new AudioContext(), 'percussive_organ');
+            try {
+                this.soundfont = await Soundfont.instrument(new AudioContext(), 'percussive_organ');
+            } catch (e) {
+                console.error(e);
+            }
         }
     };
 

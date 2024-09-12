@@ -142,7 +142,9 @@ jamtools.registerMacroType(
         };
 
         const soundfontResult = new SoundfontPeripheral();
-        await soundfontResult.initialize();
+        setTimeout(() => {
+            soundfontResult.initialize();
+        });
 
         const send = (midiEvent: MidiEvent) => {
             soundfontResult.send(midiEvent);
