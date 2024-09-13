@@ -14,6 +14,7 @@ export interface OutputMidiDevice {
 
 import {SoundfontPeripheral} from '~/core/peripherals/outputs/soundfont_peripheral';
 import {getKeyForMacro} from '../macro_handler_utils';
+import {Button} from '~/core/components/Button';
 
 type MusicalKeyboardOutputMacroConfig = {
     allowLocal?: boolean;
@@ -183,12 +184,11 @@ const Edit = (props: EditProps) => {
     if (!props.editing) {
         return (
             <div>
-                <button
-                    type='button'
+                <Button
                     onClick={props.onEdit}
                 >
                     Edit
-                </button>
+                </Button>
                 {props.savedDevices.length}
             </div>
         );
@@ -196,12 +196,11 @@ const Edit = (props: EditProps) => {
 
     return (
         <div>
-            <button
-                type='button'
+            <Button
                 onClick={props.onCancelEdit}
             >
                 Cancel
-            </button>
+            </Button>
             <div>
                 Saved outputs:
                 <ul>
@@ -239,12 +238,11 @@ const Edit = (props: EditProps) => {
                         </div>
                         <div>
                             {Boolean(props.queuedDevice.channel) && (
-                                <button
-                                    type='button'
+                                <Button
                                     onClick={() => props.onConfirmChannel()}
                                 >
                                     Confirm
-                                </button>
+                                </Button>
                             )}
                         </div>
                     </div>

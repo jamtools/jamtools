@@ -1,6 +1,7 @@
 import React from 'react';
 
 import {jamtools} from '~/core/engine/register';
+import {Button} from '~/core/components/Button';
 
 jamtools.registerModule('phone_jam', {}, async (moduleAPI) => {
     const outputMacro = await moduleAPI.deps.module.moduleRegistry.getModule('macro').createMacro(moduleAPI, 'local_output', 'musical_keyboard_output', {allowLocal: true});
@@ -34,12 +35,11 @@ const PhoneJamView = (props: PhoneJamViewProps) => {
             </h1>
 
             <div>
-                <button
-                    type='button'
+                <Button
                     onClick={props.onClickPlaySound}
                 >
                     Play sound
-                </button>
+                </Button>
             </div>
         </div>
     );

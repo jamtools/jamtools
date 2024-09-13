@@ -20,8 +20,6 @@ export const Layout = (props: Props) => {
     );
 };
 
-import SlButton from '@shoelace-style/shoelace/dist/react/button/index.js';
-
 let darkMode = false;
 if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
     darkMode = true;
@@ -54,9 +52,9 @@ const ToggleThemeButton = () => {
     };
 
     return (
-        <SlButton onClick={onClick}>
+        <Button onClick={onClick}>
             Toggle theme
-        </SlButton>
+        </Button>
     );
 };
 
@@ -64,6 +62,7 @@ import SlTab from '@shoelace-style/shoelace/dist/react/tab/index.js';
 import SlTabGroup from '@shoelace-style/shoelace/dist/react/tab-group/index.js';
 import SlTabPanel from '@shoelace-style/shoelace/dist/react/tab-panel/index.js';
 import {Module} from '~/core/module_registry/module_registry';
+import {Button} from '~/core/components/Button';
 
 type TabsProps = {
     modules: Module[];
