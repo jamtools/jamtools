@@ -2,9 +2,11 @@ import {Subject} from 'rxjs';
 
 import {CoreDependencies} from '~/core/types/module_types';
 
-// import {NodeQwertyService} from '~/platforms/node/services/node_qwerty_service';
+import {TrpcKVStoreService} from '~/core/services/trpc_kv_store_client';
+
+import {NodeQwertyService} from '~/platforms/node/services/node_qwerty_service';
 import {NodeKVStoreService} from '~/platforms/node/services/node_kvstore_service';
-// import {NodeMidiService} from '~/platforms/node/services/node_midi_service';
+import {NodeMidiService} from '~/platforms/node/services/node_midi_service';
 import {NodeJsonRpcClientAndServer} from '~/platforms/node/services/node_json_rpc';
 import {JamToolsEngine} from '~/core/engine/engine';
 import {MidiService, QwertyService} from '~/core/types/io_types';
@@ -12,11 +14,11 @@ import {MidiService, QwertyService} from '~/core/types/io_types';
 const WS_HOST = process.env.WS_HOST || 'ws://jam.local:1337';
 
 export const startJamTools = async (): Promise<JamToolsEngine> => {
-    const qwertyService: QwertyService = {
+    let qwertyService: QwertyService = {
         onInputEvent: new Subject(),
     };
 
-    const midiService: MidiService = {
+    let midiService: MidiService = {
         getInputs: () => [],
         getOutputs: () => [],
         initialize: async () => {},
@@ -24,12 +26,13 @@ export const startJamTools = async (): Promise<JamToolsEngine> => {
         send: () => {},
     };
 
-    if (!process.env.DISABLE_IO) {
-        // midiService = new NodeMidiService();
-        // qwertyService = new NodeQwertyService();
+    if (process.env.DISABLE_IO !== 'true') {
+        midiService = new NodeMidiService();
+        qwertyService = new NodeQwertyService();
     }
 
-    const kvStore = new NodeKVStoreService('persistent');
+    const kvStore = new TrpcKVStoreService('http://localhost:1337');
+    // const kvStore = new NodeKVStoreService('persistent');
 
     const sessionStore = new NodeKVStoreService('session');
     const rpc = new NodeJsonRpcClientAndServer(`${WS_HOST}/ws?is_maestro=true`, sessionStore);

@@ -3,9 +3,12 @@ import path from 'path';
 import express from 'express';
 import expressWS from 'express-ws';
 
-import {NodeJsonRpcServer} from './services/node_json_rpc';
+import * as trpcExpress from '@trpc/server/adapters/express';
 
-export const initApp = (port: string) => {
+import {NodeJsonRpcServer} from './services/node_json_rpc';
+import {WebsocketServerCoreDependencies} from '~/platforms/ws/ws_server_core_dependencies';
+
+export const initApp = (coreDeps: WebsocketServerCoreDependencies) => {
     const app = express();
 
     const ws = expressWS(app);
@@ -23,13 +26,13 @@ export const initApp = (port: string) => {
 
     router.get('/', (req, res) => {
         res.setHeader('Content-Type', 'text/html');
-        res.sendFile('index.html', { root: webappFolder });
+        res.sendFile('index.html', {root: webappFolder});
     });
 
     router.get('/dist/index.js', (req, res) => {
         res.setHeader('Content-Type', 'application/javascript');
         console.log(webappDistFolder);
-        res.sendFile('index.js', { root: webappDistFolder });
+        res.sendFile('index.js', {root: webappDistFolder});
     });
 
     router.post('/v1/traces', express.json(), async (req, res) => {
@@ -56,9 +59,22 @@ export const initApp = (port: string) => {
         }
     });
 
+    const createContext = ({
+        req,
+        res,
+    }: trpcExpress.CreateExpressContextOptions) => ({});
+
+    router.use(
+        '/trpc',
+        trpcExpress.createExpressMiddleware({
+            router: coreDeps.kvTrpcRouter,
+            createContext,
+        }),
+    );
+
     router.get('*', (req, res) => {
         res.setHeader('Content-Type', 'text/html');
-        res.sendFile('index.html', { root: webappFolder });
+        res.sendFile('index.html', {root: webappFolder});
     });
 
     app.use(router);

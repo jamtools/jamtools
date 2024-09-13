@@ -6,7 +6,7 @@
     "run:watch": "npm run build-local-server -- --watch",
     "dev": "npm-run-all --parallel build:watch run:watch",
     "build": "npm run build-local-server",
-    "build-local-server": "esbuild src/entrypoints/local-server.entrypoint.ts --outfile=dist/local-server.js --bundle --platform=node",
+    "build-local-server": "esbuild src/entrypoints/local-server.entrypoint.ts --outfile=dist/local-server.js --bundle --platform=node --external:better-sqlite3",
     "check-types": "tsc --noEmit",
     "lint": "eslint --ext ts --ext tsx src/",
     "fix": "npm run lint -- --fix"

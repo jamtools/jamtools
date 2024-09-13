@@ -1,10 +1,15 @@
+import {makeWebsocketServerCoreDependenciesWithSqlite} from '~/platforms/ws/ws_server_core_dependencies';
+
 import {initApp} from '../express_app';
 
+setTimeout(async () => {
+    const coreDeps = await makeWebsocketServerCoreDependenciesWithSqlite();
 
-const port = process.env.PORT || '1337';
+    const app = initApp(coreDeps);
 
-const app = initApp(port);
+    const port = process.env.PORT || '1337';
 
-app.listen(port, () => {
-    console.log(`http://localhost:${port}`);
+    app.listen(port, () => {
+        console.log(`http://localhost:${port}`);
+    });
 });

@@ -3,10 +3,12 @@
   "scripts": {
     "start": "node dist/local-server.js",
     "run:watch": "nodemon dist/local-server.js",
+    "run:debug": "node --watch --inspect-brk=9229 dist/local-server.js",
     "build:watch": "npm run build-local-server -- --watch",
     "dev": "npm-run-all --parallel build:watch run:watch",
+    "debug": "npm-run-all --parallel build:watch run:debug",
     "build": "npm run build-local-server",
-    "build-local-server": "esbuild src/index.ts --outfile=dist/local-server.js --bundle --platform=node --external:@julusian/midi --external:easymidi --define:process.env.WS_HOST=\"'$WS_HOST'\" --define:process.env.DISABLE_IO=\"'$DISABLE_IO'\"",
+    "build-local-server": "esbuild src/index.ts --outfile=dist/local-server.js --bundle --sourcemap --platform=node --external:@julusian/midi --external:easymidi --define:process.env.WS_HOST=\"'$WS_HOST'\" --define:process.env.DISABLE_IO=\"'$DISABLE_IO'\"",
     "check-types": "tsc --noEmit",
     "lint": "eslint --ext ts --ext tsx src/",
     "fix": "npm run lint -- --fix"

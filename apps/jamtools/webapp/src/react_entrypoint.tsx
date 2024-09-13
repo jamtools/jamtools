@@ -7,6 +7,8 @@ setBasePath('https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.16.0/cdn/')
 
 import {CoreDependencies} from '~/core/types/module_types';
 
+import {TrpcKVStoreService} from '~/core/services/trpc_kv_store_client';
+
 import {Main} from './main';
 import {BrowserQwertyService} from '~/platforms/webapp/services/browser_qwerty_service';
 import {BrowserKVStoreService} from '~/platforms/webapp/services/browser_kvstore_service';
@@ -24,9 +26,11 @@ const WS_HOST = process.env.WS_HOST || `ws://${location.host}`;
 
 export const startJamToolsAndRenderApp = async (): Promise<JamToolsEngine> => {
     const qwertyService = new BrowserQwertyService(document);
-    const kvStore = new BrowserKVStoreService(localStorage);
     const midiService = new BrowserMidiService();
     const rpc = new BrowserJsonRpcClientAndServer(`${WS_HOST}/ws`);
+
+    // const kvStore = new BrowserKVStoreService(localStorage);
+    const kvStore = new TrpcKVStoreService('http://localhost:1337');
 
     const coreDeps: CoreDependencies = {
         log: console.log,
