@@ -1,16 +1,1 @@
-/** @type {import('ts-jest').JestConfigWithTsJest} */
-module.exports = {
-    preset: 'ts-jest',
-    testEnvironment: 'jsdom',
-    moduleNameMapper: {
-      "\\.(css)$": "identity-obj-proxy",
-      "~/core/(.*)": "<rootDir>/$1"
-    },
-    globals: {
-      'ts-jest': {
-        diagnostics: {
-          exclude: ['**'],
-        },
-      },
-    },
-  };
+module.exports = require('../../../configs/jest.config');
