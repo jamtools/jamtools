@@ -5,7 +5,7 @@ import expressWS from 'express-ws';
 
 import * as trpcExpress from '@trpc/server/adapters/express';
 
-import {NodeJsonRpcServer} from './services/node_json_rpc';
+import {NodeJsonRpcServer} from './services/server_json_rpc';
 import {WebsocketServerCoreDependencies} from '~/platforms/ws/ws_server_core_dependencies';
 
 export const initApp = (coreDeps: WebsocketServerCoreDependencies) => {

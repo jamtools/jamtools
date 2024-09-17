@@ -1,6 +1,8 @@
 import {JSONRPCClient, JSONRPCServer} from 'json-rpc-2.0';
 import {Rpc, RpcArgs} from '~/core/types/module_types';
 
+import ReconnectingWebSocket from 'reconnecting-websocket';
+
 type ClientParams = {
     clientId: string;
 }
@@ -57,7 +59,7 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
         return this.rpcClient.notify(method, args, params);
     };
 
-    retrying = false;
+    // retrying = false;
 
     initializeWebsocket = async () => {
         const forceError = false;
@@ -66,22 +68,8 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
         }
 
         const fullUrl = `${this.url}?clientId=${this.getClientId()}`;
-        const ws = new WebSocket(fullUrl);
-
-        ws.onclose = async () => {
-            console.error('websocket disconnected');
-            console.log('retrying websocket in 5 seconds');
-
-            if (this.retrying) {
-                return;
-            }
-            this.retrying = true;
-
-            setTimeout(() => {
-                this.initializeWebsocket();
-                this.retrying = false;
-            }, 5000);
-        };
+        // const ws = new WebSocket(fullUrl);
+        const ws = new ReconnectingWebSocket(fullUrl, undefined, {WebSocket});
 
         ws.onmessage = async (event) => {
             const jsonMessage = JSON.parse(event.data);
@@ -128,17 +116,6 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
                 }
 
                 console.error('Error with websocket', e);
-                console.log('retrying websocket in 5 seconds');
-
-                if (this.retrying) {
-                    return;
-                }
-                this.retrying = true;
-
-                setTimeout(() => {
-                    this.initializeWebsocket();
-                    this.retrying = false;
-                }, 5000);
             };
         });
     };
