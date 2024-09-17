@@ -12,13 +12,15 @@ on:
 jobs:
     build:
         runs-on: ubuntu-latest
+        container:
+          image: node:21
         steps:
             - uses: actions/checkout@v3
-            - name: Install Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: 21
-                  cache: 'npm'
+            # - name: Install Node.js
+            #   uses: actions/setup-node@v4
+            #   with:
+            #       node-version: 21
+            #       cache: 'npm'
             - name: Install modules
               run: npm i
             - name: Build app
@@ -27,11 +29,11 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
-            - name: Install Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: 21
-                  cache: 'npm'
+            # - name: Install Node.js
+            #   uses: actions/setup-node@v4
+            #   with:
+            #       node-version: 21
+            #       cache: 'npm'
             - name: Install modules
               run: npm i
             - name: Build app
@@ -40,11 +42,11 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
-            - name: Install Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: 21
-                  cache: 'npm'
+            # - name: Install Node.js
+            #   uses: actions/setup-node@v4
+            #   with:
+            #       node-version: 21
+            #       cache: 'npm'
             - name: Install modules
               run: npm i
             - name: Check Types
@@ -53,11 +55,11 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
-            - name: Install Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: 21
-                  cache: 'npm'
+            # - name: Install Node.js
+            #   uses: actions/setup-node@v4
+            #   with:
+            #       node-version: 21
+            #       cache: 'npm'
             - name: Install modules
               run: npm i
             - name: Run eslint
@@ -66,11 +68,11 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
-            - name: Install Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: 21
-                  cache: 'npm'
+            # - name: Install Node.js
+            #   uses: actions/setup-node@v4
+            #   with:
+            #       node-version: 21
+            #       cache: 'npm'
             - name: Install modules
               run: npm i
             - name: Run tests
