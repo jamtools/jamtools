@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 
 import {MidiDeviceAndChannelMap, MidiEventFull, makeHashedMidiDeviceAndChannel} from '../../macro_module_types';
 import {QwertyCallbackPayload} from '~/core/types/io_types';
@@ -159,20 +159,4 @@ const qwertyEventToMidiEvent = (event: QwertyCallbackPayload, localStateService:
     };
 
     return fullEvent;
-};
-
-type EditComponentProps = {
-    isQwertyEnabled: boolean;
-    onQwertyToggle: () => void;
-};
-
-const EditComponent = (props: EditComponentProps) => {
-    return (
-        <div>
-            <span>Qwerty enabled: {new String(props.isQwertyEnabled)}</span>
-            <button onClick={props.onQwertyToggle}>
-                Toggle
-            </button>
-        </div>
-    );
 };

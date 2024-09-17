@@ -1,6 +1,8 @@
 import React from 'react';
+
 import {MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
 import {getKeyForMidiEvent} from '../macro_handler_utils';
+import {Button} from '~/core/components/Button';
 
 export type SavedMacroValues = {
     saved: MidiEventFull[];
@@ -12,15 +14,13 @@ export const SavedMacroValues = ({saved, onClickDelete}: SavedMacroValues) => {
             {saved.map((event) => {
                 const key = getKeyForMidiEvent(event);
                 return (
-
                     <li key={key}>
                         {key}
-                        <button
-                            type='button'
+                        <Button
                             onClick={() => onClickDelete(event)}
                         >
                             Delete
-                        </button>
+                        </Button>
                     </li>
                 );
             })}

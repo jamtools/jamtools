@@ -1,6 +1,7 @@
 import React from 'react';
 
 import {HelloModule} from './hello_module';
+import {Button} from '~/core/components/Button';
 
 export const HelloComponent = () => {
     const value = HelloModule.use();
@@ -10,9 +11,9 @@ export const HelloComponent = () => {
             <h1>
                 {'Hello Module!'}
             </h1>
-            <button onClick={() => value.mod.actions.hello()}>
+            <Button onClick={() => value.mod.actions.hello()}>
                 Hello
-            </button>
+            </Button>
             <pre>
                 {JSON.stringify(value.state)}
             </pre>

@@ -4,3 +4,5 @@ dist
 .turbo
 site
 typedoc_docs
+kv.db
+.env

@@ -3,6 +3,8 @@ import React from 'react';
 import {MIDI_NUMBER_TO_NOTE_NAME_MAPPINGS} from '~/core/constants/midi_number_to_note_name_mappings';
 import {ScaleDegreeInfo} from './root_mode_types';
 
+import {Button} from '~/core/components/Button';
+
 type Props = {
     chord: ScaleDegreeInfo | null;
     scale: number;
@@ -17,7 +19,7 @@ export const RootModeComponent = (props: Props) => {
             <div>
                 Scale: {scaleRootNoteName} Major
             </div>
-            <button onClick={props.onClick}>Change scale</button>
+            <Button onClick={props.onClick}>Change scale</Button>
 
             {props.chord && (
                 <div>

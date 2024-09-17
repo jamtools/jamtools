@@ -1,6 +1,8 @@
 import React from 'react';
+
 import {MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
 import {getKeyForMidiEvent} from '../macro_handler_utils';
+import {Button} from '~/core/components/Button';
 
 type CaptureFormProps = {
     waiting: boolean;
@@ -17,18 +19,16 @@ export const CaptureForm = ({waiting, toggleWaiting, confirmMacro, captured}: Ca
             </p>
             {waiting ? (
                 <>
-                    <button
+                    <Button
                         onClick={() => toggleWaiting({})}
-                        type='button'
                     >
                         Cancel
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                         onClick={() => confirmMacro({})}
-                        type='button'
                     >
                         Confirm
-                    </button>
+                    </Button>
                     <div>
                         Captured:
                         <pre>
@@ -37,12 +37,11 @@ export const CaptureForm = ({waiting, toggleWaiting, confirmMacro, captured}: Ca
                     </div>
                 </>
             ) : (
-                <button
+                <Button
                     onClick={() => toggleWaiting({})}
-                    type='button'
                 >
                     Capture
-                </button>
+                </Button>
             )}
         </form>
     );

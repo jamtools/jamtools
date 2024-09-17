@@ -4,6 +4,7 @@ import {MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
 
 import {SavedMacroValues} from './saved_macro_values';
 import {CaptureForm} from './capture_form';
+import {Button} from '~/core/components/Button';
 
 type EditProps = {
     editing: boolean;
@@ -20,12 +21,11 @@ export const Edit = (props: EditProps) => {
     if (!props.editing) {
         return (
             <div>
-                <button
-                    type='button'
+                <Button
                     onClick={props.onEdit}
                 >
                     Edit
-                </button>
+                </Button>
                 {props.saved.length}
             </div>
         );
@@ -49,12 +49,11 @@ export const Edit = (props: EditProps) => {
 
     return (
         <div>
-            <button
-                type='button'
+            <Button
                 onClick={props.onCancelEdit}
             >
                 Cancel
-            </button>
+            </Button>
             {captureForm}
             {savedValues}
         </div>

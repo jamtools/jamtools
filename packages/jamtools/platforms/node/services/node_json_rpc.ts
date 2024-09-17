@@ -1,5 +1,6 @@
 import {JSONRPCClient, JSONRPCServer} from 'json-rpc-2.0';
 import WebSocket from 'isomorphic-ws';
+import ReconnectingWebSocket from 'reconnecting-websocket';
 
 import {KVStore, Rpc, RpcArgs} from '~/core/types/module_types';
 
@@ -68,15 +69,7 @@ export class NodeJsonRpcClientAndServer implements Rpc {
     initializeWebsocket = async () => {
         const separator = this.url.includes('?') ? '&' : '?';
         const fullUrl = `${this.url}${separator}clientId=${this.clientId}`;
-        const ws = new WebSocket(fullUrl);
-
-        ws.onclose = async () => {
-            // console.error('websocket disconnected');
-            // console.log('retrying websocket in 5 seconds');
-            setTimeout(() => {
-                this.initializeWebsocket();
-            }, 5000);
-        };
+        const ws = new ReconnectingWebSocket(fullUrl, undefined, {WebSocket});
 
         ws.onmessage = async (event) => {
             const jsonMessage = JSON.parse(event.data.toString());
@@ -123,11 +116,7 @@ export class NodeJsonRpcClientAndServer implements Rpc {
                     resolve(false);
                 }
 
-                // console.error('Error with websocket', e);
-                // console.log('retrying websocket in 5 seconds');
-                setTimeout(() => {
-                    this.initializeWebsocket();
-                }, 5000);
+                console.error('Error with websocket', e);
             };
         });
     };

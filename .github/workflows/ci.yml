@@ -14,51 +14,75 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
-            - name: Install Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: 21
-                  cache: 'npm'
+            # - name: Install Node.js
+            #   uses: actions/setup-node@v4
+            #   with:
+            #       node-version: 21
+            #       cache: 'npm'
+            # - name: Set npm mirror
+            #   run: npm config set registry https://npmjs.cf/
+
             - name: Install modules
               run: npm i
             - name: Build app
-              run: npx turbo build
+              run: npx turbo run build
+    build-saas:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            # - name: Install Node.js
+            #   uses: actions/setup-node@v4
+            #   with:
+            #       node-version: 21
+            #       cache: 'npm'
+            # - name: Set npm mirror
+            #   run: npm config set registry https://npmjs.cf/
+            - name: Install modules
+              run: npm i
+            - name: Build app
+              run: npx turbo run build-saas
     types:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
-            - name: Install Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: 21
-                  cache: 'npm'
+            # - name: Install Node.js
+            #   uses: actions/setup-node@v4
+            #   with:
+            #       node-version: 21
+            #       cache: 'npm'
+            # - name: Set npm mirror
+            #   run: npm config set registry https://npmjs.cf/
             - name: Install modules
               run: npm i
             - name: Check Types
-              run: npx turbo check-types
+              run: npx turbo run check-types
     lint:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
-            - name: Install Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: 21
-                  cache: 'npm'
+            # - name: Install Node.js
+            #   uses: actions/setup-node@v4
+            #   with:
+            #       node-version: 21
+            #       cache: 'npm'
+            # - name: Set npm mirror
+            #   run: npm config set registry https://npmjs.cf/
             - name: Install modules
               run: npm i
             - name: Run eslint
-              run: npx turbo lint
+              run: npx turbo run lint
     test:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
-            - name: Install Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: 21
-                  cache: 'npm'
+            # - name: Install Node.js
+            #   uses: actions/setup-node@v4
+            #   with:
+            #       node-version: 21
+            #       cache: 'npm'
+            # - name: Set npm mirror
+            #   run: npm config set registry https://npmjs.cf/
             - name: Install modules
               run: npm i
             - name: Run tests
-              run: npx turbo test
+              run: npx turbo run test

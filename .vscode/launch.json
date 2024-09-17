@@ -1,0 +1,20 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "attach",
+      "name": "Attach to Node.js Process",
+      "port": 9229,
+      "restart": true,
+      "timeout": 20000,
+      "skipFiles": [
+        "<node_internals>/**",
+        "**/node_modules/**",
+        "**/node_modules/@julusian/midi/**",
+        "**/wasm/**",
+      ],
+      "autoAttachChildProcesses": true,
+    }
+  ]
+}

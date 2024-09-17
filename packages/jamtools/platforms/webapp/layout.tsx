@@ -3,6 +3,14 @@ import React, {useState} from 'react';
 import {useLocation, useNavigate} from 'react-router-dom';
 
 import SlDetails from '@shoelace-style/shoelace/dist/react/details/index.js';
+import SlTab from '@shoelace-style/shoelace/dist/react/tab/index.js';
+import SlTabGroup from '@shoelace-style/shoelace/dist/react/tab-group/index.js';
+import SlTabPanel from '@shoelace-style/shoelace/dist/react/tab-panel/index.js';
+
+import {Module} from '~/core/module_registry/module_registry';
+import {Button} from '~/core/components/Button';
+
+import {RunLocalButton} from './components/run_local_button';
 
 type Props = React.PropsWithChildren & {
     modules: Module[];
@@ -12,6 +20,7 @@ export const Layout = (props: Props) => {
     return (
         <>
             <ToggleThemeButton />
+            <RunLocalButton/>
             <SlDetails summary='Navigation'>
                 <Tabs modules={props.modules} />
             </SlDetails>
@@ -19,8 +28,6 @@ export const Layout = (props: Props) => {
         </>
     );
 };
-
-import SlButton from '@shoelace-style/shoelace/dist/react/button/index.js';
 
 let darkMode = false;
 if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -54,16 +61,11 @@ const ToggleThemeButton = () => {
     };
 
     return (
-        <SlButton onClick={onClick}>
+        <Button onClick={onClick}>
             Toggle theme
-        </SlButton>
+        </Button>
     );
 };
-
-import SlTab from '@shoelace-style/shoelace/dist/react/tab/index.js';
-import SlTabGroup from '@shoelace-style/shoelace/dist/react/tab-group/index.js';
-import SlTabPanel from '@shoelace-style/shoelace/dist/react/tab-panel/index.js';
-import {Module} from '~/core/module_registry/module_registry';
 
 type TabsProps = {
     modules: Module[];
