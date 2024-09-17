@@ -11,6 +11,7 @@ export class SoundfontPeripheral {
     constructor() { }
 
     soundfont?: Soundfont.Player;
+    audioContext?: AudioContext;
 
     private heldDownNotes: HeldDownSoundfontNotes[] = [];
 
@@ -24,12 +25,20 @@ export class SoundfontPeripheral {
 
         if ('AudioContext' in globalThis) {
             try {
-                this.soundfont = await Soundfont.instrument(new AudioContext(), 'percussive_organ');
+                this.audioContext = new AudioContext();
+                this.soundfont = await Soundfont.instrument(this.audioContext, 'percussive_organ');
             } catch (e) {
                 console.error(e);
             }
         }
     };
+
+    public destroy = () => {
+        this.soundfont?.stop();
+        this.audioContext?.close();
+    };
+
+    // TODO: define React components in this file for choosing instruments. need Edit and Short components to show in output macro view
 
     public send = (midiEvent: MidiEvent) => {
         if (!this.soundfont) {

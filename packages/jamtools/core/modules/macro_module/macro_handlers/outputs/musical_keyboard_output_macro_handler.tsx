@@ -65,10 +65,41 @@ jamtools.registerMacroType(
             addingOutputDevice.setState({device: args.device, channel: 1});
         });
 
+        let soundfontResult: SoundfontPeripheral | undefined;
+        if (savedOutputDevices.getState().find(output => output.device === 'soundfont')) {
+            soundfontResult = new SoundfontPeripheral();
+            setTimeout(() => {
+                soundfontResult!.initialize();
+            });
+        }
+
+        const onClickSoundfont = () => {
+            soundfontResult = new SoundfontPeripheral();
+            setTimeout(() => {
+                soundfontResult!.initialize();
+            });
+
+            saveOutputDevice({
+                channel: 1,
+                device: 'soundfont',
+            });
+        };
+
         const onChooseChannel = createAction('on_choose_channel', async (args: {channel: string}) => {
             const state = addingOutputDevice.getState();
             addingOutputDevice.setState({device: state.device, channel: parseInt(args.channel)});
         });
+
+        const saveOutputDevice = (state: SavedOutputDeviceState) => {
+            // TODO: de-dupe
+            const saved = savedOutputDevices.getState();
+            savedOutputDevices.setState([...saved, {
+                device: state.device,
+                channel: state.channel,
+            }]);
+
+            addingOutputDevice.setState({device: null, channel: null});
+        };
 
         const onConfirmChannel = createAction('on_confirm_channel', async () => {
             const state = addingOutputDevice.getState();
@@ -79,14 +110,10 @@ jamtools.registerMacroType(
                 throw new Error('no channel selected');
             }
 
-            // TODO: de-dupe
-            const saved = savedOutputDevices.getState();
-            savedOutputDevices.setState([...saved, {
-                device: state.device,
+            saveOutputDevice({
                 channel: state.channel,
-            }]);
-
-            addingOutputDevice.setState({device: null, channel: null});
+                device: state.device,
+            });
         });
 
         const onConfirmDeleteSavedDevice = createAction('on_confirm_delete_saved_device', async (args: SavedOutputDeviceState) => {
@@ -100,6 +127,12 @@ jamtools.registerMacroType(
                 ...state.slice(0, index),
                 ...state.slice(index + 1),
             ]);
+
+            if (args.device === 'soundfont') {
+                if (soundfontResult) {
+                    soundfontResult.destroy();
+                }
+            }
         });
 
         const askToDelete = (device: SavedOutputDeviceState) => {
@@ -134,6 +167,7 @@ jamtools.registerMacroType(
                         availableMidiOutputs={midiDevices.midiOutputDevices}
                         onChooseChannel={(channel: string) => onChooseChannel({channel})}
                         onClickOutput={(device: string) => onClickOutput({device})}
+                        onClickSoundfont={onClickSoundfont}
                         onConfirmChannel={() => onConfirmChannel({})}
                         queuedDevice={queuedDevice}
                         savedDevices={saved}
@@ -142,16 +176,16 @@ jamtools.registerMacroType(
             },
         };
 
-        const soundfontResult = new SoundfontPeripheral();
-        setTimeout(() => {
-            soundfontResult.initialize();
-        });
-
         const send = (midiEvent: MidiEvent) => {
-            soundfontResult.send(midiEvent);
+            soundfontResult?.send(midiEvent);
 
             const saved = savedOutputDevices.getState();
             for (const device of saved) {
+                if (device.device === 'soundfont') {
+                    soundfontResult?.send(midiEvent);
+                    continue;
+                }
+
                 ioModule.sendMidiEvent(device.device, {
                     ...midiEvent,
                     channel: device.channel,
@@ -161,7 +195,6 @@ jamtools.registerMacroType(
 
         return {
             send,
-            initialize: soundfontResult.initialize,
             components,
         };
     }),
@@ -178,6 +211,7 @@ type EditProps = {
     onChooseChannel: (channel: string) => void;
     onConfirmChannel: () => void;
     onClickOutput: (device: string) => void;
+    onClickSoundfont: () => void;
 }
 
 const Edit = (props: EditProps) => {
@@ -259,6 +293,13 @@ const Edit = (props: EditProps) => {
                             <pre>{output}</pre>
                         </li>
                     ))}
+                    <li
+                        onClick={() => props.onClickSoundfont()}
+                    >
+                        <pre>
+                            Soundfont
+                        </pre>
+                    </li>
                 </ul>
             </div>
         </div>
