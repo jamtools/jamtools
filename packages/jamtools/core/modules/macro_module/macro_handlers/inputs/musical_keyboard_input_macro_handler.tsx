@@ -6,7 +6,7 @@ import {Subject} from 'rxjs';
 import {QWERTY_TO_MIDI_MAPPINGS} from '~/core/constants/qwerty_to_midi_mappings';
 import {jamtools} from '~/core/engine/register';
 import {SharedStateSupervisor} from '~/core/services/states/shared_state_service';
-import {MacroStateHolders, getKeyForMacro, getKeyForMidiEvent, useInputMacroWaiterAndSaver} from './input_macro_handler_utils';
+import {InputMacroStateHolders, getKeyForMacro, getKeyForMidiEvent, useInputMacroWaiterAndSaver} from './input_macro_handler_utils';
 
 type MusicalKeyboardInputResult = {
     subject: Subject<MidiEventFull>;
@@ -45,7 +45,7 @@ jamtools.registerMacroType(
         const waitingForConfiguration = await macroAPI.moduleAPI.statesAPI.createSharedState(getKeyForMacro('waiting_for_configuration', fieldName), false);
         const capturedMidiEvent = await macroAPI.moduleAPI.statesAPI.createSharedState<MidiEventFull | null>(getKeyForMacro('captured_midi_event', fieldName), null);
         const savedMidiEvents = await macroAPI.moduleAPI.statesAPI.createPersistentState<MidiEventFull[]>(getKeyForMacro('saved_midi_event', fieldName), []);
-        const states: MacroStateHolders = {
+        const states: InputMacroStateHolders = {
             editing,
             waiting: waitingForConfiguration,
             captured: capturedMidiEvent,
@@ -82,15 +82,15 @@ jamtools.registerMacroType(
         //     }); // .cleanup(macroAPI.onDestroy);
         // }
 
-        const isMidiEnabled = true;
+        // const isMidiEnabled = true;
         // const isMidiEnabled = (Object.keys(storedUserConfig).length > 1) || (Object.keys(storedUserConfig).length === 1 && !isQwertyEnabled);
-
-        macroReturnValue.subject.subscribe(event => {
-
-        });
 
         const sub = macroAPI.moduleAPI.deps.module.moduleRegistry.getModule('io').midiInputSubject.subscribe(event => {
             if (event.event.type !== 'noteon' && event.event.type !== 'noteoff') {
+                return;
+            }
+
+            if (event.deviceInfo.name.startsWith('IAC')) {
                 return;
             }
 

@@ -3,7 +3,7 @@ import {Subject} from 'rxjs';
 
 import {jamtools} from '~/core/engine/register';
 import {MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
-import {getKeyForMacro, MacroStateHolders, useInputMacroWaiterAndSaver, savedMidiEventsAreEqual, getKeyForMidiEvent} from './input_macro_handler_utils';
+import {getKeyForMacro, InputMacroStateHolders, useInputMacroWaiterAndSaver, savedMidiEventsAreEqual, getKeyForMidiEvent} from './input_macro_handler_utils';
 
 type MacroConfigItemMidiControlChangeInput = {
     onTrigger?(midiEvent: MidiEventFull): void;
@@ -31,7 +31,7 @@ jamtools.registerMacroType('midi_control_change_input', {}, async (macroAPI, con
     const waitingForConfiguration = await macroAPI.moduleAPI.statesAPI.createSharedState(getKeyForMacro('waiting_for_configuration', fieldName), false);
     const capturedMidiEvent = await macroAPI.moduleAPI.statesAPI.createSharedState<MidiEventFull | null>(getKeyForMacro('captured_midi_event', fieldName), null);
     const savedMidiEvents = await macroAPI.moduleAPI.statesAPI.createPersistentState<MidiEventFull[]>(getKeyForMacro('saved_midi_event', fieldName), []);
-    const states: MacroStateHolders = {
+    const states: InputMacroStateHolders = {
         editing,
         waiting: waitingForConfiguration,
         captured: capturedMidiEvent,
@@ -46,6 +46,10 @@ jamtools.registerMacroType('midi_control_change_input', {}, async (macroAPI, con
 
     const sub = macroAPI.moduleAPI.deps.module.moduleRegistry.getModule('io').midiInputSubject.subscribe(event => {
         if (event.event.type !== 'cc') {
+            return;
+        }
+
+        if (event.deviceInfo.name.startsWith('IAC')) {
             return;
         }
 

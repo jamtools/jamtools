@@ -12,7 +12,7 @@ export type AddingOutputDeviceState = {
 export type SavedOutputDeviceState = {
     device: string;
     channel: number;
-    note?: number;
+    note?: number | null;
 };
 
 type EditProps = {
