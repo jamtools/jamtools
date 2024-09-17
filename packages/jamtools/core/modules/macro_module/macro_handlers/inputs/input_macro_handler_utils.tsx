@@ -6,7 +6,7 @@ import {MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
 import {SharedStateSupervisor} from '~/core/services/states/shared_state_service';
 
 import {Edit} from './components/edit_macro';
-import type {MidiControlChangeInputResult} from './inputs/midi_control_change_input_macro_handler';
+import type {MidiControlChangeInputResult} from './midi_control_change_input_macro_handler';
 
 export const savedMidiEventsAreEqual = (event1: MidiEventFull, event2: MidiEventFull): boolean => {
     const key1 = getKeyForMidiEvent(event1);
@@ -33,7 +33,7 @@ type MacroSaverOptions = {
 
 type CheckSavedMidiEventsAreEqual = (event1: MidiEventFull, event2: MidiEventFull) => boolean;
 
-export const useMacroWaiterAndSaver = async (macroAPI: MacroAPI, states: MacroStateHolders, options: MacroSaverOptions, fieldName: string, checkSavedMidiEventsAreEqual: CheckSavedMidiEventsAreEqual): Promise<MidiControlChangeInputResult> => {
+export const useInputMacroWaiterAndSaver = async (macroAPI: MacroAPI, states: MacroStateHolders, options: MacroSaverOptions, fieldName: string, checkSavedMidiEventsAreEqual: CheckSavedMidiEventsAreEqual): Promise<MidiControlChangeInputResult> => {
     const editingState = states.editing;
     const waitingForConfiguration = states.waiting;
     const capturedMidiEvent = states.captured;

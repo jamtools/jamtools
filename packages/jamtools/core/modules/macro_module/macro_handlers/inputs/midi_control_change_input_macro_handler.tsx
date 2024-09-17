@@ -3,7 +3,7 @@ import {Subject} from 'rxjs';
 
 import {jamtools} from '~/core/engine/register';
 import {MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
-import {getKeyForMacro, MacroStateHolders, useMacroWaiterAndSaver, savedMidiEventsAreEqual, getKeyForMidiEvent} from '../macro_handler_utils';
+import {getKeyForMacro, MacroStateHolders, useInputMacroWaiterAndSaver, savedMidiEventsAreEqual, getKeyForMidiEvent} from './input_macro_handler_utils';
 
 type MacroConfigItemMidiControlChangeInput = {
     onTrigger?(midiEvent: MidiEventFull): void;
@@ -38,7 +38,7 @@ jamtools.registerMacroType('midi_control_change_input', {}, async (macroAPI, con
         savedMidiEvents,
     };
 
-    const macroReturnValue = await useMacroWaiterAndSaver(macroAPI, states, {}, fieldName, savedMidiEventsAreEqual);
+    const macroReturnValue = await useInputMacroWaiterAndSaver(macroAPI, states, {}, fieldName, savedMidiEventsAreEqual);
 
     if (!macroAPI.moduleAPI.deps.core.isMaestro() && !conf.allowLocal) {
         return macroReturnValue;
