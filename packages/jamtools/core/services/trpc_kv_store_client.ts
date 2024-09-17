@@ -11,7 +11,7 @@ const createKVStoreTrpcClient = (serverUrl: string) => {
             }),
         ],
     });
-}
+};
 
 export class TrpcKVStoreService implements KVStore {
     constructor(private serverUrl: string) {}
@@ -24,10 +24,10 @@ export class TrpcKVStoreService implements KVStore {
         }
 
         return JSON.parse(result) as T;
-    }
+    };
 
     set = async <T>(key: string, value: T) => {
         const serialized = JSON.stringify(value);
         await this.trpc.kvPut.mutate({key, value: serialized});
-    }
+    };
 }

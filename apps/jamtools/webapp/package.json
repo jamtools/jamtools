@@ -2,7 +2,8 @@
   "name": "jamtools-webapp",
   "scripts": {
     "dev": "npm run build -- --watch",
-    "build": "esbuild src/index.tsx --outfile=dist/index.js --bundle --sourcemap=inline --define:process.env.WS_HOST=\"'$WS_HOST'\"",
+    "build": "esbuild src/index.tsx --outfile=dist/index.js --bundle --sourcemap=inline --define:process.env.WS_HOST=\"'$WS_HOST'\" --define:process.env.DATA_HOST=\"'$DATA_HOST'\" --target=es6",
+    "build-saas": "npm run build",
     "build-snack": "esbuild ./snacks/root_mode_snack/root_mode_snack.tsx --outfile=dist/index.js --bundle",
     "check-types": "tsc --noEmit",
     "lint": "eslint --ext ts --ext tsx src/",

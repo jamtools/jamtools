@@ -4,7 +4,12 @@
       "build": {
         "dependsOn": ["^build"],
         "outputs": ["dist"],
-        "env": ["WS_HOST"]
+        "env": ["WS_HOST", "DATA_HOST", "NODE_ENV"]
+      },
+      "build-saas": {
+        "dependsOn": ["^build-saas"],
+        "outputs": ["dist"],
+        "env": ["WS_HOST", "DATA_HOST", "NODE_ENV"]
       },
       "check-types": {
         "dependsOn": ["^check-types"]
@@ -20,7 +25,8 @@
       },
       "dev": {
         "persistent": true,
-        "cache": false
+        "cache": false,
+        "env": ["WS_HOST", "DATA_HOST", "NODE_ENV"]
       },
       "start": {
         "persistent": true,
