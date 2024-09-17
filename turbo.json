@@ -31,7 +31,7 @@
       "start": {
         "persistent": true,
         "cache": false,
-        "env": ["PORT"]
+        "env": ["PORT", "WS_HOST", "DATA_HOST"]
       }
     }
   }
