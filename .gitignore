@@ -5,3 +5,4 @@ dist
 site
 typedoc_docs
 kv.db
+.env
