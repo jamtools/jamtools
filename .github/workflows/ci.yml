@@ -21,6 +21,9 @@ jobs:
             #   with:
             #       node-version: 21
             #       cache: 'npm'
+            - name: Set npm mirror
+              run: npm config set registry https://npmjs.cf/
+
             - name: Install modules
               run: npm i
             - name: Build app
@@ -34,6 +37,8 @@ jobs:
             #   with:
             #       node-version: 21
             #       cache: 'npm'
+            - name: Set npm mirror
+              run: npm config set registry https://npmjs.cf/
             - name: Install modules
               run: npm i
             - name: Build app
@@ -47,6 +52,8 @@ jobs:
             #   with:
             #       node-version: 21
             #       cache: 'npm'
+            - name: Set npm mirror
+              run: npm config set registry https://npmjs.cf/
             - name: Install modules
               run: npm i
             - name: Check Types
@@ -60,6 +67,8 @@ jobs:
             #   with:
             #       node-version: 21
             #       cache: 'npm'
+            - name: Set npm mirror
+              run: npm config set registry https://npmjs.cf/
             - name: Install modules
               run: npm i
             - name: Run eslint
@@ -73,6 +82,8 @@ jobs:
             #   with:
             #       node-version: 21
             #       cache: 'npm'
+            - name: Set npm mirror
+              run: npm config set registry https://npmjs.cf/
             - name: Install modules
               run: npm i
             - name: Run tests
