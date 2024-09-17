@@ -16,7 +16,7 @@ export type SavedOutputDeviceState = {
 };
 
 type EditProps = {
-    includeNote?: boolean;
+    onChooseNote?: (note: string) => void;
     editing: boolean;
     onEdit: () => void;
     onCancelEdit: () => void;
@@ -25,9 +25,9 @@ type EditProps = {
     savedDevices: SavedOutputDeviceState[];
     askToDelete: (savedDevice: SavedOutputDeviceState) => void;
     onChooseChannel: (channel: string) => void;
-    onConfirmChannel: () => void;
+    onConfirm: () => void;
     onClickOutput: (device: string) => void;
-    onClickSoundfont: () => void;
+    onClickSoundfont?: () => void;
 };
 
 export const Edit = (props: EditProps) => {
@@ -59,8 +59,9 @@ export const Edit = (props: EditProps) => {
 
             <QueuedDevice
                 queuedDevice={props.queuedDevice}
+                onChooseNote={props.onChooseNote}
                 onChooseChannel={props.onChooseChannel}
-                onConfirmChannel={props.onConfirmChannel}
+                onConfirm={props.onConfirm}
             />
 
             <AvailableOutputs
@@ -75,7 +76,7 @@ export const Edit = (props: EditProps) => {
 type AvailableOutputsProps = {
     availableMidiOutputs: string[];
     onClickOutput: (output: string) => void;
-    onClickSoundfont: () => void;
+    onClickSoundfont?: () => void;
 }
 
 const AvailableOutputs = (props: AvailableOutputsProps) => {
@@ -91,13 +92,15 @@ const AvailableOutputs = (props: AvailableOutputsProps) => {
                         <pre>{output}</pre>
                     </li>
                 ))}
-                <li
-                    onClick={() => props.onClickSoundfont()}
-                >
-                    <pre>
-                        Soundfont
-                    </pre>
-                </li>
+                {props.onClickSoundfont && (
+                    <li
+                        onClick={() => props.onClickSoundfont!()}
+                    >
+                        <pre>
+                            Soundfont
+                        </pre>
+                    </li>
+                )}
             </ul>
         </div>
     );
@@ -105,11 +108,19 @@ const AvailableOutputs = (props: AvailableOutputsProps) => {
 
 type QueuedDeviceProps = {
     queuedDevice: AddingOutputDeviceState;
+    onChooseNote?: (note: string) => void;
     onChooseChannel: (channel: string) => void;
-    onConfirmChannel: () => void;
+    onConfirm: () => void;
 }
 
 const QueuedDevice = (props: QueuedDeviceProps) => {
+    let enableConfirmButton = false;
+    if (props.onChooseNote) {
+        enableConfirmButton = Boolean(props.queuedDevice.device && props.queuedDevice.channel && props.queuedDevice.note);
+    } else {
+        enableConfirmButton = Boolean(props.queuedDevice.device && props.queuedDevice.channel);
+    }
+
     return (
         <div>
             Queued device: {props.queuedDevice.device || 'none'}
@@ -133,10 +144,19 @@ const QueuedDevice = (props: QueuedDeviceProps) => {
                             ))}
                         </select>
                     </div>
+                    {props.onChooseNote && (
+                        <div>
+                            <input
+                                type='number'
+                                onChange={(event) => props.onChooseNote!(event.target.value)}
+                                value={props.queuedDevice.note?.toString()}
+                            />
+                        </div>
+                    )}
                     <div>
-                        {Boolean(props.queuedDevice.channel) && (
+                        {enableConfirmButton && (
                             <Button
-                                onClick={() => props.onConfirmChannel()}
+                                onClick={() => props.onConfirm()}
                             >
                                 Confirm
                             </Button>
@@ -163,7 +183,7 @@ const SavedOutputs = (props: SavedOutputsProps) => {
                         key={savedDevice.device + '|' + savedDevice.channel}
                         onClick={() => props.askToDelete(savedDevice)}
                     >
-                        {savedDevice.device} {' - '} {savedDevice.channel}
+                        {savedDevice.device} {' - '} {savedDevice.channel} {Boolean(savedDevice.note) && <>{' - '} {savedDevice.note}</>}
                     </li>
                 ))}
             </ul>

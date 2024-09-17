@@ -2,36 +2,31 @@ import React from 'react';
 
 import {jamtools} from '~/core/engine/register';
 
-import {MidiEvent} from '~/core/modules/macro_module/macro_module_types';
-
-export interface OutputMidiDevice {
-    send(midiEvent: MidiEvent): void;
+export interface MidiControlChangeOutputMacroOutput {
+    send(value: number): void;
     initialize?: () => Promise<void>;
     components: {
         edit: React.ElementType;
     };
 }
 
-import {SoundfontPeripheral} from '~/core/peripherals/outputs/soundfont_peripheral';
 import {getKeyForMacro} from '../inputs/input_macro_handler_utils';
-import {Edit} from './components/output_macro_edit';
-import {AddingOutputDeviceState, SavedOutputDeviceState} from './components/output_macro_edit';
+import {AddingOutputDeviceState, Edit, SavedOutputDeviceState} from './components/output_macro_edit';
 
-type MusicalKeyboardOutputMacroConfig = {
-    allowLocal?: boolean;
+type MidiControlChangeOutputMacroConfig = {
 };
 
 declare module '~/core/modules/macro_module/macro_module_types' {
     interface MacroTypeConfigs {
-        musical_keyboard_output: {
-            input: MusicalKeyboardOutputMacroConfig;
-            output: OutputMidiDevice;
+        midi_control_change_output: {
+            input: MidiControlChangeOutputMacroConfig;
+            output: MidiControlChangeOutputMacroOutput;
         }
     }
 }
 
 jamtools.registerMacroType(
-    'musical_keyboard_output',
+    'midi_control_change_output',
     {},
     (async (macroAPI, inputConf, fieldName) => {
         const ioModule = macroAPI.moduleAPI.deps.module.moduleRegistry.getModule('io');
@@ -43,36 +38,21 @@ jamtools.registerMacroType(
             });
         };
 
-        const addingOutputDevice = await macroAPI.moduleAPI.statesAPI.createSharedState<AddingOutputDeviceState>(getKeyForMacro('adding_output_device', fieldName), {device: null, channel: null});
+        const addingOutputDevice = await macroAPI.moduleAPI.statesAPI.createSharedState<AddingOutputDeviceState>(getKeyForMacro('adding_output_device', fieldName), {device: null, channel: null, note: null});
         const savedOutputDevices = await macroAPI.moduleAPI.statesAPI.createPersistentState<SavedOutputDeviceState[]>(getKeyForMacro('saved_output_devices', fieldName), []);
 
         const onClickOutput = createAction('on_click_available_output', async (args: {device: string}) => {
             addingOutputDevice.setState({device: args.device, channel: 1});
         });
 
-        let soundfontResult: SoundfontPeripheral | undefined;
-        if (savedOutputDevices.getState().find(output => output.device === 'soundfont')) {
-            soundfontResult = new SoundfontPeripheral();
-            setTimeout(() => {
-                soundfontResult!.initialize();
-            });
-        }
-
-        const onClickSoundfont = () => {
-            soundfontResult = new SoundfontPeripheral();
-            setTimeout(() => {
-                soundfontResult!.initialize();
-            });
-
-            saveOutputDevice({
-                channel: 1,
-                device: 'soundfont',
-            });
-        };
-
         const onChooseChannel = createAction('on_choose_channel', async (args: {channel: string}) => {
             const state = addingOutputDevice.getState();
             addingOutputDevice.setState({device: state.device, channel: parseInt(args.channel)});
+        });
+
+        const onChooseNote = createAction('on_choose_note', async (args: {note: string}) => {
+            const state = addingOutputDevice.getState();
+            addingOutputDevice.setState({device: state.device, channel: state.channel, note: parseInt(args.note)});
         });
 
         const saveOutputDevice = (state: SavedOutputDeviceState) => {
@@ -81,6 +61,7 @@ jamtools.registerMacroType(
             savedOutputDevices.setState([...saved, {
                 device: state.device,
                 channel: state.channel,
+                note: state.note,
             }]);
 
             addingOutputDevice.setState({device: null, channel: null});
@@ -94,10 +75,14 @@ jamtools.registerMacroType(
             if (!state.channel) {
                 throw new Error('no channel selected');
             }
+            if (!state.note) {
+                throw new Error('no note selected');
+            }
 
             saveOutputDevice({
                 channel: state.channel,
                 device: state.device,
+                note: state.note,
             });
         });
 
@@ -112,12 +97,6 @@ jamtools.registerMacroType(
                 ...state.slice(0, index),
                 ...state.slice(index + 1),
             ]);
-
-            if (args.device === 'soundfont') {
-                if (soundfontResult) {
-                    soundfontResult.destroy();
-                }
-            }
         });
 
         const askToDelete = (device: SavedOutputDeviceState) => {
@@ -145,6 +124,7 @@ jamtools.registerMacroType(
 
                 return (
                     <Edit
+                        onChooseNote={(note: string) => onChooseNote({note})}
                         editing={editing}
                         onEdit={() => onEdit({})}
                         onCancelEdit={() => onCancelEdit({})}
@@ -152,7 +132,6 @@ jamtools.registerMacroType(
                         availableMidiOutputs={midiDevices.midiOutputDevices}
                         onChooseChannel={(channel: string) => onChooseChannel({channel})}
                         onClickOutput={(device: string) => onClickOutput({device})}
-                        onClickSoundfont={onClickSoundfont}
                         onConfirm={() => onConfirm({})}
                         queuedDevice={queuedDevice}
                         savedDevices={saved}
@@ -161,19 +140,14 @@ jamtools.registerMacroType(
             },
         };
 
-        const send = (midiEvent: MidiEvent) => {
-            soundfontResult?.send(midiEvent);
-
+        const send = (value: number) => {
             const saved = savedOutputDevices.getState();
             for (const device of saved) {
-                if (device.device === 'soundfont') {
-                    soundfontResult?.send(midiEvent);
-                    continue;
-                }
-
                 ioModule.sendMidiEvent(device.device, {
-                    ...midiEvent,
+                    type: 'cc',
+                    number: device.note!,
                     channel: device.channel,
+                    value,
                 });
             }
         };
