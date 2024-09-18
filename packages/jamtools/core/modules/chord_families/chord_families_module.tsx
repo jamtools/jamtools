@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {ScaleDegreeInfo, cycle, getScaleDegreeFromScaleAndNote} from './root_mode_snack/root_mode_types';
+import {ScaleDegreeInfo, cycle, getScaleDegreeFromScaleAndNote, ionianScaleDegreeQualities} from './root_mode_snack/root_mode_types';
 
 import {RootModeComponent} from './root_mode_snack/root_mode_component';
 import {jamtools} from '~/core/engine/register';
@@ -10,7 +10,114 @@ type State = {
     scale: number;
 }
 
-jamtools.registerModule('root_mode_module', {}, async (moduleAPI) => {
+const CHORD_QUALITIES = {
+    major: 'major',
+    minor: 'minor',
+} as const;
+
+type ChordQuality = keyof typeof CHORD_QUALITIES;
+
+type Chord = {
+    name: string;
+    quality: ChordQuality;
+    notes: number[];
+}
+
+type ChordFamilyData = {
+    mappings: Record<number, Chord[]>;
+}
+
+const testChordFamilyHandler = () => {
+    const data: ChordFamilyData = {
+        mappings: {
+
+        },
+    };
+    const handler = new ChordFamilyHandler(data);
+
+    const fromKey = handler.getChordForKeyAndNote(0, 2);
+    console.log(fromKey);
+
+    const exactNote = handler.getExactChordForNote(24);
+    console.log(exactNote);
+}
+
+const getOppositeQuality = (quality: ChordQuality): ChordQuality => {
+    return quality === 'major' ? 'minor' : 'major';
+}
+
+class ChordFamilyHandler {
+    constructor(private data: ChordFamilyData) {}
+
+    // this function will be used to do data entry as well. "fill in the blanks" feature for data entry
+    // alternative forms of the chords too, so the user can toggle between them
+    public getChordForKeyAndNote = (key: number, note: number): Chord | null => {
+        const integerNotationScaleDegree = note - key;
+        const quality = ionianScaleDegreeQualities[integerNotationScaleDegree];
+        if (!quality) {
+            // TODO: implement "out of scale" chords
+            return null;
+        }
+
+        const existingMapping = this.data.mappings[note] || this.data.mappings[cycle(note)];
+        if (existingMapping) {
+            const qualityMatch = existingMapping.find(c => c.quality === quality);
+            if (qualityMatch) {
+                return qualityMatch;
+            }
+
+            const oppositeQuality = getOppositeQuality(quality);
+            const oppositeQualityMatch = existingMapping.find(c => c.quality === oppositeQuality);
+            if (oppositeQualityMatch) {
+                // transpose minor thirds to major thirds maybe
+                // return {} as Chord;
+            }
+        }
+
+        // search the radius around this chord to find a nearby one
+
+        return null;
+    }
+
+    public getExactChordForNote = (note: number): Chord | null => {
+        const existingMapping = this.data.mappings[note];
+        if (existingMapping?.length) {
+            return existingMapping[0];
+        }
+
+        return null;
+    }
+}
+
+type ChordFamiliesModuleReturnValue = {
+    getChordFamilyHandler(key: string): ChordFamilyHandler;
+}
+
+declare module '~/core/module_registry/module_registry' {
+    interface AllModules {
+        chord_families: ChordFamiliesModuleReturnValue;
+    }
+}
+
+jamtools.registerModule('chord_families_test', {}, async (moduleAPI) => {
+    const chordFamiliesModule = moduleAPI.deps.module.moduleRegistry.getModule('chord_families');
+
+    const data = chordFamiliesModule.getChordFamilyHandler('mykey');
+});
+
+jamtools.registerModule('chord_families', {}, async (moduleAPI) => {
+    const savedData = await moduleAPI.statesAPI.createPersistentState<ChordFamilyData[]>('all_chord_families', []);
+
+    const getChordFamilyHandler = (key: string): ChordFamilyHandler => {
+        const data = savedData.getState()[0];
+        return new ChordFamilyHandler(data);
+    };
+
+    const moduleReturnValue = {
+        getChordFamilyHandler,
+    };
+
+
     // C major on page load
     let scale = 0;
 
@@ -78,6 +185,8 @@ jamtools.registerModule('root_mode_module', {}, async (moduleAPI) => {
             });
         }
     }); // .cleanup()
+
+    return moduleReturnValue;
 });
 
 const getChordFromRootNote = (scale: number, rootNote: number): number[] => {

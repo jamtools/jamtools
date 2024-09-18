@@ -84,6 +84,7 @@ export const useOutputMacroWaiterAndSaver = async (macroAPI: MacroAPI, states: O
     };
 
     const onConfirm = createAction('on_confirm', async () => {
+        // TODO: use zod
         const state = addingOutputDevice.getState();
         if (!state.device) {
             throw new Error('no device selected');
