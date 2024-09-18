@@ -1,4 +1,4 @@
-import {Module} from '~/core/module_registry/module_registry';
+import {ExtraModuleDependencies, Module} from '~/core/module_registry/module_registry';
 import {SharedStateSupervisor} from '../services/states/shared_state_service';
 import {CoreDependencies, ModuleDependencies} from '../types/module_types';
 import {RegisterRouteOptions} from './register';
@@ -14,11 +14,11 @@ type ActionCallback<Args extends object, ReturnValue = any> = (args: Args) => Pr
  * The API provided in the callback when calling jamtools.registerModule. The ModuleAPI is the entrypoint in the framework for everything pertaining to creating a module.
 */
 export class ModuleAPI {
-    public deps: {core: CoreDependencies; module: ModuleDependencies};
+    public deps: {core: CoreDependencies; module: ModuleDependencies, extra: ExtraModuleDependencies};
     public moduleId: string;
 
-    constructor(private module: Module, private prefix: string, private coreDeps: CoreDependencies, private modDeps: ModuleDependencies) {
-        this.deps = {core: coreDeps, module: modDeps};
+    constructor(private module: Module, private prefix: string, private coreDeps: CoreDependencies, private modDeps: ModuleDependencies, private extraDeps: ExtraModuleDependencies) {
+        this.deps = {core: coreDeps, module: modDeps, extra: extraDeps};
         this.moduleId = this.module.moduleId;
     }
 

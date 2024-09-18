@@ -3,7 +3,7 @@ import esbuild from 'esbuild';
 import {esbuildPluginLogBuildTime} from '../../../configs/esbuild_plugins/esbuild_plugin_log_build_time.js';
 
 let entrypoint = './src/entrypoints/node_main_entrypoint.ts';
-let externals = ['@julusian/midi', 'easymidi'];
+let externals = ['@julusian/midi', 'easymidi', 'jsdom'];
 
 if (process.env.DISABLE_IO === 'true') {
     entrypoint = './src/entrypoints/node_saas_entrypoint.ts';

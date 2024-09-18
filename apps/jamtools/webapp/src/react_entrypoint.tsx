@@ -14,6 +14,8 @@ import {BrowserQwertyService} from '~/platforms/webapp/services/browser_qwerty_s
 import {BrowserMidiService} from '~/platforms/webapp/services/browser_midi_service';
 import {BrowserJsonRpcClientAndServer} from '~/platforms/webapp/services/browser_json_rpc';
 import {JamToolsEngine} from '~/core/engine/engine';
+import {ExtraModuleDependencies} from '~/core/module_registry/module_registry';
+import {UltimateGuitarService} from '~/features/modules/ultimate_guitar/ultimate_guitar_service';
 
 const waitForPageLoad = () => new Promise<void>(resolve => {
     window.addEventListener('DOMContentLoaded', () => {
@@ -46,7 +48,14 @@ export const startJamToolsAndRenderApp = async (): Promise<JamToolsEngine> => {
         isMaestro: () => isLocal,
     };
 
-    const engine = new JamToolsEngine(coreDeps);
+    const extraDeps: ExtraModuleDependencies = {
+        "Ultimate Guitar": {
+            domParser: (htmlData: string) => new DOMParser().parseFromString(htmlData, 'text/html'),
+            ultimateGuitarService: new UltimateGuitarService(),
+        },
+    }
+
+    const engine = new JamToolsEngine(coreDeps, extraDeps);
 
     await waitForPageLoad();
 

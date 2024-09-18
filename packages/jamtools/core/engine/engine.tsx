@@ -5,7 +5,7 @@ import {ClassModuleCallback, ModuleCallback, RegisterModuleOptions, jamtools} fr
 import React, {createContext, useContext, useState} from 'react';
 
 import {useMount} from '~/core/hooks/useMount';
-import {Module, ModuleRegistry} from '~/core/module_registry/module_registry';
+import {ExtraModuleDependencies, Module, ModuleRegistry} from '~/core/module_registry/module_registry';
 
 import '../modules';
 import {SharedStateService} from '../services/states/shared_state_service';
@@ -17,7 +17,7 @@ type CapturedRegisterClassModuleCalls = ClassModuleCallback<any>;
 export class JamToolsEngine {
     public moduleRegistry!: ModuleRegistry;
 
-    constructor(public coreDeps: CoreDependencies) {}
+    constructor(public coreDeps: CoreDependencies, public extraModuleDependencies: ExtraModuleDependencies) {}
 
     private initializeCallbacks: (() => void)[] = [];
 
@@ -67,7 +67,7 @@ export class JamToolsEngine {
         api: ModuleReturnValue
     }> => {
         const mod: Module = {moduleId};
-        const moduleAPI = new ModuleAPI(mod, 'engine', this.coreDeps, this.makeDerivedDependencies());
+        const moduleAPI = new ModuleAPI(mod, 'engine', this.coreDeps, this.makeDerivedDependencies(), this.extraModuleDependencies);
         const moduleReturnValue = await cb(moduleAPI);
 
         this.moduleRegistry.registerModule(mod);
@@ -92,7 +92,7 @@ export class JamToolsEngine {
 
         const mod = await Promise.resolve(cb(this.coreDeps, modDependencies));
 
-        const moduleAPI = new ModuleAPI(mod, 'engine', this.coreDeps, modDependencies);
+        const moduleAPI = new ModuleAPI(mod, 'engine', this.coreDeps, modDependencies, this.extraModuleDependencies);
 
         if (!isModuleEnabled(mod)) {
             return null;
