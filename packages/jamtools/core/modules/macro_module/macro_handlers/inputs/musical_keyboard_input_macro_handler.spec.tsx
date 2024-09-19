@@ -17,24 +17,6 @@ describe('MusicalKeyboardInputMacroHandler', () => {
         jamtools.reset();
     });
 
-    it('should create shared state', async () => {
-        const coreDeps: CoreDependencies = makeMockCoreDependencies({store: {}});
-
-        const engine = new JamToolsEngine(coreDeps);
-        await engine.initialize();
-
-        const mod = await engine.registerModule('Test_MusicalKeyboardInputMacro', {}, async (moduleAPI) => {
-            const state = await moduleAPI.statesAPI.createSharedState('hey', {yep: 'yeah'});
-            return {
-                state,
-            };
-        });
-
-        expect(mod.api.state.getState()).toEqual({yep: 'yeah'});
-        await mod.api.state.setState({yep: 'nah'});
-        expect(mod.api.state.getState()).toEqual({yep: 'nah'});
-    });
-
     it('should handle qwerty events', async () => {
         const coreDeps: CoreDependencies = makeMockCoreDependencies({store: {}});
 

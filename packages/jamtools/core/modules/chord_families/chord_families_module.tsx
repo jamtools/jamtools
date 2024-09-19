@@ -40,11 +40,11 @@ const testChordFamilyHandler = () => {
 
     const exactNote = handler.getExactChordForNote(24);
     console.log(exactNote);
-}
+};
 
 const getOppositeQuality = (quality: ChordQuality): ChordQuality => {
     return quality === 'major' ? 'minor' : 'major';
-}
+};
 
 class ChordFamilyHandler {
     constructor(private data: ChordFamilyData) {}
@@ -77,7 +77,7 @@ class ChordFamilyHandler {
         // search the radius around this chord to find a nearby one
 
         return null;
-    }
+    };
 
     public getExactChordForNote = (note: number): Chord | null => {
         const existingMapping = this.data.mappings[note];
@@ -86,7 +86,7 @@ class ChordFamilyHandler {
         }
 
         return null;
-    }
+    };
 }
 
 type ChordFamiliesModuleReturnValue = {
@@ -99,11 +99,11 @@ declare module '~/core/module_registry/module_registry' {
     }
 }
 
-jamtools.registerModule('chord_families_test', {}, async (moduleAPI) => {
-    const chordFamiliesModule = moduleAPI.deps.module.moduleRegistry.getModule('chord_families');
+// jamtools.registerModule('chord_families_test', {}, async (moduleAPI) => {
+//     const chordFamiliesModule = moduleAPI.deps.module.moduleRegistry.getModule('chord_families');
 
-    const data = chordFamiliesModule.getChordFamilyHandler('mykey');
-});
+//     const data = chordFamiliesModule.getChordFamilyHandler('mykey');
+// });
 
 jamtools.registerModule('chord_families', {}, async (moduleAPI) => {
     const savedData = await moduleAPI.statesAPI.createPersistentState<ChordFamilyData[]>('all_chord_families', []);
