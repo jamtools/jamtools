@@ -31,9 +31,11 @@ export const CaptureForm = ({waiting, toggleWaiting, confirmMacro, captured}: Ca
                     </Button>
                     <div>
                         Captured:
-                        <pre>
-                            {captured && getKeyForMidiEvent(captured)}
-                        </pre>
+                        {captured && (
+                            <pre data-testid={'captured_event'}>
+                                {getKeyForMidiEvent(captured)}
+                            </pre>
+                        )}
                     </div>
                 </>
             ) : (

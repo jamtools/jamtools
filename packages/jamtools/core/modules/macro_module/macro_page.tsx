@@ -15,7 +15,11 @@ export const MacroPage = (props: Props) => {
                 const fieldNames = Object.keys(c);
 
                 return (
-                    <li key={moduleId}>
+                    <li
+                        key={moduleId}
+                        data-testid={`macro-module_registered-module-id_${moduleId}`}
+                        id='yay'
+                    >
                         {moduleId}
                         <ul>
                             {fieldNames.map((fieldName) => {
