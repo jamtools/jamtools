@@ -43,7 +43,7 @@ export class MacroModule implements Module<MacroConfigState> {
     routes = {
         '': () => {
             const mod = MacroModule.use();
-            return <MacroPage state={mod.state} />;
+            return <MacroPage state={mod.state || this.state} />;
         },
     };
 

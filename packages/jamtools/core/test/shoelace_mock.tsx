@@ -1,5 +1,5 @@
 import React from 'react';
 
-const MockComponent = (props: any) => <div {...props}>Mock Component</div>;
+const ShoelaceComponentMock = (props: any) => <div {...props}>Mock Component</div>;
 
-export default MockComponent;
+export default ShoelaceComponentMock;
