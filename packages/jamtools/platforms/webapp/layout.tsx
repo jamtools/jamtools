@@ -17,14 +17,28 @@ type Props = React.PropsWithChildren & {
 };
 
 export const Layout = (props: Props) => {
+    const [showHeader, setShowHeader] = useState(true);
+
     return (
         <>
-            <ToggleThemeButton />
-            <RunLocalButton/>
-            <SlDetails summary='Navigation'>
-                <Tabs modules={props.modules} />
-            </SlDetails>
+            <Button
+                onClick={() => {
+                    setShowHeader(!showHeader);
+                }}
+            >
+                {showHeader ? 'Hide' : 'Show'} {' Navigation'}
+            </Button>
+            {showHeader && (
+                <>
+                    <ToggleThemeButton />
+                    <RunLocalButton/>
+                    <SlDetails summary='Navigation'>
+                        <Tabs modules={props.modules} />
+                    </SlDetails>
+                </>
+            )}
             {props.children}
+
         </>
     );
 };
