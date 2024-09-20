@@ -1,23 +1,9 @@
 import {Module} from '~/core/module_registry/module_registry';
 import {CoreDependencies, ModuleDependencies} from '~/core/types/module_types';
-import {ModuleAPI} from './module_api';
-import {MacroTypeConfigs} from '~/core/modules/macro_module/macro_module_types';
+import type {ModuleAPI} from './module_api';
+import type {MacroTypeConfigs} from '~/core/modules/macro_module/macro_module_types';
 
 export type RegisterRouteOptions = {};
-
-type StateSupervisor<State> = {
-    state: State;
-    setState: (state: State) => Promise<void>;
-    useState: () => State;
-}
-
-type StatesAPI = {
-    createSharedState<State>(stateName: string, initialValue: State): Promise<StateSupervisor<State>>;
-    createSessionState(stateName: string): void;
-    createPersistentState(stateName: string): void;
-    createLocalState(stateName: string): void;
-    createLocalStorageState(stateName: string): void;
-}
 
 export type MacroOptions = {};
 

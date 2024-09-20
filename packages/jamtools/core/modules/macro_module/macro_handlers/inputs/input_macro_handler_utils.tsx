@@ -3,7 +3,7 @@ import {Subject} from 'rxjs';
 
 import {MacroAPI} from '~/core/engine/register';
 import {MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
-import {SharedStateSupervisor} from '~/core/services/states/shared_state_service';
+import {StateSupervisor} from '~/core/services/states/shared_state_service';
 
 import {Edit} from './components/edit_macro';
 
@@ -27,10 +27,10 @@ export const getKeyForMidiEvent = (event: MidiEventFull) => {
 export const getKeyForMacro = (key: string, fieldName: string) => `macro|${fieldName}|${key}`;
 
 export type InputMacroStateHolders = {
-    editing: SharedStateSupervisor<boolean>;
-    waiting: SharedStateSupervisor<boolean>;
-    captured: SharedStateSupervisor<MidiEventFull | null>;
-    savedMidiEvents: SharedStateSupervisor<MidiEventFull[]>;
+    editing: StateSupervisor<boolean>;
+    waiting: StateSupervisor<boolean>;
+    captured: StateSupervisor<MidiEventFull | null>;
+    savedMidiEvents: StateSupervisor<MidiEventFull[]>;
 };
 
 type MacroSaverOptions = {

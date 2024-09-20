@@ -115,7 +115,7 @@ export class StatesAPI {
     /**
      * Create a piece of state to be shared between all connected devices. This state should generally be treated as ephemeral, though it will be cached on the server to retain application state.
     */
-    public createSharedState = async <State>(stateName: string, initialValue: State): Promise<SharedStateSupervisor<State>> => {
+    public createSharedState = async <State>(stateName: string, initialValue: State): Promise<StateSupervisor<State>> => {
         const fullKey = `${this.prefix}|state.shared|${stateName}`;
         const supervisor = new SharedStateSupervisor(fullKey, initialValue, this.modDeps.services.sharedStateService);
         return supervisor;
@@ -124,7 +124,7 @@ export class StatesAPI {
     /**
      * Create a piece of state to be saved in persistent storage such as a database or localStorage. If the deployment is multi-player, then this data is shared between all connected devices.
     */
-    public createPersistentState = async <State>(stateName: string, initialValue: State): Promise<SharedStateSupervisor<State>> => {
+    public createPersistentState = async <State>(stateName: string, initialValue: State): Promise<StateSupervisor<State>> => {
         const fullKey = `${this.prefix}|state.persistent|${stateName}`;
 
         const storedValue = await this.coreDeps.storage.remote.get<State>(fullKey);

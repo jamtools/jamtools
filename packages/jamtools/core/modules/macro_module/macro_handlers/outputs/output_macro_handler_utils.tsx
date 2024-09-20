@@ -1,15 +1,15 @@
 import React from 'react';
 
 import {MacroAPI} from '~/core/engine/register';
-import {SharedStateSupervisor} from '~/core/services/states/shared_state_service';
+import {StateSupervisor} from '~/core/services/states/shared_state_service';
 import {AddingOutputDeviceState, Edit, SavedOutputDeviceState} from './components/output_macro_edit';
 import {SoundfontPeripheral} from '~/core/peripherals/outputs/soundfont_peripheral';
 import {MidiEvent} from '~/core/modules/macro_module/macro_module_types';
 
 export type OutputMacroStateHolders = {
-    editing: SharedStateSupervisor<boolean>;
-    adding: SharedStateSupervisor<AddingOutputDeviceState>;
-    savedMidiOutputs: SharedStateSupervisor<SavedOutputDeviceState[]>;
+    editing: StateSupervisor<boolean>;
+    adding: StateSupervisor<AddingOutputDeviceState>;
+    savedMidiOutputs: StateSupervisor<SavedOutputDeviceState[]>;
 };
 
 type MidiOutputMacroPayload = {
