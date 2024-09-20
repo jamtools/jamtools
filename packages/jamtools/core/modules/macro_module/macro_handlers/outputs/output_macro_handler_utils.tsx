@@ -53,17 +53,12 @@ export const useOutputMacroWaiterAndSaver = async (macroAPI: MacroAPI, states: O
         }
     }
 
-    const onClickSoundfont = () => {
-        soundfontResult = new SoundfontPeripheral();
-        setTimeout(() => {
-            soundfontResult!.initialize();
-        });
-
-        saveOutputDevice({
+    const onClickSoundfont = createAction('on_click_soundfont', async () => {
+        addingOutputDevice.setState({
             channel: 1,
             device: 'soundfont',
         });
-    };
+    });
 
     const onChooseChannel = createAction('on_choose_channel', async (args: {channel: string}) => {
         const state = addingOutputDevice.getState();
@@ -107,6 +102,13 @@ export const useOutputMacroWaiterAndSaver = async (macroAPI: MacroAPI, states: O
             throw new Error('already saved that midi input');
         }
 
+        if (newState.device === 'soundfont') {
+            soundfontResult = new SoundfontPeripheral();
+            setTimeout(() => {
+                soundfontResult!.initialize();
+            });
+        }
+
         saveOutputDevice(newState);
     });
 
@@ -114,7 +116,7 @@ export const useOutputMacroWaiterAndSaver = async (macroAPI: MacroAPI, states: O
         const state = savedOutputDevices.getState();
         const index = state.findIndex(o => o.device === args.device && o.channel === args.channel);
         if (index === -1) {
-            throw new Error('no saved output device found to delete ' + args.device);
+            throw new Error(`no saved output device found to delete '${args.device}'`);
         }
 
         savedOutputDevices.setState([
@@ -160,7 +162,7 @@ export const useOutputMacroWaiterAndSaver = async (macroAPI: MacroAPI, states: O
                     availableMidiOutputs={midiDevices.midiOutputDevices}
                     onChooseChannel={(channel: string) => onChooseChannel({channel})}
                     onClickOutput={(device: string) => onClickOutput({device})}
-                    onClickSoundfont={options.includeSoundfont ? onClickSoundfont : undefined}
+                    onClickSoundfont={options.includeSoundfont ? () => onClickSoundfont({}) : undefined}
                     onConfirm={() => onConfirm({})}
                     queuedDevice={queuedDevice}
                     savedDevices={saved}

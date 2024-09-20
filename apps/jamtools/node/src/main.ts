@@ -29,7 +29,10 @@ export const startJamTools = async (services: Services): Promise<JamToolsEngine>
             qwerty: services.qwerty,
             midi: services.midi,
         },
-        kvStore,
+        storage: {
+            remote: kvStore,
+            userAgent: sessionStore,
+        },
         rpc,
         isMaestro: () => true,
     };

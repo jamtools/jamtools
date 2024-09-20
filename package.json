@@ -9,6 +9,7 @@
     "build": "turbo run build",
     "build-saas": "turbo run build-saas",
     "dev": "turbo run dev",
+    "docs": "cd docs && docker compose up",
     "dev-without-node": "turbo run dev --filter=\"!./apps/jamtools/node\"",
     "debug-node": "npm run debug --prefix apps/jamtools/node",
     "test": "turbo run test",

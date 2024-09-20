@@ -2,7 +2,6 @@ import React, {useState} from 'react';
 
 import {useLocation, useNavigate} from 'react-router-dom';
 
-import SlDetails from '@shoelace-style/shoelace/dist/react/details/index.js';
 import SlTab from '@shoelace-style/shoelace/dist/react/tab/index.js';
 import SlTabGroup from '@shoelace-style/shoelace/dist/react/tab-group/index.js';
 import SlTabPanel from '@shoelace-style/shoelace/dist/react/tab-panel/index.js';
@@ -11,52 +10,24 @@ import {Module} from '~/core/module_registry/module_registry';
 import {Button} from '~/core/components/Button';
 
 import {RunLocalButton} from './components/run_local_button';
+import {Details} from '~/core/components/Details';
 
 type Props = React.PropsWithChildren & {
     modules: Module[];
 };
 
 export const Layout = (props: Props) => {
-    const [showHeader, setShowHeader] = useState(true);
-
     return (
         <>
-            <Button
-                onClick={() => {
-                    setShowHeader(!showHeader);
-                }}
-            >
-                {showHeader ? 'Hide' : 'Show'} {' Navigation'}
-            </Button>
-            {showHeader && (
-                <>
-                    <ToggleThemeButton />
-                    <RunLocalButton/>
-                    <SlDetails summary='Navigation'>
-                        <Tabs modules={props.modules} />
-                    </SlDetails>
-                </>
-            )}
+            <Details summary='Navigation'>
+                <ToggleThemeButton />
+                <RunLocalButton/>
+                <Tabs modules={props.modules} />
+            </Details>
             {props.children}
-
         </>
     );
 };
-
-let darkMode = false;
-if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    darkMode = true;
-}
-
-if (darkMode) {
-    const classList = document.documentElement.classList;
-    for (const cls of classList) {
-        if (cls === 'sl-theme-light') {
-            classList.add('sl-theme-dark');
-            classList.remove(cls);
-        }
-    }
-}
 
 const ToggleThemeButton = () => {
     const onClick = () => {

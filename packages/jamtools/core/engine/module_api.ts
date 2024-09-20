@@ -1,5 +1,5 @@
 import {Module} from '~/core/module_registry/module_registry';
-import {SharedStateSupervisor} from '../services/states/shared_state_service';
+import {SharedStateSupervisor, StateSupervisor, UserAgentStateSupervisor} from '../services/states/shared_state_service';
 import {CoreDependencies, ModuleDependencies} from '../types/module_types';
 import {RegisterRouteOptions} from './register';
 
@@ -106,24 +106,28 @@ export class ModuleAPI {
 
 /**
  * The States API is used for creating shared, persistent, and user-scoped states.
- * @see {@link https://github.com/your-repo/your-project/blob/main/src/MyClass.js}
- * @hideconstructor
 */
 export class StatesAPI {
     constructor(private prefix: string, private coreDeps: CoreDependencies, private modDeps: ModuleDependencies) {
 
     }
 
+    /**
+     * Create a piece of state to be shared between all connected devices. This state should generally be treated as ephemeral, though it will be cached on the server to retain application state.
+    */
     public createSharedState = async <State>(stateName: string, initialValue: State): Promise<SharedStateSupervisor<State>> => {
         const fullKey = `${this.prefix}|state.shared|${stateName}`;
         const supervisor = new SharedStateSupervisor(fullKey, initialValue, this.modDeps.services.sharedStateService);
         return supervisor;
     };
 
+    /**
+     * Create a piece of state to be saved in persistent storage such as a database or localStorage. If the deployment is multi-player, then this data is shared between all connected devices.
+    */
     public createPersistentState = async <State>(stateName: string, initialValue: State): Promise<SharedStateSupervisor<State>> => {
         const fullKey = `${this.prefix}|state.persistent|${stateName}`;
 
-        const storedValue = await this.coreDeps.kvStore.get<State>(fullKey);
+        const storedValue = await this.coreDeps.storage.remote.get<State>(fullKey);
         if (storedValue) {
             initialValue = storedValue;
         }
@@ -135,12 +139,19 @@ export class StatesAPI {
         // every time you access coreDeps, that's the case
         // persistent state has been a weird thing
         supervisor.subject.subscribe(async value => {
-            await this.coreDeps.kvStore.set(fullKey, value);
+            await this.coreDeps.storage.remote.set(fullKey, value);
         });
 
         return supervisor;
     };
-    // createSessionState(stateName: string): void;
-    // createLocalState(stateName: string): void;
-    // createLocalStorageState(stateName: string): void;
+
+    /**
+     * Create a piece of state to be saved on the given user agent. In the browser's case, this will use `localStorage`
+    */
+    public createUserAgentState = async <State>(stateName: string, initialValue: State): Promise<StateSupervisor<State>> => {
+        const fullKey = `${this.prefix}|state.useragent|${stateName}`;
+        const value = await this.coreDeps.storage.userAgent.get<State>(fullKey);
+        const supervisor = new UserAgentStateSupervisor(fullKey, value || initialValue, this.coreDeps.storage.userAgent);
+        return supervisor;
+    };
 }

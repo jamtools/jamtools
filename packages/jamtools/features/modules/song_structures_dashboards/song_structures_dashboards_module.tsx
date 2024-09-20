@@ -1,7 +1,10 @@
 import React from 'react';
 
+import {Link} from 'react-router-dom';
+
 import {jamtools} from '~/core/engine/register';
 import {BasicGuitarTabView, GuitarTabView} from '~/core/modules/song_structures/components/guitar_tab_view';
+import {Button} from '~/core/components/Button';
 
 declare module '~/core/module_registry/module_registry' {
     interface AllModules {
@@ -13,12 +16,25 @@ type SongStructuresDashboardsModuleReturnValue = {
 
 };
 
-jamtools.registerModule('song_structures_dashboards', {}, async (moduleAPI): Promise<SongStructuresDashboardsModuleReturnValue> => {
-    // moduleAPI.registerRoute('', {}, () => {
-    //     return (
+type GuitarDisplaySettings = {
+    showGuitar: boolean;
+    showLetters: boolean;
+};
 
-    //     )
-    // });
+jamtools.registerModule('song_structures_dashboards', {}, async (moduleAPI): Promise<SongStructuresDashboardsModuleReturnValue> => {
+    const state = await moduleAPI.statesAPI.createUserAgentState<GuitarDisplaySettings>('guitar_display_settings', {showGuitar: true, showLetters: true});
+
+    moduleAPI.registerRoute('', {}, () => {
+        return (
+            <div>
+                <Link to='/modules/song_structures_dashboards/bass_guitar'>
+                    <Button>
+                        Go to Bass Guitar
+                    </Button>
+                </Link>
+            </div>
+        );
+    });
 
     moduleAPI.registerRoute('bass_guitar', {}, () => {
         const props: React.ComponentProps<typeof GuitarTabView> = {
@@ -43,13 +59,35 @@ jamtools.registerModule('song_structures_dashboards', {}, async (moduleAPI): Pro
             ],
         };
 
+        const myState = state.useState();
+        console.log(myState);
+
         return (
             <>
                 <div>
-                    <BasicGuitarTabView {...props}/>
+                    <Button
+                        onClick={() => state.setState({...state.getState(), showLetters: !state.getState().showLetters})}
+                    >
+                        {myState.showLetters ? 'Hide' : 'Show'} {' Letters'}
+                    </Button>
+                    {myState.showLetters && (
+                        <div>
+                            <BasicGuitarTabView {...props}/>
+                        </div>
+                    )}
                 </div>
+
                 <div>
-                    <GuitarTabView {...props}/>
+                    <Button
+                        onClick={() => state.setState({...state.getState(), showGuitar: !state.getState().showGuitar})}
+                    >
+                        {myState.showGuitar ? 'Hide' : 'Show'} {' Guitar'}
+                    </Button>
+                    {myState.showGuitar && (
+                        <div>
+                            <GuitarTabView {...props}/>
+                        </div>
+                    )}
                 </div>
             </>
 

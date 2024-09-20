@@ -15,8 +15,11 @@ export type CoreDependencies = {
     inputs: {
         qwerty: QwertyService;
         midi: MidiService;
-    }
-    kvStore: KVStore;
+    };
+    storage: {
+        remote: KVStore;
+        userAgent: KVStore;
+    };
     rpc: Rpc;
     isMaestro: () => boolean;
 }

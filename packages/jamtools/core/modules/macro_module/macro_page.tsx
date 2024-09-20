@@ -1,5 +1,6 @@
 import React from 'react';
 import {MacroConfigState} from './macro_module';
+import {Details} from '~/core/components/Details';
 
 type Props = {
     state: MacroConfigState;
@@ -18,23 +19,28 @@ export const MacroPage = (props: Props) => {
                     <li
                         key={moduleId}
                         data-testid={`macro-module_registered-module-id_${moduleId}`}
-                        id='yay'
+                        style={{
+                            maxWidth: '400px',
+                        }}
                     >
-                        {moduleId}
-                        <ul>
-                            {fieldNames.map((fieldName) => {
-                                const mapping = c[fieldName];
-                                const producedMacro = props.state.producedMacros[moduleId][fieldName];
-                                const maybeComponents = (producedMacro as {components?: {edit: React.ElementType}} | undefined);
+                        <Details
+                            summary={moduleId}
+                        >
+                            <ul>
+                                {fieldNames.map((fieldName) => {
+                                    const mapping = c[fieldName];
+                                    const producedMacro = props.state.producedMacros[moduleId][fieldName];
+                                    const maybeComponents = (producedMacro as {components?: {edit: React.ElementType}} | undefined);
 
-                                return (
-                                    <li key={fieldName} style={{margin: '20px', border: '1px solid', padding: '20px'}}>
-                                        {maybeComponents?.components && <maybeComponents.components.edit/>}
-                                        {fieldName} - {mapping.type}
-                                    </li>
-                                );
-                            })}
-                        </ul>
+                                    return (
+                                        <li key={fieldName} style={{margin: '20px', border: '1px solid', padding: '20px'}}>
+                                            {maybeComponents?.components && <maybeComponents.components.edit/>}
+                                            {fieldName} - {mapping.type}
+                                        </li>
+                                    );
+                                })}
+                            </ul>
+                        </Details>
                     </li>
                 );
             })}

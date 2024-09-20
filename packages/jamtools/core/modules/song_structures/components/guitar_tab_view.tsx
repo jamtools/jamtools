@@ -1,6 +1,7 @@
 import React from 'react';
 
 import GuitarImport from 'react-guitar';
+import {Card} from '~/core/components/Card';
 const Guitar = (GuitarImport as unknown as {default: typeof GuitarImport}).default;
 
 type Props = {
@@ -44,7 +45,7 @@ export const BasicGuitarTabView = (props: Props) => {
             }
         }
         innerResult.push('');
-        result.push(innerResult.join('   '));
+        result.push(innerResult.join(' | '));
         // result.push(innerResult.join(' | '));
     }
 
@@ -77,22 +78,27 @@ export const BasicGuitarTabView = (props: Props) => {
     // }
 
     return (
-        <div>
+        <Card
+            style={{
+                margin: '20px',
+                // border: 'solid 2px',
+            }}
+        >
             <pre style={{
-                fontSize: '40px',
-                border: 'solid 1px',
-                padding: '10px',
+                fontSize: '7vw',
+                // fontSize: '40px',
+                // padding: '10px',
+                margin: 0,
                 display: 'inline-block',
                 whiteSpace: 'pre-wrap',
             }}>
                 {fullText}
             </pre>
-        </div>
+        </Card>
     );
 };
 
 export const GuitarTabView = (props: Props) => {
-    return <BasicGuitarTabView {...props}/>;
     const chosen = props.chosenFrets;
 
     const str = Array.from('0'.repeat(props.numberOfStrings));
