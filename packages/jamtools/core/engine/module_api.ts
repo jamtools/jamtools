@@ -11,7 +11,7 @@ type ActionOptions = object;
 type ActionCallback<Args extends object, ReturnValue = any> = (args: Args) => Promise<ReturnValue>;
 
 /**
- * The API provided in the callback when calling jamtools.registerModule. The ModuleAPI is the entrypoint in the framework for everything pertaining to creating a module.
+ * The API provided in the callback when calling `registerModule`. The ModuleAPI is the entrypoint in the framework for everything pertaining to creating a module.
 */
 export class ModuleAPI {
     public deps: {core: CoreDependencies; module: ModuleDependencies};

@@ -3,8 +3,10 @@ import React from 'react';
 import {Link} from 'react-router-dom';
 
 import {jamtools} from '~/core/engine/register';
-import {BasicGuitarTabView, GuitarTabView} from '~/core/modules/song_structures/components/guitar_tab_view';
+import {GuitarChordRootsDisplay, GuitarTabView} from '~/core/modules/song_structures/components/guitar_tab_view';
 import {Button} from '~/core/components/Button';
+import {MidiEvent} from '~/core/modules/macro_module/macro_module_types';
+import {ChordChoice, ChordDisplay} from '~/core/modules/song_structures/components/chord_display';
 
 declare module '~/core/module_registry/module_registry' {
     interface AllModules {
@@ -21,8 +23,119 @@ type GuitarDisplaySettings = {
     showLetters: boolean;
 };
 
+const initialGuitarDisplaySettings: GuitarDisplaySettings = {
+    showGuitar: false,
+    showLetters: false,
+};
+
 jamtools.registerModule('song_structures_dashboards', {}, async (moduleAPI): Promise<SongStructuresDashboardsModuleReturnValue> => {
-    const state = await moduleAPI.statesAPI.createUserAgentState<GuitarDisplaySettings>('guitar_display_settings', {showGuitar: true, showLetters: true});
+    const states = moduleAPI.statesAPI;
+    const macros = moduleAPI.deps.module.moduleRegistry.getModule('macro');
+
+    const state = await states.createUserAgentState('guitar_display_settings', initialGuitarDisplaySettings);
+
+    const draftChordsState = await states.createSharedState<ChordChoice[] | null>('draft_chord_choices', null);
+    const confirmedChordsState = await states.createSharedState<ChordChoice[] | null>('confirmed_chord_choices', null);
+
+    // const draftScaleChoice = moduleAPI.statesAPI.createSharedState('', true);
+    // const confirmedScaleChoise = moduleAPI.statesAPI.createSharedState('', true);
+
+    const musicalKeyboardInputMacro = await macros.createMacro(moduleAPI, 'keyboard_in', 'musical_keyboard_input', {enableQwerty: true});
+    const musicalKeyboardOutputMacro = await macros.createMacro(moduleAPI, 'keyboard_out', 'musical_keyboard_output', {});
+
+    const toggleChordChooseMode = await macros.createMacro(moduleAPI, 'toggle_chord_choose_mode', 'midi_button_input', {enableQwerty: true});
+    // const toggleChordChooseMode = moduleAPI.createMacro();
+    // const toggleScaleChooseMode = moduleAPI.createMacro();
+
+    // const messageState = await states.createSharedState('message', '');
+
+    const currentlyHeldNotes = new Set<number>();
+
+    musicalKeyboardInputMacro.subject.subscribe(midiEvent => {
+        midiEvent.event.number = midiEvent.event.number % 12;
+        if (midiEvent.event.type === 'noteon') {
+            currentlyHeldNotes.add(midiEvent.event.number);
+        } else {
+            currentlyHeldNotes.delete(midiEvent.event.number);
+        }
+
+        const draftChords = draftChordsState.getState();
+        // const draftScale = draftScaleChoice.getState();
+
+        // if (draftScale !== null) {
+        //     handleScaleChoiceInput(midiEvent.event);
+        //     return;
+        // }
+
+        if (draftChords !== null) {
+            if (midiEvent.event.type === 'noteon') {
+                handleChordChoiceInput(midiEvent.event);
+            }
+            return;
+        }
+
+        handleMusicalKeyboardInput(midiEvent.event);
+    });
+
+    function handleChordChoiceInput(midiEvent: MidiEvent) {
+        const heldDown = Array.from(currentlyHeldNotes);
+        if (!heldDown.length || heldDown.length > 2) {
+            return;
+        }
+
+        if (heldDown.length == 1) {
+            // draftState.setState(state => [...state, midiEvent.event.number]);
+            return;
+        }
+
+        let chord: ChordChoice;
+
+        const diff = (12 + midiEvent.number - heldDown[0]) % 12;
+        if (diff === 3) {
+            chord = {
+                root: heldDown[0] % 12,
+                quality: 'minor',
+            };
+        } else if (diff === 4) {
+            chord = {
+                root: heldDown[0] % 12,
+                quality: 'major',
+            };
+        } else {
+            return;
+        }
+
+        const current = draftChordsState.getState() || [];
+        draftChordsState.setState([...current, chord]);
+    }
+
+    function handleMusicalKeyboardInput(midiEvent: MidiEvent) {
+        musicalKeyboardOutputMacro.send(midiEvent);
+    }
+
+    toggleChordChooseMode.subject.subscribe(midiEvent => {
+        if (midiEvent.event.type === 'noteoff') {
+            return;
+        }
+
+        const draftChords = draftChordsState.getState();
+        // const draftScale = draftScaleChoice.getState();
+
+        // if (draftScale) {
+        // return;
+        // }
+
+        if (draftChords) {
+            // confirm
+            confirmedChordsState.setState(draftChords);
+            draftChordsState.setState(null);
+            // alert('confirmed')
+        } else {
+            // start drafting
+            // alert('start drafting')
+            draftChordsState.setState([]);
+        }
+    });
 
     moduleAPI.registerRoute('', {}, () => {
         return (
@@ -39,7 +152,7 @@ jamtools.registerModule('song_structures_dashboards', {}, async (moduleAPI): Pro
     moduleAPI.registerRoute('bass_guitar', {}, () => {
         const props: React.ComponentProps<typeof GuitarTabView> = {
             numberOfStrings: 4,
-            chosenFrets:[
+            chosenFrets: [
                 {
                     fret: 2,
                     string: 2,
@@ -59,33 +172,61 @@ jamtools.registerModule('song_structures_dashboards', {}, async (moduleAPI): Pro
             ],
         };
 
-        const myState = state.useState();
-        console.log(myState);
+        const displaySettings = state.useState();
+        console.log(displaySettings);
+
+        const draftChords = draftChordsState.useState();
+        const confirmedChords = confirmedChordsState.useState();
 
         return (
             <>
                 <div>
-                    <Button
-                        onClick={() => state.setState({...state.getState(), showLetters: !state.getState().showLetters})}
-                    >
-                        {myState.showLetters ? 'Hide' : 'Show'} {' Letters'}
-                    </Button>
-                    {myState.showLetters && (
+                    <div>
+                        <Button
+                            onClick={() => state.setState({...state.getState(), showLetters: !state.getState().showLetters})}
+                        >
+                            {displaySettings.showLetters ? 'Hide' : 'Show'} {' Letters'}
+                        </Button>
+                        <Button
+                            onClick={() => state.setState({...state.getState(), showGuitar: !state.getState().showGuitar})}
+                        >
+                            {displaySettings.showGuitar ? 'Hide' : 'Show'} {' Guitar'}
+                        </Button>
+                    </div>
+                    {displaySettings.showLetters && (
                         <div>
-                            <BasicGuitarTabView {...props}/>
+                            {/* <BasicGuitarTabView {...props} /> */}
+                            <div>
+                                Confirmed:
+                                <div>
+                                    {confirmedChords?.map(c => (
+                                        <ChordDisplay chord={c}/>
+                                    ))}
+                                </div>
+                            </div>
+                            <div>
+                                Draft:
+                                <div>
+                                    {draftChords?.map(c => (
+                                        <ChordDisplay chord={c}/>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
                     )}
                 </div>
 
                 <div>
-                    <Button
-                        onClick={() => state.setState({...state.getState(), showGuitar: !state.getState().showGuitar})}
-                    >
-                        {myState.showGuitar ? 'Hide' : 'Show'} {' Guitar'}
-                    </Button>
-                    {myState.showGuitar && (
+                    {/* {displaySettings.showGuitar && (
                         <div>
-                            <GuitarTabView {...props}/>
+                            <GuitarTabView {...props} />
+                        </div>
+                    )} */}
+                    {displaySettings.showGuitar && (
+                        <div>
+                            <GuitarChordRootsDisplay
+                                chords={confirmedChords || []}
+                            />
                         </div>
                     )}
                 </div>

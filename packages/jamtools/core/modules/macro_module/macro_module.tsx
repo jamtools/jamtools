@@ -10,6 +10,7 @@ import {ModuleAPI} from '~/core/engine/module_api';
 
 import './macro_handlers/inputs/musical_keyboard_input_macro_handler';
 import './macro_handlers/inputs/midi_control_change_input_macro_handler';
+import './macro_handlers/inputs/midi_button_input_macro_handler';
 import './macro_handlers/outputs/musical_keyboard_output_macro_handler';
 import './macro_handlers/outputs/midi_control_change_output_macro_handler';
 

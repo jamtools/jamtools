@@ -14,4 +14,4 @@ export const QWERTY_TO_MIDI_MAPPINGS = {
     'k': 12,
     'o': 13,
     'l': 14,
-} as const;
+} as Record<string, number>;

@@ -19,7 +19,7 @@
     // "hideBreadcrumbs": true,
     // "hidePageTitle": true,
     // "hideGroupHeadings": true,
-    "useCodeBlocks": true,
+    "useCodeBlocks": false,
     "expandParameters": true,
     // "parametersFormat": "table",
     // "interfacePropertiesFormat": "table",

@@ -2,6 +2,7 @@ import React from 'react';
 
 import GuitarImport from 'react-guitar';
 import {Card} from '~/core/components/Card';
+import {ChordChoice} from './chord_display';
 const Guitar = (GuitarImport as unknown as {default: typeof GuitarImport}).default;
 
 type Props = {
@@ -13,6 +14,34 @@ type ChosenNote = {
     fret: number;
     string: number;
 }
+
+type GuitarChordRootsDisplayProps = {
+    chords: ChordChoice[];
+}
+
+const convertRootToChosenFret = (chord: ChordChoice): ChosenNote => {
+    const root = chord.root;
+    const firstString = (root >= 4) && (root <= 9);
+    const stringNumber = firstString ? 3 : 2;
+
+    const fretNumber = firstString ? root - 4 : (root + 3) % 12;
+
+    return {
+        fret: fretNumber,
+        string: stringNumber,
+    };
+};
+
+export const GuitarChordRootsDisplay = (props: GuitarChordRootsDisplayProps) => {
+    const chosenNotes: ChosenNote[] = props.chords.map(root => convertRootToChosenFret(root));
+
+    return (
+        <GuitarTabView
+            chosenFrets={chosenNotes}
+            numberOfStrings={4}
+        />
+    );
+};
 
 export const BasicGuitarTabView = (props: Props) => {
     const result: string[] = [];
