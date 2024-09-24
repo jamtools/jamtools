@@ -92,6 +92,9 @@ const Tabs = (props: TabsProps) => {
     }
 
     const showRoute = (modId: string, route: string) => {
+        if (route.startsWith('/')) {
+            route = route.substring(1);
+        }
         navigate(`/modules/${modId}/${route}`);
     };
 

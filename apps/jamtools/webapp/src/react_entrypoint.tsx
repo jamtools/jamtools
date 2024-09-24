@@ -15,7 +15,6 @@ import {BrowserMidiService} from '~/platforms/webapp/services/browser_midi_servi
 import {BrowserJsonRpcClientAndServer} from '~/platforms/webapp/services/browser_json_rpc';
 import {JamToolsEngine} from '~/core/engine/engine';
 import {ExtraModuleDependencies} from '~/core/module_registry/module_registry';
-import {UltimateGuitarService} from '~/features/modules/ultimate_guitar/ultimate_guitar_service';
 
 const waitForPageLoad = () => new Promise<void>(resolve => {
     window.addEventListener('DOMContentLoaded', () => {
@@ -49,11 +48,11 @@ export const startJamToolsAndRenderApp = async (): Promise<JamToolsEngine> => {
     };
 
     const extraDeps: ExtraModuleDependencies = {
-        "Ultimate Guitar": {
+        'Ultimate Guitar': {
             domParser: (htmlData: string) => new DOMParser().parseFromString(htmlData, 'text/html'),
-            ultimateGuitarService: new UltimateGuitarService(),
+            ultimateGuitarService: createNotImplementedProxy(),
         },
-    }
+    };
 
     const engine = new JamToolsEngine(coreDeps, extraDeps);
 
@@ -68,4 +67,14 @@ export const startJamToolsAndRenderApp = async (): Promise<JamToolsEngine> => {
     await engine.waitForInitialize();
 
     return engine;
+};
+
+const createNotImplementedProxy = () => {
+    return new Proxy({}, {
+        get(target, prop) {
+            return () => {
+                throw new Error(`${prop.toString()} is not implemented in this environment.`);
+            };
+        }
+    });
 };

@@ -26,6 +26,8 @@ export const startJamTools = async (services: Services): Promise<JamToolsEngine>
     const sessionStore = new NodeKVStoreService('session');
     const rpc = new NodeJsonRpcClientAndServer(`${WS_HOST}/ws?is_maestro=true`, sessionStore);
 
+    const ugStore = new NodeKVStoreService('ultimate_guitar');
+
     const coreDeps: CoreDependencies = {
         log: console.log,
         showError: console.error,
@@ -39,11 +41,11 @@ export const startJamTools = async (services: Services): Promise<JamToolsEngine>
     };
 
     const extraDeps: ExtraModuleDependencies = {
-        "Ultimate Guitar": {
+        'Ultimate Guitar': {
             domParser: (htmlData: string) => new JSDOM(htmlData).window.document,
-            ultimateGuitarService: new UltimateGuitarService(),
+            ultimateGuitarService: new UltimateGuitarService(ugStore),
         },
-    }
+    };
 
     const engine = new JamToolsEngine(coreDeps, extraDeps);
 

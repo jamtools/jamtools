@@ -1,17 +1,18 @@
-// import {JSDOM} from 'jsdom';
+export type ParsedTabPageData = {
+    title: string;
+    tabData: string;
+}
 
-// import htmlData from './sample_ug_html';
+export const parseUltimateGuitarHTMLContent = (doc: Document): ParsedTabPageData | null => {
+    let title = '';
+    const titleContainer = doc.querySelector('meta[property="og:title"]');
+    if (titleContainer) {
+        title = (titleContainer as HTMLMetaElement).content;
+        title = title.replace(' (Chords)', '');
+        title = title.replace(' (Official)', '');
+        title = title.replace(' (Bass)', '');
+    }
 
-import fs from 'fs';
-
-export const parseUltimateGuitarHTMLContent = (doc: Document) => {
-    // const domParser = new DOMParser();
-    // const parsed = domParser.parseFromString('');
-    // parsed.querySelector
-
-    // const dom = new JSDOM(htmlData);
-
-    // const doc = dom.window.document;
     const el = doc.querySelector('.js-store');
     const content = el?.getAttribute('data-content');
 
@@ -21,18 +22,17 @@ export const parseUltimateGuitarHTMLContent = (doc: Document) => {
     houseForEscapedHTML.innerHTML = content || '';
     const unescapedJSONData = houseForEscapedHTML.textContent || '';
 
-    fs.writeFileSync('out.json', unescapedJSONData);
-
     let chordSheetData: string | undefined;
     try {
         const jsonData = JSON.parse(unescapedJSONData);
         chordSheetData = jsonData?.store?.page.data.tab_view.wiki_tab.content;
     } catch (e) {
+        console.error(e);
     }
 
     if (!chordSheetData) {
-        console.log('failed to parse chord sheet data');
-        return null;
+        throw new Error('failed to parse chord sheet data');
+        // return null;
     }
 
     function cleanChordSheet(input: string): string {
@@ -43,6 +43,9 @@ export const parseUltimateGuitarHTMLContent = (doc: Document) => {
             .replace(/\n{2,}/g, '\n\n');      // Ensure spacing between sections
     }
 
-    const result = cleanChordSheet(chordSheetData);
-    return result;
-}
+    const tabData = cleanChordSheet(chordSheetData);
+    return {
+        title,
+        tabData,
+    };
+};
