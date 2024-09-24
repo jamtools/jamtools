@@ -2,10 +2,10 @@ import React from 'react';
 
 import {Button} from '~/core/components/Button';
 
-import {ParsedTabPageData} from '../ultimate_guitar_utils';
+import {UltimateGuitarTab} from '../ultimate_guitar_types';
 
 type UltimateGuitarViewProps = {
-    currentTab: ParsedTabPageData | null;
+    currentTab: UltimateGuitarTab | null;
     getTabForUrl: (url: string) => void;
 };
 
@@ -34,7 +34,7 @@ export const UltimateGuitarMainView = (props: UltimateGuitarViewProps) => {
             </div>
             <div>
                 <pre>
-                    {props.currentTab?.tabData}
+                    {props.currentTab?.tabLyrics}
                 </pre>
             </div>
         </div>

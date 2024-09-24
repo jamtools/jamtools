@@ -35,17 +35,25 @@ export const parseUltimateGuitarHTMLContent = (doc: Document): ParsedTabPageData
         // return null;
     }
 
-    function cleanChordSheet(input: string): string {
-        // Remove [ch] and [tab] tags
-        return input
-            .replace(/\[\/?(ch|tab)\]/g, '') // Remove chord/tab tags
-            .replace(/\r\n/g, '\n')           // Normalize line endings
-            .replace(/\n{2,}/g, '\n\n');      // Ensure spacing between sections
-    }
-
-    const tabData = cleanChordSheet(chordSheetData);
+    const tabData = cleanUltimateGuitarChordTabLyrics(chordSheetData);
     return {
         title,
         tabData,
     };
 };
+
+export const cleanUltimateGuitarChordTabLyrics = (tabLyrics: string): string => {
+    return tabLyrics
+        .replace(/\[\/?(ch|tab)\]/g, '')
+        .replace(/\r\n/g, '\n')
+        .replace(/\n{2,}/g, '\n\n');
+}
+
+export const cleanUltimateGuitarOfficialTabLyrics = (tabLyrics: string): string => {
+    return tabLyrics
+        .replace(/\[ch.*?\](.*?)\[\/ch\]/g, '$1')
+        .replace(/\[\/?tab\]/g, '')
+        .replace(/\[\/?syllable.*?\]/g, '')
+        .replace(/\r\n/g, '\n')
+        .replace(/\n{2,}/g, '\n\n');
+}
