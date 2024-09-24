@@ -35,7 +35,6 @@ export class ModuleAPI {
     registerRoute = (routePath: string, options: RegisterRouteOptions, component: React.ElementType) => {
         const routes = this.module.routes || {};
         routes[routePath] = {
-            route: routePath,
             options,
             component,
         };

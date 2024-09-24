@@ -51,6 +51,6 @@ export const parseUltimateGuitarTabUrl = (url: string): ParsedUltimateGuitarUrl 
     return {
         url,
         id,
-        type: resourceType,
+        type: resourceType as keyof typeof UltimateGuitarResourceTypes,
     };
 };

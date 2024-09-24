@@ -47,7 +47,7 @@ export const cleanUltimateGuitarChordTabLyrics = (tabLyrics: string): string => 
         .replace(/\[\/?(ch|tab)\]/g, '')
         .replace(/\r\n/g, '\n')
         .replace(/\n{2,}/g, '\n\n');
-}
+};
 
 export const cleanUltimateGuitarOfficialTabLyrics = (tabLyrics: string): string => {
     return tabLyrics
@@ -56,4 +56,4 @@ export const cleanUltimateGuitarOfficialTabLyrics = (tabLyrics: string): string 
         .replace(/\[\/?syllable.*?\]/g, '')
         .replace(/\r\n/g, '\n')
         .replace(/\n{2,}/g, '\n\n');
-}
+};

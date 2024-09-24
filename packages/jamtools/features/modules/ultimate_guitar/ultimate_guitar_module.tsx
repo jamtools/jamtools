@@ -52,7 +52,7 @@ jamtools.registerModule('Ultimate_Guitar', {}, async (moduleAPI): Promise<Ultima
         }
 
         const deps = moduleAPI.deps.extra['Ultimate Guitar'];
-        const tab = await handleSubmitTabUrl(args.url, deps)
+        const tab = await handleSubmitTabUrl(args.url, deps);
         if (typeof tab === 'string') {
             throw new Error(tab);
         }

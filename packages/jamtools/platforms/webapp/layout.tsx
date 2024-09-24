@@ -29,7 +29,7 @@ export const Layout = (props: Props) => {
             continue;
         }
 
-        for (let route of Object.keys(mod.routes)) {
+        for (const route of Object.keys(mod.routes)) {
             const cleanedRoute = route.endsWith('/') ? route.substring(0, route.length - 1) : route;
 
             if (pathname === `/modules/${mod.moduleId}/${cleanedRoute}`) {

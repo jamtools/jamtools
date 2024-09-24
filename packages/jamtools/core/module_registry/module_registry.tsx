@@ -6,8 +6,7 @@ import type {ModuleAPI} from '../engine/module_api';
 import {RegisterRouteOptions} from '../engine/register';
 
 type RegisteredRoute = {
-    route: string;
-    options: RegisterRouteOptions;
+    options?: RegisterRouteOptions;
     component: React.ElementType;
 }
 
