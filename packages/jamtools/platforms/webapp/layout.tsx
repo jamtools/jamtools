@@ -17,13 +17,41 @@ type Props = React.PropsWithChildren & {
 };
 
 export const Layout = (props: Props) => {
+    const loc = useLocation();
+    let pathname = loc.pathname;
+    if (!pathname.endsWith('/')) {
+        pathname += '/';
+    }
+
+    let showNavbar = true;
+    for (const mod of props.modules) {
+        if (!mod.routes) {
+            continue;
+        }
+
+        for (let route of Object.keys(mod.routes)) {
+            const cleanedRoute = route.endsWith('/') ? route.substring(0, route.length - 1) : route;
+
+            if (pathname === `/modules/${mod.moduleId}/${cleanedRoute}`) {
+                const options = mod.routes[route].options;
+                if (options?.hideNavbar) {
+                    showNavbar = false;
+                }
+            }
+        }
+    }
+
     return (
         <>
-            <ToggleThemeButton />
-            <RunLocalButton/>
-            <SlDetails summary='Navigation'>
-                <Tabs modules={props.modules} />
-            </SlDetails>
+            {showNavbar && (
+                <>
+                    <ToggleThemeButton />
+                    <RunLocalButton/>
+                    <SlDetails summary='Navigation'>
+                        <Tabs modules={props.modules} />
+                    </SlDetails>
+                </>
+            )}
             {props.children}
         </>
     );

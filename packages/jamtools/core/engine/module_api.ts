@@ -34,7 +34,12 @@ export class ModuleAPI {
     */
     registerRoute = (routePath: string, options: RegisterRouteOptions, component: React.ElementType) => {
         const routes = this.module.routes || {};
-        routes[routePath] = component;
+        routes[routePath] = {
+            route: routePath,
+            options,
+            component,
+        };
+
         this.module.routes = {...routes};
         if (this.modDeps.moduleRegistry.getCustomModule(this.module.moduleId)) {
             this.modDeps.moduleRegistry.refreshModules();

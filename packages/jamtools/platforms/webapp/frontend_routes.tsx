@@ -30,7 +30,7 @@ export const FrontendRoutes = () => {
         moduleRoutes.push({
             path: mod.moduleId,
             children: Object.keys(routes).map((path): RouteObject => {
-                const Component = routes[path];
+                const Component = routes[path].component;
                 const fixedPath = path.startsWith('/') ? path.slice(1) : path;
                 return {
                     path: fixedPath,

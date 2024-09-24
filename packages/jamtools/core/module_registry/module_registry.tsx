@@ -1,7 +1,15 @@
 import React, {useEffect, useState} from 'react';
 
 import {Subject} from 'rxjs';
+
 import type {ModuleAPI} from '../engine/module_api';
+import {RegisterRouteOptions} from '../engine/register';
+
+type RegisteredRoute = {
+    route: string;
+    options: RegisterRouteOptions;
+    component: React.ElementType;
+}
 
 export type Module<State extends object = any> = {
     moduleId: string;
@@ -9,7 +17,7 @@ export type Module<State extends object = any> = {
     Provider?: React.ElementType;
     state?: State;
     subject?: Subject<State>;
-    routes?: Record<string, React.ElementType>;
+    routes?: Record<string, RegisteredRoute>;
 };
 
 // this interface is meant to be extended by each individual module file through interface merging

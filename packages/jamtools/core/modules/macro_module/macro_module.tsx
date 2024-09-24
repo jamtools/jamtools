@@ -41,9 +41,11 @@ export class MacroModule implements Module<MacroConfigState> {
     constructor(private coreDeps: CoreDependencies, private moduleDeps: ModuleDependencies) {}
 
     routes = {
-        '': () => {
-            const mod = MacroModule.use();
-            return <MacroPage state={mod.state} />;
+        '': {
+            component: () => {
+                const mod = MacroModule.use();
+                return <MacroPage state={mod.state} />;
+            },
         },
     };
 

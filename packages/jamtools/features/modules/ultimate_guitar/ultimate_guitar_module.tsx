@@ -7,6 +7,7 @@ import {cleanUltimateGuitarOfficialTabLyrics, parseUltimateGuitarHTMLContent} fr
 import type {UltimateGuitarService} from './ultimate_guitar_service';
 import {UltimateGuitarMainView} from './components/ultimate_guitar_main_view';
 import {UltimateGuitarTab, parseUltimateGuitarTabUrl} from './ultimate_guitar_types';
+import {UltimateGuitarManageView} from './components/ultimate_guitar_manage_view';
 
 type UltimateGuitarModuleDependencies = {
     domParser(htmlData: string): Document;
@@ -31,7 +32,7 @@ declare module '~/core/module_registry/module_registry' {
     }
 }
 
-jamtools.registerModule('Ultimate Guitar', {}, async (moduleAPI): Promise<UltimateGuitarModuleReturnValue> => {
+jamtools.registerModule('Ultimate_Guitar', {}, async (moduleAPI): Promise<UltimateGuitarModuleReturnValue> => {
     // const savedData = await moduleAPI.statesAPI.createPersistentState<SavedSetlist[]>('saved_setlists', []);
     const savedTabs = await moduleAPI.statesAPI.createPersistentState<UltimateGuitarTab[]>('saved_tabs', []);
 
@@ -60,7 +61,7 @@ jamtools.registerModule('Ultimate Guitar', {}, async (moduleAPI): Promise<Ultima
         savedTabs.setState([...savedTabs.getState(), tab]);
     });
 
-    moduleAPI.registerRoute('/', {}, () => {
+    moduleAPI.registerRoute('/', {hideNavbar: true}, () => {
         const tabData = currentTabData.useState();
 
         return (
@@ -75,7 +76,7 @@ jamtools.registerModule('Ultimate Guitar', {}, async (moduleAPI): Promise<Ultima
         const tabData = currentTabData.useState();
 
         return (
-            <UltimateGuitarMainView
+            <UltimateGuitarManageView
                 currentTab={tabData}
                 getTabForUrl={(url: string) => submitTabUrl({url})}
             />
