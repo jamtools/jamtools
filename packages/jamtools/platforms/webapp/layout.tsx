@@ -130,6 +130,7 @@ const Tabs = (props: TabsProps) => {
         <React.Fragment key={m.moduleId}>
             <SlTab
                 slot="nav"
+                data-testid={`navbar_module_link-${m.moduleId}`}
                 panel={m.moduleId}
                 active={m.moduleId === moduleId}
                 onClick={() => showRoute(m.moduleId, '')}

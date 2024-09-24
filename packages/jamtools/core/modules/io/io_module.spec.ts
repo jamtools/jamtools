@@ -3,7 +3,7 @@ import {makeMockCoreDependencies, makeMockExtraDependences} from '~/core/test/mo
 
 describe('IoModule', () => {
     it('should initialize with the engine', async () => {
-        const coreDeps = makeMockCoreDependencies();
+        const coreDeps = makeMockCoreDependencies({store: {}});
         const extraDeps = makeMockExtraDependences();
 
         const engine = new JamToolsEngine(coreDeps, extraDeps);

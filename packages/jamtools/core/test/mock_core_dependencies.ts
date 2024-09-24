@@ -21,8 +21,15 @@ class MockQwertyService implements QwertyService {
 }
 
 class MockKVStore implements KVStore {
-    get = async <T>(key: string) => {
-        return {} as T;
+    constructor(private store: Record<string, string> = {}) {}
+
+    get = async <T>(key: string): Promise<T | null> => {
+        const value = this.store[key];
+        if (value) {
+            return JSON.parse(value);
+        }
+
+        return null;
     };
 
     set = async <T>(key: string, value: T): Promise<void> => {
@@ -48,16 +55,20 @@ class MockRpcService implements Rpc {
     };
 }
 
-export const makeMockCoreDependencies = () => {
+type MakeMockCoreDependenciesOptions = {
+    store: Record<string, string>;
+}
+
+export const makeMockCoreDependencies = ({store}: MakeMockCoreDependenciesOptions) => {
     return {
         isMaestro: () => true,
         showError: console.error,
-        log: jest.fn(),
+        log: () => {},
         inputs: {
             midi: new MockMidiService(),
             qwerty: new MockQwertyService(),
         },
-        kvStore: new MockKVStore(),
+        kvStore: new MockKVStore(store),
         rpc: new MockRpcService(),
     } satisfies CoreDependencies;
 };
