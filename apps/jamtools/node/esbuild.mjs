@@ -7,7 +7,7 @@ let externals = ['@julusian/midi', 'easymidi', 'jsdom'];
 
 if (process.env.DISABLE_IO === 'true') {
     entrypoint = './src/entrypoints/node_saas_entrypoint.ts';
-    externals = [];
+    externals = ['jsdom'];
 }
 
 const watchForChanges = process.argv.includes('--watch');
