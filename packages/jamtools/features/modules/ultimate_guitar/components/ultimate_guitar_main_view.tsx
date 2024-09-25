@@ -1,25 +1,27 @@
 import React from 'react';
 
-import {Button} from '~/core/components/Button';
-
-import {UltimateGuitarTab} from '../ultimate_guitar_types';
+import {UltimateGuitarSetlist, UltimateGuitarSetlistStatus, UltimateGuitarTab} from '../ultimate_guitar_types';
+import {getTabFromCurrentSetlistData} from '../ultimate_guitar_utils';
 
 type UltimateGuitarMainViewProps = {
-    currentTab: UltimateGuitarTab | null;
-    getTabForUrl: (url: string) => void;
+    currentSetlistStatus: UltimateGuitarSetlistStatus | null;
+    savedSetlists: UltimateGuitarSetlist[];
+    savedTabs: UltimateGuitarTab[];
 };
 
 export const UltimateGuitarMainView = (props: UltimateGuitarMainViewProps) => {
+    const {song} = getTabFromCurrentSetlistData(props.currentSetlistStatus, props.savedSetlists, props.savedTabs);
+
     return (
         <div>
             <div>
                 <h2>
-                    {props.currentTab?.title}
+                    {song?.title}
                 </h2>
             </div>
             <div>
                 <pre>
-                    {props.currentTab?.tabLyrics}
+                    {song?.tabLyrics}
                 </pre>
             </div>
         </div>

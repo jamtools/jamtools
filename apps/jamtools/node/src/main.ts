@@ -39,7 +39,7 @@ export const startJamTools = async (services: Services): Promise<JamToolsEngine>
     };
 
     const extraDeps: ExtraModuleDependencies = {
-        'Ultimate Guitar': {
+        Ultimate_Guitar: {
             domParser: (htmlData: string) => new JSDOM(htmlData).window.document,
             ultimateGuitarService: new UltimateGuitarService(),
         },

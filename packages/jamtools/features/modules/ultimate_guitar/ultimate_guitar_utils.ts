@@ -1,3 +1,5 @@
+import {UltimateGuitarSetlist, UltimateGuitarSetlistStatus, UltimateGuitarTab} from './ultimate_guitar_types';
+
 export type ParsedTabPageData = {
     title: string;
     tabData: string;
@@ -56,4 +58,33 @@ export const cleanUltimateGuitarOfficialTabLyrics = (tabLyrics: string): string 
         .replace(/\[\/?syllable.*?\]/g, '')
         .replace(/\r\n/g, '\n')
         .replace(/\n{2,}/g, '\n\n');
+};
+
+type GetTabFromCurrentSetlistDataReturnValue = {
+    setlist?: UltimateGuitarSetlist;
+    song?: UltimateGuitarTab;
+}
+
+export const getTabFromCurrentSetlistData = (setlistStatus: UltimateGuitarSetlistStatus | null, savedSetlists: UltimateGuitarSetlist[], savedTabs: UltimateGuitarTab[]): GetTabFromCurrentSetlistDataReturnValue => {
+    if (!setlistStatus) {
+        return {
+            setlist: undefined,
+            song: undefined,
+        };
+    }
+
+    const setlist = savedSetlists.find(s => s.id === setlistStatus.setlistId);
+    if (!setlist) {
+        return {
+            setlist: undefined,
+            song: undefined,
+        };
+    }
+
+    const currentSongUrl = setlist.songUrls[setlistStatus.songIndex];
+    const tab = savedTabs.find(t => t.url === currentSongUrl);
+    return {
+        setlist,
+        song: tab,
+    };
 };

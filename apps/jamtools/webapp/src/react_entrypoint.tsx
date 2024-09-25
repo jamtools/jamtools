@@ -56,7 +56,7 @@ export const startJamToolsAndRenderApp = async (): Promise<JamToolsEngine> => {
     };
 
     const extraDeps: ExtraModuleDependencies = {
-        'Ultimate Guitar': {
+        Ultimate_Guitar: {
             domParser: (htmlData: string) => new DOMParser().parseFromString(htmlData, 'text/html'),
             ultimateGuitarService: createNotImplementedProxy(new UltimateGuitarService()),
         },

@@ -2,13 +2,13 @@ import React, {useState} from 'react';
 
 import {useLocation, useNavigate} from 'react-router-dom';
 
-import SlDetails from '@shoelace-style/shoelace/dist/react/details/index.js';
 import SlTab from '@shoelace-style/shoelace/dist/react/tab/index.js';
 import SlTabGroup from '@shoelace-style/shoelace/dist/react/tab-group/index.js';
 import SlTabPanel from '@shoelace-style/shoelace/dist/react/tab-panel/index.js';
 
 import {Module} from '~/core/module_registry/module_registry';
 import {Button} from '~/core/components/Button';
+import {Details} from '~/core/components/Details';
 
 import {RunLocalButton} from './components/run_local_button';
 
@@ -52,9 +52,9 @@ export const Layout = (props: Props) => {
                 <>
                     <ToggleThemeButton />
                     <RunLocalButton/>
-                    <SlDetails summary='Navigation'>
+                    <Details summary='Navigation'>
                         <Tabs modules={props.modules} />
-                    </SlDetails>
+                    </Details>
                 </>
             )}
             {props.children}

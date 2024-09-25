@@ -4,18 +4,20 @@ export type UltimateGuitarTab = ParsedUltimateGuitarUrl & {
 }
 
 export type UltimateGuitarSetlist = {
-
+    id: string;
+    name: string;
+    songUrls: string[];
 }
+
+export type UltimateGuitarSetlistStatus = {
+    setlistId: string;
+    songIndex: number;
+};
 
 type SavedUltimateGuitarSong = {
     name: string;
     url: string;
     transpose: number;
-}
-
-type SavedSetlist = {
-    url: string;
-    songs: SavedUltimateGuitarSong[];
 }
 
 const UltimateGuitarResourceTypes = {

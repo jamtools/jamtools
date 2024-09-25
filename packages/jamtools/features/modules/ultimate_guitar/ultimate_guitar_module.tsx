@@ -6,8 +6,9 @@ import {isErrorResponse} from '~/core/types/response_types';
 import {cleanUltimateGuitarOfficialTabLyrics, parseUltimateGuitarHTMLContent} from './ultimate_guitar_utils';
 import type {UltimateGuitarService} from './ultimate_guitar_service';
 import {UltimateGuitarMainView} from './components/ultimate_guitar_main_view';
-import {UltimateGuitarTab, parseUltimateGuitarTabUrl} from './ultimate_guitar_types';
+import {UltimateGuitarSetlist, UltimateGuitarSetlistStatus, UltimateGuitarTab, parseUltimateGuitarTabUrl} from './ultimate_guitar_types';
 import {UltimateGuitarManageView} from './components/ultimate_guitar_manage_view';
+import {generateId} from '~/core/utils/generate_id';
 
 type UltimateGuitarModuleDependencies = {
     domParser(htmlData: string): Document;
@@ -22,56 +23,115 @@ type UltimateGuitarModuleReturnValue = {
 
 declare module '~/core/module_registry/module_registry' {
     interface ExtraModuleDependencies {
-        'Ultimate Guitar': UltimateGuitarModuleDependencies;
+        Ultimate_Guitar: UltimateGuitarModuleDependencies;
     }
 }
 
 declare module '~/core/module_registry/module_registry' {
     interface AllModules {
-        'Ultimate Guitar': UltimateGuitarModuleReturnValue;
+        Ultimate_Guitar: UltimateGuitarModuleReturnValue;
     }
 }
 
 jamtools.registerModule('Ultimate_Guitar', {}, async (moduleAPI): Promise<UltimateGuitarModuleReturnValue> => {
-    // const savedData = await moduleAPI.statesAPI.createPersistentState<SavedSetlist[]>('saved_setlists', []);
-    const savedTabs = await moduleAPI.statesAPI.createPersistentState<UltimateGuitarTab[]>('saved_tabs', []);
+    const [
+        savedSetlists,
+        savedTabs,
+        currentSetlistStatus,
+    ] = await Promise.all([
+        moduleAPI.statesAPI.createPersistentState<UltimateGuitarSetlist[]>('saved_setlists', []),
+        moduleAPI.statesAPI.createPersistentState<UltimateGuitarTab[]>('saved_tabs', []),
+        moduleAPI.statesAPI.createPersistentState<UltimateGuitarSetlistStatus | null>('current_setlist_status', null),
+    ]);
 
-    const currentTabData = await moduleAPI.statesAPI.createPersistentState<null | UltimateGuitarTab>('current_tab_data', null);
+    const submitPlaylistUrl = moduleAPI.createAction('submitPlaylistUrl', {}, async (args: {url: string}) => {
+    });
 
-    const submitTabUrl = moduleAPI.createAction('submit_tab_url', {}, async (args: {url: string}) => {
-        if (!args?.url) {
-            // should probably be using zod for these actions
-            throw new Error('malformed url');
+    const createNewSetlist = moduleAPI.createAction('createNewSetlist', {}, async (args: {name: string}) => {
+        const id = generateId();
+        const setlist: UltimateGuitarSetlist = {
+            id,
+            name: args.name,
+            songUrls: [],
+        };
+
+        savedSetlists.setState([...savedSetlists.getState(), setlist]);
+    });
+
+    const addTabUrlToSetlist = moduleAPI.createAction('addTabUrlToSetlist', {}, async (args: {setlistId: string, url: string}) => {
+        const tabs = savedTabs.getState();
+        const setlists = savedSetlists.getState();
+        const setlistStoredIndex = setlists.findIndex(s => s.id === args.setlistId);
+        if (setlistStoredIndex === -1) {
+            throw new Error(`no setlist with id '${args.setlistId}'`);
         }
 
-        for (const saved of savedTabs.getState()) {
-            if (saved.url === args.url) {
-                currentTabData.setState(saved);
-                return;
-            }
+        const setlist = setlists[setlistStoredIndex]!;
+        if (setlist.songUrls.includes(args.url)) {
+            throw new Error('setlist already includes this url');
         }
 
-        const deps = moduleAPI.deps.extra['Ultimate Guitar'];
-        const tab = await handleSubmitTabUrl(args.url, deps);
-        if (typeof tab === 'string') {
-            throw new Error(tab);
+        const foundTab = tabs.find(t => t.url === args.url);
+        if (foundTab) {
+            savedSetlists.setState([
+                ...setlists.slice(0, setlistStoredIndex),
+                {
+                    ...setlist,
+                    songUrls: [
+                        ...setlist.songUrls,
+                        args.url,
+                    ],
+                },
+                ...setlists.slice(setlistStoredIndex + 1),
+            ]);
+            return;
+        }
+    });
+
+    const startSetlist = moduleAPI.createAction('startSetlist', {}, async (args: {setlistId: string}) => {
+        currentSetlistStatus.setState({
+            setlistId: args.setlistId,
+            songIndex: 0,
+        });
+    });
+
+    const reorderSongUrlsForSetlist = moduleAPI.createAction('reorderSongUrlsForSetlist', {}, async (args: {setlistId: string, songUrls: string[]}) => {
+        const setlists = savedSetlists.getState();
+        const setlistStoredIndex = setlists.findIndex(s => s.id === args.setlistId);
+        if (setlistStoredIndex === -1) {
+            throw new Error(`no setlist with id '${args.setlistId}'`);
         }
 
-        currentTabData.setState(tab);
-        savedTabs.setState([...savedTabs.getState(), tab]);
+        const setlist = setlists[setlistStoredIndex]!;
+
+        savedSetlists.setState([
+            ...setlists.slice(0, setlistStoredIndex),
+            {
+                ...setlist,
+                songUrls: args.songUrls,
+            },
+            ...setlists.slice(setlistStoredIndex + 1),
+        ]);
     });
 
     moduleAPI.registerRoute('/', {hideNavbar: true}, () => (
         <UltimateGuitarMainView
-            currentTab={currentTabData.useState()}
-            getTabForUrl={(url: string) => submitTabUrl({url})}
+            currentSetlistStatus={currentSetlistStatus.useState()}
+            savedSetlists={savedSetlists.useState()}
+            savedTabs={savedTabs.useState()}
         />
     ));
 
     moduleAPI.registerRoute('manage', {}, () => (
         <UltimateGuitarManageView
-            currentTab={currentTabData.useState()}
-            getTabForUrl={(url: string) => submitTabUrl({url})}
+            currentSetlistStatus={currentSetlistStatus.useState()}
+            savedSetlists={savedSetlists.useState()}
+            savedTabs={savedTabs.useState()}
+            submitPlaylistUrl={(url: string) => submitPlaylistUrl({url})}
+            createNewSetlist={(name: string) => createNewSetlist({name})}
+            addTabUrlToSetlist={(setlistId: string, url: string) => addTabUrlToSetlist({setlistId, url})}
+            startSetlist={(setlistId: string) => startSetlist({setlistId})}
+            reorderSongUrlsForSetlist={(setlistId: string, songUrls: string[]) => reorderSongUrlsForSetlist({setlistId, songUrls})}
         />
     ));
 
