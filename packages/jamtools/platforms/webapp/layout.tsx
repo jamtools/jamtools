@@ -16,15 +16,14 @@ type Props = React.PropsWithChildren & {
     modules: Module[];
 };
 
-export const Layout = (props: Props) => {
+const useShowNavbar = (modules: Module[]) => {
     const loc = useLocation();
     let pathname = loc.pathname;
     if (!pathname.endsWith('/')) {
         pathname += '/';
     }
 
-    let showNavbar = true;
-    for (const mod of props.modules) {
+    for (const mod of modules) {
         if (!mod.routes) {
             continue;
         }
@@ -35,11 +34,17 @@ export const Layout = (props: Props) => {
             if (pathname === `/modules/${mod.moduleId}/${cleanedRoute}`) {
                 const options = mod.routes[route].options;
                 if (options?.hideNavbar) {
-                    showNavbar = false;
+                    return false;
                 }
             }
         }
     }
+
+    return true;
+};
+
+export const Layout = (props: Props) => {
+    const showNavbar = useShowNavbar(props.modules);
 
     return (
         <>

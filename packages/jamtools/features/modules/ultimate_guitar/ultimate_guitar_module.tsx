@@ -61,27 +61,19 @@ jamtools.registerModule('Ultimate_Guitar', {}, async (moduleAPI): Promise<Ultima
         savedTabs.setState([...savedTabs.getState(), tab]);
     });
 
-    moduleAPI.registerRoute('/', {hideNavbar: true}, () => {
-        const tabData = currentTabData.useState();
+    moduleAPI.registerRoute('/', {hideNavbar: true}, () => (
+        <UltimateGuitarMainView
+            currentTab={currentTabData.useState()}
+            getTabForUrl={(url: string) => submitTabUrl({url})}
+        />
+    ));
 
-        return (
-            <UltimateGuitarMainView
-                currentTab={tabData}
-                getTabForUrl={(url: string) => submitTabUrl({url})}
-            />
-        );
-    });
-
-    moduleAPI.registerRoute('manage', {}, () => {
-        const tabData = currentTabData.useState();
-
-        return (
-            <UltimateGuitarManageView
-                currentTab={tabData}
-                getTabForUrl={(url: string) => submitTabUrl({url})}
-            />
-        );
-    });
+    moduleAPI.registerRoute('manage', {}, () => (
+        <UltimateGuitarManageView
+            currentTab={currentTabData.useState()}
+            getTabForUrl={(url: string) => submitTabUrl({url})}
+        />
+    ));
 
     return {};
 });

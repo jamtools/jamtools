@@ -1,3 +1,5 @@
+import {ScaleLoader} from 'react-spinners';
+
 import {CoreDependencies, ModuleDependencies} from '~/core/types/module_types';
 
 import {ClassModuleCallback, ModuleCallback, RegisterModuleOptions, jamtools} from './register';
@@ -144,8 +146,13 @@ export const JamToolsProvider = (props: JamToolsProviderProps) => {
 
     if (!engine) {
         return (
-            <div>
-                Initializing engine
+            <div style={{textAlign: 'center', marginTop: '50px'}}>
+                <ScaleLoader
+                    color="#eee"
+                    radius={10}
+                    height={50}
+                    width={20}
+                />
             </div>
         );
     }

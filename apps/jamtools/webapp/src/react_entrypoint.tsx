@@ -23,8 +23,15 @@ const waitForPageLoad = () => new Promise<void>(resolve => {
     });
 });
 
-const WS_HOST = process.env.WS_HOST || `ws://${location.host}`;
-const DATA_HOST = process.env.DATA_HOST || `http://${location.host}`;
+let wsProtocol = 'ws';
+let httpProtocol = 'http';
+if (location.protocol === 'https:') {
+    wsProtocol = 'wss';
+    httpProtocol = 'https';
+}
+
+const WS_HOST = process.env.WS_HOST || `${wsProtocol}://${location.host}`;
+const DATA_HOST = process.env.DATA_HOST || `${httpProtocol}://${location.host}`;
 
 export const startJamToolsAndRenderApp = async (): Promise<JamToolsEngine> => {
     const qwertyService = new BrowserQwertyService(document);

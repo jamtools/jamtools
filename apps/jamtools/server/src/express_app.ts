@@ -31,8 +31,20 @@ export const initApp = (coreDeps: WebsocketServerCoreDependencies) => {
 
     router.get('/dist/index.js', (req, res) => {
         res.setHeader('Content-Type', 'application/javascript');
-        console.log(webappDistFolder);
+        res.setHeader('Cache-Control', 'no-store');
         res.sendFile('index.js', {root: webappDistFolder});
+    });
+
+    router.get('/dist/index.js.map', (req, res) => {
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Cache-Control', 'no-store');
+        res.sendFile('index.js.map', {root: webappDistFolder});
+    });
+
+    router.get('/dist/manifest.json', (req, res) => {
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Cache-Control', 'no-store');
+        res.sendFile('manifest.json', {root: webappDistFolder});
     });
 
     router.post('/v1/traces', express.json(), async (req, res) => {
