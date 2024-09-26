@@ -15,6 +15,8 @@ type UltimateGuitarManageViewProps = {
     addTabUrlToSetlist: (setlistId: string, url: string) => Promise<void>;
     startSetlist: (setlistId: string) => void;
     reorderSongUrlsForSetlist: (setlistId: string, songUrls: string[]) => void;
+    queueSongForNext: (setlistId: string, songUrl: string) => void;
+    gotoNextSong: () => void;
 };
 
 export const UltimateGuitarManageView = (props: UltimateGuitarManageViewProps) => {
@@ -24,7 +26,9 @@ export const UltimateGuitarManageView = (props: UltimateGuitarManageViewProps) =
     } = getTabFromCurrentSetlistData(props.currentSetlistStatus, props.savedSetlists, props.savedTabs);
 
     const currentSetlistName = setlist ? setlist.name : 'none';
-    const currentSongName = song ? song.title : 'none';
+    const currentSongName = song ? (song.title || song.url) : 'none';
+
+    const currentSongIndex = props.currentSetlistStatus ? props.currentSetlistStatus.songIndex + 1 : '';
 
     const statusHeader = (
         <div>
@@ -32,8 +36,14 @@ export const UltimateGuitarManageView = (props: UltimateGuitarManageViewProps) =
                 Current setlist: {currentSetlistName}
             </h3>
             <h3>
-                Current song: {currentSongName}
+                Current song: #{currentSongIndex}
             </h3>
+            <h3>
+                {currentSongName}
+            </h3>
+            <Button onClick={props.gotoNextSong}>
+                Next Song
+            </Button>
         </div>
     );
 
@@ -58,6 +68,7 @@ export const UltimateGuitarManageView = (props: UltimateGuitarManageViewProps) =
                     currentSetlistStatus={props.currentSetlistStatus}
                     reorderSongUrlsForSetlist={props.reorderSongUrlsForSetlist}
                     startSetlist={props.startSetlist}
+                    queueSongForNext={props.queueSongForNext}
                 />
             ))}
         </div>
@@ -101,6 +112,7 @@ type SetlistDetailsProps = {
     currentSetlistStatus: UltimateGuitarSetlistStatus | null;
     startSetlist: (setlistId: string) => void;
     reorderSongUrlsForSetlist: (setlistId: string, songUrls: string[]) => void;
+    queueSongForNext: (setlistId: string, songUrl: string) => void;
 }
 
 const SetlistDetails = (props: SetlistDetailsProps) => {
@@ -139,16 +151,24 @@ const SetlistDetails = (props: SetlistDetailsProps) => {
                     const foundTab = props.savedTabs.find(t => t.url === url);
                     const tabName = foundTab?.title || url;
 
+                    const gotoSong = () => {
+
+                    };
+
+                    const queueForNext = () => {
+                        props.queueSongForNext(props.setlist.id, url);
+                    };
+
                     return (
                         <li
                             key={url}
                             style={{fontWeight: currentSongIndex === i ? 'bold' : 'inherit'}}
                         >
                             {tabName}
-                            <Button>
+                            {/* <Button onClick={gotoSong}>
                                 Go to song
-                            </Button>
-                            <Button>
+                            </Button> */}
+                            <Button onClick={queueForNext}>
                                 Queue for next
                             </Button>
                         </li>

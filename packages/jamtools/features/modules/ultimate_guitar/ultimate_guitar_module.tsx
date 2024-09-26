@@ -9,8 +9,8 @@ import {UltimateGuitarMainView} from './components/ultimate_guitar_main_view';
 import {UltimateGuitarSetlist, UltimateGuitarSetlistStatus, UltimateGuitarTab, parseUltimateGuitarTabUrl} from './ultimate_guitar_types';
 import {UltimateGuitarManageView} from './components/ultimate_guitar_manage_view';
 import {generateId} from '~/core/utils/generate_id';
-import {ModuleAPI} from '../../../core/engine/module_api';
-import {SharedStateSupervisor} from '../../../core/services/states/shared_state_service';
+import {ModuleAPI} from '~/core/engine/module_api';
+import {SharedStateSupervisor} from '~/core/services/states/shared_state_service';
 
 type UltimateGuitarModuleDependencies = {
     domParser(htmlData: string): Document;
@@ -59,6 +59,9 @@ jamtools.registerModule('Ultimate_Guitar', {}, async (moduleAPI): Promise<Ultima
             addTabUrlToSetlist={(setlistId: string, url: string) => actions.addTabUrlToSetlist({setlistId, url})}
             startSetlist={(setlistId: string) => actions.startSetlist({setlistId})}
             reorderSongUrlsForSetlist={(setlistId: string, songUrls: string[]) => actions.reorderSongUrlsForSetlist({setlistId, songUrls})}
+            // gotoSong={(setlistId: string, songIndex: number) => actions.gotoSong({setlistId, songIndex})}
+            gotoNextSong={() => actions.gotoNextSong({})}
+            queueSongForNext={(setlistId: string, songUrl: string) => actions.queueSongForNext({setlistId, songUrl})}
         />
     ));
 
@@ -91,6 +94,71 @@ class States {
 
 class Actions {
     constructor(private moduleAPI: ModuleAPI, private states: States) {}
+
+    gotoSong = this.moduleAPI.createAction('gotoSong', {}, async (args: {setlistId: string, songIndex: number}) => {
+        this.states.currentSetlistStatus.setState({
+            setlistId: args.setlistId,
+            songIndex: args.songIndex,
+        });
+    });
+
+    gotoNextSong = this.moduleAPI.createAction('gotoNextSong', {}, async () => {
+        const {currentSetlistStatus, savedSetlists} = this.states;
+
+        const status = currentSetlistStatus.getState();
+        if (!status) {
+            const setlist = savedSetlists.getState()[0];
+            if (!setlist) {
+                return;
+            }
+
+            currentSetlistStatus.setState({setlistId: setlist.id, songIndex: 0});
+            return;
+        }
+
+        const currentSongIndex = status.songIndex;
+        const setlist = savedSetlists.getState().find(s => s.id === status.setlistId)!;
+
+        const nextIndex = (currentSongIndex + 1) % setlist.songUrls.length;
+        currentSetlistStatus.setState({setlistId: setlist.id, songIndex: nextIndex});
+    });
+
+    queueSongForNext = this.moduleAPI.createAction('queueSongForNext', {}, async (args: {setlistId: string, songUrl: string}) => {
+        const {savedSetlists, currentSetlistStatus} = this.states;
+
+        const status = currentSetlistStatus.getState();
+        if (!status) {
+            throw new Error('no setlist in progress');
+        }
+
+        if (status.setlistId !== args.setlistId) {
+            throw new Error('song is not part of the current setlist');
+        }
+
+        const setlists = savedSetlists.getState();
+        const setlistStoredIndex = setlists.findIndex(s => s.id === args.setlistId);
+        const setlist = setlists[setlistStoredIndex];
+
+        const newSongUrlsState = insertStringAtIndex(setlist.songUrls, args.songUrl, status.songIndex + 1);
+        // for (let i = 0; i <= existingSongIndex; i++) {
+        //     newSongUrlsState.push(setlist.songUrls[i]);
+        // }
+
+        // newSongUrlsState.push(args.songUrl);
+
+        // for (let i = existingSongIndex + 1; i < setlist.songUrls.length; i++) {
+        //     newSongUrlsState.push(setlist.songUrls[i + 1]);
+        // }
+
+        savedSetlists.setState([
+            ...setlists.slice(0, setlistStoredIndex),
+            {
+                ...setlist,
+                songUrls: newSongUrlsState,
+            },
+            ...setlists.slice(setlistStoredIndex + 1),
+        ]);
+    });
 
     createNewSetlist = this.moduleAPI.createAction('createNewSetlist', {}, async (args: {name: string}) => {
         const {savedSetlists} = this.states;
@@ -130,20 +198,27 @@ class Actions {
         }
 
         const foundTab = tabs.find(t => t.url === args.url);
-        if (foundTab) {
-            savedSetlists.setState([
-                ...setlists.slice(0, setlistStoredIndex),
-                {
-                    ...setlist,
-                    songUrls: [
-                        ...setlist.songUrls,
-                        args.url,
-                    ],
-                },
-                ...setlists.slice(setlistStoredIndex + 1),
-            ]);
-            return;
+        if (!foundTab) {
+            const deps = this.moduleAPI.deps.extra.Ultimate_Guitar;
+            const tab = await handleSubmitTabUrl(args.url, deps);
+            if (typeof tab === 'string') {
+                throw new Error(tab);
+            }
+
+            savedTabs.setState([...savedTabs.getState(), tab]);
         }
+
+        savedSetlists.setState([
+            ...setlists.slice(0, setlistStoredIndex),
+            {
+                ...setlist,
+                songUrls: [
+                    ...setlist.songUrls,
+                    args.url,
+                ],
+            },
+            ...setlists.slice(setlistStoredIndex + 1),
+        ]);
     });
 
     reorderSongUrlsForSetlist = this.moduleAPI.createAction('reorderSongUrlsForSetlist', {}, async (args: {setlistId: string, songUrls: string[]}) => {
@@ -217,4 +292,17 @@ const handleSubmitTabUrl = async (url: string, deps: UltimateGuitarModuleDepende
     }
 
     return `unexpected resource type '${parsed.type}'`;
+};
+
+const insertStringAtIndex = (arr: string[], str: string, index: number): string[] => {
+    if (!arr.includes(str)) {
+        throw new Error('The string must be in the array.');
+    }
+
+    const newArr = [...arr];
+    const stringIndex = newArr.indexOf(str);
+    newArr.splice(stringIndex, 1);
+    newArr.splice(index, 0, str);
+
+    return newArr;
 };

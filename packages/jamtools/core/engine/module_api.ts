@@ -138,7 +138,7 @@ export class StatesAPI {
         // this createPersistentState function is not Maestro friendly
         // every time you access coreDeps, that's the case
         // persistent state has been a weird thing
-        supervisor.subject.subscribe(async value => {
+        supervisor.subjectForKVStorePublish.subscribe(async value => {
             await this.coreDeps.kvStore.set(fullKey, value);
         });
 
