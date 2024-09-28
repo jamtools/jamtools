@@ -17,6 +17,7 @@ type UltimateGuitarManageViewProps = {
     reorderSongUrlsForSetlist: (setlistId: string, songs: UltimateGuitarSetlistSong[]) => void;
     queueSongForNext: (setlistId: string, song: UltimateGuitarSetlistSong) => Promise<void>;
     gotoNextSong: () => void;
+    transposeSong: (setlistId: string, url: string, transpose: number) => Promise<void>;
 };
 
 export const UltimateGuitarManageView = (props: UltimateGuitarManageViewProps) => {
@@ -69,6 +70,7 @@ export const UltimateGuitarManageView = (props: UltimateGuitarManageViewProps) =
                     reorderSongUrlsForSetlist={props.reorderSongUrlsForSetlist}
                     startSetlist={props.startSetlist}
                     queueSongForNext={props.queueSongForNext}
+                    transposeSong={props.transposeSong}
                 />
             ))}
         </div>
@@ -113,6 +115,7 @@ type SetlistDetailsProps = {
     startSetlist: (setlistId: string) => void;
     reorderSongUrlsForSetlist: (setlistId: string, songs: UltimateGuitarSetlistSong[]) => void;
     queueSongForNext: (setlistId: string, song: UltimateGuitarSetlistSong) => Promise<void>;
+    transposeSong: (setlistId: string, url: string, transpose: number) => Promise<void>;
 }
 
 const SetlistDetails = (props: SetlistDetailsProps) => {
@@ -195,6 +198,8 @@ const SetlistDetails = (props: SetlistDetailsProps) => {
                             queueSong={queueSong}
                             queued={queuedSongs.includes(song)}
                             song={song}
+                            transposeSong={props.transposeSong}
+                            setlistId={setlist.id}
                         />
                     );
                 })}
@@ -204,22 +209,38 @@ const SetlistDetails = (props: SetlistDetailsProps) => {
 };
 
 type SetlistSongProps = {
+    setlistId: string;
     savedTab: UltimateGuitarTab;
     isCurrentSong: boolean;
     queueSong: (song: UltimateGuitarSetlistSong) => void;
     queued: boolean;
     song: UltimateGuitarSetlistSong;
-    // setlistEntry
+    transposeSong: (setlistId: string, url: string, transpose: number) => Promise<void>;
 };
 
 const SetlistSong = (props: SetlistSongProps) => {
+    const [editingTranspose, setEditingTranspose] = React.useState<number | null>(null);
+
     const tabName = props.savedTab.title || props.savedTab.url;
 
     const gotoSong = () => {
 
     };
 
-    const transposeValue = 0;
+    const transposeValue = props.song.transpose;
+
+    const handleTransposeButtonClick = () => {
+        setEditingTranspose(props.song.transpose);
+    };
+
+    const handleTransposeCancel = () => {
+        setEditingTranspose(null);
+    };
+
+    const handleTransposeConfirm = async () => {
+        await props.transposeSong(props.setlistId, props.savedTab.url, editingTranspose!);
+        setEditingTranspose(null);
+    };
 
     return (
         <li
@@ -235,9 +256,41 @@ const SetlistSong = (props: SetlistSongProps) => {
             >
                 Queue {props.queued && '✓'}
             </Button>
-            <Button style={{marginLeft: '10px'}}>
+            <Button
+                style={{marginLeft: '10px'}}
+                onClick={handleTransposeButtonClick}
+            >
                 Transpose {transposeValue}
             </Button>
+            {(editingTranspose !== null) && (
+                <>
+                    <Button
+                        style={{marginLeft: '10px'}}
+                        onClick={() => setEditingTranspose(editingTranspose - 1)}
+                    >
+                        -
+                    </Button>
+                    {editingTranspose}
+                    <Button
+                        style={{marginLeft: '10px'}}
+                        onClick={() => setEditingTranspose(editingTranspose + 1)}
+                    >
+                        +
+                    </Button>
+                    <Button
+                        style={{marginLeft: '10px'}}
+                        onClick={handleTransposeCancel}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        style={{marginLeft: '10px'}}
+                        onClick={handleTransposeConfirm}
+                    >
+                        Confirm
+                    </Button>
+                </>
+            )}
         </li>
     );
 };
