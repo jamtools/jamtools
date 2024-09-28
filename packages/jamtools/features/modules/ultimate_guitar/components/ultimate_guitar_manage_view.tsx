@@ -23,7 +23,7 @@ type UltimateGuitarManageViewProps = {
 export const UltimateGuitarManageView = (props: UltimateGuitarManageViewProps) => {
     const {
         setlist,
-        song,
+        tab: song,
     } = getTabFromCurrentSetlistData(props.currentSetlistStatus, props.savedSetlists, props.savedTabs);
 
     const currentSetlistName = setlist ? setlist.name : 'none';

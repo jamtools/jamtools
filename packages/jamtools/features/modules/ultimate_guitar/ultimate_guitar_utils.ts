@@ -1,4 +1,6 @@
-import {UltimateGuitarSetlist, UltimateGuitarSetlistStatus, UltimateGuitarTab} from './ultimate_guitar_types';
+import {Note} from 'tonal';
+
+import {UltimateGuitarSetlist, UltimateGuitarSetlistSong, UltimateGuitarSetlistStatus, UltimateGuitarTab} from './ultimate_guitar_types';
 
 export type ParsedTabPageData = {
     title: string;
@@ -45,13 +47,15 @@ export const parseUltimateGuitarHTMLContent = (doc: Document): ParsedTabPageData
 
 type GetTabFromCurrentSetlistDataReturnValue = {
     setlist?: UltimateGuitarSetlist;
-    song?: UltimateGuitarTab;
+    tab?: UltimateGuitarTab;
+    song?: UltimateGuitarSetlistSong;
 }
 
 export const getTabFromCurrentSetlistData = (setlistStatus: UltimateGuitarSetlistStatus | null, savedSetlists: UltimateGuitarSetlist[], savedTabs: UltimateGuitarTab[]): GetTabFromCurrentSetlistDataReturnValue => {
     if (!setlistStatus) {
         return {
             setlist: undefined,
+            tab: undefined,
             song: undefined,
         };
     }
@@ -60,6 +64,7 @@ export const getTabFromCurrentSetlistData = (setlistStatus: UltimateGuitarSetlis
     if (!setlist) {
         return {
             setlist: undefined,
+            tab: undefined,
             song: undefined,
         };
     }
@@ -68,17 +73,51 @@ export const getTabFromCurrentSetlistData = (setlistStatus: UltimateGuitarSetlis
     const tab = savedTabs.find(t => t.url === currentSong.url);
     return {
         setlist,
-        song: tab,
+        tab: tab,
+        song: currentSong,
     };
 };
 
-export const prepareLyricsWithChords = (tabLyrics: string, options: {showChords: boolean}): string => {
-    const regexReplacement = options.showChords ? '$1' : '';
-
+export const prepareLyricsWithChords = (tabLyrics: string, options: {showChords: boolean, transpose: number}): string => {
     return tabLyrics
-        .replace(/\[ch.*?\](.*?)\[\/ch\]/g, regexReplacement)
+        .replace(/\[ch.*?\](.*?)\[\/ch\]/g, (match, captureAny) => {
+            if (!options.showChords) {
+                return '';
+            }
+
+            if (!options.transpose) {
+                return captureAny;
+            }
+
+            const capture = captureAny as string;
+
+            let suffix = '';
+            let mainPart = capture;
+            if (!isNaN(parseInt(capture[capture.length - 1]))) {
+                suffix = capture[capture.length - 1];
+                mainPart = capture.substring(0, capture.length - 1);
+            }
+
+            const interval = transposeIntervals[(options.transpose + 12) % 12]!;
+            const transposed = Note.transpose(mainPart, interval);
+
+            return transposed + suffix;
+        })
         .replace(/\[\/?tab\]/g, '')
         .replace(/\[\/?syllable.*?\]/g, '')
         .replace(/\r\n/g, '\n')
         .replace(/\n{2,}/g, '\n\n');
+};
+
+const transposeIntervals = {
+    1: '2m',
+    2: '2M',
+    3: '3m',
+    4: '3M',
+    5: '4P',
+    7: '5P',
+    8: '6m',
+    9: '6M',
+    10: '7m',
+    11: '7M',
 };

@@ -10,7 +10,7 @@ type UltimateGuitarMainViewProps = {
 };
 
 export const UltimateGuitarMainView = (props: UltimateGuitarMainViewProps) => {
-    const {song} = getTabFromCurrentSetlistData(props.currentSetlistStatus, props.savedSetlists, props.savedTabs);
+    const {song, tab} = getTabFromCurrentSetlistData(props.currentSetlistStatus, props.savedSetlists, props.savedTabs);
 
     const [showChords, setShowChords] = useState(true);
     const [wrapText, setWrapText] = useState(true);
@@ -20,16 +20,16 @@ export const UltimateGuitarMainView = (props: UltimateGuitarMainViewProps) => {
 
     const displayContent = useMemo(
         () => {
-            if (!song) {
+            if (!song || !tab) {
                 return '';
             }
 
-            return prepareLyricsWithChords(song.tabLyrics, {showChords});
+            return prepareLyricsWithChords(tab.tabLyrics, {showChords, transpose: song.transpose});
         },
         [showChords, song]
     );
 
-    if (!song) {
+    if (!song || !tab) {
         return (
             <div>
                 {'Waiting for band leader to choose the song'}
@@ -49,7 +49,7 @@ export const UltimateGuitarMainView = (props: UltimateGuitarMainViewProps) => {
             </button>
             <div>
                 <h2>
-                    {song.title}
+                    {tab.title}
                 </h2>
             </div>
             <pre style={preTagStyle}>
