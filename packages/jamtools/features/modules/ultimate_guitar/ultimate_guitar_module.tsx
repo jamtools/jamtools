@@ -3,7 +3,7 @@ import React from 'react';
 import {jamtools} from '~/core/engine/register';
 import {isErrorResponse} from '~/core/types/response_types';
 
-import {cleanUltimateGuitarOfficialTabLyrics, parseUltimateGuitarHTMLContent} from './ultimate_guitar_utils';
+import {parseUltimateGuitarHTMLContent} from './ultimate_guitar_utils';
 import type {UltimateGuitarService} from './ultimate_guitar_service';
 import {UltimateGuitarMainView} from './components/ultimate_guitar_main_view';
 import {UltimateGuitarSetlist, UltimateGuitarSetlistStatus, UltimateGuitarTab, parseUltimateGuitarTabUrl} from './ultimate_guitar_types';
@@ -280,7 +280,7 @@ const handleSubmitTabUrl = async (url: string, deps: UltimateGuitarModuleDepende
         }
 
         const data = JSON.parse(response.data) as {lyrics: string};
-        const tabLyrics = cleanUltimateGuitarOfficialTabLyrics(data.lyrics);
+        const tabLyrics = data.lyrics;
 
         const tab: UltimateGuitarTab = {
             ...parsed,
