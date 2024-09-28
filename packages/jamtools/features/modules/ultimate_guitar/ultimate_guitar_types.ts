@@ -3,10 +3,15 @@ export type UltimateGuitarTab = ParsedUltimateGuitarUrl & {
     tabLyrics: string;
 }
 
+export type UltimateGuitarSetlistSong = {
+    url: string;
+    transpose: number;
+}
+
 export type UltimateGuitarSetlist = {
     id: string;
     name: string;
-    songUrls: string[];
+    songs: UltimateGuitarSetlistSong[];
 }
 
 export type UltimateGuitarSetlistStatus = {

@@ -64,8 +64,8 @@ export const getTabFromCurrentSetlistData = (setlistStatus: UltimateGuitarSetlis
         };
     }
 
-    const currentSongUrl = setlist.songUrls[setlistStatus.songIndex];
-    const tab = savedTabs.find(t => t.url === currentSongUrl);
+    const currentSong = setlist.songs[setlistStatus.songIndex];
+    const tab = savedTabs.find(t => t.url === currentSong.url);
     return {
         setlist,
         song: tab,

@@ -2,7 +2,7 @@ import React from 'react';
 
 import {Button} from '~/core/components/Button';
 
-import {UltimateGuitarSetlist, UltimateGuitarSetlistStatus, UltimateGuitarTab} from '../ultimate_guitar_types';
+import {UltimateGuitarSetlist, UltimateGuitarSetlistSong, UltimateGuitarSetlistStatus, UltimateGuitarTab} from '../ultimate_guitar_types';
 import {Details} from '~/core/components/Details';
 import {getTabFromCurrentSetlistData} from '../ultimate_guitar_utils';
 
@@ -14,8 +14,8 @@ type UltimateGuitarManageViewProps = {
     createNewSetlist: (name: string) => Promise<void>;
     addTabUrlToSetlist: (setlistId: string, url: string) => Promise<void>;
     startSetlist: (setlistId: string) => void;
-    reorderSongUrlsForSetlist: (setlistId: string, songUrls: string[]) => void;
-    queueSongForNext: (setlistId: string, songUrl: string) => Promise<void>;
+    reorderSongUrlsForSetlist: (setlistId: string, songs: UltimateGuitarSetlistSong[]) => void;
+    queueSongForNext: (setlistId: string, song: UltimateGuitarSetlistSong) => Promise<void>;
     gotoNextSong: () => void;
 };
 
@@ -111,41 +111,41 @@ type SetlistDetailsProps = {
     addTabUrlToSetlist: (setlistId: string, url: string) => Promise<void>;
     currentSetlistStatus: UltimateGuitarSetlistStatus | null;
     startSetlist: (setlistId: string) => void;
-    reorderSongUrlsForSetlist: (setlistId: string, songUrls: string[]) => void;
-    queueSongForNext: (setlistId: string, songUrl: string) => Promise<void>;
+    reorderSongUrlsForSetlist: (setlistId: string, songs: UltimateGuitarSetlistSong[]) => void;
+    queueSongForNext: (setlistId: string, song: UltimateGuitarSetlistSong) => Promise<void>;
 }
 
 const SetlistDetails = (props: SetlistDetailsProps) => {
     const [draftTabUrl, setDraftTabUrl] = React.useState('');
     const {setlist} = props;
 
-    const [queuedUrls, setQueuedUrls] = React.useState<string[]>([]);
+    const [queuedSongs, setQueuedSongs] = React.useState<UltimateGuitarSetlistSong[]>([]);
 
     const currentSongIndex = props.currentSetlistStatus?.setlistId === props.setlist.id ? props.currentSetlistStatus?.songIndex : -1;
 
     const submitQueue = async () => {
-        if (!queuedUrls.length) {
+        if (!queuedSongs.length) {
             return;
         }
 
-        for (const url of queuedUrls) {
+        for (const url of [...queuedSongs].reverse()) {
             await props.queueSongForNext(props.setlist.id, url);
             await new Promise(r => setTimeout(r, 10));
         }
 
-        setQueuedUrls([]);
+        setQueuedSongs([]);
     };
 
-    const queueUrl = (url: string) => {
-        if (queuedUrls.includes(url)) {
-            setQueuedUrls([
-                ...queuedUrls.slice(0, queuedUrls.indexOf(url)),
-                ...queuedUrls.slice(queuedUrls.indexOf(url) + 1),
+    const queueSong = (song: UltimateGuitarSetlistSong) => {
+        if (queuedSongs.includes(song)) {
+            setQueuedSongs([
+                ...queuedSongs.slice(0, queuedSongs.indexOf(song)),
+                ...queuedSongs.slice(queuedSongs.indexOf(song) + 1),
             ]);
             return;
         }
 
-        setQueuedUrls([...queuedUrls, url]);
+        setQueuedSongs([...queuedSongs, song]);
     };
 
     return (
@@ -177,33 +177,67 @@ const SetlistDetails = (props: SetlistDetailsProps) => {
                 </Button>
             </div>
             <ul>
-                {setlist.songUrls.map((url, i) => {
-                    const foundTab = props.savedTabs.find(t => t.url === url);
-                    const tabName = foundTab?.title || url;
+                {setlist.songs.map((song, i) => {
+                    const url = song.url;
+                    const savedTab = props.savedTabs.find(t => t.url === url);
 
-                    const gotoSong = () => {
-
-                    };
+                    if (!savedTab) {
+                        return (
+                            <li key={url}>Not found: {url}</li>
+                        );
+                    }
 
                     return (
-                        <li
+                        <SetlistSong
                             key={url}
-                            style={{fontWeight: currentSongIndex === i ? 'bold' : 'inherit'}}
-                        >
-                            {tabName}
-                            {/* <Button onClick={gotoSong}>
-                                Go to song
-                            </Button> */}
-                            <Button
-                                onClick={() => queueUrl(url)}
-                                style={{marginLeft: '10px'}}
-                            >
-                                Queue {queuedUrls.includes(url) && '✓'}
-                            </Button>
-                        </li>
+                            isCurrentSong={currentSongIndex === i}
+                            savedTab={savedTab}
+                            queueSong={queueSong}
+                            queued={queuedSongs.includes(song)}
+                            song={song}
+                        />
                     );
                 })}
             </ul>
         </Details>
+    );
+};
+
+type SetlistSongProps = {
+    savedTab: UltimateGuitarTab;
+    isCurrentSong: boolean;
+    queueSong: (song: UltimateGuitarSetlistSong) => void;
+    queued: boolean;
+    song: UltimateGuitarSetlistSong;
+    // setlistEntry
+};
+
+const SetlistSong = (props: SetlistSongProps) => {
+    const tabName = props.savedTab.title || props.savedTab.url;
+
+    const gotoSong = () => {
+
+    };
+
+    const transposeValue = 0;
+
+    return (
+        <li
+            style={{fontWeight: props.isCurrentSong ? 'bold' : 'inherit'}}
+        >
+            {tabName}
+            {/* <Button onClick={gotoSong}>
+                                Go to song
+                            </Button> */}
+            <Button
+                onClick={() => props.queueSong(props.song)}
+                style={{marginLeft: '10px'}}
+            >
+                Queue {props.queued && '✓'}
+            </Button>
+            <Button style={{marginLeft: '10px'}}>
+                Transpose {transposeValue}
+            </Button>
+        </li>
     );
 };

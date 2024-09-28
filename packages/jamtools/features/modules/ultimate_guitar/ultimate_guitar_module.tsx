@@ -6,7 +6,7 @@ import {isErrorResponse} from '~/core/types/response_types';
 import {parseUltimateGuitarHTMLContent} from './ultimate_guitar_utils';
 import type {UltimateGuitarService} from './ultimate_guitar_service';
 import {UltimateGuitarMainView} from './components/ultimate_guitar_main_view';
-import {UltimateGuitarSetlist, UltimateGuitarSetlistStatus, UltimateGuitarTab, parseUltimateGuitarTabUrl} from './ultimate_guitar_types';
+import {UltimateGuitarSetlist, UltimateGuitarSetlistSong, UltimateGuitarSetlistStatus, UltimateGuitarTab, parseUltimateGuitarTabUrl} from './ultimate_guitar_types';
 import {UltimateGuitarManageView} from './components/ultimate_guitar_manage_view';
 import {generateId} from '~/core/utils/generate_id';
 import {ModuleAPI} from '~/core/engine/module_api';
@@ -59,10 +59,10 @@ jamtools.registerModule('Ultimate_Guitar', {}, async (moduleAPI): Promise<Ultima
             createNewSetlist={(name: string) => actions.createNewSetlist({name})}
             addTabUrlToSetlist={(setlistId: string, url: string) => actions.addTabUrlToSetlist({setlistId, url})}
             startSetlist={(setlistId: string) => actions.startSetlist({setlistId})}
-            reorderSongUrlsForSetlist={(setlistId: string, songUrls: string[]) => actions.reorderSongUrlsForSetlist({setlistId, songUrls})}
+            reorderSongUrlsForSetlist={(setlistId: string, songs: UltimateGuitarSetlistSong[]) => actions.reorderSongUrlsForSetlist({setlistId, songs})}
             // gotoSong={(setlistId: string, songIndex: number) => actions.gotoSong({setlistId, songIndex})}
             gotoNextSong={() => actions.gotoNextSong({})}
-            queueSongForNext={(setlistId: string, songUrl: string) => actions.queueSongForNext({setlistId, songUrl})}
+            queueSongForNext={(setlistId: string, song: UltimateGuitarSetlistSong) => actions.queueSongForNext({setlistId, song})}
         />
     ));
 
@@ -124,11 +124,11 @@ class Actions {
         const currentSongIndex = status.songIndex;
         const setlist = savedSetlists.getState().find(s => s.id === status.setlistId)!;
 
-        const nextIndex = (currentSongIndex + 1) % setlist.songUrls.length;
+        const nextIndex = (currentSongIndex + 1) % setlist.songs.length;
         currentSetlistStatus.setState({setlistId: setlist.id, songIndex: nextIndex});
     });
 
-    queueSongForNext = this.moduleAPI.createAction('queueSongForNext', {}, async (args: {setlistId: string, songUrl: string}) => {
+    queueSongForNext = this.moduleAPI.createAction('queueSongForNext', {}, async (args: {setlistId: string, song: UltimateGuitarSetlistSong}) => {
         const {savedSetlists, currentSetlistStatus} = this.states;
 
         const status = currentSetlistStatus.getState();
@@ -144,17 +144,18 @@ class Actions {
         const setlistStoredIndex = setlists.findIndex(s => s.id === args.setlistId);
         const setlist = setlists[setlistStoredIndex];
 
-        const currentUrl = setlist.songUrls[status.songIndex];
-        const newSongUrlsState = insertStringAtIndex(setlist.songUrls, args.songUrl, status.songIndex + 1);
+        const currentUrl = setlist.songs[status.songIndex];
 
-        const newStatusIndex = newSongUrlsState.indexOf(currentUrl);
+        const newSongsState = insertStringAtIndex(setlist.songs, args.song, status.songIndex + 1);
+
+        const newStatusIndex = newSongsState.indexOf(currentUrl);
         currentSetlistStatus.setState({...status, songIndex: newStatusIndex});
 
         savedSetlists.setState([
             ...setlists.slice(0, setlistStoredIndex),
             {
                 ...setlist,
-                songUrls: newSongUrlsState,
+                songs: newSongsState,
             },
             ...setlists.slice(setlistStoredIndex + 1),
         ]);
@@ -167,7 +168,7 @@ class Actions {
         const setlist: UltimateGuitarSetlist = {
             id,
             name: args.name,
-            songUrls: [],
+            songs: [],
         };
 
         savedSetlists.setState([...savedSetlists.getState(), setlist]);
@@ -193,7 +194,7 @@ class Actions {
         }
 
         const setlist = setlists[setlistStoredIndex]!;
-        if (setlist.songUrls.includes(args.url)) {
+        if (setlist.songs.find(s => s.url === args.url)) {
             throw new Error('setlist already includes this url');
         }
 
@@ -208,20 +209,25 @@ class Actions {
             savedTabs.setState([...savedTabs.getState(), tab]);
         }
 
+        const newSong: UltimateGuitarSetlistSong = {
+            url: args.url,
+            transpose: 0,
+        };
+
         savedSetlists.setState([
             ...setlists.slice(0, setlistStoredIndex),
             {
                 ...setlist,
-                songUrls: [
-                    ...setlist.songUrls,
-                    args.url,
+                songs: [
+                    ...setlist.songs,
+                    newSong,
                 ],
             },
             ...setlists.slice(setlistStoredIndex + 1),
         ]);
     });
 
-    reorderSongUrlsForSetlist = this.moduleAPI.createAction('reorderSongUrlsForSetlist', {}, async (args: {setlistId: string, songUrls: string[]}) => {
+    reorderSongUrlsForSetlist = this.moduleAPI.createAction('reorderSongUrlsForSetlist', {}, async (args: {setlistId: string, songs: UltimateGuitarSetlistSong[]}) => {
         const {savedSetlists} = this.states;
 
         const setlists = savedSetlists.getState();
@@ -236,7 +242,7 @@ class Actions {
             ...setlists.slice(0, setlistStoredIndex),
             {
                 ...setlist,
-                songUrls: args.songUrls,
+                songs: args.songs,
             },
             ...setlists.slice(setlistStoredIndex + 1),
         ]);
@@ -294,9 +300,9 @@ const handleSubmitTabUrl = async (url: string, deps: UltimateGuitarModuleDepende
     return `unexpected resource type '${parsed.type}'`;
 };
 
-const insertStringAtIndex = (arr: string[], str: string, index: number): string[] => {
+const insertStringAtIndex = <T,>(arr: T[], str: T, index: number): T[] => {
     if (!arr.includes(str)) {
-        throw new Error('The string must be in the array.');
+        throw new Error('The object/string must be in the array.');
     }
 
     const newArr = [...arr];
