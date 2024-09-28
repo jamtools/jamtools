@@ -13,7 +13,7 @@ export const UltimateGuitarMainView = (props: UltimateGuitarMainViewProps) => {
     const {song} = getTabFromCurrentSetlistData(props.currentSetlistStatus, props.savedSetlists, props.savedTabs);
 
     const [showChords, setShowChords] = useState(true);
-    const [wrapText, setWrapText] = useState(false);
+    const [wrapText, setWrapText] = useState(true);
 
     const toggleChords = () => setShowChords(!showChords);
     const toggleWrap = () => setWrapText(!wrapText);

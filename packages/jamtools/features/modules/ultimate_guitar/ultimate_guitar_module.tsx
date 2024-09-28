@@ -11,6 +11,7 @@ import {UltimateGuitarManageView} from './components/ultimate_guitar_manage_view
 import {generateId} from '~/core/utils/generate_id';
 import {ModuleAPI} from '~/core/engine/module_api';
 import {SharedStateSupervisor} from '~/core/services/states/shared_state_service';
+import {UltimateGuitarQRCode} from './components/ultimate_guitar_qr_code';
 
 type UltimateGuitarModuleDependencies = {
     domParser(htmlData: string): Document;
@@ -63,6 +64,10 @@ jamtools.registerModule('Ultimate_Guitar', {}, async (moduleAPI): Promise<Ultima
             gotoNextSong={() => actions.gotoNextSong({})}
             queueSongForNext={(setlistId: string, songUrl: string) => actions.queueSongForNext({setlistId, songUrl})}
         />
+    ));
+
+    moduleAPI.registerRoute('qrcode', {}, () => (
+        <UltimateGuitarQRCode/>
     ));
 
     return {};

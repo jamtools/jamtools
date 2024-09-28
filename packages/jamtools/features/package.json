@@ -6,12 +6,12 @@
         "fix": "npm run lint -- --fix"
     },
     "dependencies": {
-        "chordsheetjs": "^10.2.0",
-        "he": "^1.2.0",
         "jamtools-core": "*",
-        "jsdom": "^25.0.0"
+        "jsdom": "^25.0.0",
+        "qrcode": "^1.5.4"
     },
     "devDependencies": {
+        "@types/qrcode": "^1.5.5",
         "configs": "*"
     },
     "config": {
