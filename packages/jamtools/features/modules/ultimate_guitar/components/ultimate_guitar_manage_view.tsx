@@ -15,7 +15,7 @@ type UltimateGuitarManageViewProps = {
     addTabUrlToSetlist: (setlistId: string, url: string) => Promise<void>;
     startSetlist: (setlistId: string) => void;
     reorderSongUrlsForSetlist: (setlistId: string, songUrls: string[]) => void;
-    queueSongForNext: (setlistId: string, songUrl: string) => void;
+    queueSongForNext: (setlistId: string, songUrl: string) => Promise<void>;
     gotoNextSong: () => void;
 };
 
@@ -112,14 +112,41 @@ type SetlistDetailsProps = {
     currentSetlistStatus: UltimateGuitarSetlistStatus | null;
     startSetlist: (setlistId: string) => void;
     reorderSongUrlsForSetlist: (setlistId: string, songUrls: string[]) => void;
-    queueSongForNext: (setlistId: string, songUrl: string) => void;
+    queueSongForNext: (setlistId: string, songUrl: string) => Promise<void>;
 }
 
 const SetlistDetails = (props: SetlistDetailsProps) => {
     const [draftTabUrl, setDraftTabUrl] = React.useState('');
     const {setlist} = props;
 
+    const [queuedUrls, setQueuedUrls] = React.useState<string[]>([]);
+
     const currentSongIndex = props.currentSetlistStatus?.setlistId === props.setlist.id ? props.currentSetlistStatus?.songIndex : -1;
+
+    const submitQueue = async () => {
+        if (!queuedUrls.length) {
+            return;
+        }
+
+        for (const url of queuedUrls) {
+            await props.queueSongForNext(props.setlist.id, url);
+            await new Promise(r => setTimeout(r, 10));
+        }
+
+        setQueuedUrls([]);
+    };
+
+    const queueUrl = (url: string) => {
+        if (queuedUrls.includes(url)) {
+            setQueuedUrls([
+                ...queuedUrls.slice(0, queuedUrls.indexOf(url)),
+                ...queuedUrls.slice(queuedUrls.indexOf(url) + 1),
+            ]);
+            return;
+        }
+
+        setQueuedUrls([...queuedUrls, url]);
+    };
 
     return (
         <Details
@@ -129,6 +156,9 @@ const SetlistDetails = (props: SetlistDetailsProps) => {
             <div>
                 <Button onClick={() => props.startSetlist(props.setlist.id)}>
                     Start Setlist
+                </Button>
+                <Button onClick={submitQueue}>
+                    Submit Queue
                 </Button>
             </div>
             <div>
@@ -155,10 +185,6 @@ const SetlistDetails = (props: SetlistDetailsProps) => {
 
                     };
 
-                    const queueForNext = () => {
-                        props.queueSongForNext(props.setlist.id, url);
-                    };
-
                     return (
                         <li
                             key={url}
@@ -168,8 +194,11 @@ const SetlistDetails = (props: SetlistDetailsProps) => {
                             {/* <Button onClick={gotoSong}>
                                 Go to song
                             </Button> */}
-                            <Button onClick={queueForNext}>
-                                Queue for next
+                            <Button
+                                onClick={() => queueUrl(url)}
+                                style={{marginLeft: '10px'}}
+                            >
+                                Queue {queuedUrls.includes(url) && '✓'}
                             </Button>
                         </li>
                     );

@@ -139,16 +139,11 @@ class Actions {
         const setlistStoredIndex = setlists.findIndex(s => s.id === args.setlistId);
         const setlist = setlists[setlistStoredIndex];
 
+        const currentUrl = setlist.songUrls[status.songIndex];
         const newSongUrlsState = insertStringAtIndex(setlist.songUrls, args.songUrl, status.songIndex + 1);
-        // for (let i = 0; i <= existingSongIndex; i++) {
-        //     newSongUrlsState.push(setlist.songUrls[i]);
-        // }
 
-        // newSongUrlsState.push(args.songUrl);
-
-        // for (let i = existingSongIndex + 1; i < setlist.songUrls.length; i++) {
-        //     newSongUrlsState.push(setlist.songUrls[i + 1]);
-        // }
+        const newStatusIndex = newSongUrlsState.indexOf(currentUrl);
+        currentSetlistStatus.setState({...status, songIndex: newStatusIndex});
 
         savedSetlists.setState([
             ...setlists.slice(0, setlistStoredIndex),
