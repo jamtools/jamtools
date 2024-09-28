@@ -18,6 +18,7 @@ type UltimateGuitarManageViewProps = {
     queueSongForNext: (setlistId: string, song: UltimateGuitarSetlistSong) => Promise<void>;
     gotoNextSong: () => void;
     transposeSong: (setlistId: string, url: string, transpose: number) => Promise<void>;
+    gotoSong: (setlistId: string, index: number) => Promise<void>;
 };
 
 export const UltimateGuitarManageView = (props: UltimateGuitarManageViewProps) => {
@@ -71,6 +72,7 @@ export const UltimateGuitarManageView = (props: UltimateGuitarManageViewProps) =
                     startSetlist={props.startSetlist}
                     queueSongForNext={props.queueSongForNext}
                     transposeSong={props.transposeSong}
+                    gotoSong={(index: number) => props.gotoSong(setlist.id, index)}
                 />
             ))}
         </div>
@@ -116,6 +118,7 @@ type SetlistDetailsProps = {
     reorderSongUrlsForSetlist: (setlistId: string, songs: UltimateGuitarSetlistSong[]) => void;
     queueSongForNext: (setlistId: string, song: UltimateGuitarSetlistSong) => Promise<void>;
     transposeSong: (setlistId: string, url: string, transpose: number) => Promise<void>;
+    gotoSong: (index: number) => Promise<void>;
 }
 
 const SetlistDetails = (props: SetlistDetailsProps) => {
@@ -200,6 +203,7 @@ const SetlistDetails = (props: SetlistDetailsProps) => {
                             song={song}
                             transposeSong={props.transposeSong}
                             setlistId={setlist.id}
+                            gotoSong={() => props.gotoSong(i)}
                         />
                     );
                 })}
@@ -216,16 +220,13 @@ type SetlistSongProps = {
     queued: boolean;
     song: UltimateGuitarSetlistSong;
     transposeSong: (setlistId: string, url: string, transpose: number) => Promise<void>;
+    gotoSong: () => Promise<void>;
 };
 
 const SetlistSong = (props: SetlistSongProps) => {
     const [editingTranspose, setEditingTranspose] = React.useState<number | null>(null);
 
     const tabName = props.savedTab.title || props.savedTab.url;
-
-    const gotoSong = () => {
-
-    };
 
     const transposeValue = props.song.transpose;
 
@@ -247,9 +248,9 @@ const SetlistSong = (props: SetlistSongProps) => {
             style={{fontWeight: props.isCurrentSong ? 'bold' : 'inherit'}}
         >
             {tabName}
-            {/* <Button onClick={gotoSong}>
-                                Go to song
-                            </Button> */}
+            <Button onClick={props.gotoSong}>
+                Go to song
+            </Button>
             <Button
                 onClick={() => props.queueSong(props.song)}
                 style={{marginLeft: '10px'}}

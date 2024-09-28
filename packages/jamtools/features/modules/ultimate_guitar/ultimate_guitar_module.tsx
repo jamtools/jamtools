@@ -64,6 +64,7 @@ jamtools.registerModule('Ultimate_Guitar', {}, async (moduleAPI): Promise<Ultima
             gotoNextSong={() => actions.gotoNextSong({})}
             queueSongForNext={(setlistId: string, song: UltimateGuitarSetlistSong) => actions.queueSongForNext({setlistId, song})}
             transposeSong={(setlistId: string, url: string, transpose: number) => actions.transposeSong({setlistId, url, transpose})}
+            gotoSong={(setlistId: string, songIndex: number) => actions.gotoSong({setlistId, songIndex})}
         />
     ));
 
