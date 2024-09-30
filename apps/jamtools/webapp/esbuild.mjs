@@ -8,9 +8,10 @@ async function build() {
     const buildOptions = {
         entryPoints: ['./src/index.tsx'],
         bundle: true,
-        sourcemap: 'inline',
+        sourcemap: true,
         outfile: './dist/index.js',
         platform: 'browser',
+        minify: process.env.NODE_ENV === 'production',
         target: 'es6',
         plugins: [
             esbuildPluginLogBuildTime(),

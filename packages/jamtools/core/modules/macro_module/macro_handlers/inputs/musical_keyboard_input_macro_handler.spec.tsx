@@ -3,9 +3,8 @@ import {act} from 'react';
 import { screen } from 'shadow-dom-testing-library';
 import '@testing-library/jest-dom';
 
-import {CoreDependencies} from '~/core/types/module_types';
 import {JamToolsEngine} from '~/core/engine/engine';
-import {makeMockCoreDependencies} from '~/core/test/mock_core_dependencies';
+import {makeMockCoreDependencies, makeMockExtraDependences} from '~/core/test/mock_core_dependencies';
 import {Subject} from 'rxjs';
 import {QwertyCallbackPayload} from '~/core/types/io_types';
 import {MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
@@ -18,9 +17,10 @@ describe('MusicalKeyboardInputMacroHandler', () => {
     });
 
     it('should create shared state', async () => {
-        const coreDeps: CoreDependencies = makeMockCoreDependencies({store: {}});
+        const coreDeps = makeMockCoreDependencies({store: {}});
+        const extraDeps = makeMockExtraDependences();
 
-        const engine = new JamToolsEngine(coreDeps);
+        const engine = new JamToolsEngine(coreDeps, extraDeps);
         await engine.initialize();
 
         const mod = await engine.registerModule('Test_MusicalKeyboardInputMacro', {}, async (moduleAPI) => {
@@ -36,14 +36,13 @@ describe('MusicalKeyboardInputMacroHandler', () => {
     });
 
     it('should handle qwerty events', async () => {
-        const coreDeps: CoreDependencies = makeMockCoreDependencies({store: {}});
+        const coreDeps = makeMockCoreDependencies({store: {}});
+        const extraDeps = makeMockExtraDependences();
 
         const qwertySubject = new Subject<QwertyCallbackPayload>();
-        coreDeps.inputs.qwerty = {
-            onInputEvent: qwertySubject,
-        };
+        coreDeps.inputs.qwerty.onInputEvent = qwertySubject;
 
-        const engine = new JamToolsEngine(coreDeps);
+        const engine = new JamToolsEngine(coreDeps, extraDeps);
         await engine.initialize();
 
         const calls: MidiEventFull[] = [];

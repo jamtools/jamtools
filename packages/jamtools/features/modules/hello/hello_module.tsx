@@ -28,12 +28,6 @@ declare module '~/core/module_registry/module_registry' {
 export class HelloModule implements Module<HelloState> {
     moduleId = 'hello';
 
-    routes: Record<string, React.ElementType> = {
-        '': HelloComponent,
-        'actions': HelloComponent,
-        'view': HelloComponent,
-    };
-
     state: HelloState = {
         hello: true,
     };

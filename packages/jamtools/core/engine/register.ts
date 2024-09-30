@@ -3,7 +3,9 @@ import {CoreDependencies, ModuleDependencies} from '~/core/types/module_types';
 import {ModuleAPI} from './module_api';
 import {MacroTypeConfigs} from '~/core/modules/macro_module/macro_module_types';
 
-export type RegisterRouteOptions = {};
+export type RegisterRouteOptions = {
+    hideNavbar?: boolean;
+};
 
 type StateSupervisor<State> = {
     state: State;

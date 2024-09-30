@@ -2,13 +2,13 @@ import React, {useState} from 'react';
 
 import {useLocation, useNavigate} from 'react-router-dom';
 
-import SlDetails from '@shoelace-style/shoelace/dist/react/details/index.js';
 import SlTab from '@shoelace-style/shoelace/dist/react/tab/index.js';
 import SlTabGroup from '@shoelace-style/shoelace/dist/react/tab-group/index.js';
 import SlTabPanel from '@shoelace-style/shoelace/dist/react/tab-panel/index.js';
 
 import {Module} from '~/core/module_registry/module_registry';
 import {Button} from '~/core/components/Button';
+import {Details} from '~/core/components/Details';
 
 import {RunLocalButton} from './components/run_local_button';
 
@@ -16,14 +16,47 @@ type Props = React.PropsWithChildren & {
     modules: Module[];
 };
 
+const useShowNavbar = (modules: Module[]) => {
+    const loc = useLocation();
+    let pathname = loc.pathname;
+    if (!pathname.endsWith('/')) {
+        pathname += '/';
+    }
+
+    for (const mod of modules) {
+        if (!mod.routes) {
+            continue;
+        }
+
+        for (const route of Object.keys(mod.routes)) {
+            const cleanedRoute = route.endsWith('/') ? route.substring(0, route.length - 1) : route;
+
+            if (pathname === `/modules/${mod.moduleId}/${cleanedRoute}`) {
+                const options = mod.routes[route].options;
+                if (options?.hideNavbar) {
+                    return false;
+                }
+            }
+        }
+    }
+
+    return true;
+};
+
 export const Layout = (props: Props) => {
+    const showNavbar = useShowNavbar(props.modules);
+
     return (
         <>
-            <ToggleThemeButton />
-            <RunLocalButton/>
-            <SlDetails summary='Navigation'>
-                <Tabs modules={props.modules} />
-            </SlDetails>
+            {showNavbar && (
+                <>
+                    <ToggleThemeButton />
+                    <RunLocalButton/>
+                    <Details summary='Navigation'>
+                        <Tabs modules={props.modules} />
+                    </Details>
+                </>
+            )}
             {props.children}
         </>
     );
@@ -92,6 +125,9 @@ const Tabs = (props: TabsProps) => {
     }
 
     const showRoute = (modId: string, route: string) => {
+        if (route.startsWith('/')) {
+            route = route.substring(1);
+        }
         navigate(`/modules/${modId}/${route}`);
     };
 

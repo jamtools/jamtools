@@ -22,15 +22,15 @@ export class SoundfontPeripheral {
     public initialize = async () => {
         // TODO: serve the soundfont file from origin instead of fetching from CDN. would probably need to fork or do babel transformation since the url is hardcoded
         // https://github.com/danigb/soundfont-player/blob/2b89587d7cc396c5c7b91056f8cb78831ead7436/dist/soundfont-player.js#L76
-
-        if ('AudioContext' in globalThis) {
-            try {
-                this.audioContext = new AudioContext();
-                this.soundfont = await Soundfont.instrument(this.audioContext, 'percussive_organ');
-            } catch (e) {
-                console.error(e);
-            }
-        }
+        return;
+        // if ('AudioContext' in globalThis) {
+        //     try {
+        //         this.audioContext = new AudioContext();
+        //         this.soundfont = await Soundfont.instrument(this.audioContext, 'percussive_organ');
+        //     } catch (e) {
+        //         console.error(e);
+        //     }
+        // }
     };
 
     public destroy = () => {

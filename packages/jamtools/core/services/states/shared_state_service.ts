@@ -90,6 +90,7 @@ export class SharedStateService {
 
 export class SharedStateSupervisor<State> {
     public subject: Subject<State> = new Subject();
+    public subjectForKVStorePublish: Subject<State> = new Subject();
 
     constructor(private key: string, initialValue: State, private sharedStateService: SharedStateService) {
         this.sharedStateService.setCachedValue<State>(key, initialValue);
@@ -104,6 +105,7 @@ export class SharedStateSupervisor<State> {
 
     public setState = (state: State): Promise<unknown> => {
         this.subject.next(state);
+        this.subjectForKVStorePublish.next(state);
         return this.sharedStateService.sendRpcSetSharedState(this.key, state);
     };
 

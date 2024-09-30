@@ -14,6 +14,8 @@ import {BrowserQwertyService} from '~/platforms/webapp/services/browser_qwerty_s
 import {BrowserMidiService} from '~/platforms/webapp/services/browser_midi_service';
 import {BrowserJsonRpcClientAndServer} from '~/platforms/webapp/services/browser_json_rpc';
 import {JamToolsEngine} from '~/core/engine/engine';
+import {ExtraModuleDependencies} from '~/core/module_registry/module_registry';
+import {UltimateGuitarService} from '~/features/modules/ultimate_guitar/ultimate_guitar_service';
 
 const waitForPageLoad = () => new Promise<void>(resolve => {
     window.addEventListener('DOMContentLoaded', () => {
@@ -21,8 +23,15 @@ const waitForPageLoad = () => new Promise<void>(resolve => {
     });
 });
 
-const WS_HOST = process.env.WS_HOST || `ws://${location.host}`;
-const DATA_HOST = process.env.DATA_HOST || `http://${location.host}`;
+let wsProtocol = 'ws';
+let httpProtocol = 'http';
+if (location.protocol === 'https:') {
+    wsProtocol = 'wss';
+    httpProtocol = 'https';
+}
+
+const WS_HOST = process.env.WS_HOST || `${wsProtocol}://${location.host}`;
+const DATA_HOST = process.env.DATA_HOST || `${httpProtocol}://${location.host}`;
 
 export const startJamToolsAndRenderApp = async (): Promise<JamToolsEngine> => {
     const qwertyService = new BrowserQwertyService(document);
@@ -46,7 +55,14 @@ export const startJamToolsAndRenderApp = async (): Promise<JamToolsEngine> => {
         isMaestro: () => isLocal,
     };
 
-    const engine = new JamToolsEngine(coreDeps);
+    const extraDeps: ExtraModuleDependencies = {
+        Ultimate_Guitar: {
+            domParser: (htmlData: string) => new DOMParser().parseFromString(htmlData, 'text/html'),
+            ultimateGuitarService: createNotImplementedProxy(new UltimateGuitarService()),
+        },
+    };
+
+    const engine = new JamToolsEngine(coreDeps, extraDeps);
 
     await waitForPageLoad();
 
@@ -59,4 +75,14 @@ export const startJamToolsAndRenderApp = async (): Promise<JamToolsEngine> => {
     await engine.waitForInitialize();
 
     return engine;
+};
+
+const createNotImplementedProxy = <ToMock extends object,>(toMock: ToMock) => {
+    return new Proxy(toMock, {
+        get(target, prop) {
+            return () => {
+                throw new Error(`${prop.toString()} is not implemented in this environment.`);
+            };
+        }
+    });
 };
