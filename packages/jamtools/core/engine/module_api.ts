@@ -1,5 +1,5 @@
-import {Module} from '~/core/module_registry/module_registry';
 import {SharedStateSupervisor, StateSupervisor, UserAgentStateSupervisor} from '../services/states/shared_state_service';
+import {ExtraModuleDependencies, Module} from '~/core/module_registry/module_registry';
 import {CoreDependencies, ModuleDependencies} from '../types/module_types';
 import {RegisterRouteOptions} from './register';
 
@@ -14,11 +14,11 @@ type ActionCallback<Args extends object, ReturnValue = any> = (args: Args) => Pr
  * The API provided in the callback when calling `registerModule`. The ModuleAPI is the entrypoint in the framework for everything pertaining to creating a module.
 */
 export class ModuleAPI {
-    public deps: {core: CoreDependencies; module: ModuleDependencies};
+    public deps: {core: CoreDependencies; module: ModuleDependencies, extra: ExtraModuleDependencies};
     public moduleId: string;
 
-    constructor(private module: Module, private prefix: string, private coreDeps: CoreDependencies, private modDeps: ModuleDependencies) {
-        this.deps = {core: coreDeps, module: modDeps};
+    constructor(private module: Module, private prefix: string, private coreDeps: CoreDependencies, private modDeps: ModuleDependencies, private extraDeps: ExtraModuleDependencies) {
+        this.deps = {core: coreDeps, module: modDeps, extra: extraDeps};
         this.moduleId = this.module.moduleId;
     }
 
@@ -34,7 +34,11 @@ export class ModuleAPI {
     */
     registerRoute = (routePath: string, options: RegisterRouteOptions, component: React.ElementType) => {
         const routes = this.module.routes || {};
-        routes[routePath] = component;
+        routes[routePath] = {
+            options,
+            component,
+        };
+
         this.module.routes = {...routes};
         if (this.modDeps.moduleRegistry.getCustomModule(this.module.moduleId)) {
             this.modDeps.moduleRegistry.refreshModules();
@@ -138,7 +142,7 @@ export class StatesAPI {
         // this createPersistentState function is not Maestro friendly
         // every time you access coreDeps, that's the case
         // persistent state has been a weird thing
-        supervisor.subject.subscribe(async value => {
+        supervisor.subjectForKVStorePublish.subscribe(async value => {
             await this.coreDeps.storage.remote.set(fullKey, value);
         });
 

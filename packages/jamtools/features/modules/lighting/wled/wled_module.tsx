@@ -48,14 +48,16 @@ export class WledModule implements Module<WledState> {
     cleanup: (() => void)[] = [];
 
     routes = {
-        '': () => {
-            const mod = WledModule.use();
+        '': {
+            component: () => {
+                const mod = WledModule.use();
 
-            return (
-                <pre>
-                    {JSON.stringify(mod.state)}
-                </pre>
-            );
+                return (
+                    <pre>
+                        {JSON.stringify(mod.state)}
+                    </pre>
+                );
+            },
         },
     };
 

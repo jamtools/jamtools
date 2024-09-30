@@ -5,7 +5,7 @@ import {Subject} from 'rxjs';
 import { screen } from 'shadow-dom-testing-library';
 import '@testing-library/jest-dom';
 import {MidiEvent, MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
-import {makeMockCoreDependencies} from '~/core/test/mock_core_dependencies';
+import {makeMockCoreDependencies, makeMockExtraDependences} from '~/core/test/mock_core_dependencies';
 
 import {Main} from '~/../../apps/jamtools/webapp/src/main';
 import {JamToolsEngine} from '~/core/engine/engine';
@@ -13,6 +13,7 @@ import {JamToolsEngine} from '~/core/engine/engine';
 export const getMacroInputTestHelpers = () => {
     const setupTest = async (midiSubject: Subject<MidiEventFull>): Promise<JamToolsEngine> => {
         const coreDeps = makeMockCoreDependencies({store: {}});
+        const extraDeps = makeMockExtraDependences();
 
         // const midiSubject = new Subject<MidiEventFull>();
         coreDeps.inputs.midi = {
@@ -20,8 +21,7 @@ export const getMacroInputTestHelpers = () => {
             onInputEvent: midiSubject,
         };
 
-        const engine = new JamToolsEngine(coreDeps);
-
+        const engine = new JamToolsEngine(coreDeps, extraDeps);
 
         const { container } = render(
             <Main

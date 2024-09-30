@@ -30,7 +30,7 @@ export const FrontendRoutes = () => {
         moduleRoutes.push({
             path: mod.moduleId,
             children: Object.keys(routes).map((path): RouteObject => {
-                const Component = routes[path];
+                const Component = routes[path].component;
                 const fixedPath = path.startsWith('/') ? path.slice(1) : path;
                 return {
                     path: fixedPath,
@@ -79,13 +79,28 @@ const RenderModuleRoutes = ({mod}: {mod: Module}) => {
         <li>
             {mod.moduleId}
             <ul>
-                {mod.routes && Object.keys(mod.routes).map(path => (
-                    <li key={path}>
-                        <Link to={`/modules/${mod.moduleId}/${path}`}>
-                            {path || '/'}
-                        </Link>
-                    </li>
-                ))}
+                {mod.routes && Object.keys(mod.routes).map(path => {
+                    let suffix = '';
+                    if (path && path !== '/') {
+                        if (!path.startsWith('/')) {
+                            suffix += '/';
+                        }
+
+                        if (path.endsWith('/')) {
+                            suffix += path.substring(0, path.length - 1);
+                        } else {
+                            suffix += path;
+                        }
+                    }
+
+                    return (
+                        <li key={path}>
+                            <Link to={`/modules/${mod.moduleId}${suffix}`}>
+                                {path || '/'}
+                            </Link>
+                        </li>
+                    );
+                })}
             </ul>
         </li>
     );

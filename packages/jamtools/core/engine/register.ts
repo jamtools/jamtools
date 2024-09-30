@@ -3,7 +3,9 @@ import {CoreDependencies, ModuleDependencies} from '~/core/types/module_types';
 import type {ModuleAPI} from './module_api';
 import type {MacroTypeConfigs} from '~/core/modules/macro_module/macro_module_types';
 
-export type RegisterRouteOptions = {};
+export type RegisterRouteOptions = {
+    hideNavbar?: boolean;
+};
 
 export type MacroOptions = {};
 

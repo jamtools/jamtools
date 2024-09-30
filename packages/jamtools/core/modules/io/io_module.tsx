@@ -28,10 +28,6 @@ export class IoModule implements Module<IoState> {
 
     cleanup: (() => void)[] = [];
 
-    routes = {
-        '': () => 'io yeah',
-    };
-
     state: IoState = {
         midiInputDevices: [],
         midiOutputDevices: [],
