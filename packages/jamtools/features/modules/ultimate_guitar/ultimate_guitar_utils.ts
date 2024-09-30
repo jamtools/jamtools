@@ -85,7 +85,7 @@ export const prepareLyricsWithChords = (tabLyrics: string, options: {showChords:
                 return '';
             }
 
-            if (!options.transpose) {
+            if (!options.transpose || !transposeIntervals[options.transpose]) {
                 return captureAny;
             }
 
@@ -98,7 +98,7 @@ export const prepareLyricsWithChords = (tabLyrics: string, options: {showChords:
                 mainPart = capture.substring(0, capture.length - 1);
             }
 
-            const interval = transposeIntervals[(options.transpose + 12) % 12]!;
+            const interval = transposeIntervals[(options.transpose + 12) % 12];
             const transposed = Note.transpose(mainPart, interval);
 
             return transposed + suffix;
@@ -109,7 +109,7 @@ export const prepareLyricsWithChords = (tabLyrics: string, options: {showChords:
         .replace(/\n{2,}/g, '\n\n');
 };
 
-const transposeIntervals = {
+const transposeIntervals: Record<number, string> = {
     1: '2m',
     2: '2M',
     3: '3m',
