@@ -52,7 +52,7 @@ type GetTabFromCurrentSetlistDataReturnValue = {
 }
 
 export const getTabFromCurrentSetlistData = (setlistStatus: UltimateGuitarSetlistStatus | null, savedSetlists: UltimateGuitarSetlist[], savedTabs: UltimateGuitarTab[]): GetTabFromCurrentSetlistDataReturnValue => {
-    if (!setlistStatus) {
+    if (!setlistStatus || setlistStatus.songIndex === -1) {
         return {
             setlist: undefined,
             tab: undefined,

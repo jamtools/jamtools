@@ -8,7 +8,8 @@
     "dependencies": {
         "jamtools-core": "*",
         "jsdom": "^25.0.0",
-        "qrcode": "^1.5.4"
+        "qrcode": "^1.5.4",
+        "tonal": "^6.2.0"
     },
     "devDependencies": {
         "@types/qrcode": "^1.5.5",
