@@ -1,53 +1,65 @@
-// import fs from 'node:fs';
+import midi from 'midi-file';
 
-// const midiFileContent = fs.readFileSync('/Users/mickmister/code/jamtools/packages/jamtools/core/services/midi_file_parser/3-MIDI 1.mid');
+import fs from 'node:fs';
+
+const midiFileContent = fs.readFileSync('/Users/mickmister/code/jamtools/packages/jamtools/core/services/midi_file_parser/3-MIDI 1.mid');
 
 import {MidiFileParser} from './midi_file_parser';
 
 describe('midi_file_parser', () => {
-    it('should kick ass', () => {
+    const expected = {
+        "events": [
+            {
+                "notes": [
+                    {
+                        "midiNumber": 65
+                    },
+                    {
+                        "midiNumber": 71
+                    }
+                ]
+            },
+            {
+                "notes": [
+                    {
+                        "midiNumber": 71
+                    }
+                ]
+            },
+            {
+                "notes": [
+                    {
+                        "midiNumber": 67
+                    },
+                    {
+                        "midiNumber": 71
+                    }
+                ]
+            },
+            {
+                "notes": [
+                    {
+                        "midiNumber": 71
+                    }
+                ]
+            }
+        ]
+    };
+
+    it('@tonejs/midi should parse into NoteCluster objects', () => {
         const parser = new MidiFileParser();
-        const result = parser.parseFromData(midiData);
+        const result = parser.parseWithTonejsMidiBuffer(midiFileContent);
 
         expect(result).toBeTruthy();
-        expect(result).toEqual({
-            "events": [
-                {
-                    "notes": [
-                        {
-                            "midiNumber": 65
-                        },
-                        {
-                            "midiNumber": 71
-                        }
-                    ]
-                },
-                {
-                    "notes": [
-                        {
-                            "midiNumber": 71
-                        }
-                    ]
-                },
-                {
-                    "notes": [
-                        {
-                            "midiNumber": 67
-                        },
-                        {
-                            "midiNumber": 71
-                        }
-                    ]
-                },
-                {
-                    "notes": [
-                        {
-                            "midiNumber": 71
-                        }
-                    ]
-                }
-            ]
-        })
+        expect(result).toEqual(expected);
+    });
+
+    it('midi-file should parse into NoteCluster objects', () => {
+        const parser = new MidiFileParser();
+        const result = parser.parseFromData(midiData as midi.MidiData);
+
+        expect(result).toBeTruthy();
+        expect(result).toEqual(expected)
     });
 });
 

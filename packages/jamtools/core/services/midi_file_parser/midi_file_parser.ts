@@ -1,5 +1,7 @@
 import midi from 'midi-file';
 
+import {Midi} from '@tonejs/midi'
+
 type SustainedNote = {
     midiNumber: number;
     // startTime: number;
@@ -16,12 +18,49 @@ type ParsedMidiFile = {
 }
 
 export class MidiFileParser {
-    parseFromBuffer = (input: Buffer | string) => {
+    parseWithTonejsMidiBuffer = (input: Buffer) => {
+        const parsed = new Midi(input);
+        return this.parseWithTonejsMidiData(parsed);
+    };
+
+    parseWithTonejsMidiData = (parsed: Midi) => {
+        let timeOfLastNoteOn = 0;
+        let currentTime = 0;
+
+        const result: ParsedMidiFile = {events: []};
+
+        const track = parsed.tracks[0];
+
+        let currentCluster: NoteCluster = {notes: []};
+
+        for (const event of track.notes) {
+            currentTime = event.ticks;
+
+            const timeSinceLastNoteOn = currentTime - timeOfLastNoteOn;
+
+            if (currentCluster.notes.length && timeSinceLastNoteOn > 30) {
+                result.events.push(currentCluster);
+                currentCluster = {notes: []};
+            }
+
+            currentCluster.notes.push({
+                midiNumber: event.midi,
+            });
+
+            timeOfLastNoteOn = currentTime;
+        }
+
+        result.events.push(currentCluster);
+
+        return result;
+    };
+
+    parseFromBuffer = (input: Buffer) => {
         const parsed = midi.parseMidi(input);
         return this.parseFromData(parsed);
     };
 
-    parseFromData = (parsed: midi.MidiData) => {
+    parseFromData = (parsed: midi.MidiData): ParsedMidiFile => {
         let timeOfLastNoteOn = 0;
         let timeSinceLastEvent = 0;
         let currentTime = 0;
