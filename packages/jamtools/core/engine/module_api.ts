@@ -1,5 +1,5 @@
 import {SharedStateSupervisor, StateSupervisor, UserAgentStateSupervisor} from '../services/states/shared_state_service';
-import {ExtraModuleDependencies, Module} from '~/core/module_registry/module_registry';
+import {AllModules, ExtraModuleDependencies, Module} from '~/core/module_registry/module_registry';
 import {CoreDependencies, ModuleDependencies} from '../types/module_types';
 import {RegisterRouteOptions} from './register';
 
@@ -100,9 +100,19 @@ export class ModuleAPI {
         };
     };
 
-    // createMacro = () => {
-
-    // };
+    /**
+     * Create a macro for the user to configure with their hardware peripherals. This includes:
+     * - Inputs:
+     *   - `musical_keyboard_input`
+     *   - `midi_control_change_input`
+     *   - `midi_button_input`
+     * - Outputs
+     *   - `musical_keyboard_output`
+     *   - `midi_control_change_output`
+    */
+    createMacro: AllModules['macro']['createMacro'] = (...args) => {
+        return this.modDeps.moduleRegistry.getModule('macro').createMacro(...args);
+    };
 
     // registerSnack(snackName: string, options: RegisterSnackOptions, cb: SnackCallback): Promise<void>;
     // states: StatesAPI;

@@ -1,4 +1,6 @@
-import React from 'react';
+import React, {useState} from 'react';
+
+import {Button} from '~/core/components/Button';
 
 import {jamtools} from '~/core/engine/register';
 import {MidiFileParser, ParsedMidiFile} from '~/core/services/midi_file_parser/midi_file_parser';
@@ -23,6 +25,8 @@ jamtools.registerModule('MidiFile', {}, async (moduleAPI): Promise<MidiFileModul
     return {
         components: {
             Upload: (props: UploadComponentProps) => {
+                const [parsedMidiFile, setParsedMidiFile] = useState<ParsedMidiFile | null>(null);
+
                 const handleFile = (event: React.ChangeEvent<HTMLInputElement>) => {
                     const file = event.target.files?.[0];
 
@@ -37,7 +41,7 @@ jamtools.registerModule('MidiFile', {}, async (moduleAPI): Promise<MidiFileModul
                                 return;
                             }
                             const parsed = parser.parseWithTonejsMidiBuffer(content as Buffer);
-                            props.onParsed(parsed);
+                            setParsedMidiFile(parsed);
                         };
 
                         reader.readAsArrayBuffer(file);
@@ -46,11 +50,32 @@ jamtools.registerModule('MidiFile', {}, async (moduleAPI): Promise<MidiFileModul
                     }
                 }
 
+                const handleFormSubmission = () => {
+                    if (!parsedMidiFile) {
+                        return;
+                    }
+
+                    props.onParsed(parsedMidiFile);
+                };
+
                 return (
-                    <input
-                        type='file'
-                        onChange={handleFile}
-                    />
+                    <form>
+                        <div>
+                            <input
+                                type='file'
+                                onChange={handleFile}
+                            />
+                        </div>
+                        <div>
+                            <Button
+                                onClick={handleFormSubmission}
+                                disabled={!parsedMidiFile}
+                            >
+                                Submit
+                            </Button>
+                        </div>
+                    </form>
+
                 );
             },
         },
