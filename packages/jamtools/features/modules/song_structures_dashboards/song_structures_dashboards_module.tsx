@@ -199,16 +199,22 @@ jamtools.registerModule('song_structures_dashboards', {}, async (moduleAPI): Pro
                             <div>
                                 Confirmed:
                                 <div>
-                                    {confirmedChords?.map(c => (
-                                        <ChordDisplay chord={c}/>
+                                    {confirmedChords?.map((c, i) => (
+                                        <ChordDisplay
+                                            key={i}
+                                            chord={c}
+                                        />
                                     ))}
                                 </div>
                             </div>
                             <div>
                                 Draft:
                                 <div>
-                                    {draftChords?.map(c => (
-                                        <ChordDisplay chord={c}/>
+                                    {draftChords?.map((c, i) => (
+                                        <ChordDisplay
+                                            key={i}
+                                            chord={c}
+                                        />
                                     ))}
                                 </div>
                             </div>
