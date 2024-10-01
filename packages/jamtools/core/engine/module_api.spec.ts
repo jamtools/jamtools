@@ -1,6 +1,5 @@
-import {CoreDependencies} from '~/core/types/module_types';
 import {JamToolsEngine} from '~/core/engine/engine';
-import {makeMockCoreDependencies} from '~/core/test/mock_core_dependencies';
+import {makeMockCoreDependencies, makeMockExtraDependences} from '~/core/test/mock_core_dependencies';
 import {jamtools} from '~/core/engine/register';
 
 describe('ModuleAPI', () => {
@@ -9,9 +8,10 @@ describe('ModuleAPI', () => {
     });
 
     it('should create shared state', async () => {
-        const coreDeps: CoreDependencies = makeMockCoreDependencies({store: {}});
+        const coreDeps = makeMockCoreDependencies({store: {}});
+        const extraDeps = makeMockExtraDependences();
 
-        const engine = new JamToolsEngine(coreDeps);
+        const engine = new JamToolsEngine(coreDeps, extraDeps);
         await engine.initialize();
 
         const mod = await engine.registerModule('Test_MusicalKeyboardInputMacro', {}, async (moduleAPI) => {
