@@ -13,7 +13,7 @@ type NoteCluster = {
     notes: SustainedNote[];
 }
 
-type ParsedMidiFile = {
+export type ParsedMidiFile = {
     events: NoteCluster[];
 }
 
