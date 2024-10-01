@@ -1,8 +1,10 @@
-import midi from 'midi-file';
-
 import fs from 'node:fs';
+import path from 'node:path';
 
-const midiFileContent = fs.readFileSync('/Users/mickmister/code/jamtools/packages/jamtools/core/services/midi_file_parser/3-MIDI 1.mid');
+const midiFilePath = path.join(__dirname, '3-MIDI 1.mid');
+const midiFileContent = fs.readFileSync(midiFilePath);
+
+import type midi from 'midi-file';
 
 import {MidiFileParser} from './midi_file_parser';
 
