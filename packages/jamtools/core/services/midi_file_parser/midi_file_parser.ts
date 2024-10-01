@@ -1,6 +1,6 @@
 import midi from 'midi-file';
 
-import {Midi} from '@tonejs/midi'
+import {Midi} from '@tonejs/midi';
 
 type SustainedNote = {
     midiNumber: number;
@@ -62,7 +62,7 @@ export class MidiFileParser {
 
     parseFromData = (parsed: midi.MidiData): ParsedMidiFile => {
         let timeOfLastNoteOn = 0;
-        let timeSinceLastEvent = 0;
+        const timeSinceLastEvent = 0;
         let currentTime = 0;
 
         type MidiNumber = number;

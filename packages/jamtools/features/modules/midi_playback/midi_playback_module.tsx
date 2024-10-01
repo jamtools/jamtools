@@ -37,7 +37,7 @@ jamtools.registerModule('MidiPlayback', {}, async (moduleAPI): Promise<MidiPlayb
 
         const clusterToSend = midiData.events[currentIndex];
 
-        console.log('sending', clusterToSend)
+        console.log('sending', clusterToSend);
 
         for (const note of clusterToSend.notes) {
             outputDevice.send({

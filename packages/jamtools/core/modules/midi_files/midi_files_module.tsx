@@ -48,7 +48,7 @@ jamtools.registerModule('MidiFile', {}, async (moduleAPI): Promise<MidiFileModul
                     } else {
                         console.error('No file selected');
                     }
-                }
+                };
 
                 const handleFormSubmission = () => {
                     if (!parsedMidiFile) {
