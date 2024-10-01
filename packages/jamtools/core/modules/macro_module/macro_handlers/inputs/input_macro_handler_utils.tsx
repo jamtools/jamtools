@@ -3,10 +3,16 @@ import {Subject} from 'rxjs';
 
 import {MacroAPI} from '~/core/engine/register';
 import {MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
-import {SharedStateSupervisor} from '~/core/services/states/shared_state_service';
+import {StateSupervisor} from '~/core/services/states/shared_state_service';
 
 import {Edit} from './components/edit_macro';
-import type {MidiControlChangeInputResult} from './inputs/midi_control_change_input_macro_handler';
+
+type MidiInputMacroPayload = {
+    subject: Subject<MidiEventFull>;
+    components: {
+        edit: React.ElementType;
+    };
+}
 
 export const savedMidiEventsAreEqual = (event1: MidiEventFull, event2: MidiEventFull): boolean => {
     const key1 = getKeyForMidiEvent(event1);
@@ -20,11 +26,11 @@ export const getKeyForMidiEvent = (event: MidiEventFull) => {
 
 export const getKeyForMacro = (key: string, fieldName: string) => `macro|${fieldName}|${key}`;
 
-export type MacroStateHolders = {
-    editing: SharedStateSupervisor<boolean>;
-    waiting: SharedStateSupervisor<boolean>;
-    captured: SharedStateSupervisor<MidiEventFull | null>;
-    savedMidiEvents: SharedStateSupervisor<MidiEventFull[]>;
+export type InputMacroStateHolders = {
+    editing: StateSupervisor<boolean>;
+    waiting: StateSupervisor<boolean>;
+    captured: StateSupervisor<MidiEventFull | null>;
+    savedMidiEvents: StateSupervisor<MidiEventFull[]>;
 };
 
 type MacroSaverOptions = {
@@ -33,7 +39,7 @@ type MacroSaverOptions = {
 
 type CheckSavedMidiEventsAreEqual = (event1: MidiEventFull, event2: MidiEventFull) => boolean;
 
-export const useMacroWaiterAndSaver = async (macroAPI: MacroAPI, states: MacroStateHolders, options: MacroSaverOptions, fieldName: string, checkSavedMidiEventsAreEqual: CheckSavedMidiEventsAreEqual): Promise<MidiControlChangeInputResult> => {
+export const useInputMacroWaiterAndSaver = async (macroAPI: MacroAPI, states: InputMacroStateHolders, options: MacroSaverOptions, fieldName: string, checkSavedMidiEventsAreEqual: CheckSavedMidiEventsAreEqual): Promise<MidiInputMacroPayload> => {
     const editingState = states.editing;
     const waitingForConfiguration = states.waiting;
     const capturedMidiEvent = states.captured;
@@ -57,7 +63,7 @@ export const useMacroWaiterAndSaver = async (macroAPI: MacroAPI, states: MacroSt
         }
 
         if (currentPersisted.find(e => checkSavedMidiEventsAreEqual(e, captured))) {
-            throw new Error('already saved that cc control');
+            throw new Error('already saved that midi input');
         }
 
         savedMidiEvents.setState([...currentPersisted, captured]);
@@ -97,7 +103,7 @@ export const useMacroWaiterAndSaver = async (macroAPI: MacroAPI, states: MacroSt
         capturedMidiEvent.setState(null);
     });
 
-    const returnValue: MidiControlChangeInputResult = {
+    const returnValue: MidiInputMacroPayload = {
         subject,
         components: {
             edit: () => {

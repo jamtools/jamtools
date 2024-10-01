@@ -2,10 +2,8 @@ import React from 'react';
 
 import {jamtools} from '~/core/engine/register';
 
-import {MidiEvent} from '~/core/modules/macro_module/macro_module_types';
-
-export interface OutputMidiDevice {
-    send(midiEvent: MidiEvent): void;
+export interface MidiControlChangeOutputMacroOutput {
+    send(value: number): void;
     initialize?: () => Promise<void>;
     components: {
         edit: React.ElementType;
@@ -13,24 +11,23 @@ export interface OutputMidiDevice {
 }
 
 import {getKeyForMacro} from '../inputs/input_macro_handler_utils';
-import {AddingOutputDeviceState, SavedOutputDeviceState} from './components/output_macro_edit';
+import {AddingOutputDeviceState, Edit, SavedOutputDeviceState} from './components/output_macro_edit';
 import {OutputMacroStateHolders, checkSavedMidiOutputsAreEqual, useOutputMacroWaiterAndSaver} from './output_macro_handler_utils';
 
-type MusicalKeyboardOutputMacroConfig = {
-    allowLocal?: boolean;
+type MidiControlChangeOutputMacroConfig = {
 };
 
 declare module '~/core/modules/macro_module/macro_module_types' {
     interface MacroTypeConfigs {
-        musical_keyboard_output: {
-            input: MusicalKeyboardOutputMacroConfig;
-            output: OutputMidiDevice;
+        midi_control_change_output: {
+            input: MidiControlChangeOutputMacroConfig;
+            output: MidiControlChangeOutputMacroOutput;
         }
     }
 }
 
 jamtools.registerMacroType(
-    'musical_keyboard_output',
+    'midi_control_change_output',
     {},
     (async (macroAPI, inputConf, fieldName) => {
         const editingState = await macroAPI.moduleAPI.statesAPI.createSharedState(getKeyForMacro('editing', fieldName), false);
@@ -43,7 +40,25 @@ jamtools.registerMacroType(
             savedMidiOutputs: savedOutputDevices,
         };
 
-        const macroReturnValue = await useOutputMacroWaiterAndSaver(macroAPI, states, {includeSoundfont: true}, fieldName, checkSavedMidiOutputsAreEqual);
-        return macroReturnValue;
+        const macroReturnValue = await useOutputMacroWaiterAndSaver(macroAPI, states, {includeNote: true}, fieldName, checkSavedMidiOutputsAreEqual);
+
+        const ioModule = macroAPI.moduleAPI.deps.module.moduleRegistry.getModule('io');
+
+        const send = (value: number) => {
+            const saved = savedOutputDevices.getState();
+            for (const device of saved) {
+                ioModule.sendMidiEvent(device.device, {
+                    type: 'cc',
+                    number: device.note!,
+                    channel: device.channel,
+                    value,
+                });
+            }
+        };
+
+        return {
+            send,
+            components: macroReturnValue.components,
+        };
     }),
 );

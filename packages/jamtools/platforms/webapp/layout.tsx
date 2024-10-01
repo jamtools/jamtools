@@ -62,21 +62,6 @@ export const Layout = (props: Props) => {
     );
 };
 
-let darkMode = false;
-if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    darkMode = true;
-}
-
-if (darkMode) {
-    const classList = document.documentElement.classList;
-    for (const cls of classList) {
-        if (cls === 'sl-theme-light') {
-            classList.add('sl-theme-dark');
-            classList.remove(cls);
-        }
-    }
-}
-
 const ToggleThemeButton = () => {
     const onClick = () => {
         const classList = document.documentElement.classList;

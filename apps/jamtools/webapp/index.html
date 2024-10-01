@@ -14,9 +14,24 @@
 
     <style>
         body {
-            font-family: system-ui
+            font-family: system-ui;
+            overflow-y: scroll;
         }
     </style>
+
+    <script>
+        (function() {
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                const classList = document.documentElement.classList;
+                for (const cls of classList) {
+                    if (cls === 'sl-theme-light') {
+                        classList.add('sl-theme-dark');
+                        classList.remove(cls);
+                    }
+                }
+            }
+        })();
+    </script>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.16.0/cdn/themes/light.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.16.0/cdn/themes/dark.min.css">

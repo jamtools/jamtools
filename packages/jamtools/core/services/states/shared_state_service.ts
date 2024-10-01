@@ -1,7 +1,7 @@
 import {useEffect, useState} from 'react';
 import {Subject} from 'rxjs';
 
-import {CoreDependencies, Rpc} from '~/core/types/module_types';
+import {CoreDependencies, KVStore, Rpc} from '~/core/types/module_types';
 
 type SharedStateMessage = {
     key: string;
@@ -88,7 +88,37 @@ export class SharedStateService {
     };
 }
 
-export class SharedStateSupervisor<State> {
+export type StateSupervisor<State> = {
+    subject: Subject<State>;
+    getState(): State;
+    setState(state: State): Promise<unknown>;
+    useState(): State;
+}
+
+export class UserAgentStateSupervisor<State> implements StateSupervisor<State> {
+    public subject: Subject<State> = new Subject();
+    private currentValue: State;
+
+    constructor(private key: string, initialValue: State, private userAgentStore: KVStore) {
+        this.currentValue = initialValue;
+    }
+
+    public getState = (): State => {
+        return this.currentValue;
+    };
+
+    public setState = async (state: State): Promise<unknown> => {
+        this.currentValue = state;
+        this.subject.next(this.currentValue);
+        return this.userAgentStore.set(this.key, state);
+    };
+
+    public useState = (): State => {
+        return useSubject<State>(this.getState(), this.subject)!;
+    };
+}
+
+export class SharedStateSupervisor<State> implements StateSupervisor<State> {
     public subject: Subject<State> = new Subject();
     public subjectForKVStorePublish: Subject<State> = new Subject();
 

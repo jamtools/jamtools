@@ -12,6 +12,7 @@ import {TrpcKVStoreService} from '~/core/services/trpc_kv_store_client';
 import {Main} from './main';
 import {BrowserQwertyService} from '~/platforms/webapp/services/browser_qwerty_service';
 import {BrowserMidiService} from '~/platforms/webapp/services/browser_midi_service';
+import {BrowserKVStoreService} from '~/platforms/webapp/services/browser_kvstore_service';
 import {BrowserJsonRpcClientAndServer} from '~/platforms/webapp/services/browser_json_rpc';
 import {JamToolsEngine} from '~/core/engine/engine';
 import {ExtraModuleDependencies} from '~/core/module_registry/module_registry';
@@ -41,6 +42,8 @@ export const startJamToolsAndRenderApp = async (): Promise<JamToolsEngine> => {
     // const kvStore = new BrowserKVStoreService(localStorage);
     const kvStore = new TrpcKVStoreService(DATA_HOST);
 
+    const userAgentKVStore = new BrowserKVStoreService(localStorage);
+
     const isLocal = localStorage.getItem('isLocal') === 'true';
 
     const coreDeps: CoreDependencies = {
@@ -50,7 +53,10 @@ export const startJamToolsAndRenderApp = async (): Promise<JamToolsEngine> => {
             qwerty: qwertyService,
             midi: midiService,
         },
-        kvStore,
+        storage: {
+            remote: kvStore,
+            userAgent: userAgentKVStore,
+        },
         rpc,
         isMaestro: () => isLocal,
     };
@@ -67,6 +73,7 @@ export const startJamToolsAndRenderApp = async (): Promise<JamToolsEngine> => {
     await waitForPageLoad();
 
     const rootElem = document.createElement('div');
+    rootElem.style.overflowY = 'scroll';
     document.body.appendChild(rootElem);
 
     const root = ReactDOM.createRoot(rootElem);

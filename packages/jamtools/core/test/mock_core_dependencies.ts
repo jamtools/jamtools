@@ -68,7 +68,10 @@ export const makeMockCoreDependencies = ({store}: MakeMockCoreDependenciesOption
             midi: new MockMidiService(),
             qwerty: new MockQwertyService(),
         },
-        kvStore: new MockKVStore(store),
+        storage: {
+            remote: new MockKVStore(store),
+            userAgent: new MockKVStore(store),
+        },
         rpc: new MockRpcService(),
     } satisfies CoreDependencies;
 };

@@ -1,0 +1,22 @@
+{
+    "Print to console": {
+        "prefix": "register-module",
+        "scope": "javascript,typescript,typescriptreact",
+        "body": [
+            "declare module '~/core/module_registry/module_registry' {",
+            "    interface AllModules {",
+            "        $1: $2;",
+            "    }",
+            "}",
+            "",
+            "type $2 = {",
+            "",
+            "};",
+            "",
+            "jamtools.registerModule('$1', {}, async (moduleAPI): Promise<$2> => {",
+            "    return {};",
+            "});"
+        ],
+        "description": "Add a module to the system, to be consumed by other modules"
+    }
+}

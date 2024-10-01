@@ -4,13 +4,15 @@ import {Subject} from 'rxjs';
 import {jamtools} from '~/core/engine/register';
 import {MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
 import {getKeyForMacro, InputMacroStateHolders, useInputMacroWaiterAndSaver, savedMidiEventsAreEqual, getKeyForMidiEvent} from './input_macro_handler_utils';
+import {qwertyEventToMidiEvent, savedMidiInputsAreEqual} from './musical_keyboard_input_macro_handler';
 
-type MacroConfigItemMidiControlChangeInput = {
+type MacroConfigItemMidiButtonInput = {
     onTrigger?(midiEvent: MidiEventFull): void;
     allowLocal?: boolean;
+    enableQwerty?: boolean;
 }
 
-export type MidiControlChangeInputResult = {
+export type MidiButtonInputResult = {
     subject: Subject<MidiEventFull>;
     components: {
         edit: React.ElementType;
@@ -19,14 +21,14 @@ export type MidiControlChangeInputResult = {
 
 declare module '~/core/modules/macro_module/macro_module_types' {
     interface MacroTypeConfigs {
-        midi_control_change_input: {
-            input: MacroConfigItemMidiControlChangeInput;
-            output: MidiControlChangeInputResult;
+        midi_button_input: {
+            input: MacroConfigItemMidiButtonInput;
+            output: MidiButtonInputResult;
         }
     }
 }
 
-jamtools.registerMacroType('midi_control_change_input', {}, async (macroAPI, conf, fieldName) => {
+jamtools.registerMacroType('midi_button_input', {}, async (macroAPI, conf, fieldName) => {
     const editing = await macroAPI.moduleAPI.statesAPI.createSharedState(getKeyForMacro('editing', fieldName), false);
     const waitingForConfiguration = await macroAPI.moduleAPI.statesAPI.createSharedState(getKeyForMacro('waiting_for_configuration', fieldName), false);
     const capturedMidiEvent = await macroAPI.moduleAPI.statesAPI.createSharedState<MidiEventFull | null>(getKeyForMacro('captured_midi_event', fieldName), null);
@@ -38,14 +40,14 @@ jamtools.registerMacroType('midi_control_change_input', {}, async (macroAPI, con
         savedMidiEvents,
     };
 
-    const macroReturnValue = await useInputMacroWaiterAndSaver(macroAPI, states, {}, fieldName, savedMidiEventsAreEqual);
+    const macroReturnValue = await useInputMacroWaiterAndSaver(macroAPI, states, {includeQwerty: conf.enableQwerty}, fieldName, savedMidiEventsAreEqual);
 
-    if (!macroAPI.moduleAPI.deps.core.isMaestro() && !conf.allowLocal) {
+    if (!macroAPI.moduleAPI.deps.core.isMaestro()) {
         return macroReturnValue;
     }
 
-    const sub = macroAPI.moduleAPI.deps.module.moduleRegistry.getModule('io').midiInputSubject.subscribe(event => {
-        if (event.event.type !== 'cc') {
+    const handleMidiEvent = (event: MidiEventFull) => {
+        if (event.event.type !== 'noteon' && event.event.type !== 'noteoff') {
             return;
         }
 
@@ -69,8 +71,22 @@ jamtools.registerMacroType('midi_control_change_input', {}, async (macroAPI, con
             macroReturnValue.subject.next(event);
             conf.onTrigger?.(event);
         }
-    });
-    macroAPI.onDestroy(sub.unsubscribe);
+    };
+
+    const midiSubscription = macroAPI.moduleAPI.deps.module.moduleRegistry.getModule('io').midiInputSubject.subscribe(handleMidiEvent);
+    macroAPI.onDestroy(midiSubscription.unsubscribe);
+
+    if (conf.enableQwerty) {
+        const qwertySubscription = macroAPI.moduleAPI.deps.module.moduleRegistry.getModule('io').qwertyInputSubject.subscribe((qwertyEvent => {
+            const midiEvent = qwertyEventToMidiEvent(qwertyEvent, false);
+            if (!midiEvent) {
+                return;
+            }
+
+            handleMidiEvent(midiEvent);
+        }));
+        macroAPI.onDestroy(qwertySubscription.unsubscribe);
+    }
 
     return macroReturnValue;
 });

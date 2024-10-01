@@ -39,6 +39,7 @@ declare module '~/core/module_registry/module_registry' {
     }
 }
 
+// TODO: proxy wled UI in jamtools UI
 export class WledModule implements Module<WledState> {
     moduleId = 'wled';
 

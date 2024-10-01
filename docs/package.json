@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "typedoc": "npx typedoc --out content/typedoc_docs",
-    "typedoc:watch": "npm run typedoc -- -watch",
+    "typedoc": "./scripts/patch_typedoc-plugin-markdown.sh && npx typedoc --out content/typedoc_docs",
+    "typedoc:watch": "./scripts/patch_typedoc-plugin-markdown.sh && nodemon --watch typedoc.json --exec \"npm run typedoc -- -watch\"",
     "mkdocs": "mkdocs build",
     "mkdocs:watch": "mkdocs serve --dev-addr=0.0.0.0:8000 --watch typedoc_docs",
     "serve": "concurrently \"npm run typedoc:watch\" \"npm run mkdocs:watch\"",

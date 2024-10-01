@@ -6,7 +6,7 @@ import {Subject} from 'rxjs';
 import {QWERTY_TO_MIDI_MAPPINGS} from '~/core/constants/qwerty_to_midi_mappings';
 import {jamtools} from '~/core/engine/register';
 import {SharedStateSupervisor} from '~/core/services/states/shared_state_service';
-import {MacroStateHolders, getKeyForMacro, getKeyForMidiEvent, useMacroWaiterAndSaver} from '../macro_handler_utils';
+import {InputMacroStateHolders, getKeyForMacro, getKeyForMidiEvent, useInputMacroWaiterAndSaver} from './input_macro_handler_utils';
 
 type MusicalKeyboardInputResult = {
     subject: Subject<MidiEventFull>;
@@ -45,52 +45,25 @@ jamtools.registerMacroType(
         const waitingForConfiguration = await macroAPI.moduleAPI.statesAPI.createSharedState(getKeyForMacro('waiting_for_configuration', fieldName), false);
         const capturedMidiEvent = await macroAPI.moduleAPI.statesAPI.createSharedState<MidiEventFull | null>(getKeyForMacro('captured_midi_event', fieldName), null);
         const savedMidiEvents = await macroAPI.moduleAPI.statesAPI.createPersistentState<MidiEventFull[]>(getKeyForMacro('saved_midi_event', fieldName), []);
-        const states: MacroStateHolders = {
+        const states: InputMacroStateHolders = {
             editing,
             waiting: waitingForConfiguration,
             captured: capturedMidiEvent,
             savedMidiEvents,
         };
 
-        const macroReturnValue = await useMacroWaiterAndSaver(macroAPI, states, {includeQwerty: conf.enableQwerty}, fieldName, savedMidiInputsAreEqual);
+        const macroReturnValue = await useInputMacroWaiterAndSaver(macroAPI, states, {includeQwerty: conf.enableQwerty}, fieldName, savedMidiInputsAreEqual);
 
         if (!macroAPI.moduleAPI.deps.core.isMaestro()) {
             return macroReturnValue;
         }
 
-        const ioModule = macroAPI.moduleAPI.deps.module.moduleRegistry.getModule('io');
-
-        // const storedUserConfig = dataService.getState();
-
-        // const isQwertyEnabled = true;
-
-        // TODO: uncomment this once UI is done here
-        // if (isQwertyEnabled) {
-        //     // TODO: subscribe should require a second parameter, the garbage cleanup callback
-        //     ioModule.qwertyInputSubject.subscribe(event => {
-        //         const midiEvent = qwertyEventToMidiEvent(event, localQwertyData);
-        //         if (!midiEvent) {
-        //             return;
-        //         }
-
-        //         const onTrigger = conf.onTrigger;
-        //         if (onTrigger) {
-        //             onTrigger(midiEvent);
-        //         }
-
-        //         resultEventSubject.next(midiEvent);
-        //     }); // .cleanup(macroAPI.onDestroy);
-        // }
-
-        const isMidiEnabled = true;
-        // const isMidiEnabled = (Object.keys(storedUserConfig).length > 1) || (Object.keys(storedUserConfig).length === 1 && !isQwertyEnabled);
-
-        macroReturnValue.subject.subscribe(event => {
-
-        });
-
-        const sub = macroAPI.moduleAPI.deps.module.moduleRegistry.getModule('io').midiInputSubject.subscribe(event => {
+        const handleMidiEvent = (event: MidiEventFull) => {
             if (event.event.type !== 'noteon' && event.event.type !== 'noteoff') {
+                return;
+            }
+
+            if (event.deviceInfo.name.startsWith('IAC')) {
                 return;
             }
 
@@ -104,14 +77,28 @@ jamtools.registerMacroType(
                 return;
             }
 
-            const key = getKeyForMidiEvent(event);
+            // const key = getKeyForMidiEvent(event);
             const saved = savedMidiEvents.getState();
             if (saved.find(e => savedMidiInputsAreEqual(e, event))) {
                 macroReturnValue.subject.next(event);
                 conf.onTrigger?.(event);
             }
-        });
-        macroAPI.onDestroy(sub.unsubscribe);
+        };
+
+        const midiSubscription = macroAPI.moduleAPI.deps.module.moduleRegistry.getModule('io').midiInputSubject.subscribe(handleMidiEvent);
+        macroAPI.onDestroy(midiSubscription.unsubscribe);
+
+        if (conf.enableQwerty) {
+            const qwertySubscription = macroAPI.moduleAPI.deps.module.moduleRegistry.getModule('io').qwertyInputSubject.subscribe((qwertyEvent => {
+                const midiEvent = qwertyEventToMidiEvent(qwertyEvent, true);
+                if (!midiEvent) {
+                    return;
+                }
+
+                handleMidiEvent(midiEvent);
+            }));
+            macroAPI.onDestroy(qwertySubscription.unsubscribe);
+        }
 
         return macroReturnValue;
     },
@@ -121,37 +108,27 @@ export const getKeyForInputDevice = (event: MidiEventFull) => {
     return `${event.deviceInfo.name}|${event.event.channel}`;
 };
 
-const savedMidiInputsAreEqual = (event1: MidiEventFull, event2: MidiEventFull): boolean => {
+export const savedMidiInputsAreEqual = (event1: MidiEventFull, event2: MidiEventFull): boolean => {
     return getKeyForInputDevice(event1) === getKeyForInputDevice(event2);
 };
 
-const qwertyEventToMidiEvent = (event: QwertyCallbackPayload, localStateService: SharedStateSupervisor<LocalState>): MidiEventFull | undefined => {
-    const midiNumber = QWERTY_TO_MIDI_MAPPINGS[event.key as keyof typeof QWERTY_TO_MIDI_MAPPINGS];
+export const qwertyEventToMidiEvent = (event: QwertyCallbackPayload, onlyMusical: boolean): MidiEventFull | undefined => {
+    let midiNumber = QWERTY_TO_MIDI_MAPPINGS[event.key as keyof typeof QWERTY_TO_MIDI_MAPPINGS];
     if (midiNumber === undefined) {
-        return;
-    }
-
-    const state = localStateService.getState();
-
-    const currentlyHoldingKey = state[event.key];
-
-    if (event.event === 'keydown') {
-        if (currentlyHoldingKey) {
+        if (onlyMusical) {
             return;
         }
 
-        localStateService.setState({...state, [event.key]: true});
+        midiNumber = event.key.charCodeAt(0);
     } else {
-        const newState = {...state};
-        delete newState[event.key];
-        localStateService.setState(newState);
+        midiNumber + 24;
     }
 
     const fullEvent: MidiEventFull = {
         deviceInfo: {type: 'midi', subtype: 'midi_input', name: 'qwerty', manufacturer: ''},
         event: {
             channel: 0,
-            number: midiNumber + 24,
+            number: midiNumber,
             type: event.event === 'keydown' ? 'noteon' : 'noteoff',
             velocity: 100, // maybe make this random or gradually change or something
         },

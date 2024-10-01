@@ -15,4 +15,22 @@
     "excludeNotDocumented": true, // Excludes items without JSDoc comments
     "excludePrivate": true, // Optional: Excludes private members
     // "excludeProtected": true // Optional: Excludes protected members
+    // "hidePageHeader": true,
+    // "hideBreadcrumbs": true,
+    // "hidePageTitle": true,
+    // "hideGroupHeadings": true,
+    "useCodeBlocks": false,
+    "expandParameters": true,
+    // "parametersFormat": "table",
+    // "interfacePropertiesFormat": "table",
+    // "classPropertiesFormat": "table",
+    // "enumMembersFormat": "list",
+    // "tableColumnSettings": {
+    //     "hideDefaults": true,
+    //     "hideInherited": true,
+    //     "hideModifiers": true,
+    //     "hideOverrides": true,
+    //     "hideSources": true,
+    //     "leftAlignHeaders": true
+    // }
 }
