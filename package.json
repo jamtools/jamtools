@@ -6,6 +6,7 @@
   "packageManager": "npm@10.2.4",
   "scripts": {
     "start": "turbo run start",
+    "prestart": "bash -c \"./configs/scripts/check-dependencies.sh\"",
     "build": "turbo run build",
     "build-saas": "turbo run build-saas",
     "dev": "turbo run dev",
