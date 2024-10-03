@@ -10,6 +10,7 @@ type MacroConfigItemMidiButtonInput = {
     onTrigger?(midiEvent: MidiEventFull): void;
     allowLocal?: boolean;
     enableQwerty?: boolean;
+    includeRelease?: boolean;
 }
 
 export type MidiButtonInputResult = {
@@ -48,6 +49,10 @@ jamtools.registerMacroType('midi_button_input', {}, async (macroAPI, conf, field
 
     const handleMidiEvent = (event: MidiEventFull) => {
         if (event.event.type !== 'noteon' && event.event.type !== 'noteoff') {
+            return;
+        }
+
+        if (!conf.includeRelease && event.event.type === 'noteoff') {
             return;
         }
 

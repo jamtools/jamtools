@@ -5,11 +5,11 @@ import {QwertyCallbackPayload} from '~/core/types/io_types';
 import {Subject} from 'rxjs';
 import {QWERTY_TO_MIDI_MAPPINGS} from '~/core/constants/qwerty_to_midi_mappings';
 import {jamtools} from '~/core/engine/register';
-import {SharedStateSupervisor} from '~/core/services/states/shared_state_service';
 import {InputMacroStateHolders, getKeyForMacro, getKeyForMidiEvent, useInputMacroWaiterAndSaver} from './input_macro_handler_utils';
 
 type MusicalKeyboardInputResult = {
     subject: Subject<MidiEventFull>;
+    getStoredEvents: () => MidiEventFull[];
     components: {
         edit: React.ElementType;
     };
@@ -52,7 +52,12 @@ jamtools.registerMacroType(
             savedMidiEvents,
         };
 
-        const macroReturnValue = await useInputMacroWaiterAndSaver(macroAPI, states, {includeQwerty: conf.enableQwerty}, fieldName, savedMidiInputsAreEqual);
+        const macroReturnValueFromSaver = await useInputMacroWaiterAndSaver(macroAPI, states, {includeQwerty: conf.enableQwerty}, fieldName, savedMidiInputsAreEqual);
+
+        const macroReturnValue = {
+            ...macroReturnValueFromSaver,
+            getStoredEvents: () => savedMidiEvents.getState(),
+        };
 
         if (!macroAPI.moduleAPI.deps.core.isMaestro()) {
             return macroReturnValue;
