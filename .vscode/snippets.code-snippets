@@ -1,5 +1,5 @@
 {
-    "Print to console": {
+    "Register new jamtools module": {
         "prefix": "register-module",
         "scope": "javascript,typescript,typescriptreact",
         "body": [
