@@ -52,7 +52,7 @@ export class MultiOctaveSupervisor {
     };
 
     private createActions = () => ({
-        toggleDebugging: this.moduleAPI.createAction('toggleDebugging', {}, async () => {
+        toggleDebugging: this.moduleAPI.createAction(`${this.kvPrefix}|toggleDebugging`, {}, async () => {
             console.log('toggling debug mode', !this.states.enableDebugging.getState());
             this.states.enableDebugging.setState(!this.states.enableDebugging.getState());
         }),
