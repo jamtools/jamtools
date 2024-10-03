@@ -72,6 +72,8 @@ export class JamToolsEngine {
         const moduleAPI = new ModuleAPI(mod, 'engine', this.coreDeps, this.makeDerivedDependencies(), this.extraModuleDependencies);
         const moduleReturnValue = await cb(moduleAPI);
 
+        Object.assign(mod, moduleReturnValue);
+
         this.moduleRegistry.registerModule(mod);
         return {module: mod, api: moduleReturnValue};
     };

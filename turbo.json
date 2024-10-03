@@ -23,6 +23,9 @@
       "test": {
         "dependsOn": ["^test"]
       },
+      "test:watch": {
+        "dependsOn": ["^test:watch"]
+      },
       "dev": {
         "persistent": true,
         "cache": false,

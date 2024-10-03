@@ -6,6 +6,7 @@
   "packageManager": "npm@10.2.4",
   "scripts": {
     "start": "turbo run start",
+    "prestart": "bash -c \"./configs/scripts/check-dependencies.sh\"",
     "build": "turbo run build",
     "build-saas": "turbo run build-saas",
     "dev": "turbo run dev",
@@ -13,6 +14,9 @@
     "dev-without-node": "turbo run dev --filter=\"!./apps/jamtools/node\"",
     "debug-node": "npm run debug --prefix apps/jamtools/node",
     "test": "turbo run test",
+    "test:watch": "turbo run test:watch",
+    "lint": "turbo run lint",
+    "fix": "turbo run fix",
     "ci": "turbo run lint check-types build test --output-logs errors-only",
     "heroku-postbuild": "NODE_ENV=production npm run build-saas"
   },

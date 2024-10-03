@@ -125,10 +125,15 @@ export class NodeMidiService implements MidiService {
         }
 
         if (midiEvent.type === 'noteon' || midiEvent.type === 'noteoff') {
+            let velocity = midiEvent.velocity;
+            if (velocity === undefined) {
+                velocity = midiEvent.type === 'noteon' ? 100 : 0;
+            }
+
             const note: easymidi.Note = {
                 channel: midiEvent.channel as Channel,
                 note: midiEvent.number,
-                velocity: midiEvent.velocity!,
+                velocity,
             };
 
             output.send(midiEvent.type as 'noteon', note);
