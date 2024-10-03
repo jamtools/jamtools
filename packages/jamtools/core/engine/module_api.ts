@@ -142,7 +142,7 @@ export class StatesAPI {
         const fullKey = `${this.prefix}|state.persistent|${stateName}`;
 
         const storedValue = await this.coreDeps.storage.remote.get<State>(fullKey);
-        if (storedValue) {
+        if (storedValue !== null) {
             initialValue = storedValue;
         }
 

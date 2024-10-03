@@ -2,27 +2,54 @@ import React from 'react';
 
 import {ModuleAPI} from '~/core/engine/module_api';
 import {MidiEvent, MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
-import {Button} from '../../../../core/components/Button';
+import {Button} from '~/core/components/Button';
+
+type MultiOctaveSupervisorMidiState = {
+    currentlyHeldDownInputNotes: MidiEvent[];
+};
 
 export class MultiOctaveSupervisor {
     macros!: Awaited<ReturnType<MultiOctaveSupervisor['createMacros']>>;
     states!: Awaited<ReturnType<MultiOctaveSupervisor['createStates']>>;
-    actions!: Awaited<ReturnType<MultiOctaveSupervisor['createActions']>>;
+    actions!: ReturnType<MultiOctaveSupervisor['createActions']>;
 
-    currentlyHeldNotes: MidiEvent[] = [];
+    midiState: MultiOctaveSupervisorMidiState = {
+        currentlyHeldDownInputNotes: [],
+    };
 
     handleKeyboardNote = async (event: MidiEventFull) => {
         this.macros.pagedOctaveOutput.send(event.event);
-        this.states.savedEvent.setState(event);
+
+        setTimeout(() => {
+            if (this.states.enableDebugging.getState()) {
+                this.states.savedEvent.setState(event);
+            }
+        });
     };
 
     render: React.ElementType = () => {
-        const [showDebugData, setShowDebugData] = React.useState(false);
-
+        const enableDebugging = this.states.enableDebugging.useState();
         const savedEvent = this.states.savedEvent.useState();
 
-        const debugData = (
+        return (
             <>
+                <this.renderDebugData
+                    enableDebugging={enableDebugging}
+                    savedEvent={savedEvent}
+                />
+            </>
+        );
+    };
+
+    private renderDebugData = ({savedEvent, enableDebugging}: {savedEvent: MidiEventFull | null, enableDebugging: boolean}) => {
+        const [showDebugData, setShowDebugData] = React.useState(false);
+
+        return (
+            <>
+                <Button onClick={() => this.actions.toggleDebugging({})}>
+                    {enableDebugging ? 'Disable debugging' : 'Enable debugging'}
+                </Button>
+
                 <Button onClick={() => setShowDebugData(!showDebugData)}>
                     {showDebugData ? 'Hide debug data' : 'Show debug data'}
                 </Button>
@@ -48,12 +75,6 @@ export class MultiOctaveSupervisor {
                 )}
             </>
         );
-
-        return (
-            <>
-                {debugData}
-            </>
-        );
     };
 
     constructor(private moduleAPI: ModuleAPI, private kvPrefix: string) { }
@@ -61,6 +82,7 @@ export class MultiOctaveSupervisor {
     initialize = async () => {
         this.macros = await this.createMacros();
         this.states = await this.createStates();
+        this.actions = this.createActions();
     };
 
     createMacros = async () => {
@@ -81,14 +103,29 @@ export class MultiOctaveSupervisor {
     };
 
     createStates = async () => {
-        const savedEvent = await this.moduleAPI.statesAPI.createSharedState<MidiEventFull | null>('savedEvent', null);
+        const [
+            enableDebugging,
+            savedEvent,
+            currentlyHeldDownNotes,
+        ] = await Promise.all([
+            this.moduleAPI.statesAPI.createPersistentState<boolean>('enableDebugging', true),
+            this.moduleAPI.statesAPI.createSharedState<MidiEventFull | null>('savedEvent', null),
+            this.moduleAPI.statesAPI.createSharedState<MultiOctaveSupervisorMidiState>('currentlyHeldDownNotes', this.midiState),
+        ]);
 
         return {
+            enableDebugging,
             savedEvent,
+            currentlyHeldDownNotes,
         };
     };
 
-    createActions = async () => {
-
+    createActions = () => {
+        return {
+            toggleDebugging: this.moduleAPI.createAction('toggleDebugging', {}, async () => {
+                console.log('toggling debug mode', !this.states.enableDebugging.getState())
+                this.states.enableDebugging.setState(!this.states.enableDebugging.getState());
+            }),
+        };
     };
 }
