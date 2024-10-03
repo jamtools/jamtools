@@ -9,39 +9,72 @@ type MultiOctaveSupervisorMidiState = {
 };
 
 export class MultiOctaveSupervisor {
-    macros!: Awaited<ReturnType<MultiOctaveSupervisor['createMacros']>>;
-    states!: Awaited<ReturnType<MultiOctaveSupervisor['createStates']>>;
-    actions!: ReturnType<MultiOctaveSupervisor['createActions']>;
+    private macros!: Awaited<ReturnType<MultiOctaveSupervisor['createMacros']>>;
+    private states!: Awaited<ReturnType<MultiOctaveSupervisor['createStates']>>;
+    private actions!: ReturnType<MultiOctaveSupervisor['createActions']>;
 
-    midiState: MultiOctaveSupervisorMidiState = {
+    private midiState: MultiOctaveSupervisorMidiState = {
         currentlyHeldDownInputNotes: [],
     };
 
-    handleKeyboardNote = async (event: MidiEventFull) => {
-        this.macros.pagedOctaveOutput.send(event.event);
+    private handleKeyboardNote = async (fullEvent: MidiEventFull) => {
+        const event = fullEvent.event;
+
+        this.macros.pagedOctaveOutput.send(event);
+
+        if (event.type === 'noteon') {
+            if (!this.midiState.currentlyHeldDownInputNotes.find(e => e.number === event.number)) {
+                this.midiState = {
+                    ...this.midiState,
+                    currentlyHeldDownInputNotes: [
+                        ...this.midiState.currentlyHeldDownInputNotes,
+                        event,
+                    ],
+                };
+            }
+        }
+
+        if (event.type === 'noteoff') {
+            this.midiState = {
+                ...this.midiState,
+                currentlyHeldDownInputNotes: this.midiState.currentlyHeldDownInputNotes.filter(e => {
+                    return e.number !== event.number;
+                }),
+            };
+        }
 
         setTimeout(() => {
             if (this.states.enableDebugging.getState()) {
-                this.states.savedEvent.setState(event);
+                this.states.debugSavedInputEvent.setState(fullEvent);
+                this.states.debugMidiState.setState(this.midiState);
             }
         });
     };
 
-    render: React.ElementType = () => {
+    private createActions = () => ({
+        toggleDebugging: this.moduleAPI.createAction('toggleDebugging', {}, async () => {
+            console.log('toggling debug mode', !this.states.enableDebugging.getState())
+            this.states.enableDebugging.setState(!this.states.enableDebugging.getState());
+        }),
+    });
+
+    public render: React.ElementType = () => {
         const enableDebugging = this.states.enableDebugging.useState();
-        const savedEvent = this.states.savedEvent.useState();
+        const debugSavedInputEvent = this.states.debugSavedInputEvent.useState();
+        const debugMidiState = this.states.debugMidiState.useState();
 
         return (
             <>
                 <this.renderDebugData
                     enableDebugging={enableDebugging}
-                    savedEvent={savedEvent}
+                    debugSavedInputEvent={debugSavedInputEvent}
+                    debugMidiState={debugMidiState}
                 />
             </>
         );
     };
 
-    private renderDebugData = ({savedEvent, enableDebugging}: {savedEvent: MidiEventFull | null, enableDebugging: boolean}) => {
+    private renderDebugData = ({debugSavedInputEvent, enableDebugging, debugMidiState}: {debugSavedInputEvent: MidiEventFull | null, enableDebugging: boolean, debugMidiState: MultiOctaveSupervisorMidiState}) => {
         const [showDebugData, setShowDebugData] = React.useState(false);
 
         return (
@@ -66,9 +99,15 @@ export class MultiOctaveSupervisor {
                             <this.macros.pagedOctaveOutput.components.edit />
                         </div>
 
-                        {savedEvent && (
+                        {debugSavedInputEvent && (
                             <pre>
-                                {JSON.stringify(savedEvent, null, 2)}
+                                {JSON.stringify(debugSavedInputEvent, null, 2)}
+                            </pre>
+                        )}
+
+                        {debugMidiState && (
+                            <pre>
+                                {JSON.stringify(debugMidiState, null, 2)}
                             </pre>
                         )}
                     </>
@@ -79,13 +118,13 @@ export class MultiOctaveSupervisor {
 
     constructor(private moduleAPI: ModuleAPI, private kvPrefix: string) { }
 
-    initialize = async () => {
+    public initialize = async () => {
         this.macros = await this.createMacros();
         this.states = await this.createStates();
         this.actions = this.createActions();
     };
 
-    createMacros = async () => {
+    private createMacros = async () => {
         const makeMacroName = (name: string) => `${this.kvPrefix}|${name}`;
 
         const pagedOctaveOutput = await this.moduleAPI.createMacro(this.moduleAPI, makeMacroName('pagedOctaveOutput'), 'musical_keyboard_output', {});
@@ -102,30 +141,21 @@ export class MultiOctaveSupervisor {
         } as const;
     };
 
-    createStates = async () => {
+    private createStates = async () => {
         const [
             enableDebugging,
-            savedEvent,
-            currentlyHeldDownNotes,
+            debugSavedInputEvent,
+            debugMidiState,
         ] = await Promise.all([
             this.moduleAPI.statesAPI.createPersistentState<boolean>('enableDebugging', true),
-            this.moduleAPI.statesAPI.createSharedState<MidiEventFull | null>('savedEvent', null),
-            this.moduleAPI.statesAPI.createSharedState<MultiOctaveSupervisorMidiState>('currentlyHeldDownNotes', this.midiState),
+            this.moduleAPI.statesAPI.createSharedState<MidiEventFull | null>('debugSavedInputEvent', null),
+            this.moduleAPI.statesAPI.createSharedState<MultiOctaveSupervisorMidiState>('debugMidiState', this.midiState),
         ]);
 
         return {
             enableDebugging,
-            savedEvent,
-            currentlyHeldDownNotes,
-        };
-    };
-
-    createActions = () => {
-        return {
-            toggleDebugging: this.moduleAPI.createAction('toggleDebugging', {}, async () => {
-                console.log('toggling debug mode', !this.states.enableDebugging.getState())
-                this.states.enableDebugging.setState(!this.states.enableDebugging.getState());
-            }),
+            debugSavedInputEvent,
+            debugMidiState,
         };
     };
 }

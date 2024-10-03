@@ -8,4 +8,4 @@ export default [
         id: 'keytar_and_foot_dashboard',
         label: 'Keytar and Foot dashboard',
     },
-] satisfies RegisteredDashboard[];
+] as RegisteredDashboard[];
