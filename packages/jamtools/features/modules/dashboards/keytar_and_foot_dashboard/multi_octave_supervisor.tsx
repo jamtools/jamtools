@@ -20,7 +20,7 @@ export class MultiOctaveSupervisor {
     private handleKeyboardNote = async (fullEvent: MidiEventFull) => {
         const event = fullEvent.event;
 
-        this.macros.pagedOctaveOutput.send(event);
+        this.macros.midiOutput.send(event);
 
         if (event.type === 'noteon') {
             if (!this.midiState.currentlyHeldDownInputNotes.find(e => e.number === event.number)) {
@@ -96,7 +96,7 @@ export class MultiOctaveSupervisor {
 
                         <p>Paged octave output:</p>
                         <div>
-                            <this.macros.pagedOctaveOutput.components.edit />
+                            <this.macros.midiOutput.components.edit />
                         </div>
 
                         {debugSavedInputEvent && (
@@ -137,7 +137,7 @@ export class MultiOctaveSupervisor {
 
         return {
             pagedOctaveInput,
-            pagedOctaveOutput,
+            midiOutput: pagedOctaveOutput,
         } as const;
     };
 
