@@ -100,7 +100,8 @@ jamtools.registerMacroType(
                     return;
                 }
 
-                handleMidiEvent(midiEvent);
+                macroReturnValue.subject.next(midiEvent);
+                conf.onTrigger?.(midiEvent);
             }));
             macroAPI.onDestroy(qwertySubscription.unsubscribe);
         }
@@ -126,7 +127,7 @@ export const qwertyEventToMidiEvent = (event: QwertyCallbackPayload, onlyMusical
 
         midiNumber = event.key.charCodeAt(0);
     } else {
-        midiNumber + 24;
+        midiNumber += 24;
     }
 
     const fullEvent: MidiEventFull = {

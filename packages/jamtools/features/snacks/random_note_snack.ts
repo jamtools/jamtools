@@ -3,7 +3,7 @@ import {jamtools} from '../../core/engine/register';
 jamtools.registerModule('random_note', {}, async (moduleAPI) => {
     const macroModule = moduleAPI.deps.module.moduleRegistry.getModule('macro');
 
-    const inputTrigger = await macroModule.createMacro(moduleAPI, 'Input trigger', 'musical_keyboard_input', {enableQwerty: true});
+    const inputTrigger = await macroModule.createMacro(moduleAPI, 'Input trigger', 'musical_keyboard_input', {enableQwerty: false});
     const output = await macroModule.createMacro(moduleAPI, 'Random output', 'musical_keyboard_output', {});
 
     let playing = false;

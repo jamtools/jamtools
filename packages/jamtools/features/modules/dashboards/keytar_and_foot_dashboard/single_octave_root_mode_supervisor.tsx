@@ -4,6 +4,7 @@ import {ModuleAPI} from '~/core/engine/module_api';
 import {MidiEvent, MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
 import {Button} from '~/core/components/Button';
 import {playChord, ChordWithName, noteNames} from './chord_player';
+import {OutputMidiDevice} from '../../../../core/modules/macro_module/macro_handlers/outputs/musical_keyboard_output_macro_handler';
 
 type SingleOctaveRootModeSupervisorMidiState = {
     currentlyHeldDownInputNotes: MidiEvent[];
@@ -11,6 +12,16 @@ type SingleOctaveRootModeSupervisorMidiState = {
     scaleRoot: number;
     choosingScale: boolean;
 };
+
+const muteKeyboard = (midiOutput: OutputMidiDevice) => {
+    for (let i = 0; i < 84; i++) {
+        midiOutput.send({
+            number: i,
+            channel: 1,
+            type: 'noteoff',
+        });
+    }
+}
 
 export class SingleOctaveRootModeSupervisor {
     private macros!: Awaited<ReturnType<SingleOctaveRootModeSupervisor['createMacros']>>;
@@ -67,12 +78,12 @@ export class SingleOctaveRootModeSupervisor {
 
     private handleNoteOnForStaccatoChord = (event: MidiEvent) => {
         // TODO: play chord
-        this.macros.stacattoOutput.send(event);
+        // this.macros.stacattoOutput.send(event);
+        playChord(this.midiState.scaleRoot, event.number, null, this.macros.stacattoOutput);
     };
 
     private handleNoteOffForStaccatoChord = (event: MidiEvent) => {
-        // TODO: stop playing chord
-        this.macros.stacattoOutput.send(event);
+        muteKeyboard(this.macros.stacattoOutput);
     };
 
     private handleNoteOnForMonoBass = (event: MidiEvent) => {
@@ -195,6 +206,7 @@ export class SingleOctaveRootModeSupervisor {
                         <p>Sustained output mute:</p>
                         <div>
                             <this.macros.sustainedOutputMute.components.edit />
+                            <this.macros.sustainedOutputMute.components.show />
                         </div>
 
                         <p>Stacatto output:</p>
@@ -243,6 +255,7 @@ export class SingleOctaveRootModeSupervisor {
 
         const singleOctaveInput = await this.moduleAPI.createMacro(this.moduleAPI, makeMacroName('singleOctaveInput'), 'musical_keyboard_paged_octave_input', {
             singleOctave: true,
+            enableQwerty: true,
             onTrigger: (event) => {
                 this.handleKeyboardNote(event);
             },
@@ -255,13 +268,7 @@ export class SingleOctaveRootModeSupervisor {
                     currentSustainingChord: null,
                 };
 
-                for (let i = 0; i < 84; i++) {
-                    this.macros.sustainedOutput.send({
-                        number: i,
-                        channel: 1,
-                        type: 'noteoff',
-                    });
-                }
+                muteKeyboard(this.macros.sustainedOutput);
             },
         });
 

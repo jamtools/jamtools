@@ -65,7 +65,7 @@ jamtools.registerMacroType(
             macroAPI.onDestroy(subscription.unsubscribe);
         }
 
-        const keyboardMacro = await macroAPI.moduleAPI.createMacro(macroAPI.moduleAPI, fieldName + '|keyboard_input', 'musical_keyboard_input', {});
+        const keyboardMacro = await macroAPI.moduleAPI.createMacro(macroAPI.moduleAPI, fieldName + '|keyboard_input', 'musical_keyboard_input', {enableQwerty: conf.enableQwerty});
 
         const pageDownMacro = await macroAPI.moduleAPI.createMacro(macroAPI.moduleAPI, fieldName + '|page_down', 'midi_button_input', {
             includeRelease: false,
@@ -106,11 +106,11 @@ jamtools.registerMacroType(
         const keyboardSub = keyboardMacro.subject.subscribe(event => {
             const savedEvents = keyboardMacro.getStoredEvents();
             const matchedEvent = savedEvents.find(e => savedMidiInputsAreEqual(e, event));
-            if (!matchedEvent) {
+            if (!matchedEvent && event.deviceInfo.name !== 'qwerty') { // TODO: qwerty hack
                 return;
             }
 
-            const beginningOctave = matchedEvent.event.number;
+            const beginningOctave = matchedEvent?.event.number || 24;
 
             const storedConfig = pagedOctaveInputStoredConfig.getState();
             const numberOfOctaves = storedConfig.numberOfOctaves;
