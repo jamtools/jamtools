@@ -3,9 +3,11 @@ import React from 'react';
 import {ModuleAPI} from '~/core/engine/module_api';
 import {MidiEvent, MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
 import {Button} from '~/core/components/Button';
+import {ChordChoice} from '~/core/modules/song_structures/components/chord_display';
 
 type SingleOctaveRootModeSupervisorMidiState = {
     currentlyHeldDownInputNotes: MidiEvent[];
+    currentSustainingChord: ChordChoice | null;
 };
 
 export class SingleOctaveRootModeSupervisor {
@@ -15,32 +17,71 @@ export class SingleOctaveRootModeSupervisor {
 
     private midiState: SingleOctaveRootModeSupervisorMidiState = {
         currentlyHeldDownInputNotes: [],
+        currentlySustainingChord: null,
+    };
+
+    private handleNoteOnForSustainedKeyboard = (event: MidiEvent) => {
+        this.macros.sustainedOutput.send(event);
+    };
+
+    private handleNoteOffForSustainedKeyboard = (event: MidiEvent) => {
+        this.macros.sustainedOutput.send(event);
+    };
+
+    private handleNoteOnForStaccatoChord = (event: MidiEvent) => {
+        this.macros.stacattoOutput.send(event);
+    };
+
+    private handleNoteOffForStaccatoChord = (event: MidiEvent) => {
+        this.macros.stacattoOutput.send(event);
+    };
+
+    private handleNoteOnForMonoBass = (event: MidiEvent) => {
+        this.macros.monoBassOutput.send(event);
+    };
+
+    private handleNoteOffForMonoBass = (event: MidiEvent) => {
+        this.macros.monoBassOutput.send(event);
+    };
+
+    private handleNoteOn = (event: MidiEvent) => {
+        this.handleNoteOnForSustainedKeyboard(event);
+        this.handleNoteOnForStaccatoChord(event);
+        this.handleNoteOnForMonoBass(event);
+
+        if (!this.midiState.currentlyHeldDownInputNotes.find(e => e.number === event.number)) {
+            this.midiState = {
+                ...this.midiState,
+                currentlyHeldDownInputNotes: [
+                    ...this.midiState.currentlyHeldDownInputNotes,
+                    event,
+                ],
+            };
+        }
+    };
+
+    private handleNoteOff = (event: MidiEvent) => {
+        this.handleNoteOffForSustainedKeyboard(event);
+        this.handleNoteOffForStaccatoChord(event);
+        this.handleNoteOffForMonoBass(event);
+
+        this.midiState = {
+            ...this.midiState,
+            currentlyHeldDownInputNotes: this.midiState.currentlyHeldDownInputNotes.filter(e => {
+                return e.number !== event.number;
+            }),
+        };
     };
 
     private handleKeyboardNote = async (fullEvent: MidiEventFull) => {
         const event = fullEvent.event;
 
-        this.macros.midiOutput.send(event);
-
         if (event.type === 'noteon') {
-            if (!this.midiState.currentlyHeldDownInputNotes.find(e => e.number === event.number)) {
-                this.midiState = {
-                    ...this.midiState,
-                    currentlyHeldDownInputNotes: [
-                        ...this.midiState.currentlyHeldDownInputNotes,
-                        event,
-                    ],
-                };
-            }
-        }
-
-        if (event.type === 'noteoff') {
-            this.midiState = {
-                ...this.midiState,
-                currentlyHeldDownInputNotes: this.midiState.currentlyHeldDownInputNotes.filter(e => {
-                    return e.number !== event.number;
-                }),
-            };
+            this.handleNoteOn(event);
+        } else if (event.type === 'noteoff') {
+            this.handleNoteOff(event);
+        } else {
+            return;
         }
 
         setTimeout(() => {
@@ -94,9 +135,19 @@ export class SingleOctaveRootModeSupervisor {
                             <this.macros.singleOctaveInput.components.edit />
                         </div>
 
-                        <p>Single octave output:</p>
+                        <p>Sustained output:</p>
                         <div>
-                            <this.macros.midiOutput.components.edit />
+                            <this.macros.sustainedOutput.components.edit />
+                        </div>
+
+                        <p>Stacatto output:</p>
+                        <div>
+                            <this.macros.stacattoOutput.components.edit />
+                        </div>
+
+                        <p>Monobass output:</p>
+                        <div>
+                            <this.macros.monoBassOutput.components.edit />
                         </div>
 
                         {debugSavedInputEvent && (
@@ -134,11 +185,15 @@ export class SingleOctaveRootModeSupervisor {
             },
         });
 
-        const midiOutput = await this.moduleAPI.createMacro(this.moduleAPI, makeMacroName('midiOutput'), 'musical_keyboard_output', {});
+        const sustainedOutput = await this.moduleAPI.createMacro(this.moduleAPI, makeMacroName('sustainedOutput'), 'musical_keyboard_output', {});
+        const stacattoOutput = await this.moduleAPI.createMacro(this.moduleAPI, makeMacroName('stacattoOutput'), 'musical_keyboard_output', {});
+        const monoBassOutput = await this.moduleAPI.createMacro(this.moduleAPI, makeMacroName('monoBassOutput'), 'musical_keyboard_output', {});
 
         return {
             singleOctaveInput,
-            midiOutput,
+            sustainedOutput,
+            stacattoOutput,
+            monoBassOutput,
         } as const;
     };
 
