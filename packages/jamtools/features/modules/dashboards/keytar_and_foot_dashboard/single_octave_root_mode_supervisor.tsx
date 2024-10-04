@@ -4,16 +4,16 @@ import {ModuleAPI} from '~/core/engine/module_api';
 import {MidiEvent, MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
 import {Button} from '~/core/components/Button';
 
-type MultiOctaveSupervisorMidiState = {
+type SingleOctaveRootModeSupervisorMidiState = {
     currentlyHeldDownInputNotes: MidiEvent[];
 };
 
-export class MultiOctaveSupervisor {
-    private macros!: Awaited<ReturnType<MultiOctaveSupervisor['createMacros']>>;
-    private states!: Awaited<ReturnType<MultiOctaveSupervisor['createStates']>>;
-    private actions!: ReturnType<MultiOctaveSupervisor['createActions']>;
+export class SingleOctaveRootModeSupervisor {
+    private macros!: Awaited<ReturnType<SingleOctaveRootModeSupervisor['createMacros']>>;
+    private states!: Awaited<ReturnType<SingleOctaveRootModeSupervisor['createStates']>>;
+    private actions!: ReturnType<SingleOctaveRootModeSupervisor['createActions']>;
 
-    private midiState: MultiOctaveSupervisorMidiState = {
+    private midiState: SingleOctaveRootModeSupervisorMidiState = {
         currentlyHeldDownInputNotes: [],
     };
 
@@ -74,7 +74,7 @@ export class MultiOctaveSupervisor {
         );
     };
 
-    private renderDebugData = ({debugSavedInputEvent, enableDebugging, debugMidiState}: {debugSavedInputEvent: MidiEventFull | null, enableDebugging: boolean, debugMidiState: MultiOctaveSupervisorMidiState}) => {
+    private renderDebugData = ({debugSavedInputEvent, enableDebugging, debugMidiState}: {debugSavedInputEvent: MidiEventFull | null, enableDebugging: boolean, debugMidiState: SingleOctaveRootModeSupervisorMidiState}) => {
         const [showDebugData, setShowDebugData] = React.useState(false);
 
         return (
@@ -89,12 +89,12 @@ export class MultiOctaveSupervisor {
 
                 {showDebugData && (
                     <>
-                        <p>Paged octave input:</p>
+                        <p>Single octave root mode input:</p>
                         <div>
-                            <this.macros.pagedOctaveInput.components.edit />
+                            <this.macros.singleOctaveInput.components.edit />
                         </div>
 
-                        <p>Paged octave output:</p>
+                        <p>Single octave output:</p>
                         <div>
                             <this.macros.midiOutput.components.edit />
                         </div>
@@ -127,7 +127,8 @@ export class MultiOctaveSupervisor {
     private createMacros = async () => {
         const makeMacroName = (name: string) => `${this.kvPrefix}|${name}`;
 
-        const pagedOctaveInput = await this.moduleAPI.createMacro(this.moduleAPI, makeMacroName('pagedOctaveInput'), 'musical_keyboard_paged_octave_input', {
+        const singleOctaveInput = await this.moduleAPI.createMacro(this.moduleAPI, makeMacroName('singleOctaveInput'), 'musical_keyboard_paged_octave_input', {
+            singleOctave: true,
             onTrigger: (event) => {
                 this.handleKeyboardNote(event);
             },
@@ -136,7 +137,7 @@ export class MultiOctaveSupervisor {
         const midiOutput = await this.moduleAPI.createMacro(this.moduleAPI, makeMacroName('midiOutput'), 'musical_keyboard_output', {});
 
         return {
-            pagedOctaveInput,
+            singleOctaveInput,
             midiOutput,
         } as const;
     };
@@ -151,7 +152,7 @@ export class MultiOctaveSupervisor {
         ] = await Promise.all([
             this.moduleAPI.statesAPI.createPersistentState<boolean>(makeStateName('enableDebugging'), true),
             this.moduleAPI.statesAPI.createSharedState<MidiEventFull | null>(makeStateName('debugSavedInputEvent'), null),
-            this.moduleAPI.statesAPI.createSharedState<MultiOctaveSupervisorMidiState>(makeStateName('debugMidiState'), this.midiState),
+            this.moduleAPI.statesAPI.createSharedState<SingleOctaveRootModeSupervisorMidiState>(makeStateName('debugMidiState'), this.midiState),
         ]);
 
         return {
