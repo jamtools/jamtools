@@ -3,11 +3,11 @@ import React from 'react';
 import {ModuleAPI} from '~/core/engine/module_api';
 import {MidiEvent, MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
 import {Button} from '~/core/components/Button';
-import {playChord, ChordNotes} from './chord_player';
+import {playChord, ChordWithName, noteNames} from './chord_player';
 
 type SingleOctaveRootModeSupervisorMidiState = {
     currentlyHeldDownInputNotes: MidiEvent[];
-    currentSustainingChord: ChordNotes | null;
+    currentSustainingChord: ChordWithName | null;
     scaleRoot: number;
     choosingScale: boolean;
 };
@@ -151,6 +151,18 @@ export class SingleOctaveRootModeSupervisor {
                     debugSavedInputEvent={debugSavedInputEvent}
                     debugMidiState={debugMidiState}
                 />
+                <h3>
+                    Scale:
+                </h3>
+                <h1>
+                    {noteNames[debugMidiState.scaleRoot]} Major
+                </h1>
+                <h3>
+                    Chord:
+                </h3>
+                <h1>
+                    {debugMidiState.currentSustainingChord?.name || 'None'}
+                </h1>
             </>
         );
     };

@@ -2,18 +2,23 @@ import {OutputMidiDevice} from '~/core/modules/macro_module/macro_handlers/outpu
 
 export type ChordNotes = number[];
 
-export const playChord = (scaleRoot: number, notePlayed: number, previousChord: ChordNotes | null, output: OutputMidiDevice): ChordNotes | null => {
+export type ChordWithName = {
+    notes: ChordNotes;
+    name: string;
+};
+
+export const playChord = (scaleRoot: number, notePlayed: number, previousChord: ChordWithName | null, output: OutputMidiDevice): ChordWithName | null => {
     const chord = getChord(scaleRoot, notePlayed);
     if (!chord) {
         return null;
     }
 
     let notesToStop: ChordNotes = [];
-    let notesToPlay: ChordNotes = chord;
+    let notesToPlay: ChordNotes = chord.notes;
 
     if (previousChord) {
-        notesToStop = previousChord.filter(note => !chord.includes(note));
-        notesToPlay = chord.filter(note => !previousChord.includes(note));
+        notesToStop = previousChord.notes.filter(note => !chord.notes.includes(note));
+        notesToPlay = chord.notes.filter(note => !previousChord.notes.includes(note));
     }
 
     notesToStop.forEach(note => {
@@ -27,7 +32,7 @@ export const playChord = (scaleRoot: number, notePlayed: number, previousChord: 
     return chord;
 };
 
-const getChord = (scaleRoot: number, notePlayed: number): ChordNotes | null => {
+const getChord = (scaleRoot: number, notePlayed: number): ChordWithName | null => {
     const diff = ((notePlayed - scaleRoot) + 12) % 12;
 
     const scaleType = scaleIntervals[diff];
@@ -36,7 +41,11 @@ const getChord = (scaleRoot: number, notePlayed: number): ChordNotes | null => {
     }
 
     const chord = chordMap[notePlayed % 12][scaleType];
-    return chord;
+
+    return {
+        notes: chord,
+        name: `${noteNames[notePlayed % 12]} ${scaleType}`,
+    };
 };
 
 const scaleIntervals: Record<number, 'major' | 'minor'> = {
@@ -50,6 +59,8 @@ const scaleIntervals: Record<number, 'major' | 'minor'> = {
     9: 'minor',
     10: 'major',
 };
+
+export const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
 const chordMap: Record<number, Record<'major' | 'minor', ChordNotes>> = {
     0: { // C
