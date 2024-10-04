@@ -9,6 +9,7 @@ import {OutputMidiDevice} from '../../../../core/modules/macro_module/macro_hand
 type SingleOctaveRootModeSupervisorMidiState = {
     currentlyHeldDownInputNotes: MidiEvent[];
     currentSustainingChord: ChordWithName | null;
+    currentChordRoot: number | null;
     scaleRoot: number;
     choosingScale: boolean;
 };
@@ -21,7 +22,7 @@ const muteKeyboard = (midiOutput: OutputMidiDevice) => {
             type: 'noteoff',
         });
     }
-}
+};
 
 export class SingleOctaveRootModeSupervisor {
     private macros!: Awaited<ReturnType<SingleOctaveRootModeSupervisor['createMacros']>>;
@@ -31,6 +32,7 @@ export class SingleOctaveRootModeSupervisor {
     private midiState: SingleOctaveRootModeSupervisorMidiState = {
         currentlyHeldDownInputNotes: [],
         currentSustainingChord: null,
+        currentChordRoot: null,
         scaleRoot: 0,
         choosingScale: false,
     };
@@ -50,6 +52,7 @@ export class SingleOctaveRootModeSupervisor {
         }
 
         const newChord = playChord(this.midiState.scaleRoot, event.number, this.midiState.currentSustainingChord, this.macros.sustainedOutput);
+
 
         if (newChord) {
             this.midiState = {
@@ -88,11 +91,27 @@ export class SingleOctaveRootModeSupervisor {
 
     private handleNoteOnForMonoBass = (event: MidiEvent) => {
         // TODO: make sure this is a good octave. gotta allow octaves on outputs
-        this.macros.monoBassOutput.send(event);
+        // this.macros.monoBassOutput.send(event);
+
+        if (event.number === this.midiState.currentChordRoot) {
+            return;
+        }
+
+        if (this.midiState.currentChordRoot) {
+            this.macros.monoBassOutput.send({type: 'noteoff', number: this.midiState.currentChordRoot, channel: 1});
+        }
+
+        this.macros.monoBassOutput.send({type: 'noteon', number: event.number, channel: 1});
+
+        this.midiState = {
+            ...this.midiState,
+            currentChordRoot: event.number,
+        };
+
     };
 
     private handleNoteOffForMonoBass = (event: MidiEvent) => {
-        this.macros.monoBassOutput.send(event);
+        // this.macros.monoBassOutput.send(event);
     };
 
     private handleNoteOn = (event: MidiEvent) => {
@@ -266,9 +285,11 @@ export class SingleOctaveRootModeSupervisor {
                 this.midiState = {
                     ...this.midiState,
                     currentSustainingChord: null,
+                    currentChordRoot: null,
                 };
 
                 muteKeyboard(this.macros.sustainedOutput);
+                muteKeyboard(this.macros.monoBassOutput);
             },
         });
 

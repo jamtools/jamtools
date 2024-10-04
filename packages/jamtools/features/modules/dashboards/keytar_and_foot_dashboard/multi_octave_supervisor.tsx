@@ -20,7 +20,10 @@ export class MultiOctaveSupervisor {
     private handleKeyboardNote = async (fullEvent: MidiEventFull) => {
         const event = fullEvent.event;
 
-        this.macros.midiOutput.send(event);
+        this.macros.midiOutput.send({
+            ...event,
+            velocity: 127,
+        });
 
         if (event.type === 'noteon') {
             if (!this.midiState.currentlyHeldDownInputNotes.find(e => e.number === event.number)) {

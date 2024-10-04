@@ -1,7 +1,7 @@
 import React from 'react';
 import {Button} from '~/core/components/Button';
 
-export const ALL_CHANNEL_NUMBERS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15] as const;
+export const ALL_CHANNEL_NUMBERS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16] as const;
 
 export type AddingOutputDeviceState = {
     device: string | null;
@@ -118,7 +118,7 @@ const QueuedDevice = (props: QueuedDeviceProps) => {
     if (props.onChooseNote) {
         enableConfirmButton = Boolean(props.queuedDevice.device && props.queuedDevice.channel && props.queuedDevice.note);
     } else {
-        enableConfirmButton = Boolean(props.queuedDevice.device && props.queuedDevice.channel);
+        enableConfirmButton = Boolean(props.queuedDevice.device && (props.queuedDevice.channel || props.queuedDevice.channel === 0));
     }
 
     return (
@@ -139,7 +139,7 @@ const QueuedDevice = (props: QueuedDeviceProps) => {
                                 <option
                                     key={n}
                                 >
-                                    {n + 1}
+                                    {n}
                                 </option>
                             ))}
                         </select>

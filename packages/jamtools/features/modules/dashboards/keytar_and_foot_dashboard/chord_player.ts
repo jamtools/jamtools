@@ -22,11 +22,11 @@ export const playChord = (scaleRoot: number, notePlayed: number, previousChord: 
     }
 
     notesToStop.forEach(note => {
-        output.send({type: 'noteoff', number: note, channel: 1});
+        output.send({type: 'noteoff', number: note + 12, channel: 1});
     });
 
     notesToPlay.forEach(note => {
-        output.send({type: 'noteon', number: note, channel: 1});
+        output.send({type: 'noteon', number: note + 12, channel: 1});
     });
 
     return chord;
@@ -93,11 +93,11 @@ const chordMap: Record<number, Record<'major' | 'minor', ChordNotes>> = {
     },
     7: { // G
         major: [43, 47, 50, 55, 59, 67], // Bass G (MIDI 43)
-        minor: [43, 46, 50, 55, 59, 67], // Bass G added
+        minor: [43, 46, 50, 55, 58, 67], // Bass G added
     },
     8: { // G#/Ab
         major: [44, 48, 51, 56, 60, 68], // Bass G# (MIDI 44)
-        minor: [44, 47, 51, 56, 60, 68], // Bass G# added
+        minor: [44, 47, 51, 56, 59, 68], // Bass G# added
     },
     9: { // A
         major: [33, 45, 49, 52, 57, 61, 64], // Bass A (MIDI 33)

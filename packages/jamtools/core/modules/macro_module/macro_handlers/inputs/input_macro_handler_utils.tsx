@@ -123,7 +123,6 @@ export const useInputMacroWaiterAndSaver = async (macroAPI: MacroAPI, states: In
                         askDeleteSavedValue={askDeleteSavedValue}
                         confirmMacro={() => confirmMacro({})}
                         toggleWaiting={() => toggleWaiting({})}
-                        includeQwerty={options.includeQwerty}
                     />
                 );
             },
