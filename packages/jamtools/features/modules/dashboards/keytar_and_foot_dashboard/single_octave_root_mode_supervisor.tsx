@@ -3,11 +3,13 @@ import React from 'react';
 import {ModuleAPI} from '~/core/engine/module_api';
 import {MidiEvent, MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
 import {Button} from '~/core/components/Button';
-import {ChordChoice} from '~/core/modules/song_structures/components/chord_display';
+import {playChord, ChordNotes} from './chord_player';
 
 type SingleOctaveRootModeSupervisorMidiState = {
     currentlyHeldDownInputNotes: MidiEvent[];
-    currentSustainingChord: ChordChoice | null;
+    currentSustainingChord: ChordNotes | null;
+    scaleRoot: number;
+    choosingScale: boolean;
 };
 
 export class SingleOctaveRootModeSupervisor {
@@ -18,6 +20,8 @@ export class SingleOctaveRootModeSupervisor {
     private midiState: SingleOctaveRootModeSupervisorMidiState = {
         currentlyHeldDownInputNotes: [],
         currentSustainingChord: null,
+        scaleRoot: 0,
+        choosingScale: false,
     };
 
     private handleNoteOnForSustainedKeyboard = (event: MidiEvent) => {
@@ -25,27 +29,40 @@ export class SingleOctaveRootModeSupervisor {
         // this.macros.sustainedOutput.send(event);
         // return
 
-        if (this.midiState.currentSustainingChord) {
-            const firstNote = event.number - Math.floor(event.number / 12);
-            for (let i = firstNote; i < firstNote + 12; i++) {
-                this.macros.sustainedOutput.send({
-                    number: i,
-                    channel: 1,
-                    type: 'noteoff',
-                });
-            }
+        if (this.midiState.choosingScale) {
+            this.midiState = {
+                ...this.midiState,
+                scaleRoot: event.number % 12,
+                choosingScale: false,
+            };
+            return;
         }
 
-        this.macros.sustainedOutput.send(event);
+        const newChord = playChord(this.midiState.scaleRoot, event.number, this.midiState.currentSustainingChord, this.macros.sustainedOutput);
 
-        this.midiState = {
-            ...this.midiState,
-            currentSustainingChord: {root: event.number % 12, quality: 'major'},
-        };
+        if (newChord) {
+            this.midiState = {
+                ...this.midiState,
+                currentSustainingChord: newChord,
+            };
+        }
     };
 
     private handleNoteOffForSustainedKeyboard = (event: MidiEvent) => {
         // no-op
+    };
+
+    private toggleChooseScale = () => {
+        this.midiState = {
+            ...this.midiState,
+            choosingScale: !this.midiState.choosingScale
+        };
+
+        setTimeout(() => {
+            if (this.states.enableDebugging.getState()) {
+                this.states.debugMidiState.setState(this.midiState);
+            }
+        });
     };
 
     private handleNoteOnForStaccatoChord = (event: MidiEvent) => {
@@ -178,6 +195,12 @@ export class SingleOctaveRootModeSupervisor {
                             <this.macros.monoBassOutput.components.edit />
                         </div>
 
+                        <p>Scale chooser:</p>
+                        <div>
+                            <this.macros.chooseScaleButton.components.edit />
+                            <this.macros.chooseScaleButton.components.show />
+                        </div>
+
                         {debugSavedInputEvent && (
                             <pre>
                                 {JSON.stringify(debugSavedInputEvent, null, 2)}
@@ -215,6 +238,11 @@ export class SingleOctaveRootModeSupervisor {
 
         const sustainedOutputMute = await this.moduleAPI.createMacro(this.moduleAPI, makeMacroName('sustainedOutputMute'), 'midi_button_input', {
             onTrigger: () => {
+                this.midiState = {
+                    ...this.midiState,
+                    currentSustainingChord: null,
+                };
+
                 for (let i = 0; i < 84; i++) {
                     this.macros.sustainedOutput.send({
                         number: i,
@@ -230,12 +258,19 @@ export class SingleOctaveRootModeSupervisor {
         const stacattoOutput = await this.moduleAPI.createMacro(this.moduleAPI, makeMacroName('stacattoOutput'), 'musical_keyboard_output', {});
         const monoBassOutput = await this.moduleAPI.createMacro(this.moduleAPI, makeMacroName('monoBassOutput'), 'musical_keyboard_output', {});
 
+        const chooseScaleButton = await this.moduleAPI.createMacro(this.moduleAPI, makeMacroName('chooseScaleButton'), 'midi_button_input', {
+            onTrigger: () => {
+                this.toggleChooseScale();
+            },
+        });
+
         return {
             singleOctaveInput,
             sustainedOutputMute,
             sustainedOutput,
             stacattoOutput,
             monoBassOutput,
+            chooseScaleButton,
         } as const;
     };
 
