@@ -169,6 +169,48 @@ export class SingleOctaveRootModeSupervisor {
         }),
     });
 
+    public renderKiosk: React.ElementType = () => {
+        const debugMidiState = this.states.debugMidiState.useState();
+
+        return (
+            <this.renderScaleAndChords
+                debugMidiState={debugMidiState}
+            />
+        );
+    };
+
+    private renderScaleAndChords = ({debugMidiState}: {debugMidiState: SingleOctaveRootModeSupervisorMidiState}) => {
+        const smallFont = {fontSize: '48px', margin: '0px'};
+        const bigFont = {fontSize: '96px', margin: '0px'};
+
+        const hrMargin = '40px';
+
+        const discordLinkStyle: React.CSSProperties = {position: 'absolute', right: '20px', fontSize: '40px'};
+
+        return (
+            <>
+                <h3 style={smallFont}>
+                    Scale:
+                </h3>
+                <h1 style={bigFont}>
+                    {noteNames[debugMidiState.scaleRoot]} Major
+                </h1>
+                <hr
+                    style={{marginTop: hrMargin, marginBottom: hrMargin}}
+                />
+                <h3 style={smallFont}>
+                    Chord:
+                </h3>
+                <h1 style={bigFont}>
+                    {debugMidiState.currentSustainingChord?.name || 'None'}
+                </h1>
+                <a style={discordLinkStyle}>
+                    jam.tools/discord
+                </a>
+            </>
+        );
+    };
+
     public render: React.ElementType = () => {
         const enableDebugging = this.states.enableDebugging.useState();
         const debugSavedInputEvent = this.states.debugSavedInputEvent.useState();
@@ -181,18 +223,9 @@ export class SingleOctaveRootModeSupervisor {
                     debugSavedInputEvent={debugSavedInputEvent}
                     debugMidiState={debugMidiState}
                 />
-                <h3>
-                    Scale:
-                </h3>
-                <h1>
-                    {noteNames[debugMidiState.scaleRoot]} Major
-                </h1>
-                <h3>
-                    Chord:
-                </h3>
-                <h1>
-                    {debugMidiState.currentSustainingChord?.name || 'None'}
-                </h1>
+                <this.renderScaleAndChords
+                    debugMidiState={debugMidiState}
+                />
             </>
         );
     };

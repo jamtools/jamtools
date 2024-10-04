@@ -14,6 +14,10 @@ const KeytarAndFootDashboard = async (moduleAPI: ModuleAPI, dashboardName: strin
         singleOctaveSupervisor.initialize(),
     ]);
 
+    moduleAPI.registerRoute('kiosk', {hideNavbar: true}, () => (
+        <singleOctaveSupervisor.renderKiosk/>
+    ));
+
     moduleAPI.registerRoute(dashboardName, {}, () => (
         <div>
             <h1>

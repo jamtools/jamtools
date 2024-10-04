@@ -29,7 +29,13 @@ const useShowNavbar = (modules: Module[]) => {
         }
 
         for (const route of Object.keys(mod.routes)) {
-            const cleanedRoute = route.endsWith('/') ? route.substring(0, route.length - 1) : route;
+            let cleanedRoute = route;
+            if (route.startsWith('/')) {
+                cleanedRoute = cleanedRoute.substring(1);
+            }
+            if (!cleanedRoute.endsWith('/')) {
+                cleanedRoute += '/';
+            }
 
             if (pathname === `/modules/${mod.moduleId}/${cleanedRoute}`) {
                 const options = mod.routes[route].options;
