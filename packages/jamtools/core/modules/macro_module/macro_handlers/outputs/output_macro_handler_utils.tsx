@@ -84,7 +84,7 @@ export const useOutputMacroWaiterAndSaver = async (macroAPI: MacroAPI, states: O
         if (!state.device) {
             throw new Error('no device selected');
         }
-        if (!state.channel) {
+        if (!state.channel && state.channel !== 0) {
             throw new Error('no channel selected');
         }
         if (!state.note && options.includeNote) {

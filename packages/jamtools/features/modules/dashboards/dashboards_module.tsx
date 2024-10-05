@@ -4,7 +4,15 @@ import {Link} from 'react-router-dom';
 
 import {jamtools} from '~/core/engine/register';
 
-import keytarAndFootDashboard from './keytar_and_foot_dashboard';
+import {ModuleAPI} from '~/core/engine/module_api';
+
+import allDashboards from '.';
+
+export type RegisteredDashboard = {
+    dashboard: (moduleAPI: ModuleAPI, dashboardId: string) => Promise<void>;
+    id: string;
+    label: string;
+}
 
 declare module '~/core/module_registry/module_registry' {
     interface AllModules {
@@ -17,14 +25,22 @@ type DashboardsModuleReturnValue = {
 };
 
 jamtools.registerModule('Dashboards', {}, async (moduleAPI): Promise<DashboardsModuleReturnValue> => {
-    await keytarAndFootDashboard(moduleAPI, 'keytar_and_foot_dashboard');
+    const promises = allDashboards.map(d => d.dashboard(moduleAPI, d.id));
+    await Promise.all(promises);
 
     moduleAPI.registerRoute('', {}, () => {
         return (
             <div>
-                <Link to='/modules/Dashboards/keytar_and_foot_dashboard'>
-                    Keytar and foot dashboard
-                </Link>
+                <h2>Dashboards:</h2>
+                <ul>
+                    {allDashboards.map(d => (
+                        <li key={d.id}>
+                            <Link to={`/modules/Dashboards/${d.id}`}>
+                                {d.label}
+                            </Link>
+                        </li>
+                    ))}
+                </ul>
             </div>
         );
     });

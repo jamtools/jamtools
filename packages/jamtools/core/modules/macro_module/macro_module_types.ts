@@ -37,7 +37,7 @@ export type DeviceInfo = {
 }
 
 export type MidiEventFull = {
-    type: 'midi';
+    type: 'midi' | 'ui' | 'qwerty';
     deviceInfo: DeviceInfo;
     event: MidiEvent;
 }

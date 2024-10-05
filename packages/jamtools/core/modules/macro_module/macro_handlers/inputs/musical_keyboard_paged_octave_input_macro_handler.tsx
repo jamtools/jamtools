@@ -17,6 +17,7 @@ type MusicalKeyboardPagedOctaveInputResult = {
 };
 
 type MacroConfigItemMusicalKeyboardPagedOctaveInput = {
+    singleOctave?: boolean;
     onTrigger?(midiEvent: MidiEventFull): void;
     enableQwerty?: boolean;
 }
@@ -36,7 +37,7 @@ type PagedOctaveInputStoredConfig = {
     numberOfOctaves: number;
 }
 
-const initialConfig: PagedOctaveInputStoredConfig = {
+const initialUserDefinedConfig: PagedOctaveInputStoredConfig = {
     octaveOffset: 4,
     // beginningOctaveMidiNumber: -1,
     numberOfOctaves: 2,
@@ -46,7 +47,12 @@ jamtools.registerMacroType(
     'musical_keyboard_paged_octave_input',
     {},
     async (macroAPI, conf, fieldName): Promise<MusicalKeyboardPagedOctaveInputResult> => {
-        const pagedOctaveInputStoredConfig = await macroAPI.moduleAPI.statesAPI.createPersistentState<PagedOctaveInputStoredConfig>(getKeyForMacro('pagedOctaveInputStoredConfig', fieldName), initialConfig);
+        const initialUserConfig: PagedOctaveInputStoredConfig = {
+            ...initialUserDefinedConfig,
+            numberOfOctaves: conf.singleOctave ? 1 : initialUserDefinedConfig.numberOfOctaves,
+        };
+
+        const pagedOctaveInputStoredConfig = await macroAPI.moduleAPI.statesAPI.createPersistentState<PagedOctaveInputStoredConfig>(getKeyForMacro('pagedOctaveInputStoredConfig', fieldName), initialUserConfig);
 
         const showConfigurationFormState = await macroAPI.moduleAPI.statesAPI.createSharedState<boolean>(getKeyForMacro('pagedOctaveInputShowForm', fieldName), false);
 
@@ -59,7 +65,7 @@ jamtools.registerMacroType(
             macroAPI.onDestroy(subscription.unsubscribe);
         }
 
-        const keyboardMacro = await macroAPI.moduleAPI.createMacro(macroAPI.moduleAPI, fieldName + '|keyboard_input', 'musical_keyboard_input', {});
+        const keyboardMacro = await macroAPI.moduleAPI.createMacro(macroAPI.moduleAPI, fieldName + '|keyboard_input', 'musical_keyboard_input', {enableQwerty: conf.enableQwerty});
 
         const pageDownMacro = await macroAPI.moduleAPI.createMacro(macroAPI.moduleAPI, fieldName + '|page_down', 'midi_button_input', {
             includeRelease: false,
@@ -100,11 +106,11 @@ jamtools.registerMacroType(
         const keyboardSub = keyboardMacro.subject.subscribe(event => {
             const savedEvents = keyboardMacro.getStoredEvents();
             const matchedEvent = savedEvents.find(e => savedMidiInputsAreEqual(e, event));
-            if (!matchedEvent) {
+            if (!matchedEvent && event.deviceInfo.name !== 'qwerty') { // TODO: qwerty hack
                 return;
             }
 
-            const beginningOctave = matchedEvent.event.number;
+            const beginningOctave = matchedEvent?.event.number || 24;
 
             const storedConfig = pagedOctaveInputStoredConfig.getState();
             const numberOfOctaves = storedConfig.numberOfOctaves;
@@ -144,7 +150,7 @@ jamtools.registerMacroType(
                     if (!show) {
                         return (
                             <Button onClick={() => showConfigurationFormState.setState(true)}>
-                                Show paged output configuration
+                                Show paged keyboard configuration
                             </Button>
                         );
                     }
@@ -152,31 +158,36 @@ jamtools.registerMacroType(
                     return (
                         <div>
                             <Button onClick={() => showConfigurationFormState.setState(false)}>
-                                Hide paged output configuration
+                                Hide paged keyvboard configuration
                             </Button>
                             <div>
                                 Macro configs:
 
                                 Keyboard with beginning octave:
-                                <keyboardMacro.components.edit/>
+                                <keyboardMacro.components.edit />
 
-                                Number of octaves:
-                                <form>
-                                    <input
-                                        type='number'
-                                        onChange={event => setNumberOfOctaves(parseInt(event.target.value))}
-                                        value={numberOfOctaves}
-                                    />
-                                    <Button onClick={() => submitNumberOfOctaves({numberOfOctaves})}>
-                                        Confirm
-                                    </Button>
-                                </form>
+                                {!conf.singleOctave && (
+                                    <>
+                                        Number of octaves:
+                                        <form>
+                                            <input
+                                                type='number'
+                                                onChange={event => setNumberOfOctaves(parseInt(event.target.value))}
+                                                value={numberOfOctaves}
+                                                disabled={conf.singleOctave}
+                                            />
+                                            <Button onClick={() => submitNumberOfOctaves({numberOfOctaves})}>
+                                                Confirm
+                                            </Button>
+                                        </form>
 
-                                Page down:
-                                <pageDownMacro.components.edit/>
+                                        Page down:
+                                        <pageDownMacro.components.edit />
 
-                                Page up:
-                                <pageUpMacro.components.edit/>
+                                        Page up:
+                                        <pageUpMacro.components.edit />
+                                    </>
+                                )}
 
                                 Current config:
                                 <pre>
