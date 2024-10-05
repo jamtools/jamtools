@@ -79,7 +79,7 @@ export class BrowserMidiService implements MidiService {
     public send = (outputName: string, event: MidiEvent) => {
         const output = this.outputs[outputName];
         if (!output) {
-            alert('no midi output found for name ' + outputName);
+            console.error('no midi output found for name ' + outputName);
             return;
         }
 

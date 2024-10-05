@@ -4,7 +4,8 @@ import {ModuleAPI} from '~/core/engine/module_api';
 import {MidiEvent, MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
 import {Button} from '~/core/components/Button';
 import {playChord, ChordWithName, noteNames} from './chord_player';
-import {OutputMidiDevice} from '../../../../core/modules/macro_module/macro_handlers/outputs/musical_keyboard_output_macro_handler';
+import {OutputMidiDevice} from '~/core/modules/macro_module/macro_handlers/outputs/musical_keyboard_output_macro_handler';
+import {QRCode} from '~/core/components/QRCode';
 
 type SingleOctaveRootModeSupervisorMidiState = {
     currentlyHeldDownInputNotes: MidiEvent[];
@@ -173,9 +174,12 @@ export class SingleOctaveRootModeSupervisor {
         const debugMidiState = this.states.debugMidiState.useState();
 
         return (
-            <this.renderScaleAndChords
-                debugMidiState={debugMidiState}
-            />
+            <>
+                <this.renderScaleAndChords
+                    debugMidiState={debugMidiState}
+                />
+                <this.renderDiscordLink/>
+            </>
         );
     };
 
@@ -184,8 +188,6 @@ export class SingleOctaveRootModeSupervisor {
         const bigFont = {fontSize: '96px', margin: '0px'};
 
         const hrMargin = '40px';
-
-        const discordLinkStyle: React.CSSProperties = {position: 'absolute', right: '20px', fontSize: '40px'};
 
         return (
             <>
@@ -204,9 +206,25 @@ export class SingleOctaveRootModeSupervisor {
                 <h1 style={bigFont}>
                     {debugMidiState.currentSustainingChord?.name || 'None'}
                 </h1>
+            </>
+        );
+    };
+
+    private renderDiscordLink = () => {
+        const discordLinkStyle: React.CSSProperties = {position: 'absolute', right: '20px', fontSize: '40px'};
+
+        const url = 'jam.tools/discord';
+
+        return (
+            <>
                 <a style={discordLinkStyle}>
-                    jam.tools/discord
+                    {url}
                 </a>
+
+                <QRCode
+                    url={`https://${url}`}
+                    style={{position: 'absolute', right: '400px', height: '200px'}}
+                />
             </>
         );
     };
