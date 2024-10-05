@@ -1,6 +1,16 @@
-import {jamtools} from '../../core/engine/register';
+import {jamtools} from '~/core/engine/register';
 
-jamtools.registerModule('random_note', {}, async (moduleAPI) => {
+declare module '~/core/module_registry/module_registry' {
+    interface AllModules {
+        RandomNote: RandomNoteModuleReturnValue;
+    }
+}
+
+type RandomNoteModuleReturnValue = {
+    togglePlaying: () => void;
+}
+
+jamtools.registerModule('RandomNote', {}, async (moduleAPI): Promise<RandomNoteModuleReturnValue> => {
     const macroModule = moduleAPI.deps.module.moduleRegistry.getModule('macro');
 
     const inputTrigger = await macroModule.createMacro(moduleAPI, 'Input trigger', 'musical_keyboard_input', {enableQwerty: false});
@@ -45,20 +55,25 @@ jamtools.registerModule('random_note', {}, async (moduleAPI) => {
         clearInterval(currentInterval);
     };
 
-    inputTrigger.subject.subscribe((evt) => {
-        if (evt.event.type !== 'noteon') {
-            return;
-        }
-
+    const togglePlaying = () => {
         if (playing) {
             stopPlaying();
         } else {
             startPlaying();
         }
+
         playing = !playing;
+    };
+
+    inputTrigger.subject.subscribe((evt) => {
+        if (evt.event.type !== 'noteon') {
+            return;
+        }
+
+        togglePlaying();
     });
 
     return {
-        moduleId: 'random_notes',
+        togglePlaying,
     };
 });

@@ -9,6 +9,13 @@ const KeytarAndFootDashboard = async (moduleAPI: ModuleAPI, dashboardName: strin
     const multiOctaveSupervisor = new MultiOctaveSupervisor(moduleAPI, dashboardName + '|multi-octave');
     const singleOctaveSupervisor = new SingleOctaveRootModeSupervisor(moduleAPI, dashboardName + '|single-octave-root-mode');
 
+    const randomNoteMacro = await moduleAPI.createMacro(moduleAPI, 'randomNoteTrigger', 'midi_button_input', {
+        onTrigger: () => {
+            const randomNoteModule = moduleAPI.deps.module.moduleRegistry.getModule('RandomNote');
+            randomNoteModule.togglePlaying();
+        },
+    });
+
     await Promise.all([
         multiOctaveSupervisor.initialize(),
         singleOctaveSupervisor.initialize(),
@@ -23,6 +30,12 @@ const KeytarAndFootDashboard = async (moduleAPI: ModuleAPI, dashboardName: strin
             <h1>
                 Keytar and Foot Dashboard
             </h1>
+
+            <div>
+                <p>Random note trigger</p>
+                <randomNoteMacro.components.edit/>
+                <randomNoteMacro.components.show/>
+            </div>
 
             <div>
                 <p>Multi octave</p>
