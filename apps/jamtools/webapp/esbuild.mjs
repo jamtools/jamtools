@@ -1,5 +1,7 @@
 import esbuild from 'esbuild';
 
+import {sassPlugin} from 'esbuild-sass-plugin';
+
 import {esbuildPluginLogBuildTime} from '../../../configs/esbuild_plugins/esbuild_plugin_log_build_time.js';
 
 const watchForChanges = process.argv.includes('--watch');
@@ -15,6 +17,7 @@ async function build() {
         target: 'es6',
         plugins: [
             esbuildPluginLogBuildTime(),
+            sassPlugin(),
         ],
         define: {
             'process.env.WS_HOST': `"${process.env.WS_HOST || ''}"`,
