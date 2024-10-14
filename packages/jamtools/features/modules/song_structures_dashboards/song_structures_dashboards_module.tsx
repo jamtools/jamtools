@@ -40,10 +40,10 @@ jamtools.registerModule('song_structures_dashboards', {}, async (moduleAPI): Pro
     // const draftScaleChoice = moduleAPI.statesAPI.createSharedState('', true);
     // const confirmedScaleChoise = moduleAPI.statesAPI.createSharedState('', true);
 
-    const musicalKeyboardInputMacro = await macros.createMacro(moduleAPI, 'keyboard_in', 'musical_keyboard_input', {enableQwerty: true});
+    const musicalKeyboardInputMacro = await macros.createMacro(moduleAPI, 'keyboard_in', 'musical_keyboard_input', {enableQwerty: false});
     const musicalKeyboardOutputMacro = await macros.createMacro(moduleAPI, 'keyboard_out', 'musical_keyboard_output', {});
 
-    const toggleChordChooseMode = await macros.createMacro(moduleAPI, 'toggle_chord_choose_mode', 'midi_button_input', {enableQwerty: true});
+    const toggleChordChooseMode = await macros.createMacro(moduleAPI, 'toggle_chord_choose_mode', 'midi_button_input', {enableQwerty: false});
     // const toggleChordChooseMode = moduleAPI.createMacro();
     // const toggleScaleChooseMode = moduleAPI.createMacro();
 

@@ -33,6 +33,7 @@ export class NodeMidiService implements MidiService {
     };
 
     private initializeMidiInputDevice = (inputName: string) => {
+        inputName = inputName.trim();
         try {
             const existingInputIndex = this.inputs.findIndex(i => i.name === inputName);
 
@@ -100,6 +101,7 @@ export class NodeMidiService implements MidiService {
     };
 
     private initializeMidiOutputDevice = (outputName: string) => {
+        outputName = outputName.trim();
         try {
             const existingOutputIndex = this.outputs.findIndex(o => o.name === outputName);
 
@@ -118,6 +120,7 @@ export class NodeMidiService implements MidiService {
     };
 
     public send = (deviceName: string, midiEvent: MidiEvent) => {
+        deviceName = deviceName.trim();
         const output = this.outputs.find(device => device.name === deviceName);
         if (!output) {
             console.error('Error: attempted to send midi message to nonexistent midi output', deviceName);

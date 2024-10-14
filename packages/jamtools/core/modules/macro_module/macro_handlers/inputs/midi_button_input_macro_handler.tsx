@@ -5,6 +5,8 @@ import {jamtools} from '~/core/engine/register';
 import {MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
 import {getKeyForMacro, InputMacroStateHolders, useInputMacroWaiterAndSaver, savedMidiEventsAreEqual, getKeyForMidiEvent} from './input_macro_handler_utils';
 import {qwertyEventToMidiEvent, savedMidiInputsAreEqual} from './musical_keyboard_input_macro_handler';
+import {MidiEvent} from 'midi-file';
+import {Button} from '~/core/components/Button';
 
 type MacroConfigItemMidiButtonInput = {
     onTrigger?(midiEvent: MidiEventFull): void;
@@ -17,6 +19,7 @@ export type MidiButtonInputResult = {
     subject: Subject<MidiEventFull>;
     components: {
         edit: React.ElementType;
+        show: React.ElementType;
     };
 };
 
@@ -41,7 +44,41 @@ jamtools.registerMacroType('midi_button_input', {}, async (macroAPI, conf, field
         savedMidiEvents,
     };
 
-    const macroReturnValue = await useInputMacroWaiterAndSaver(macroAPI, states, {includeQwerty: conf.enableQwerty}, fieldName, savedMidiEventsAreEqual);
+    const initialMacroReturnValue = await useInputMacroWaiterAndSaver(macroAPI, states, {includeQwerty: conf.enableQwerty}, fieldName, savedMidiEventsAreEqual);
+
+    const onPress = macroAPI.moduleAPI.createAction(getKeyForMacro('onPress', fieldName), {}, async () => {
+        const event: MidiEventFull = {
+            type: 'ui',
+            deviceInfo: {
+                manufacturer: '',
+                name: 'UI',
+                subtype: 'midi_input',
+                type: 'midi',
+            },
+            event: {
+                number: 0,
+                type: 'noteon',
+                channel: 1,
+            }
+        };
+
+        macroReturnValue.subject.next(event);
+        conf.onTrigger?.(event);
+    });
+
+    const macroReturnValue: MidiButtonInputResult = {
+        ...initialMacroReturnValue,
+        components: {
+            ...initialMacroReturnValue.components,
+            show: () => (
+                <Button
+                    onClick={() => onPress({})}
+                >
+                    Action {fieldName.split('|').pop()}
+                </Button>
+            ),
+        }
+    };
 
     if (!macroAPI.moduleAPI.deps.core.isMaestro()) {
         return macroReturnValue;
