@@ -23,17 +23,11 @@ jamtools.registerModule('MidiPlayback', {}, async (moduleAPI): Promise<MidiPlayb
 
     let currentIndex = -1;
 
-    const inputTrigger = await moduleAPI.createMacro(moduleAPI, 'inputTrigger', 'midi_button_input', {onTrigger: (event) => {
-        if (event.event.type !== 'noteon') {
-            return;
-        }
-
+    const playStep = () => {
         const midiData = savedMidiFileData.getState();
         if (!midiData) {
             throw new Error('no saved midi data');
         }
-
-        currentIndex = (currentIndex + 1) % midiData.events.length;
 
         const clusterToSend = midiData.events[currentIndex];
 
@@ -56,6 +50,31 @@ jamtools.registerModule('MidiPlayback', {}, async (moduleAPI): Promise<MidiPlayb
                 });
             }
         }, 100);
+    };
+
+    let restarted = false;
+    const restartLoopTrigger = await moduleAPI.createMacro(moduleAPI, 'restartLoopTrigger', 'midi_button_input', {onTrigger: (event) => {
+        currentIndex = 0;
+        playStep();
+
+        restarted = true;
+        setTimeout(() => {
+            restarted = false;
+        }, 20);
+    }});
+
+    const inputTrigger = await moduleAPI.createMacro(moduleAPI, 'inputTrigger', 'midi_button_input', {onTrigger: (event) => {
+        if (restarted) {
+            return;
+        }
+
+        const midiData = savedMidiFileData.getState();
+        if (!midiData) {
+            throw new Error('no saved midi data');
+        }
+
+        currentIndex = (currentIndex + 1) % midiData.events.length;
+        playStep();
     }});
 
     const handleParsedMidiFile = moduleAPI.createAction('handleParsedMidiFile', {}, async (args: {data: ParsedMidiFile}) => {
@@ -73,6 +92,9 @@ jamtools.registerModule('MidiPlayback', {}, async (moduleAPI): Promise<MidiPlayb
 
                 Input trigger:
                 <inputTrigger.components.edit/>
+
+                Restart loop:
+                <restartLoopTrigger.components.edit/>
 
                 Output device:
                 <outputDevice.components.edit/>

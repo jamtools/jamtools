@@ -9,5 +9,3 @@ When playing music with others and using this program:
 - Utilize several entrypoints of user interactivity to make the most out of every situation.
 - Create your own light shows to interact with during performance
 - Extend the system by adding your own modules
-
-Love each other. It's a tough one out there.
