@@ -1,34 +1,27 @@
 import React from 'react';
 
 import {jamtools} from '~/core/engine/register';
-
-// import {GuitarComponent} from './song_structures/components/guitar';
+import {Details} from '~/core/components/Details';
 
 jamtools.registerModule('hand_raiser', {}, async (moduleAPI) => {
     const sliderPositionState1 = await moduleAPI.statesAPI.createSharedState('slider_position_1', 0);
     const sliderPositionState2 = await moduleAPI.statesAPI.createSharedState('slider_position_2', 0);
 
-    moduleAPI.deps.module.moduleRegistry.getModule('macro').createMacro(moduleAPI, 'test_cc_1', 'midi_control_change_input', {
-        allowLocal: true,
+    const sliderMacro1 = await moduleAPI.deps.module.moduleRegistry.getModule('macro').createMacro(moduleAPI, 'test_cc_1', 'midi_control_change_input', {
         onTrigger: (event => {
-            if (event.event.value) {
-                sliderPositionState1.setState(event.event.value);
-            }
+            sliderPositionState1.setState(event.event.value!);
         }),
     });
 
-    moduleAPI.deps.module.moduleRegistry.getModule('macro').createMacro(moduleAPI, 'test_cc_2', 'midi_control_change_input', {
-        allowLocal: true,
+    const sliderMacro2 = await moduleAPI.deps.module.moduleRegistry.getModule('macro').createMacro(moduleAPI, 'test_cc_2', 'midi_control_change_input', {
         onTrigger: (event => {
-            if (event.event.value) {
-                sliderPositionState2.setState(event.event.value);
-            }
+            sliderPositionState2.setState(event.event.value!);
         }),
     });
 
-    const handleSliderDrag = moduleAPI.createAction('slider_drag', {}, async (args: {index: 0 | 1, value: number}) => {
-        const state = [sliderPositionState1, sliderPositionState2][args.index];
-        state.setState(args.value);
+    const handleSliderDrag = moduleAPI.createAction('slider_drag', {}, async (args: {index: number, value: number}) => {
+        const sliderState = [sliderPositionState1, sliderPositionState2][args.index];
+        sliderState.setState(args.value);
     });
 
     moduleAPI.registerRoute('/', {}, () => {
@@ -36,11 +29,24 @@ jamtools.registerModule('hand_raiser', {}, async (moduleAPI) => {
         const sliderPosition2 = sliderPositionState2.useState();
 
         return (
-            <DataSyncRootRoute
-                sliderPosition1={sliderPosition1}
-                sliderPosition2={sliderPosition2}
-                handleSliderDrag={(index, value) => handleSliderDrag({index, value})}
-            />
+            <>
+                <Details summary='Macros'>
+                    <div>
+                        Slider 1
+                        <sliderMacro1.components.edit/>
+                    </div>
+
+                    <div>
+                        Slider 2
+                        <sliderMacro2.components.edit/>
+                    </div>
+                </Details>
+                <DataSyncRootRoute
+                    sliderPosition1={sliderPosition1}
+                    sliderPosition2={sliderPosition2}
+                    handleSliderDrag={(index, value) => handleSliderDrag({index, value})}
+                />
+            </>
         );
     });
 });
@@ -100,16 +106,6 @@ const DataSyncRootRoute = ({sliderPosition1, sliderPosition2, handleSliderDrag}:
             <div>
                 {sliderHands}
             </div>
-
-            {/* <GuitarComponent
-                numberOfStrings={4}
-                chosenFrets={[
-                    // '4-0',
-                    // '4-2',
-                    // '3-0',
-                    // '3-2',
-                ]}
-            /> */}
         </div>
     );
 };
