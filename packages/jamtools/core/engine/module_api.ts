@@ -110,9 +110,9 @@ export class ModuleAPI {
      *   - `musical_keyboard_output`
      *   - `midi_control_change_output`
     */
-    createMacro: AllModules['macro']['createMacro'] = (...args) => {
-        return this.modDeps.moduleRegistry.getModule('macro').createMacro(...args);
-    };
+    // createMacro: AllModules['macro']['createMacro'] = (...args) => {
+    //     return this.modDeps.moduleRegistry.getModule('macro').createMacro(...args);
+    // };
 
     // registerSnack(snackName: string, options: RegisterSnackOptions, cb: SnackCallback): Promise<void>;
     // states: StatesAPI;

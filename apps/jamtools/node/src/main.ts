@@ -5,6 +5,7 @@ import {CoreDependencies} from '~/core/types/module_types';
 import {TrpcKVStoreService} from '~/core/services/trpc_kv_store_client';
 
 import {NodeKVStoreService} from '~/platforms/node/services/node_kvstore_service';
+import {NodeFileStorageService} from '~/platforms/node/services/node_file_storage_service';
 import {NodeJsonRpcClientAndServer} from '~/platforms/node/services/node_json_rpc';
 import {JamToolsEngine} from '~/core/engine/engine';
 import {MidiService, QwertyService} from '~/core/types/io_types';
@@ -37,6 +38,7 @@ export const startJamTools = async (services: Services): Promise<JamToolsEngine>
             remote: kvStore,
             userAgent: sessionStore,
         },
+        files: new NodeFileStorageService(),
         rpc,
         isMaestro: () => true,
     };

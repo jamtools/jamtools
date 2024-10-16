@@ -12,7 +12,7 @@ const coreFile = path.join(buildToolDir, './webapp/src/index.tsx');
 
 const moduleIndexFile = process.env.MODULES_INDEX_FILE || '../../modules/index.ts';
 
-const allImports = [coreFile, moduleIndexFile].map(file => `import '${file}';`).join('\n');
+const allImports = [moduleIndexFile, coreFile].map(file => `import '${file}';`).join('\n');
 
 const outDir = process.env.ESBUILD_OUT_DIR || './dist';
 const dynamicEntryPath = path.join(outDir, 'dynamic-entry.js');
