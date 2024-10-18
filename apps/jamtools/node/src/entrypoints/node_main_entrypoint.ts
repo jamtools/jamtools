@@ -3,9 +3,6 @@ import {startJamTools} from '../main';
 import {NodeQwertyService} from '~/platforms/node/services/node_qwerty_service';
 import {NodeMidiService} from '~/platforms/node/services/node_midi_service';
 
-import '~/features/modules';
-import '~/features/snacks';
-
 const qwerty = new NodeQwertyService();
 const midi = new NodeMidiService();
 

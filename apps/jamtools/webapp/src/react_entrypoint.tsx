@@ -57,6 +57,9 @@ export const startJamToolsAndRenderApp = async (): Promise<JamToolsEngine> => {
             remote: kvStore,
             userAgent: userAgentKVStore,
         },
+        files: {
+            saveFile: async () => {},
+        },
         rpc,
         isMaestro: () => isLocal,
     };

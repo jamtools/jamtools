@@ -16,6 +16,9 @@ export type CoreDependencies = {
         qwerty: QwertyService;
         midi: MidiService;
     };
+    files: {
+        saveFile: (name: string, content: string) => Promise<void>;
+    };
     storage: {
         remote: KVStore;
         userAgent: KVStore;
