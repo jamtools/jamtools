@@ -4,6 +4,7 @@ import path from 'path';
 import esbuild from 'esbuild';
 
 import {esbuildPluginLogBuildTime} from '../../../configs/esbuild_plugins/esbuild_plugin_log_build_time.js';
+import {esbuildPluginPlatformInject} from '../../../configs/esbuild_plugins/esbuild_plugin_platform_inject.mjs';
 
 let entrypoint = 'entrypoints/node_main_entrypoint.ts';
 let externals = ['@julusian/midi', 'easymidi', 'jsdom'];
@@ -42,6 +43,7 @@ async function build() {
         platform: 'node',
         plugins: [
             esbuildPluginLogBuildTime(),
+            esbuildPluginPlatformInject('node'),
         ],
         external: externals,
         define: {

@@ -4,6 +4,7 @@ import path from 'path';
 import esbuild from 'esbuild';
 
 import {esbuildPluginLogBuildTime} from '../../../configs/esbuild_plugins/esbuild_plugin_log_build_time.js';
+import {esbuildPluginPlatformInject} from '../../../configs/esbuild_plugins/esbuild_plugin_platform_inject.mjs';
 
 const watchForChanges = process.argv.includes('--watch');
 
@@ -36,6 +37,7 @@ async function build() {
         target: 'es6',
         plugins: [
             esbuildPluginLogBuildTime(),
+            esbuildPluginPlatformInject('browser'),
         ],
         define: {
             'process.env.WS_HOST': `"${process.env.WS_HOST || ''}"`,
