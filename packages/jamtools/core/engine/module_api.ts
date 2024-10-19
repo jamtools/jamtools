@@ -121,7 +121,7 @@ export class ModuleAPI {
      *   - `midi_control_change_output`
     */
     createMacro: MacroModule['createMacro'] = (...args) => {
-        return (this.modDeps.moduleRegistry.getCustomModule('macro') as MacroModule).createMacro(...args);
+        return (this.modDeps.moduleRegistry.getModule('macro') as MacroModule).createMacro(...args);
     };
 
     // registerSnack(snackName: string, options: RegisterSnackOptions, cb: SnackCallback): Promise<void>;
