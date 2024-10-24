@@ -8,8 +8,12 @@ import {DeviceInfo, MidiEvent, MidiEventFull} from '~/core/modules/macro_module/
 export class NodeMidiService implements MidiService {
     private inputs: easymidi.Input[] = [];
     private outputs: easymidi.Output[] = [];
+    private errorDevices: string[] = [];
 
-    initialize = async () => {
+    public onDeviceStatusChange = new Subject<DeviceInfo & {status: 'connected' | 'disconnected'}>();
+    public onInputEvent = new Subject<MidiInputEventPayload>();
+
+    public initialize = async () => {
         // this.dawToJT = new easymidi.Input('DAW to JT', true);
         // this.jtToDaw = new easymidi.Output('JT to DAW', true);
 
@@ -22,18 +26,28 @@ export class NodeMidiService implements MidiService {
         for (const outputName of outputNames) {
             this.initializeMidiOutputDevice(outputName);
         }
+
+        setTimeout(() => {
+            setInterval(() => {
+                this.pollForConnectedDevices();
+            }, 1000);
+        }, 2000);
     };
 
-    getInputs = () => {
+    public getInputs = () => {
         return this.inputs.map(i => i.name);
     };
 
-    getOutputs = () => {
+    public getOutputs = () => {
         return this.outputs.map(o => o.name);
     };
 
     private initializeMidiInputDevice = (inputName: string) => {
         inputName = inputName.trim();
+        if (this.errorDevices.includes(inputName) || inputName.includes('RtMidi')) {
+            return;
+        }
+
         try {
             const existingInputIndex = this.inputs.findIndex(i => i.name === inputName);
 
@@ -72,6 +86,10 @@ export class NodeMidiService implements MidiService {
             };
 
             input.on('noteon', (event) => {
+                if (event.velocity === 0) {
+                    handleNoteEvent('noteoff', event);
+                    return;
+                }
                 handleNoteEvent('noteon', event);
             });
 
@@ -96,12 +114,17 @@ export class NodeMidiService implements MidiService {
             // console.log('initialized midi input:', input.name);
 
         } catch (e) {
-            console.error('failed to initialize midi input device', e);
+            console.error('failed to initialize midi input device', inputName);
+            this.errorDevices.push(inputName);
         }
     };
 
     private initializeMidiOutputDevice = (outputName: string) => {
         outputName = outputName.trim();
+        if (this.errorDevices.includes(outputName) || outputName.includes('RtMidi')) {
+            return;
+        }
+
         try {
             const existingOutputIndex = this.outputs.findIndex(o => o.name === outputName);
 
@@ -115,7 +138,8 @@ export class NodeMidiService implements MidiService {
             this.outputs.push(output);
             // console.log('initialized midi output:', output.name);
         } catch (e) {
-            console.error('failed to initialize midi output device', e);
+            console.error('failed to initialize midi output device', outputName);
+            this.errorDevices.push(outputName);
         }
     };
 
@@ -151,7 +175,73 @@ export class NodeMidiService implements MidiService {
         }
     };
 
-    onDeviceStatusChange = new Subject<DeviceInfo>();
+    private pollForConnectedDevices = () => {
+        const currentInputs = easymidi.getInputs();
+        const currentOutputs = easymidi.getOutputs();
 
-    onInputEvent = new Subject<MidiInputEventPayload>();
+        const knownInputs = this.inputs.map(d => d.name);
+        const knownOutputs = this.outputs.map(d => d.name);
+
+        const newlyConnectedInputs = currentInputs.filter(device => !knownInputs.includes(device));
+        const newlyDisconnectedInputs = knownInputs.filter(device => !currentInputs.includes(device));
+
+        const newlyConnectedOutputs = currentOutputs.filter(device => !knownOutputs.includes(device));
+        const newlyDisconnectedOutputs = knownOutputs.filter(device => !currentOutputs.includes(device));
+
+        if (newlyConnectedInputs.length > 0) {
+            console.log('Newly connected MIDI input devices:', newlyConnectedInputs);
+            for (const device of newlyConnectedInputs) {
+                this.initializeMidiInputDevice(device);
+            }
+        }
+
+        if (newlyConnectedOutputs.length > 0) {
+            console.log('Newly connected MIDI output devices:', newlyConnectedOutputs);
+            newlyConnectedOutputs.forEach(this.initialize);
+            for (const device of newlyConnectedOutputs) {
+                this.initializeMidiOutputDevice(device);
+            }
+        }
+
+        if (newlyDisconnectedInputs.length > 0) {
+            console.log('Disconnected MIDI input devices:', newlyDisconnectedInputs);
+            for (const d of newlyDisconnectedInputs) {
+                this.inputs.find(i => i.name === d)?.close();
+            }
+            this.inputs = this.inputs.filter(input => !newlyDisconnectedInputs.includes(input.name));
+        }
+
+        if (newlyDisconnectedOutputs.length > 0) {
+            console.log('Disconnected MIDI output devices:', newlyDisconnectedOutputs);
+            for (const d of newlyDisconnectedOutputs) {
+                this.outputs.find(o => o.name === d)?.close();
+            }
+            this.outputs = this.outputs.filter(output => !newlyDisconnectedOutputs.includes(output.name));
+        }
+
+        const publishDeviceStatusChange = (deviceName: string, isConnected: boolean) => {
+            const deviceInfo: DeviceInfo = {
+                type: 'midi',
+                subtype: 'midi_input',
+                name: deviceName,
+                manufacturer: '',
+            };
+            this.onDeviceStatusChange.next({
+                ...deviceInfo,
+                status: isConnected ? 'connected' : 'disconnected',
+            });
+        };
+
+        // Handle newly connected devices
+        const newlyConnectedDevices = new Set([...newlyConnectedInputs, ...newlyConnectedOutputs]);
+        newlyConnectedDevices.forEach(deviceName => {
+            publishDeviceStatusChange(deviceName, true);
+        });
+
+        // Handle disconnected devices
+        const disconnectedDevices = new Set([...newlyDisconnectedInputs, ...newlyDisconnectedOutputs]);
+        disconnectedDevices.forEach(deviceName => {
+            publishDeviceStatusChange(deviceName, false);
+        });
+    };
 }
