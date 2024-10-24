@@ -1,7 +1,8 @@
 import {SharedStateSupervisor, StateSupervisor, UserAgentStateSupervisor} from '../services/states/shared_state_service';
-import {AllModules, ExtraModuleDependencies, Module} from '~/core/module_registry/module_registry';
+import {ExtraModuleDependencies, Module} from '~/core/module_registry/module_registry';
 import {CoreDependencies, ModuleDependencies} from '../types/module_types';
 import {RegisterRouteOptions} from './register';
+import type {MacroModule} from '../modules/macro_module/macro_module';
 
 type ActionOptions = object;
 
@@ -9,6 +10,15 @@ type ActionOptions = object;
  * The Action callback
 */
 type ActionCallback<Args extends object, ReturnValue = any> = (args: Args) => Promise<ReturnValue>;
+
+// this would make it so modules/plugins can extend the module API dynamically through interface merging
+// export interface ModuleAPI {
+
+// }
+
+// export class ModuleAPIImpl {
+
+// }
 
 /**
  * The API provided in the callback when calling `registerModule`. The ModuleAPI is the entrypoint in the framework for everything pertaining to creating a module.
@@ -110,8 +120,8 @@ export class ModuleAPI {
      *   - `musical_keyboard_output`
      *   - `midi_control_change_output`
     */
-    createMacro: AllModules['macro']['createMacro'] = (...args) => {
-        return this.modDeps.moduleRegistry.getModule('macro').createMacro(...args);
+    createMacro: MacroModule['createMacro'] = (...args) => {
+        return (this.modDeps.moduleRegistry.getModule('macro') as MacroModule).createMacro(...args);
     };
 
     // registerSnack(snackName: string, options: RegisterSnackOptions, cb: SnackCallback): Promise<void>;

@@ -1,3 +1,5 @@
+import '~/core/modules';
+
 import {JamToolsEngine} from '~/core/engine/engine';
 import {makeMockCoreDependencies, makeMockExtraDependences} from '~/core/test/mock_core_dependencies';
 

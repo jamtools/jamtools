@@ -3,7 +3,9 @@ import {act} from 'react';
 import { screen } from 'shadow-dom-testing-library';
 import '@testing-library/jest-dom';
 
+import '~/core/modules';
 import {JamToolsEngine} from '~/core/engine/engine';
+
 import {makeMockCoreDependencies, makeMockExtraDependences} from '~/core/test/mock_core_dependencies';
 import {Subject} from 'rxjs';
 import {QwertyCallbackPayload} from '~/core/types/io_types';

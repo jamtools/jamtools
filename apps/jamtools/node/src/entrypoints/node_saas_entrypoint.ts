@@ -3,9 +3,6 @@ import {Subject} from 'rxjs';
 import {MidiService, QwertyService} from '~/core/types/io_types';
 import {startJamTools} from '../main';
 
-import '~/features/modules';
-import '~/features/snacks';
-
 const qwerty: QwertyService = {
     onInputEvent: new Subject(),
 };

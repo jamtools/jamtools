@@ -1,5 +1,8 @@
 import React from 'react';
-import {Module} from '~/core/module_registry/module_registry';
+
+import '../io/io_module';
+
+import type {Module} from '~/core/module_registry/module_registry';
 
 import {CoreDependencies, ModuleDependencies} from '~/core/types/module_types';
 import {MacroConfigItem, MacroTypeConfigs} from './macro_module_types';

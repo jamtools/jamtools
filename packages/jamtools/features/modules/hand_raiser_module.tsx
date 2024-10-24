@@ -26,7 +26,7 @@ jamtools.registerModule('hand_raiser', {}, async (moduleAPI) => {
         }),
     });
 
-    const handleSliderDrag = moduleAPI.createAction('slider_drag', {}, async (args: {index: 0 | 1, value: number}) => {
+    const handleSliderDrag = moduleAPI.createAction('slider_drag', {}, async (args: {index: number, value: number}) => {
         const state = [sliderPositionState1, sliderPositionState2][args.index];
         state.setState(args.value);
     });

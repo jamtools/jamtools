@@ -9,7 +9,6 @@ import React, {createContext, useContext, useState} from 'react';
 import {useMount} from '~/core/hooks/useMount';
 import {ExtraModuleDependencies, Module, ModuleRegistry} from '~/core/module_registry/module_registry';
 
-import '../modules';
 import {SharedStateService} from '../services/states/shared_state_service';
 import {ModuleAPI} from './module_api';
 
