@@ -13,8 +13,12 @@
     "fix": "npm run lint -- --fix"
   },
   "dependencies": {
+    "@hono/node-server": "^1.13.2",
+    "@hono/node-ws": "^1.0.4",
+    "@hono/trpc-server": "^0.3.2",
     "express": "^4.19.2",
     "express-ws": "^5.0.2",
+    "hono": "^4.6.7",
     "jamtools-core": "*"
   },
   "devDependencies": {
