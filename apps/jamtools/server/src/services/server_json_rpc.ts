@@ -1,12 +1,9 @@
-import express from 'express';
-
-import {WebSocket} from 'ws';
 import {JSONRPCServer, JSONRPCClient, JSONRPCRequest} from 'json-rpc-2.0';
 import {Context} from 'hono';
 import {WSEvents} from 'hono/ws';
 
 type WebsocketInterface = {
-   send: (s: string) => void;
+    send: (s: string) => void;
 }
 
 export class NodeJsonRpcServer {

@@ -2,7 +2,7 @@ import path from 'path';
 
 import {Hono} from 'hono';
 import {serveStatic} from '@hono/node-server/serve-static';
-import {createNodeWebSocket} from '@hono/node-ws'
+import {createNodeWebSocket} from '@hono/node-ws';
 import {trpcServer} from '@hono/trpc-server';
 import {NodeJsonRpcServer} from './services/server_json_rpc';
 import {WebsocketServerCoreDependencies} from '~/platforms/ws/ws_server_core_dependencies';
@@ -14,7 +14,6 @@ export const initApp = (coreDeps: WebsocketServerCoreDependencies) => {
     const webappFolder = process.env.WEBAPP_FOLDER || '../webapp';
     const webappDistFolder = path.join(webappFolder, './dist');
 
-    console.log(process.cwd())
     const {injectWebSocket, upgradeWebSocket} = createNodeWebSocket({app});
 
     app.get('/ws', upgradeWebSocket(c => service.handleConnection(c)));
