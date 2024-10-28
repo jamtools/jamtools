@@ -113,8 +113,6 @@ class EasyMidiDevicePoller implements NodeMidiDevicePoller {
     }
 }
 
-let jitter = false;
-
 class AMidiDevicePoller implements NodeMidiDevicePoller {
     static async isSupported(): Promise<boolean> {
         try {
@@ -125,9 +123,11 @@ class AMidiDevicePoller implements NodeMidiDevicePoller {
         }
     }
 
+    // private forceNoMidiDevices = false;
+
     public poll = async (): Promise<DeviceMetadata[]> => {
-        // jitter = !jitter;
-        // if (jitter) {
+        // this.forceNoMidiDevices = !this.forceNoMidiDevices;
+        // if (this.forceNoMidiDevices) {
         //     return [];
         // }
 

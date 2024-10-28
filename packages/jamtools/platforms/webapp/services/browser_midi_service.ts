@@ -3,7 +3,7 @@ import {Subject} from 'rxjs';
 import {MidiInputEventPayload, MidiService} from '~/core/types/io_types';
 
 import {NoteMessageEvent, WebMidi} from 'webmidi';
-import {MidiEvent, MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
+import {DeviceInfo, MidiEvent, MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
 
 export class BrowserMidiService implements MidiService {
     private midi!: typeof WebMidi;
@@ -11,7 +11,7 @@ export class BrowserMidiService implements MidiService {
     private outputs: Record<string, typeof WebMidi['outputs'][0]> = {};
 
     public onInputEvent = new Subject<MidiInputEventPayload>();
-    public onNewInputDevice = new Subject<{newDevice: string; allDevices: string[]}>();
+    public onDeviceStatusChange = new Subject<DeviceInfo & {status: 'connected' | 'disconnected'}>();
 
     initialize = async () => {
         try {

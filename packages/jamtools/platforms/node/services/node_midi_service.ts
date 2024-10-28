@@ -214,7 +214,6 @@ export class NodeMidiService implements MidiService {
                     });
                 }
             }
-            console.log(result);
         }
 
         this.initialized = true;
