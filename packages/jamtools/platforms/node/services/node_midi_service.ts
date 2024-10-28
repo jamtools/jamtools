@@ -23,16 +23,16 @@ export class NodeMidiService implements MidiService {
     };
 
     public getInputs = () => {
-        return this.inputs.map(i => i.name).filter(d => !d.startsWith('Midi Through'));
+        return this.inputs.map(i => i.name).filter(d => !d.startsWith('Midi Through') && !d.includes('RtMidi'));
     };
 
     public getOutputs = () => {
-        return this.outputs.map(o => o.name).filter(d => !d.startsWith('Midi Through'));
+        return this.outputs.map(o => o.name).filter(d => !d.startsWith('Midi Through') && !d.includes('RtMidi'));
     };
 
     private initializeMidiInputDevice = (inputName: string) => {
         inputName = inputName.trim();
-        if (this.errorDevices.includes(inputName) || inputName.includes('RtMidi')) {
+        if (this.errorDevices.includes(inputName)) {
             return;
         }
 
@@ -109,7 +109,7 @@ export class NodeMidiService implements MidiService {
 
     private initializeMidiOutputDevice = (outputName: string) => {
         outputName = outputName.trim();
-        if (this.errorDevices.includes(outputName) || outputName.includes('RtMidi')) {
+        if (this.errorDevices.includes(outputName)) {
             return;
         }
 
