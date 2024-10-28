@@ -17,7 +17,7 @@ export const initApp = (coreDeps: WebsocketServerCoreDependencies) => {
     console.log(process.cwd())
     const {injectWebSocket, upgradeWebSocket} = createNodeWebSocket({app});
 
-    app.get('/ws', upgradeWebSocket(c => service.handleHonoWebsocketConnection(c)));
+    app.get('/ws', upgradeWebSocket(c => service.handleConnection(c)));
 
     app.use('/', serveStatic({root: webappFolder, path: 'index.html'}));
     app.use('/dist/index.js', serveStatic({root: webappDistFolder, path: '/index.js'}));
