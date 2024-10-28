@@ -1,6 +1,6 @@
 import {JSONRPCServer, JSONRPCClient, JSONRPCRequest} from 'json-rpc-2.0';
 import {Context} from 'hono';
-import {WSEvents} from 'hono/ws';
+import {WSContext, WSEvents} from 'hono/ws';
 
 type WebsocketInterface = {
     send: (s: string) => void;
@@ -40,16 +40,15 @@ export class NodeJsonRpcServer {
             this.maestroClientId = clientId;
         }
 
-        let send = (s: string) => { };
+        let wsStored: WSContext | undefined;
 
         const client = new JSONRPCClient((request: JSONRPCRequest) => {
-            // if (ws.readyState === WebSocket.OPEN) {
-            send(JSON.stringify(request));
-            // ws.send(JSON.stringify(request));
-            return Promise.resolve();
-            // } else {
-            // return Promise.reject(new Error('WebSocket is not open'));
-            // }
+            if (wsStored?.readyState === WebSocket.OPEN) {
+                wsStored.send(JSON.stringify(request));
+                return Promise.resolve();
+            } else {
+                return Promise.reject(new Error('WebSocket is not open'));
+            }
         });
 
         outgoingClients[clientId] = client;
@@ -57,7 +56,7 @@ export class NodeJsonRpcServer {
         return {
             onOpen: (event, ws) => {
                 incomingClients[clientId] = ws;
-                send = (s: string) => ws.send(s);
+                wsStored = ws;
             },
             onMessage: (event, ws) => {
                 const message = event.data.toString();
