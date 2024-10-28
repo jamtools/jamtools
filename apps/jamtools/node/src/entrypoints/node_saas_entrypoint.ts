@@ -12,6 +12,7 @@ const midi: MidiService = {
     getOutputs: () => [],
     initialize: async () => {},
     onInputEvent: new Subject(),
+    onDeviceStatusChange: new Subject(),
     send: () => {},
 };
 

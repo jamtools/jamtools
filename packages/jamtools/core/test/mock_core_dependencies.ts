@@ -1,11 +1,12 @@
 import {Subject} from 'rxjs';
-import {MidiEvent, MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
+import {DeviceInfo, MidiEvent, MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
 import {MidiService, QwertyCallbackPayload, QwertyService} from '../types/io_types';
 import {CoreDependencies, KVStore, Rpc, RpcArgs} from '../types/module_types';
 import {ExtraModuleDependencies} from '~/core/module_registry/module_registry';
 
 class MockMidiService implements MidiService {
     onInputEvent = new Subject<MidiEventFull>();
+    onDeviceStatusChange = new Subject<DeviceInfo & {status: 'connected' | 'disconnected'}>();
 
     initialize = async () => {};
 

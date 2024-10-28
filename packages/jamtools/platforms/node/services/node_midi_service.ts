@@ -4,36 +4,38 @@ import easymidi, {Channel} from 'easymidi';
 
 import {MidiInputEventPayload, MidiService} from '~/core/types/io_types';
 import {DeviceInfo, MidiEvent, MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
+import {NodeMidiDevicePollerService} from './node_midi/midi_poller';
 
 export class NodeMidiService implements MidiService {
     private inputs: easymidi.Input[] = [];
     private outputs: easymidi.Output[] = [];
+    private errorDevices: string[] = [];
+    private pollService = new NodeMidiDevicePollerService();
 
-    initialize = async () => {
-        // this.dawToJT = new easymidi.Input('DAW to JT', true);
-        // this.jtToDaw = new easymidi.Output('JT to DAW', true);
+    public onDeviceStatusChange = new Subject<DeviceInfo & {status: 'connected' | 'disconnected'}>();
+    public onInputEvent = new Subject<MidiInputEventPayload>();
 
-        const inputNames = easymidi.getInputs();
-        for (const inputName of inputNames) {
-            this.initializeMidiInputDevice(inputName);
-        }
+    private initialized = false;
 
-        const outputNames = easymidi.getOutputs();
-        for (const outputName of outputNames) {
-            this.initializeMidiOutputDevice(outputName);
-        }
+    public initialize = async () => {
+        await this.pollService.initialize();
+        await this.pollForConnectedDevices();
     };
 
-    getInputs = () => {
-        return this.inputs.map(i => i.name);
+    public getInputs = () => {
+        return this.inputs.map(i => i.name).filter(d => !d.startsWith('Midi Through') && !d.includes('RtMidi'));
     };
 
-    getOutputs = () => {
-        return this.outputs.map(o => o.name);
+    public getOutputs = () => {
+        return this.outputs.map(o => o.name).filter(d => !d.startsWith('Midi Through') && !d.includes('RtMidi'));
     };
 
     private initializeMidiInputDevice = (inputName: string) => {
         inputName = inputName.trim();
+        if (this.errorDevices.includes(inputName)) {
+            return;
+        }
+
         try {
             const existingInputIndex = this.inputs.findIndex(i => i.name === inputName);
 
@@ -72,6 +74,10 @@ export class NodeMidiService implements MidiService {
             };
 
             input.on('noteon', (event) => {
+                if (event.velocity === 0) {
+                    handleNoteEvent('noteoff', event);
+                    return;
+                }
                 handleNoteEvent('noteon', event);
             });
 
@@ -96,12 +102,17 @@ export class NodeMidiService implements MidiService {
             // console.log('initialized midi input:', input.name);
 
         } catch (e) {
-            console.error('failed to initialize midi input device', e);
+            console.error('failed to initialize midi input device', inputName);
+            this.errorDevices.push(inputName);
         }
     };
 
     private initializeMidiOutputDevice = (outputName: string) => {
         outputName = outputName.trim();
+        if (this.errorDevices.includes(outputName)) {
+            return;
+        }
+
         try {
             const existingOutputIndex = this.outputs.findIndex(o => o.name === outputName);
 
@@ -115,7 +126,8 @@ export class NodeMidiService implements MidiService {
             this.outputs.push(output);
             // console.log('initialized midi output:', output.name);
         } catch (e) {
-            console.error('failed to initialize midi output device', e);
+            console.error('failed to initialize midi output device', outputName);
+            this.errorDevices.push(outputName);
         }
     };
 
@@ -151,7 +163,61 @@ export class NodeMidiService implements MidiService {
         }
     };
 
-    onDeviceStatusChange = new Subject<DeviceInfo>();
+    private pollForConnectedDevices = async () => {
+        const knownDevices = Array.from(new Set(this.inputs.map(i => i.name).concat(this.outputs.map(o => o.name))));
+        const result = await this.pollService.pollForDevices(knownDevices);
 
-    onInputEvent = new Subject<MidiInputEventPayload>();
+        for (const device of result.newlyConnectedDevices) {
+            if (device.input) {
+                this.initializeMidiInputDevice(device.machineReadableName);
+            }
+            if (device.output) {
+                this.initializeMidiOutputDevice(device.machineReadableName);
+            }
+        }
+
+        for (const device of result.newlyDisconnectedDevices) {
+            if (device.input) {
+                const index = this.inputs.findIndex(d => d.name === device.machineReadableName);
+                if (index !== -1) {
+                    this.inputs[index].close();
+                    this.inputs = [...this.inputs.slice(0, index), ...this.inputs.slice(index + 1)];
+                }
+            }
+            if (device.output) {
+                const index = this.outputs.findIndex(d => d.name === device.machineReadableName);
+                if (index !== -1) {
+                    this.outputs[index].close();
+                    this.outputs = [...this.outputs.slice(0, index), ...this.outputs.slice(index + 1)];
+                }
+            }
+        }
+
+        if (result.newlyConnectedDevices.length || result.newlyDisconnectedDevices.length) {
+            if (this.initialized) {
+                for (const device of result.newlyConnectedDevices) {
+                    this.onDeviceStatusChange.next({
+                        manufacturer: '',
+                        name: device.humanReadableName,
+                        status: 'connected',
+                        subtype: 'midi_input',
+                        type: 'midi',
+                    });
+                }
+                for (const device of result.newlyDisconnectedDevices) {
+                    this.onDeviceStatusChange.next({
+                        manufacturer: '',
+                        name: device.humanReadableName,
+                        status: 'disconnected',
+                        subtype: 'midi_input',
+                        type: 'midi',
+                    });
+                }
+            }
+        }
+
+        this.initialized = true;
+
+        setTimeout(this.pollForConnectedDevices, 2000);
+    };
 }

@@ -1,5 +1,5 @@
 import {Subject} from 'rxjs';
-import {MidiEvent, MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
+import {DeviceInfo, MidiEvent, MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
 
 export type QwertyCallbackPayload = {
     event: 'keydown' | 'keyup';
@@ -14,6 +14,7 @@ export type MidiInputEventPayload = MidiEventFull;
 
 export type MidiService = {
     onInputEvent: Subject<MidiInputEventPayload>;
+    onDeviceStatusChange: Subject<DeviceInfo & {status: 'connected' | 'disconnected'}>;
     initialize: () => Promise<void>;
     getInputs: () => string[];
     getOutputs: () => string[];
