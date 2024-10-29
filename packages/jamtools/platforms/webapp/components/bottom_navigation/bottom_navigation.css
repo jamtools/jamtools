@@ -8,6 +8,7 @@
   padding: 10px 0;
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
   border-top: 1px solid var(--sl-color-neutral-200);
+  margin-left: -8px;
 }
 
 .nav-item {
