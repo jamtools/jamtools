@@ -11,6 +11,7 @@ import {Button} from '~/core/components/Button';
 import {Details} from '~/core/components/Details';
 
 import {RunLocalButton} from './components/run_local_button';
+import {BottomNavigation} from './components/bottom_navigation/bottom_navigation';
 
 type Props = React.PropsWithChildren & {
     modules: Module[];
@@ -64,6 +65,9 @@ export const Layout = (props: Props) => {
                 </>
             )}
             {props.children}
+            <BottonNavigationWithModules
+                modules={props.modules}
+            />
         </>
     );
 };
@@ -164,5 +168,35 @@ const Tabs = (props: TabsProps) => {
                 {modulesWithRoutes}
             </SlTabGroup>
         </>
+    );
+};
+
+const BottonNavigationWithModules = (props: {modules: Module[]}) => {
+    const loc = useLocation();
+    const navigate = useNavigate();
+
+    if (!loc.pathname.startsWith('/modules')) {
+        return null;
+    }
+
+    const moduleId = loc.pathname.split('/')[2];
+    if (!moduleId) {
+        return null;
+    }
+
+    const mod = props.modules.find(m => m.moduleId === moduleId);
+    if (!mod) {
+        return null;
+    }
+
+    if (!mod.bottomNavigationTabs) {
+        return null;
+    }
+
+    return (
+        <BottomNavigation
+            navItems={mod.bottomNavigationTabs}
+            gotoRoute={navigate}
+        />
     );
 };

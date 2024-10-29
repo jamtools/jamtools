@@ -5,10 +5,20 @@ import {Subject} from 'rxjs';
 import type {ModuleAPI} from '../engine/module_api';
 import {RegisterRouteOptions} from '../engine/register';
 
-type RegisteredRoute = {
+type RouteComponentProps = {
+    navigate: (routeName: string) => void;
+};
+
+export type RegisteredRoute = {
     options?: RegisterRouteOptions;
-    component: React.ElementType;
+    component: React.ElementType<RouteComponentProps>;
 }
+
+export type NavigationItemConfig = {
+    title: string;
+    icon: string;
+    route: string;
+};
 
 export type Module<State extends object = any> = {
     moduleId: string;
@@ -17,6 +27,7 @@ export type Module<State extends object = any> = {
     state?: State;
     subject?: Subject<State>;
     routes?: Record<string, RegisteredRoute>;
+    bottomNavigationTabs?: NavigationItemConfig[];
 };
 
 // this interface is meant to be extended by each individual module file through interface merging

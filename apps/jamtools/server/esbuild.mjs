@@ -23,6 +23,7 @@ async function build() {
         sourcemap: true,
         outfile: outFile,
         platform: 'node',
+        minify: process.env.NODE_ENV === 'production',
         plugins: [
             esbuildPluginLogBuildTime(),
         ],

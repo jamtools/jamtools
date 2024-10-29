@@ -116,7 +116,6 @@ export class NodeJsonRpcServer {
             onClose: () => {
                 delete incomingClients[clientId];
                 delete outgoingClients[clientId];
-                console.log('Connection closed');
             },
         };
     };

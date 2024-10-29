@@ -21,7 +21,9 @@ export const initApp = (coreDeps: WebsocketServerCoreDependencies) => {
     app.use('/', serveStatic({root: webappFolder, path: 'index.html'}));
     app.use('/dist/index.js', serveStatic({root: webappDistFolder, path: '/index.js'}));
     app.use('/dist/index.js.map', serveStatic({root: webappDistFolder, path: '/index.js.map'}));
+    app.use('/dist/index.css', serveStatic({root: webappDistFolder, path: '/index.css'}));
     app.use('/dist/manifest.json', serveStatic({root: webappDistFolder, path: '/manifest.json'}));
+
 
     // OTEL traces route
     app.post('/v1/traces', async (c) => {

@@ -8,12 +8,23 @@ import {
     Link,
     RouteObject,
     RouterProvider,
+    useNavigate,
 } from 'react-router-dom';
 
 import {useJamToolsEngine} from '~/core/engine/engine';
-import {Module} from '~/core/module_registry/module_registry';
+import {Module, RegisteredRoute} from '~/core/module_registry/module_registry';
 
 import {Layout} from './layout';
+
+const CustomRoute = (props: {component: RegisteredRoute['component']}) => {
+    const navigate = useNavigate();
+
+    return (
+        <props.component
+            navigate={navigate}
+        />
+    );
+};
 
 export const FrontendRoutes = () => {
     const engine = useJamToolsEngine();
@@ -34,7 +45,11 @@ export const FrontendRoutes = () => {
                 const fixedPath = path.startsWith('/') ? path.slice(1) : path;
                 return {
                     path: fixedPath,
-                    element: <Layout modules={mods}><Component/></Layout>,
+                    element: (
+                        <Layout modules={mods}>
+                            <CustomRoute component={Component}/>
+                        </Layout>
+                    ),
                 };
             }),
         });

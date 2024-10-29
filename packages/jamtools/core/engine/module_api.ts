@@ -1,5 +1,5 @@
 import {SharedStateSupervisor, StateSupervisor, UserAgentStateSupervisor} from '../services/states/shared_state_service';
-import {ExtraModuleDependencies, Module} from '~/core/module_registry/module_registry';
+import {ExtraModuleDependencies, Module, NavigationItemConfig, RegisteredRoute} from '~/core/module_registry/module_registry';
 import {CoreDependencies, ModuleDependencies} from '../types/module_types';
 import {RegisterRouteOptions} from './register';
 import type {MacroModule} from '../modules/macro_module/macro_module';
@@ -27,7 +27,7 @@ export class ModuleAPI {
     public deps: {core: CoreDependencies; module: ModuleDependencies, extra: ExtraModuleDependencies};
     public moduleId: string;
 
-    constructor(private module: Module, private prefix: string, private coreDeps: CoreDependencies, private modDeps: ModuleDependencies, private extraDeps: ExtraModuleDependencies) {
+    constructor(private module: Module, private prefix: string, private coreDeps: CoreDependencies, private modDeps: ModuleDependencies, extraDeps: ExtraModuleDependencies) {
         this.deps = {core: coreDeps, module: modDeps, extra: extraDeps};
         this.moduleId = this.module.moduleId;
     }
@@ -42,7 +42,7 @@ export class ModuleAPI {
     /**
      * Register a route with the application's React router. The route will be accessible from the browser at [myserver.com/modules/(module_id)/(route)](). The route will also be registered to the application's navigation bar.
     */
-    registerRoute = (routePath: string, options: RegisterRouteOptions, component: React.ElementType) => {
+    registerRoute = (routePath: string, options: RegisterRouteOptions, component: RegisteredRoute['component']) => {
         const routes = this.module.routes || {};
         routes[routePath] = {
             options,
@@ -50,6 +50,13 @@ export class ModuleAPI {
         };
 
         this.module.routes = {...routes};
+        if (this.modDeps.moduleRegistry.getCustomModule(this.module.moduleId)) {
+            this.modDeps.moduleRegistry.refreshModules();
+        }
+    };
+
+    registerBottomNavigationTabs = (navigationItemConfig: NavigationItemConfig[]) => {
+        this.module.bottomNavigationTabs = navigationItemConfig;
         if (this.modDeps.moduleRegistry.getCustomModule(this.module.moduleId)) {
             this.modDeps.moduleRegistry.refreshModules();
         }

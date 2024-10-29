@@ -26,7 +26,6 @@ export class NodeMidiDevicePollerService {
 
     public initialize = async () => {
         const amidiSupported = await AMidiDevicePoller.isSupported();
-        console.log('amidi supported: ', amidiSupported);
         this.poller = amidiSupported ? new AMidiDevicePoller() : new EasyMidiDevicePoller();
     };
 
