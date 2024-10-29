@@ -1,10 +1,22 @@
+import {z} from 'zod';
+
 import {SharedStateSupervisor, StateSupervisor, UserAgentStateSupervisor} from '../services/states/shared_state_service';
 import {ExtraModuleDependencies, Module} from '~/core/module_registry/module_registry';
 import {CoreDependencies, ModuleDependencies} from '../types/module_types';
 import {RegisterRouteOptions} from './register';
 import type {MacroModule} from '../modules/macro_module/macro_module';
 
-type ActionOptions = object;
+type ActionOptions<Schema extends z.ZodObject<any> | undefined = undefined> = {
+    zod?: Schema;
+};
+
+type ActionOptionsWithSchema<Schema extends z.ZodObject<any>> = {
+    zod: Schema;
+};
+
+type ActionOptionsWithoutSchema = {
+    zod?: undefined;
+};
 
 /**
  * The Action callback
@@ -55,10 +67,28 @@ export class ModuleAPI {
         }
     };
 
+    // Overload 1: Schema provided
+    createAction<Schema extends z.ZodObject<any>, ReturnValue>(
+        actionName: string,
+        options: ActionOptionsWithSchema<Schema>,
+        cb: ActionCallback<z.infer<Schema>, ReturnValue>
+    ): typeof cb;
+
+    // Overload 2: No schema
+    createAction<Args extends object = any, ReturnValue = any>(
+        actionName: string,
+        options: ActionOptionsWithoutSchema,
+        cb: ActionCallback<Args, ReturnValue>
+    ): typeof cb;
+
     /**
      * Create an action to be run on the Maestro device. If the produced action is called from the Maestro device, the framework just calls the provided callback. If it is called from another device, the framework calls the action via RPC to the Maestro device. In most cases, any main logic or calls to shared state changes should be done in an action.
     */
-    createAction = <Options extends ActionOptions, Args extends object, ReturnValue>(actionName: string, options: Options, cb: ActionCallback<Args, ReturnValue>): typeof cb => {
+    createAction(
+        actionName: string,
+        options: ActionOptions,
+        cb: ActionCallback<any, any>
+    ): typeof cb {
         const fullActionName = `${this.fullPrefix}|action|${actionName}`;
 
         // if (options.broadcast) {
@@ -69,9 +99,9 @@ export class ModuleAPI {
 
         if (this.coreDeps.isMaestro()) {
             // TODO: make error handling better in actions. we probably shouldn't log stack traces to the console if it's a user error
-            return async (args: Args) => {
+            return async (args) => {
                 try {
-                    return cb(args) as ReturnValue;
+                    return cb(args);
                 } catch (e) {
                     const errorMessage = `Error running action '${fullActionName}': ${new String(e)}`;
                     this.coreDeps.showError(errorMessage);
@@ -81,10 +111,10 @@ export class ModuleAPI {
             };
         }
 
-        return async (args: Args) => {
+        return async (args) => {
             if (this.coreDeps.isMaestro()) {
                 try {
-                    return cb(args) as ReturnValue;
+                    return cb(args);
                 } catch (e) {
                     const errorMessage = `Error running action '${fullActionName}': ${new String(e)}`;
                     this.coreDeps.showError(errorMessage);
@@ -94,7 +124,7 @@ export class ModuleAPI {
             }
 
             try {
-                const result = await this.coreDeps.rpc.callRpc<Args, ReturnValue>(fullActionName, args);
+                const result = await this.coreDeps.rpc.callRpc(fullActionName, args);
                 if (typeof result === 'string') {
                     this.coreDeps.showError(result);
                     throw new Error(result);
@@ -108,7 +138,7 @@ export class ModuleAPI {
                 throw e;
             }
         };
-    };
+    }
 
     /**
      * Create a macro for the user to configure with their hardware peripherals. This includes:
@@ -166,7 +196,7 @@ export class StatesAPI {
             await this.coreDeps.storage.remote.set(fullKey, value);
         });
 
-        return supervisor;
+        return supervisor as unknown as StateSupervisor<State>;
     };
 
     /**
@@ -176,6 +206,6 @@ export class StatesAPI {
         const fullKey = `${this.prefix}|state.useragent|${stateName}`;
         const value = await this.coreDeps.storage.userAgent.get<State>(fullKey);
         const supervisor = new UserAgentStateSupervisor(fullKey, value || initialValue, this.coreDeps.storage.userAgent);
-        return supervisor;
+        return supervisor as unknown as StateSupervisor<State>;
     };
 }

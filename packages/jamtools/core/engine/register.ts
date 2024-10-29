@@ -1,4 +1,4 @@
-import {Module} from '~/core/module_registry/module_registry';
+import type {Module, AllModules} from '~/core/module_registry/module_registry';
 import {CoreDependencies, ModuleDependencies} from '~/core/types/module_types';
 import type {ModuleAPI} from './module_api';
 import type {MacroTypeConfigs} from '~/core/modules/macro_module/macro_module_types';
@@ -13,13 +13,13 @@ export type ModuleCallback<ModuleReturnValue extends object> = (moduleAPI: Modul
 Promise<ModuleReturnValue> | ModuleReturnValue;
 
 export type ClassModuleCallback<T extends object> = (coreDeps: CoreDependencies, modDependencies: ModuleDependencies) =>
-Promise<Module<T>> | Module<T>;
+Promise<Module<T>>;
 
 export type JamTools = {
-    registerModule: <ModuleOptions extends RegisterModuleOptions, ModuleReturnValue extends object>(
-        moduleId: string,
+    registerModule: <ModuleId extends string, ModuleOptions extends RegisterModuleOptions, ModuleReturnValue extends object>(
+        moduleId: ModuleId,
         options: ModuleOptions,
-        cb: ModuleCallback<ModuleReturnValue>,
+        cb: ModuleId extends keyof AllModules ? ModuleCallback<AllModules[ModuleId]> : ModuleCallback<ModuleReturnValue>,
     ) => void;
     registerClassModule: <T extends object>(cb: ClassModuleCallback<T>) => void;
     registerMacroType: RegisterMacroType;
