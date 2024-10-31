@@ -1,9 +1,9 @@
 import {Subject} from 'rxjs';
 
-import {MidiInputEventPayload, MidiService} from '~/core/types/io_types';
+import {MidiInputEventPayload, MidiService} from 'jamtools-core/types/io_types';
 
 import {NoteMessageEvent, WebMidi} from 'webmidi';
-import {DeviceInfo, MidiEvent, MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
+import {DeviceInfo, MidiEvent, MidiEventFull} from 'jamtools-core/modules/macro_module/macro_module_types';
 
 export class BrowserMidiService implements MidiService {
     private midi!: typeof WebMidi;

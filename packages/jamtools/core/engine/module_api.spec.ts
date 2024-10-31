@@ -1,6 +1,6 @@
-import {JamToolsEngine} from '~/core/engine/engine';
-import {makeMockCoreDependencies, makeMockExtraDependences} from '~/core/test/mock_core_dependencies';
-import {jamtools} from '~/core/engine/register';
+import {JamToolsEngine} from 'jamtools-core/engine/engine';
+import {makeMockCoreDependencies, makeMockExtraDependences} from 'jamtools-core/test/mock_core_dependencies';
+import {jamtools} from 'jamtools-core/engine/register';
 
 describe('ModuleAPI', () => {
     beforeEach(() => {

@@ -2,7 +2,7 @@ import React from 'react';
 
 import {jamtools} from '~/core/engine/register';
 
-import {ParsedMidiFile} from '~/core/services/midi_file_parser/midi_file_parser';
+import {ParsedMidiFile} from '~/core/modules/midi_files/midi_file_parser/midi_file_parser';
 
 declare module '~/core/module_registry/module_registry' {
     interface AllModules {

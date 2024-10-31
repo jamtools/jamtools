@@ -1,7 +1,7 @@
-import '~/core/modules';
+import 'jamtools-core/modules';
 
-import {JamToolsEngine} from '~/core/engine/engine';
-import {makeMockCoreDependencies, makeMockExtraDependences} from '~/core/test/mock_core_dependencies';
+import {JamToolsEngine} from 'jamtools-core/engine/engine';
+import {makeMockCoreDependencies, makeMockExtraDependences} from 'jamtools-core/test/mock_core_dependencies';
 
 describe('IoModule', () => {
     it('should initialize with the engine', async () => {

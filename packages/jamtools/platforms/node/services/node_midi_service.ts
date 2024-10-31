@@ -2,8 +2,8 @@ import {Subject} from 'rxjs';
 
 import easymidi, {Channel} from 'easymidi';
 
-import {MidiInputEventPayload, MidiService} from '~/core/types/io_types';
-import {DeviceInfo, MidiEvent, MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
+import {MidiInputEventPayload, MidiService} from 'jamtools-core/types/io_types';
+import {DeviceInfo, MidiEvent, MidiEventFull} from 'jamtools-core/modules/macro_module/macro_module_types';
 import {NodeMidiDevicePollerService} from './node_midi/midi_poller';
 
 export class NodeMidiService implements MidiService {

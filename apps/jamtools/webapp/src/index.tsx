@@ -1,4 +1,4 @@
-import '../../../../packages/observability/webapp/tracing';
+// import '../../../../packages/observability/webapp/tracing';
 
 import {startJamToolsAndRenderApp} from './react_entrypoint';
 

@@ -1,7 +1,7 @@
 import React from 'react';
 
 import GuitarImport from 'react-guitar';
-import {Card} from '~/core/components/Card';
+import {Card} from 'jamtools-core/components/Card';
 import {ChordChoice} from './chord_display';
 const Guitar = (GuitarImport as unknown as {default: typeof GuitarImport}).default;
 

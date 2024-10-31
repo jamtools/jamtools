@@ -1,9 +1,9 @@
 import React from 'react';
 import {Subject} from 'rxjs';
 
-import {MacroAPI} from '~/core/engine/register';
-import {MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
-import {StateSupervisor} from '~/core/services/states/shared_state_service';
+import {MacroAPI} from 'jamtools-core/engine/register';
+import {MidiEventFull} from 'jamtools-core/modules/macro_module/macro_module_types';
+import {StateSupervisor} from 'jamtools-core/services/states/shared_state_service';
 
 import {Edit} from './components/edit_macro';
 

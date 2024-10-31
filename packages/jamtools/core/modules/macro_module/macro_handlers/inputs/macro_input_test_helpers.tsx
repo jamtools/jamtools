@@ -4,11 +4,11 @@ import {fireEvent, render, within} from '@testing-library/react';
 import {Subject} from 'rxjs';
 import { screen } from 'shadow-dom-testing-library';
 import '@testing-library/jest-dom';
-import {MidiEvent, MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
-import {makeMockCoreDependencies, makeMockExtraDependences} from '~/core/test/mock_core_dependencies';
+import {MidiEvent, MidiEventFull} from 'jamtools-core/modules/macro_module/macro_module_types';
+import {makeMockCoreDependencies, makeMockExtraDependences} from 'jamtools-core/test/mock_core_dependencies';
 
 import {Main} from '~/../../apps/jamtools/webapp/src/main';
-import {JamToolsEngine} from '~/core/engine/engine';
+import {JamToolsEngine} from 'jamtools-core/engine/engine';
 
 export const getMacroInputTestHelpers = () => {
     const setupTest = async (midiSubject: Subject<MidiEventFull>): Promise<JamToolsEngine> => {

@@ -1,10 +1,10 @@
 import React from 'react';
 
 import {MidiDeviceAndChannelMap, MidiEventFull, makeHashedMidiDeviceAndChannel} from '../../macro_module_types';
-import {QwertyCallbackPayload} from '~/core/types/io_types';
+import {QwertyCallbackPayload} from 'jamtools-core/types/io_types';
 import {Subject} from 'rxjs';
-import {QWERTY_TO_MIDI_MAPPINGS} from '~/core/constants/qwerty_to_midi_mappings';
-import {jamtools} from '~/core/engine/register';
+import {QWERTY_TO_MIDI_MAPPINGS} from 'jamtools-core/constants/qwerty_to_midi_mappings';
+import {jamtools} from 'jamtools-core/engine/register';
 import {InputMacroStateHolders, getKeyForMacro, getKeyForMidiEvent, useInputMacroWaiterAndSaver} from './input_macro_handler_utils';
 
 type MusicalKeyboardInputResult = {
@@ -20,7 +20,7 @@ type MacroConfigItemMusicalKeyboardInput = {
     enableQwerty?: boolean;
 }
 
-declare module '~/core/modules/macro_module/macro_module_types' {
+declare module 'jamtools-core/modules/macro_module/macro_module_types' {
     interface MacroTypeConfigs {
         musical_keyboard_input: {
             input: MacroConfigItemMusicalKeyboardInput;

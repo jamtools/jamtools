@@ -1,4 +1,4 @@
-import {Module, ModuleRegistry} from '~/core/module_registry/module_registry';
+import {Module, ModuleRegistry} from 'jamtools-core/module_registry/module_registry';
 import {MidiService, QwertyService} from './io_types';
 import {SharedStateService} from '../services/states/shared_state_service';
 

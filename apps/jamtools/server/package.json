@@ -19,9 +19,6 @@
     "hono": "^4.6.7",
     "jamtools-core": "*"
   },
-  "devDependencies": {
-    "configs": "*"
-  },
   "config": {
     "dir": "../../../configs"
   }

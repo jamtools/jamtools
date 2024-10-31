@@ -1,5 +1,5 @@
 import {SharedStateSupervisor, StateSupervisor, UserAgentStateSupervisor} from '../services/states/shared_state_service';
-import {ExtraModuleDependencies, Module, NavigationItemConfig, RegisteredRoute} from '~/core/module_registry/module_registry';
+import {ExtraModuleDependencies, Module, NavigationItemConfig, RegisteredRoute} from 'jamtools-core/module_registry/module_registry';
 import {CoreDependencies, ModuleDependencies} from '../types/module_types';
 import {RegisterRouteOptions} from './register';
 import type {MacroModule} from '../modules/macro_module/macro_module';

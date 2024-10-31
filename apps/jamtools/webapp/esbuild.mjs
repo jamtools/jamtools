@@ -3,13 +3,12 @@ import path from 'path';
 
 import esbuild from 'esbuild';
 
-import {esbuildPluginLogBuildTime} from '../../../configs/esbuild_plugins/esbuild_plugin_log_build_time.js';
-import {esbuildPluginPlatformInject} from '../../../configs/esbuild_plugins/esbuild_plugin_platform_inject.mjs';
+import {esbuildPluginLogBuildTime} from './esbuild_plugins/esbuild_plugin_log_build_time.js';
+import {esbuildPluginPlatformInject} from './esbuild_plugins/esbuild_plugin_platform_inject.mjs';
 
 const watchForChanges = process.argv.includes('--watch');
 
-const buildToolDir = process.env.BUILD_TOOL_DIR || '../..';
-const coreFile = path.join(buildToolDir, './webapp/src/index.tsx');
+const coreFile = 'jamtools-webapp/src/index.tsx';
 
 const moduleIndexFile = process.env.MODULES_INDEX_FILE || '../../modules/index.ts';
 

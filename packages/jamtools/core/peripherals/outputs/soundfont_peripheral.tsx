@@ -1,6 +1,6 @@
 import Soundfont from 'soundfont-player';
 
-import {MidiEvent, convertMidiNumberToNoteAndOctave} from '~/core/modules/macro_module/macro_module_types';
+import {MidiEvent, convertMidiNumberToNoteAndOctave} from 'jamtools-core/modules/macro_module/macro_module_types';
 
 type HeldDownSoundfontNotes = {
     number: number;

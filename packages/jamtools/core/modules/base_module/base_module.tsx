@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useMemo, useRef, useState} from 'react';
 
-import {Module} from '~/core/module_registry/module_registry';
+import {Module} from 'jamtools-core/module_registry/module_registry';
 
 export type ModuleHookValue<M extends Module> = {
     mod: M;

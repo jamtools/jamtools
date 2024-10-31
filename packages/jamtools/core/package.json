@@ -1,5 +1,6 @@
 {
   "name": "jamtools-core",
+  "version": "0.3.0",
   "type": "module",
   "scripts": {
     "test": "vitest --run",
@@ -8,18 +9,23 @@
     "lint": "eslint --ext ts --ext tsx  ./",
     "fix": "npm run lint -- --fix"
   },
+  "main": "./engine/register.ts",
+  "module": "./engine/register.ts",
+  "peerDependencies": {
+    "@tonejs/midi": "^2.0.0",
+    "@trpc/client": "^10.45.2",
+    "json-rpc-2.0": "^1.7.0",
+    "react": "^18.0.0 || ^17.0.0",
+    "react-dom": "^18.0.0 || ^17.0.0",
+    "rxjs": "^7.0.0"
+  },
   "dependencies": {
     "@shoelace-style/shoelace": "^2.16.0",
-    "@tonejs/midi": "^2.0.28",
     "immer": "^10.1.1",
-    "json-rpc-2.0": "^1.7.0",
     "midi-file": "^1.2.4",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
     "react-guitar": "^1.1.2",
     "react-spinners": "^0.14.1",
     "reconnecting-websocket": "^4.4.0",
-    "rxjs": "^7.8.1",
     "soundfont-player": "^0.12.0",
     "wled-client": "^0.22.1",
     "ws": "^8.18.0"

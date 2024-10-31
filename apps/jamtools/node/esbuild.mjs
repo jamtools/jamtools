@@ -3,8 +3,8 @@ import path from 'path';
 
 import esbuild from 'esbuild';
 
-import {esbuildPluginLogBuildTime} from '../../../configs/esbuild_plugins/esbuild_plugin_log_build_time.js';
-import {esbuildPluginPlatformInject} from '../../../configs/esbuild_plugins/esbuild_plugin_platform_inject.mjs';
+import {esbuildPluginLogBuildTime} from './esbuild_plugins/esbuild_plugin_log_build_time.js';
+import {esbuildPluginPlatformInject} from './esbuild_plugins/esbuild_plugin_platform_inject.mjs';
 
 let entrypoint = 'entrypoints/node_main_entrypoint.ts';
 let externals = ['@julusian/midi', 'easymidi', 'jsdom'];
@@ -15,7 +15,8 @@ if (process.env.DISABLE_IO === 'true') {
 }
 
 const buildToolDir = process.env.BUILD_TOOL_DIR || '../..';
-const coreFile = path.join(buildToolDir, './node/src', entrypoint);
+// const coreFile = path.join(buildToolDir, './node/src', entrypoint);
+const coreFile = `jamtools-node/src/${entrypoint}`;
 
 const watchForChanges = process.argv.includes('--watch');
 
@@ -41,6 +42,7 @@ async function build() {
         sourcemap: true,
         outfile: outFile,
         platform: 'node',
+        target: 'es6',
         plugins: [
             esbuildPluginLogBuildTime(),
             esbuildPluginPlatformInject('node'),

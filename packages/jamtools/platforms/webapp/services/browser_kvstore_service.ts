@@ -1,4 +1,4 @@
-import {KVStore} from '~/core/types/module_types';
+import {KVStore} from 'jamtools-core/types/module_types';
 
 export class BrowserKVStoreService implements KVStore {
     constructor(private ls: Window['localStorage']) {}

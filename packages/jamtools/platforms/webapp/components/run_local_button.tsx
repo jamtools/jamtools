@@ -1,5 +1,5 @@
 import React from 'react';
-import {Button} from '~/core/components/Button';
+import {Button} from 'jamtools-core/components/Button';
 
 const isLocal = localStorage.getItem('isLocal') === 'true';
 

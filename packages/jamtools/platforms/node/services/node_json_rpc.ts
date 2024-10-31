@@ -2,7 +2,7 @@ import {JSONRPCClient, JSONRPCServer} from 'json-rpc-2.0';
 import WebSocket from 'isomorphic-ws';
 import ReconnectingWebSocket from 'reconnecting-websocket';
 
-import {KVStore, Rpc, RpcArgs} from '~/core/types/module_types';
+import {KVStore, Rpc, RpcArgs} from 'jamtools-core/types/module_types';
 
 type ClientParams = {
     clientId: string;
@@ -66,6 +66,8 @@ export class NodeJsonRpcClientAndServer implements Rpc {
         return this.rpcClient.notify(method, args, params);
     };
 
+    // TODO: if we fail to connect on startup, we should just exit the program with a friendly error
+    // or at least not spit out the massive error object we currently do
     initializeWebsocket = async () => {
         const separator = this.url.includes('?') ? '&' : '?';
         const fullUrl = `${this.url}${separator}clientId=${this.clientId}`;

@@ -3,7 +3,7 @@ import React from 'react';
 import {ScaleDegreeInfo, cycle, getScaleDegreeFromScaleAndNote, ionianScaleDegreeQualities} from './root_mode_snack/root_mode_types';
 
 import {RootModeComponent} from './root_mode_snack/root_mode_component';
-import {jamtools} from '~/core/engine/register';
+import {jamtools} from 'jamtools-core/engine/register';
 
 type State = {
     chord: ScaleDegreeInfo | null;
@@ -93,7 +93,7 @@ type ChordFamiliesModuleReturnValue = {
     getChordFamilyHandler(key: string): ChordFamilyHandler;
 }
 
-declare module '~/core/module_registry/module_registry' {
+declare module 'jamtools-core/module_registry/module_registry' {
     interface AllModules {
         chord_families: ChordFamiliesModuleReturnValue;
     }

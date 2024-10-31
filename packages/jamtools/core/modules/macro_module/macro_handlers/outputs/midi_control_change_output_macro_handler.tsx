@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {jamtools} from '~/core/engine/register';
+import {jamtools} from 'jamtools-core/engine/register';
 
 export interface MidiControlChangeOutputMacroOutput {
     send(value: number): void;
@@ -17,7 +17,7 @@ import {OutputMacroStateHolders, checkSavedMidiOutputsAreEqual, useOutputMacroWa
 type MidiControlChangeOutputMacroConfig = {
 };
 
-declare module '~/core/modules/macro_module/macro_module_types' {
+declare module 'jamtools-core/modules/macro_module/macro_module_types' {
     interface MacroTypeConfigs {
         midi_control_change_output: {
             input: MidiControlChangeOutputMacroConfig;

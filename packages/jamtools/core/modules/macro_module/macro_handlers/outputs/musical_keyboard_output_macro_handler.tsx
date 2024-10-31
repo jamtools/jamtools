@@ -1,8 +1,8 @@
 import React from 'react';
 
-import {jamtools} from '~/core/engine/register';
+import {jamtools} from 'jamtools-core/engine/register';
 
-import {MidiEvent} from '~/core/modules/macro_module/macro_module_types';
+import {MidiEvent} from 'jamtools-core/modules/macro_module/macro_module_types';
 
 export interface OutputMidiDevice {
     send(midiEvent: MidiEvent): void;
@@ -20,7 +20,7 @@ type MusicalKeyboardOutputMacroConfig = {
     allowLocal?: boolean;
 };
 
-declare module '~/core/modules/macro_module/macro_module_types' {
+declare module 'jamtools-core/modules/macro_module/macro_module_types' {
     interface MacroTypeConfigs {
         musical_keyboard_output: {
             input: MusicalKeyboardOutputMacroConfig;

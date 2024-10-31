@@ -1,5 +1,6 @@
 {
   "name": "jamtools-node",
+  "version": "0.3.0",
   "scripts": {
     "start": "node dist/local-server.js",
     "run:watch": "nodemon dist/local-server.js",
@@ -13,12 +14,9 @@
     "lint": "eslint --ext ts --ext tsx src/",
     "fix": "npm run lint -- --fix"
   },
-  "dependencies": {
-    "jamtools-core": "*",
-    "jamtools-platforms-node": "*"
-  },
-  "devDependencies": {
-    "configs": "*"
+  "peerDependencies": {
+    "jamtools-core": "0.3.0",
+    "jamtools-platforms-node": "0.3.0"
   },
   "config": {
     "dir": "../../../configs"

@@ -11,8 +11,8 @@ import {
     useNavigate,
 } from 'react-router-dom';
 
-import {useJamToolsEngine} from '~/core/engine/engine';
-import {Module, RegisteredRoute} from '~/core/module_registry/module_registry';
+import {useJamToolsEngine} from 'jamtools-core/engine/engine';
+import {Module, RegisteredRoute} from 'jamtools-core/module_registry/module_registry';
 
 import {Layout} from './layout';
 

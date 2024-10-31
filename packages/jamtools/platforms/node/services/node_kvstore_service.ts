@@ -1,14 +1,20 @@
 import fs from 'node:fs';
 
-import {KVStore} from '~/core/types/module_types';
+import {KVStore} from 'jamtools-core/types/module_types';
 
-const DATA_FILE_NAME = process.env.NODE_KV_STORE_DATA_FILE || '../../../data/kv_data.json';
+// TODO: this needs to be optional I think. or just have a sane default
+// the file should be assumed to be in ./data/kv_data.json
+// these are growing pains for not doing things in CWD thus far
+//
+const DATA_FILE_NAME = process.env.NODE_KV_STORE_DATA_FILE || './data/kv_data.json';
 
 let allKVData: Record<string, Record<string, string>> = {};
 
 if (fs.existsSync(DATA_FILE_NAME)) {
     const initialKVDataString = fs.readFileSync(DATA_FILE_NAME).toString();
     allKVData = JSON.parse(initialKVDataString) as Record<string, Record<string, string>>;
+} else {
+    fs.writeFileSync(DATA_FILE_NAME, '{}');
 }
 
 export class NodeKVStoreService implements KVStore {

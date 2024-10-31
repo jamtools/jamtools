@@ -1,7 +1,7 @@
-import {Module} from '~/core/module_registry/module_registry';
-import {CoreDependencies, ModuleDependencies} from '~/core/types/module_types';
+import {Module} from 'jamtools-core/module_registry/module_registry';
+import {CoreDependencies, ModuleDependencies} from 'jamtools-core/types/module_types';
 import type {ModuleAPI} from './module_api';
-import type {MacroTypeConfigs} from '~/core/modules/macro_module/macro_module_types';
+import type {MacroTypeConfigs} from 'jamtools-core/modules/macro_module/macro_module_types';
 
 export type RegisterRouteOptions = {
     hideNavbar?: boolean;
