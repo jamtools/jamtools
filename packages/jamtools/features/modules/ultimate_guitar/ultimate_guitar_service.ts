@@ -1,7 +1,5 @@
 import {ErrorResponse, isErrorResponse} from '~/core/types/response_types';
 
-// import ugCookie from './ultimate_guitar_cookie';
-
 type UltimateGuitarServiceResponse = {
     data: string;
 } | ErrorResponse;

@@ -1,3 +1,3 @@
-import '~/core/modules';
-import '~/features/modules';
-import '~/features/snacks';
+import 'jamtools-core/modules';
+import 'jamtools-features/modules';
+import 'jamtools-features/snacks';

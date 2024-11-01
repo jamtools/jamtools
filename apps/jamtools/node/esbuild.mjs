@@ -38,7 +38,9 @@ const outFile = path.join(outDir, 'local-server.js');
 async function build() {
     const buildOptions = {
         entryPoints: [dynamicEntryPath],
+        metafile: true,
         bundle: true,
+        minify: process.env.NODE_ENV === '"production"',
         sourcemap: true,
         outfile: outFile,
         platform: 'node',
@@ -51,6 +53,7 @@ async function build() {
         define: {
             'process.env.WS_HOST': `"${process.env.WS_HOST || ''}"`,
             'process.env.DATA_HOST': `"${process.env.DATA_HOST || ''}"`,
+            'process.env.NODE_ENV': `"${process.env.NODE_ENV || ''}"`,
         },
     };
 
@@ -59,8 +62,10 @@ async function build() {
         await ctx.watch();
         console.log('Watching for changes...');
     } else {
-        await esbuild.build(buildOptions);
+        return esbuild.build(buildOptions);
     }
 }
 
-build().catch(() => process.exit(1));
+build().then(async m => {
+    await fs.promises.writeFile('esbuild_meta.json', JSON.stringify(m.metafile));
+}).catch(() => process.exit(1));

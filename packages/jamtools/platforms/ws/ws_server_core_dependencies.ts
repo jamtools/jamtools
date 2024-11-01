@@ -1,3 +1,5 @@
+import fs from 'fs';
+
 import {makeKyselySqliteInstance} from '../../../data_storage/sqlite_db';
 
 import {KyselyKVStore} from '../../../data_storage/kv_store_db_types';
@@ -10,7 +12,8 @@ export type WebsocketServerCoreDependencies = {
 };
 
 export const makeWebsocketServerCoreDependenciesWithSqlite = async (): Promise<WebsocketServerCoreDependencies> => {
-    const db = await makeKyselySqliteInstance('kv.db');
+    await fs.promises.mkdir('data', {recursive: true});
+    const db = await makeKyselySqliteInstance('data/kv.db');
 
     return {
         kvDatabase: db,

@@ -1,6 +1,6 @@
 {
   "name": "jamtools-core",
-  "version": "0.3.0",
+  "version": "0.5.1",
   "type": "module",
   "scripts": {
     "test": "vitest --run",
@@ -9,8 +9,21 @@
     "lint": "eslint --ext ts --ext tsx  ./",
     "fix": "npm run lint -- --fix"
   },
-  "main": "./engine/register.ts",
-  "module": "./engine/register.ts",
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "files": [
+    "components",
+    "constants",
+    "engine",
+    "hooks",
+    "module_registry",
+    "modules",
+    "peripherals",
+    "services",
+    "src",
+    "types",
+    "utils"
+  ],
   "peerDependencies": {
     "@tonejs/midi": "^2.0.0",
     "@trpc/client": "^10.45.2",

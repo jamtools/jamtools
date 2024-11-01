@@ -97,29 +97,29 @@ publish_package() {
 }
 
 root_dir=$(pwd)  # Assuming this script is run from the project root
-full_version="0.3.0"  # Set the target version here or make it a script argument
+full_version="0.5.1"  # Set the target version here or make it a script argument
 
 # Bump, update dependencies, and publish each package
 
 bump_version "$root_dir/packages/jamtools/core"
-# publish_package "$root_dir/packages/jamtools/core"
+publish_package "$root_dir/packages/jamtools/core"
 
 bump_version "$root_dir/packages/jamtools/platforms/webapp"
 bump_peer_dep "$root_dir/packages/jamtools/platforms/webapp" "jamtools-core"
-# publish_package "$root_dir/packages/jamtools/platforms/webapp"
+publish_package "$root_dir/packages/jamtools/platforms/webapp"
 
 bump_version "$root_dir/packages/jamtools/platforms/node"
 bump_peer_dep "$root_dir/packages/jamtools/platforms/node" "jamtools-core"
-# publish_package "$root_dir/packages/jamtools/platforms/node"
+publish_package "$root_dir/packages/jamtools/platforms/node"
 
 bump_version "$root_dir/apps/jamtools/webapp"
 bump_peer_dep "$root_dir/apps/jamtools/webapp" "jamtools-core"
 bump_peer_dep "$root_dir/apps/jamtools/webapp" "jamtools-platforms-webapp"
-# publish_package "$root_dir/apps/jamtools/webapp"
+publish_package "$root_dir/apps/jamtools/webapp"
 
 bump_version "$root_dir/apps/jamtools/node"
 bump_peer_dep "$root_dir/apps/jamtools/node" "jamtools-core"
 bump_peer_dep "$root_dir/apps/jamtools/node" "jamtools-platforms-node"
-# publish_package "$root_dir/apps/jamtools/node"
+publish_package "$root_dir/apps/jamtools/node"
 
-# npm i
+# # npm i

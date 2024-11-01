@@ -1,8 +1,8 @@
 import React from 'react';
 
-import {JamToolsEngine, JamToolsProvider} from '~/core/engine/engine';
+import {JamToolsEngine, JamToolsProvider} from 'jamtools-core/engine/engine';
 
-import {FrontendRoutes} from '~/platforms/webapp/frontend_routes';
+import {FrontendRoutes} from 'jamtools-platforms-webapp/frontend_routes';
 
 type Props = {
     engine: JamToolsEngine;

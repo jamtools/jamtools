@@ -1,20 +1,18 @@
 import SQLite from 'better-sqlite3';
-import {Kysely, SqliteDialect} from 'kysely';
+import {Dialect, Kysely, SqliteDialect} from 'kysely';
 
 import {KyselyKVStore} from './kv_store_db_types';
 
-let db: KyselyKVStore | undefined;
-
-export const makeKyselySqliteInstance = async (fname: string): Promise<KyselyKVStore> => {
-    if (db) {
-        return db;
-    }
-
+export const makeKyselySqliteInstance = async (fname: string) => {
     const dialect = new SqliteDialect({
         database: new SQLite(fname),
     });
 
-    db = new Kysely({
+    return makeKyselyInstanceFromDialect(dialect);
+};
+
+export const makeKyselyInstanceFromDialect = async (dialect: Dialect): Promise<KyselyKVStore> => {
+    const db = new Kysely({
         dialect,
     });
 

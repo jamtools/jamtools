@@ -24,20 +24,20 @@ type ActionCallback<Args extends object, ReturnValue = any> = (args: Args) => Pr
  * The API provided in the callback when calling `registerModule`. The ModuleAPI is the entrypoint in the framework for everything pertaining to creating a module.
 */
 export class ModuleAPI {
-    public deps: {core: CoreDependencies; module: ModuleDependencies, extra: ExtraModuleDependencies};
-    public moduleId: string;
+    public readonly deps: {core: CoreDependencies; module: ModuleDependencies, extra: ExtraModuleDependencies};
 
     constructor(private module: Module, private prefix: string, private coreDeps: CoreDependencies, private modDeps: ModuleDependencies, extraDeps: ExtraModuleDependencies) {
         this.deps = {core: coreDeps, module: modDeps, extra: extraDeps};
-        this.moduleId = this.module.moduleId;
     }
 
-    fullPrefix = `${this.prefix}|module|${this.module.moduleId}`;
+    public readonly moduleId = this.module.moduleId;
+
+    public readonly fullPrefix = `${this.prefix}|module|${this.module.moduleId}`;
 
     /**
      * Create shared and persistent pieces of state, scoped to this specific module.
     */
-    statesAPI = new StatesAPI(this.fullPrefix, this.coreDeps, this.modDeps);
+    public readonly statesAPI = new StatesAPI(this.fullPrefix, this.coreDeps, this.modDeps);
 
     /**
      * Register a route with the application's React router. The route will be accessible from the browser at [myserver.com/modules/(module_id)/(route)](). The route will also be registered to the application's navigation bar.
