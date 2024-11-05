@@ -1,5 +1,6 @@
 {
   "name": "jamtools-server",
+  "version": "0.6.4",
   "scripts": {
     "start": "node dist/local-server.js",
     "run:watch": "nodemon dist/local-server.js",
@@ -16,10 +17,13 @@
     "@hono/node-server": "^1.13.2",
     "@hono/node-ws": "^1.0.4",
     "@hono/trpc-server": "^0.3.2",
-    "hono": "^4.6.7",
-    "jamtools-core": "*"
+    "hono": "^4.6.7"
   },
   "config": {
     "dir": "../../../configs"
+  },
+  "peerDependencies": {
+    "jamtools-core": "0.6.4",
+    "springboard-data-storage": "0.6.4"
   }
 }

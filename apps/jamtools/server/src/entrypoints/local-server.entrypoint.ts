@@ -1,6 +1,6 @@
 import {serve} from '@hono/node-server';
 
-import {makeWebsocketServerCoreDependenciesWithSqlite} from '~/platforms/ws/ws_server_core_dependencies';
+import {makeWebsocketServerCoreDependenciesWithSqlite} from '../ws_server_core_dependencies';
 
 import {initApp} from '../hono_app';
 

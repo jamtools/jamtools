@@ -1,71 +1,8 @@
 #!/bin/bash
 
-# # Define the folders to include in the search
-# include_folders=("apps" "packages")
+full_version="0.6.4"  # Set the target version here or make it a script argument
 
-# # Loop over each folder and find package.json files
-# for folder in "${include_folders[@]}"; do
-#   find "./$folder" -name "package.json" -print
-# done
-
-
-
-
-
-
-
-# ./packages/jamtools/core/package.json
-
-# ./packages/jamtools/platforms/webapp/package.json
-# ./packages/jamtools/platforms/node/package.json
-
-# ./apps/jamtools/webapp/package.json
-# ./apps/jamtools/node/package.json
-
-
-# ./apps/jamtools/server/package.json
-# ./packages/jamtools/features/package.json
-
-
-# root_dir=$PWD
-
-# rc_version=10
-
-# full_version=0.1.0-rc$rc_version
-
-# cd $root_dir/packages/jamtools/core
-# bump_version $full_version
-# publish
-
-# cd $root_dir/packages/jamtools/platforms/webapp
-# bump_version $full_version
-# bump_peer_dep jamtools-core $full_version
-# publish
-
-# cd $root_dir/packages/jamtools/platforms/node
-# bump_version $full_version
-# bump_peer_dep jamtools-core $full_version
-# publish
-
-# cd $root_dir/apps/jamtools/webapp
-# bump_version $full_version
-# bump_peer_dep jamtools-core $full_version
-# bump_peer_dep jamtools-platforms-webapp $full_version
-# publish
-
-# cd $root_dir/apps/jamtools/node
-# bump_version $full_version
-# bump_peer_dep jamtools-core $full_version
-# bump_peer_dep jamtools-platforms-node $full_version
-# publish
-
-
-
-
-#!/bin/bash
-
-# Set root directory and full version
-
+root_dir=$(pwd)  # Assuming this script is run from the project root
 
 # Function to bump version
 bump_version() {
@@ -96,9 +33,6 @@ publish_package() {
   npm publish --registry http://localhost:4873
 }
 
-root_dir=$(pwd)  # Assuming this script is run from the project root
-full_version="0.5.1"  # Set the target version here or make it a script argument
-
 # Bump, update dependencies, and publish each package
 
 bump_version "$root_dir/packages/jamtools/core"
@@ -121,5 +55,20 @@ bump_version "$root_dir/apps/jamtools/node"
 bump_peer_dep "$root_dir/apps/jamtools/node" "jamtools-core"
 bump_peer_dep "$root_dir/apps/jamtools/node" "jamtools-platforms-node"
 publish_package "$root_dir/apps/jamtools/node"
+
+bump_version "$root_dir/packages/data_storage"
+publish_package "$root_dir/packages/data_storage"
+
+bump_version "$root_dir/apps/jamtools/server"
+bump_peer_dep "$root_dir/apps/jamtools/server" "jamtools-core"
+bump_peer_dep "$root_dir/apps/jamtools/server" "springboard-data-storage"
+publish_package "$root_dir/apps/jamtools/server"
+
+
+bump_version "$root_dir/packages/springboard/cli"
+bump_peer_dep "$root_dir/packages/springboard/cli" "jamtools-core"
+bump_peer_dep "$root_dir/packages/springboard/cli" "jamtools-platforms-node"
+bump_peer_dep "$root_dir/packages/springboard/cli" "jamtools-platforms-webapp"
+publish_package "$root_dir/packages/springboard/cli"
 
 # # npm i

@@ -82,9 +82,6 @@ export const makeMockCoreDependencies = ({store}: MakeMockCoreDependenciesOption
 
 export const makeMockExtraDependences = () => {
     return {
-        Ultimate_Guitar: {
-            domParser: {} as any,
-            ultimateGuitarService: {} as any,
-        },
+
     } satisfies ExtraModuleDependencies;
 };

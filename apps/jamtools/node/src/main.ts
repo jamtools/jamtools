@@ -10,7 +10,6 @@ import {NodeJsonRpcClientAndServer} from 'jamtools-platforms-node/services/node_
 import {JamToolsEngine} from 'jamtools-core/engine/engine';
 import {MidiService, QwertyService} from 'jamtools-core/types/io_types';
 import {ExtraModuleDependencies} from 'jamtools-core/module_registry/module_registry';
-// import {UltimateGuitarService} from '~/features/modules/ultimate_guitar/ultimate_guitar_service';
 
 const WS_HOST = process.env.WS_HOST || 'ws://localhost:1337';
 const DATA_HOST = process.env.DATA_HOST || 'http://localhost:1337';
@@ -44,10 +43,6 @@ export const startJamTools = async (services: Services): Promise<JamToolsEngine>
     };
 
     const extraDeps: ExtraModuleDependencies = {
-        // Ultimate_Guitar: {
-        //     domParser: (htmlData: string) => new JSDOM(htmlData).window.document,
-        //     ultimateGuitarService: new UltimateGuitarService(),
-        // },
     };
 
     const engine = new JamToolsEngine(coreDeps, extraDeps);

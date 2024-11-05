@@ -1,5 +1,5 @@
 import {JSONRPCClient, JSONRPCServer} from 'json-rpc-2.0';
-import {KVStore, Rpc, RpcArgs} from '~/core/types/module_types';
+import {KVStore, Rpc, RpcArgs} from 'jamtools-core/types/module_types';
 
 type ClientParams = {
     clientId: string;

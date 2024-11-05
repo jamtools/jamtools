@@ -19,6 +19,7 @@ const buildToolDir = process.env.BUILD_TOOL_DIR || '../..';
 const coreFile = `jamtools-node/src/${entrypoint}`;
 
 const watchForChanges = process.argv.includes('--watch');
+const shouldOutputMetaFile = process.argv.includes('--meta');
 
 const moduleIndexFile = process.env.MODULES_INDEX_FILE || '../../modules/index.ts';
 
@@ -38,7 +39,7 @@ const outFile = path.join(outDir, 'local-server.js');
 async function build() {
     const buildOptions = {
         entryPoints: [dynamicEntryPath],
-        metafile: true,
+        metafile: shouldOutputMetaFile,
         bundle: true,
         minify: process.env.NODE_ENV === '"production"',
         sourcemap: true,
@@ -67,5 +68,7 @@ async function build() {
 }
 
 build().then(async m => {
-    await fs.promises.writeFile('esbuild_meta.json', JSON.stringify(m.metafile));
+    if (shouldOutputMetaFile) {
+        await fs.promises.writeFile('esbuild_meta.json', JSON.stringify(m.metafile));
+    }
 }).catch(() => process.exit(1));

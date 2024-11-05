@@ -1,6 +1,6 @@
 {
   "name": "jamtools-core",
-  "version": "0.5.1",
+  "version": "0.6.4",
   "type": "module",
   "scripts": {
     "test": "vitest --run",
@@ -21,6 +21,7 @@
     "peripherals",
     "services",
     "src",
+    "test",
     "types",
     "utils"
   ],

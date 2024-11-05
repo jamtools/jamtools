@@ -17,7 +17,6 @@ import {BrowserKVStoreService} from 'jamtools-platforms-webapp/services/browser_
 import {BrowserJsonRpcClientAndServer} from 'jamtools-platforms-webapp/services/browser_json_rpc';
 import {JamToolsEngine} from 'jamtools-core/engine/engine';
 import {ExtraModuleDependencies} from 'jamtools-core/module_registry/module_registry';
-// import {UltimateGuitarService} from '~/features/modules/ultimate_guitar/ultimate_guitar_service';
 
 const waitForPageLoad = () => new Promise<void>(resolve => {
     window.addEventListener('DOMContentLoaded', () => {
@@ -66,10 +65,6 @@ export const startJamToolsAndRenderApp = async (): Promise<JamToolsEngine> => {
     };
 
     const extraDeps: ExtraModuleDependencies = {
-        // Ultimate_Guitar: {
-        //     domParser: (htmlData: string) => new DOMParser().parseFromString(htmlData, 'text/html'),
-        //     ultimateGuitarService: createNotImplementedProxy(new UltimateGuitarService()),
-        // },
     };
 
     const engine = new JamToolsEngine(coreDeps, extraDeps);
