@@ -4,8 +4,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "node -r esbuild-runner/register esbuild.ts",
-    "build-local": "NODE_MODULES_PARENT_FOLDER=../../../ node -r esbuild-runner/register esbuild.ts",
+    "build": "NODE_MODULES_PARENT_FOLDER=../../../ node -r esbuild-runner/register esbuild.ts",
+    "build-with-cli": "NODE_MODULES_PARENT_FOLDER=../../../ node -r esbuild-runner/register esbuild.ts",
     "run-node-local": "NODE_KV_STORE_DATA_FILE=kv_data.json node dist/node/dist/index.js",
     "dev": "npm run build -- --watch"
   },

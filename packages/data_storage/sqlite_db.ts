@@ -14,7 +14,7 @@ export const makeKyselySqliteInstance = async (fname: string) => {
 export const makeKyselyInstanceFromDialect = async (dialect: Dialect): Promise<KyselyKVStore> => {
     const db = new Kysely({
         dialect,
-    });
+    }) as KyselyKVStore;
 
     await ensureKVTable(db);
 
