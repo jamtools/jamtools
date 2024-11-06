@@ -3,7 +3,7 @@ import React from 'react';
 import {ScaleDegreeInfo, cycle, getScaleDegreeFromScaleAndNote} from './root_mode_types';
 
 import {RootModeComponent} from './root_mode_component';
-import {jamtools} from '~/core/engine/register';
+import {jamtools} from 'jamtools-core/engine/register';
 
 type State = {
     chord: ScaleDegreeInfo | null;

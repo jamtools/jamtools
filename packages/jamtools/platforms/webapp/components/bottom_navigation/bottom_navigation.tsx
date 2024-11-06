@@ -12,15 +12,17 @@ export const BottomNavigation = (props: BottomNavigationProps) => {
 
     return (
         <>
-            <div className='bottom-nav'>
-                {navItems.map(item => (
-                    <NavItem
-                        key={item.title}
-                        item={item}
-                        gotoRoute={gotoRoute}
-                    />
-                ))}
-            </div>
+            {Boolean(navItems.length) && (
+                <div className='bottom-nav'>
+                    {navItems.map(item => (
+                        <NavItem
+                            key={item.title}
+                            item={item}
+                            gotoRoute={gotoRoute}
+                        />
+                    ))}
+                </div>
+            )}
         </>
     );
 };

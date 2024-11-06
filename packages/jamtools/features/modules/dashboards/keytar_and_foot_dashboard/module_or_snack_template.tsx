@@ -1,8 +1,8 @@
 import React from 'react';
 
-import {jamtools} from '~/core/engine/register';
-import {ModuleAPI} from '~/core/engine/module_api';
-import {Button} from '~/core/components/Button';
+import {jamtools} from 'jamtools-core/engine/register';
+import {ModuleAPI} from 'jamtools-core/engine/module_api';
+import {Button} from 'jamtools-core/components/Button';
 
 type AwaitedRecord<Obj extends Record<string, Promise<any>>> = {
     [Key in keyof Obj]: Awaited<Obj[Key]>;
@@ -75,7 +75,7 @@ const registerRoutes = (moduleAPI: ModuleAPI, states: States, macros: Macros, ac
     });
 };
 
-declare module '~/core/module_registry/module_registry' {
+declare module 'jamtools-core/module_registry/module_registry' {
     interface AllModules {
         ModuleOrSnackTemplate: ModuleOrSnackTemplateModuleReturnValue;
     }

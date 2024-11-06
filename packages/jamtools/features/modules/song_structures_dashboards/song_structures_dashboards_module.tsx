@@ -2,13 +2,13 @@ import React from 'react';
 
 import {Link} from 'react-router-dom';
 
-import {jamtools} from '~/core/engine/register';
-import {GuitarChordRootsDisplay, GuitarTabView} from '~/core/modules/song_structures/components/guitar_tab_view';
-import {Button} from '~/core/components/Button';
-import {MidiEvent} from '~/core/modules/macro_module/macro_module_types';
-import {ChordChoice, ChordDisplay} from '~/core/modules/song_structures/components/chord_display';
+import {jamtools} from 'jamtools-core/engine/register';
+import {GuitarChordRootsDisplay, GuitarTabView} from 'jamtools-core/modules/song_structures/components/guitar_tab_view';
+import {Button} from 'jamtools-core/components/Button';
+import {MidiEvent} from 'jamtools-core/modules/macro_module/macro_module_types';
+import {ChordChoice, ChordDisplay} from 'jamtools-core/modules/song_structures/components/chord_display';
 
-declare module '~/core/module_registry/module_registry' {
+declare module 'jamtools-core/module_registry/module_registry' {
     interface AllModules {
         song_structures_dashboards: SongStructuresDashboardsModuleReturnValue;
     }

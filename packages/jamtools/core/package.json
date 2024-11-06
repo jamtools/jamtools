@@ -1,6 +1,6 @@
 {
   "name": "jamtools-core",
-  "version": "0.6.4",
+  "version": "0.6.7",
   "type": "module",
   "scripts": {
     "test": "vitest --run",
@@ -35,6 +35,7 @@
   },
   "dependencies": {
     "@shoelace-style/shoelace": "^2.16.0",
+    "dexie": "^4.0.9",
     "immer": "^10.1.1",
     "midi-file": "^1.2.4",
     "react-guitar": "^1.1.2",

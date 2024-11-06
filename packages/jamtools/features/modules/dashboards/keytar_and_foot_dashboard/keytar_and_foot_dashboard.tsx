@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {ModuleAPI} from '~/core/engine/module_api';
+import {ModuleAPI} from 'jamtools-core/engine/module_api';
 
 import {MultiOctaveSupervisor} from './multi_octave_supervisor';
 import {SingleOctaveRootModeSupervisor} from './single_octave_root_mode_supervisor';

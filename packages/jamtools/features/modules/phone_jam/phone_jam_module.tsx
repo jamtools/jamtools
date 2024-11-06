@@ -1,7 +1,7 @@
 import React from 'react';
 
-import {jamtools} from '~/core/engine/register';
-import {Button} from '~/core/components/Button';
+import {jamtools} from 'jamtools-core/engine/register';
+import {Button} from 'jamtools-core/components/Button';
 
 jamtools.registerModule('phone_jam', {}, async (moduleAPI) => {
     const outputMacro = await moduleAPI.deps.module.moduleRegistry.getModule('macro').createMacro(moduleAPI, 'local_output', 'musical_keyboard_output', {allowLocal: true});

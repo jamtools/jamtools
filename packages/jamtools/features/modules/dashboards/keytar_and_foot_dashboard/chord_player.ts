@@ -1,4 +1,4 @@
-import {OutputMidiDevice} from '~/core/modules/macro_module/macro_handlers/outputs/musical_keyboard_output_macro_handler';
+import {OutputMidiDevice} from 'jamtools-core/modules/macro_module/macro_handlers/outputs/musical_keyboard_output_macro_handler';
 
 export type ChordNotes = number[];
 

@@ -1,6 +1,6 @@
 {
   "name": "jamtools-node",
-  "version": "0.6.4",
+  "version": "0.6.7",
   "scripts": {
     "start": "node dist/local-server.js",
     "run:watch": "nodemon dist/local-server.js",
@@ -15,8 +15,8 @@
     "fix": "npm run lint -- --fix"
   },
   "peerDependencies": {
-    "jamtools-core": "0.6.4",
-    "jamtools-platforms-node": "0.6.4"
+    "jamtools-core": "0.6.7",
+    "jamtools-platforms-node": "0.6.7"
   },
   "config": {
     "dir": "../../../configs"

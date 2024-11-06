@@ -1,4 +1,4 @@
-import {jamtools} from '~/core/engine/register';
+import {jamtools} from 'jamtools-core/engine/register';
 
 jamtools.registerModule('midi_thru_cc', {}, async (moduleAPI) => {
     console.log('running snack: midi thru cc');

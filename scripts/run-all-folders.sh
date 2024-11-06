@@ -1,6 +1,6 @@
 #!/bin/bash
 
-full_version="0.6.4"  # Set the target version here or make it a script argument
+full_version="0.6.7"  # Set the target version here or make it a script argument
 
 root_dir=$(pwd)  # Assuming this script is run from the project root
 
@@ -64,6 +64,9 @@ bump_peer_dep "$root_dir/apps/jamtools/server" "jamtools-core"
 bump_peer_dep "$root_dir/apps/jamtools/server" "springboard-data-storage"
 publish_package "$root_dir/apps/jamtools/server"
 
+bump_version "$root_dir/packages/springboard/mantine"
+bump_peer_dep "$root_dir/packages/springboard/mantine" "jamtools-core"
+publish_package "$root_dir/packages/springboard/mantine"
 
 bump_version "$root_dir/packages/springboard/cli"
 bump_peer_dep "$root_dir/packages/springboard/cli" "jamtools-core"

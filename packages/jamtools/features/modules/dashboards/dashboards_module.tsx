@@ -2,9 +2,9 @@ import React from 'react';
 
 import {Link} from 'react-router-dom';
 
-import {jamtools} from '~/core/engine/register';
+import {jamtools} from 'jamtools-core/engine/register';
 
-import {ModuleAPI} from '~/core/engine/module_api';
+import {ModuleAPI} from 'jamtools-core/engine/module_api';
 
 import allDashboards from '.';
 
@@ -14,7 +14,7 @@ export type RegisteredDashboard = {
     label: string;
 }
 
-declare module '~/core/module_registry/module_registry' {
+declare module 'jamtools-core/module_registry/module_registry' {
     interface AllModules {
         Dashboards: DashboardsModuleReturnValue;
     }

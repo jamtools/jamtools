@@ -1,11 +1,11 @@
 import React from 'react';
 
-import {ModuleAPI} from '~/core/engine/module_api';
-import {MidiEvent, MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
-import {Button} from '~/core/components/Button';
+import {ModuleAPI} from 'jamtools-core/engine/module_api';
+import {MidiEvent, MidiEventFull} from 'jamtools-core/modules/macro_module/macro_module_types';
+import {Button} from 'jamtools-core/components/Button';
 import {playChord, ChordWithName, noteNames} from './chord_player';
-import {OutputMidiDevice} from '~/core/modules/macro_module/macro_handlers/outputs/musical_keyboard_output_macro_handler';
-import {QRCode} from '~/core/components/QRCode';
+import {OutputMidiDevice} from 'jamtools-core/modules/macro_module/macro_handlers/outputs/musical_keyboard_output_macro_handler';
+import {QRCode} from 'jamtools-core/components/QRCode';
 
 type SingleOctaveRootModeSupervisorMidiState = {
     currentlyHeldDownInputNotes: MidiEvent[];
