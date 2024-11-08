@@ -1,6 +1,6 @@
 #!/bin/bash
 
-full_version="0.9.4"  # Set the target version here or make it a script argument
+full_version="0.9.5"  # Set the target version here or make it a script argument
 
 root_dir=$(pwd)  # Assuming this script is run from the project root
 
@@ -34,8 +34,8 @@ publish_package() {
 
 # Bump, update dependencies, and publish each package
 
-bump_version "$root_dir/packages/jamtools/core"
-publish_package "$root_dir/packages/jamtools/core"
+bump_version "$root_dir/packages/springboard/core"
+publish_package "$root_dir/packages/springboard/core"
 
 bump_version "$root_dir/packages/springboard/platforms/webapp"
 bump_peer_dep "$root_dir/packages/springboard/platforms/webapp" "jamtools-core"
