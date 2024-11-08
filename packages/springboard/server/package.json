@@ -1,6 +1,6 @@
 {
   "name": "jamtools-server",
-  "version": "0.8.0",
+  "version": "0.9.2",
   "main": "./index.ts",
   "module": "./index.ts",
   "files": [
@@ -27,7 +27,7 @@
     "dir": "../../../configs"
   },
   "peerDependencies": {
-    "jamtools-core": "0.8.0",
-    "springboard-data-storage": "0.8.0"
+    "jamtools-core": "0.9.2",
+    "springboard-data-storage": "0.9.2"
   }
 }

@@ -35,6 +35,7 @@
     "packages/jamtools/features",
     "packages/jamtools/platforms/*",
     "packages/springboard/*",
+    "packages/springboard/external/*",
     "packages/*",
     "configs"
   ]

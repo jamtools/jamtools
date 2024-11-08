@@ -1,6 +1,6 @@
 #!/bin/bash
 
-full_version="0.8.0"  # Set the target version here or make it a script argument
+full_version="0.9.2"  # Set the target version here or make it a script argument
 
 root_dir=$(pwd)  # Assuming this script is run from the project root
 
@@ -11,7 +11,6 @@ bump_version() {
 
   cd "$target_dir" || exit 1
   echo "Bumping version in $target_dir"
-  # npm version "$full_version" --no-git-tag-version
   jq --arg version "$version" '.version = $version' "$target_dir/package.json" > "$target_dir/tmp.json" && mv "$target_dir/tmp.json" "$target_dir/package.json"
 }
 
@@ -21,7 +20,6 @@ bump_peer_dep() {
   local dependency_name=$2
   local version="$full_version"
   echo "Updating peer dependency $package_name in $target_dir to $version"
-  # npm install "$package_name@$full_version" --save-peer --registry http://localhost:4873
   jq --arg dep "$dependency_name" --arg version "$version" '.peerDependencies[$dep] = $version' "$target_dir/package.json" > "$target_dir/tmp.json" && mv "$target_dir/tmp.json" "$target_dir/package.json"
 }
 
@@ -48,34 +46,22 @@ bump_version "$root_dir/packages/jamtools/platforms/node"
 bump_peer_dep "$root_dir/packages/jamtools/platforms/node" "jamtools-core"
 publish_package "$root_dir/packages/jamtools/platforms/node"
 
-bump_version "$root_dir/apps/jamtools/webapp"
-bump_peer_dep "$root_dir/apps/jamtools/webapp" "jamtools-core"
-bump_peer_dep "$root_dir/apps/jamtools/webapp" "jamtools-platforms-webapp"
-publish_package "$root_dir/apps/jamtools/webapp"
+bump_version "$root_dir/packages/springboard/data_storage"
+publish_package "$root_dir/packages/springboard/data_storage"
 
-bump_version "$root_dir/apps/jamtools/node"
-bump_peer_dep "$root_dir/apps/jamtools/node" "jamtools-core"
-bump_peer_dep "$root_dir/apps/jamtools/node" "jamtools-platforms-node"
-publish_package "$root_dir/apps/jamtools/node"
+bump_version "$root_dir/packages/springboard/server"
+bump_peer_dep "$root_dir/packages/springboard/server" "jamtools-core"
+bump_peer_dep "$root_dir/packages/springboard/server" "springboard-data-storage"
+publish_package "$root_dir/packages/springboard/server"
 
-bump_version "$root_dir/packages/data_storage"
-publish_package "$root_dir/packages/data_storage"
-
-bump_version "$root_dir/apps/jamtools/server"
-bump_peer_dep "$root_dir/apps/jamtools/server" "jamtools-core"
-bump_peer_dep "$root_dir/apps/jamtools/server" "springboard-data-storage"
-publish_package "$root_dir/apps/jamtools/server"
-
-bump_version "$root_dir/packages/springboard/mantine"
-bump_peer_dep "$root_dir/packages/springboard/mantine" "jamtools-core"
-publish_package "$root_dir/packages/springboard/mantine"
+bump_version "$root_dir/packages/springboard/external/mantine"
+bump_peer_dep "$root_dir/packages/springboard/external/mantine" "jamtools-core"
+publish_package "$root_dir/packages/springboard/external/mantine"
 
 bump_version "$root_dir/packages/springboard/cli"
 bump_peer_dep "$root_dir/packages/springboard/cli" "jamtools-core"
 bump_peer_dep "$root_dir/packages/springboard/cli" "jamtools-platforms-node"
 bump_peer_dep "$root_dir/packages/springboard/cli" "jamtools-platforms-webapp"
-bump_peer_dep "$root_dir/packages/springboard/cli" "jamtools-node"
-bump_peer_dep "$root_dir/packages/springboard/cli" "jamtools-webapp"
 bump_peer_dep "$root_dir/packages/springboard/cli" "jamtools-server"
 publish_package "$root_dir/packages/springboard/cli"
 

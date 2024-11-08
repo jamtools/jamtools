@@ -1,4 +1,4 @@
-import type {KVTrpcRouter} from '../../../../packages/data_storage/kv_api_trpc';
+import type {KVTrpcRouter} from 'springboard-data-storage/kv_api_trpc';
 
 import {createTRPCProxyClient, httpBatchLink} from '@trpc/client';
 import {KVStore} from '../types/module_types';

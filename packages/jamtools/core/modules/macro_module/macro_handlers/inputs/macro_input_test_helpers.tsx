@@ -7,7 +7,7 @@ import '@testing-library/jest-dom';
 import {MidiEvent, MidiEventFull} from 'jamtools-core/modules/macro_module/macro_module_types';
 import {makeMockCoreDependencies, makeMockExtraDependences} from 'jamtools-core/test/mock_core_dependencies';
 
-import {Main} from 'jamtools-webapp/src/main';
+import {Main} from 'jamtools-platforms-webapp/entrypoints/main';
 import {JamToolsEngine} from 'jamtools-core/engine/engine';
 
 export const getMacroInputTestHelpers = () => {

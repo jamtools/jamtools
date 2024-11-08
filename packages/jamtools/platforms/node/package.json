@@ -1,6 +1,6 @@
 {
   "name": "jamtools-platforms-node",
-  "version": "0.8.0",
+  "version": "0.9.2",
   "scripts": {
     "check-types": "tsc --noEmit",
     "lint": "eslint --ext ts --ext tsx .",
@@ -9,7 +9,7 @@
   "peerDependencies": {
     "easymidi": "^3.0.1",
     "isomorphic-ws": "^5.0.0",
-    "jamtools-core": "0.8.0",
+    "jamtools-core": "0.9.2",
     "ws": "^8.18.0"
   },
   "config": {

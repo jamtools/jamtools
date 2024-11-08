@@ -9,7 +9,7 @@ import {esbuildPluginPlatformInject} from './esbuild_plugins/esbuild_plugin_plat
 type EsbuildOptions = Parameters<typeof esbuild.build>[0];
 
 type BuildConfig = {
-    platform: EsbuildOptions['platform'];
+    platform: NonNullable<EsbuildOptions['platform']>;
     platformEntrypoint: () => string;
     esbuildPlugins?: () => any[];
     externals?: () => string[];
@@ -28,9 +28,9 @@ const buildConfigs: BuildConfig[] = [
     {
         platform: 'node',
         platformEntrypoint: () => {
-            let entrypoint = 'jamtools-node/src/entrypoints/node_main_entrypoint.ts';
+            let entrypoint = 'jamtools-platforms-node/entrypoints/node_main_entrypoint.ts';
             if (process.env.DISABLE_IO === 'true') {
-                entrypoint = 'jamtools-node/src/entrypoints/node_saas_entrypoint.ts';
+                entrypoint = 'jamtools-platforms-node/entrypoints/node_saas_entrypoint.ts';
             }
 
             return entrypoint;
@@ -49,12 +49,12 @@ const buildConfigs: BuildConfig[] = [
     },
     {
         platform: 'browser',
-        platformEntrypoint: () => 'jamtools-webapp/src/index.tsx',
+        platformEntrypoint: () => 'jamtools-platforms-webapp/entrypoints/index.tsx',
         esbuildPlugins: () => [
             esbuildPluginPlatformInject('browser'),
         ],
         additionalFiles: {
-            'jamtools-webapp/index.html': 'index.html',
+            'jamtools-platforms-webapp/index.html': 'index.html',
         },
     },
 ];

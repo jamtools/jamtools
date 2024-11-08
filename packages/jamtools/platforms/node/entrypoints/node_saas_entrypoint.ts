@@ -1,7 +1,7 @@
 import {Subject} from 'rxjs';
 
 import {MidiService, QwertyService} from 'jamtools-core/types/io_types';
-import {startJamTools} from '../main';
+import {startJamTools} from './main';
 
 const qwerty: QwertyService = {
     onInputEvent: new Subject(),

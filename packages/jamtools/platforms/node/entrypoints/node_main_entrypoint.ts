@@ -1,4 +1,4 @@
-import {startJamTools} from '../main';
+import {startJamTools} from './main';
 
 import {NodeQwertyService} from 'jamtools-platforms-node/services/node_qwerty_service';
 import {NodeMidiService} from 'jamtools-platforms-node/services/node_midi_service';
