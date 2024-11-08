@@ -1,6 +1,6 @@
 {
   "name": "@springboardjs/cli",
-  "version": "0.9.2",
+  "version": "0.9.4",
   "main": "index.js",
   "scripts": {
     "build": "NODE_MODULES_PARENT_FOLDER=../../../ npx tsx esbuild.ts",
@@ -16,10 +16,10 @@
     "typescript": "^5.4.5"
   },
   "peerDependencies": {
-    "jamtools-core": "0.9.2",
-    "jamtools-platforms-node": "0.9.2",
-    "jamtools-platforms-webapp": "0.9.2",
-    "jamtools-server": "0.9.2"
+    "jamtools-core": "0.9.4",
+    "jamtools-platforms-node": "0.9.4",
+    "jamtools-platforms-webapp": "0.9.4",
+    "jamtools-server": "0.9.4"
   },
   "keywords": [],
   "author": "",

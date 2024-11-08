@@ -1,10 +1,12 @@
 #!/bin/bash
 
-full_version="0.9.2"  # Set the target version here or make it a script argument
+full_version="0.9.4"  # Set the target version here or make it a script argument
 
 root_dir=$(pwd)  # Assuming this script is run from the project root
 
-# Function to bump version
+# exit script if anything fails
+set e
+
 bump_version() {
   local target_dir=$1
   local version=$full_version
@@ -14,7 +16,6 @@ bump_version() {
   jq --arg version "$version" '.version = $version' "$target_dir/package.json" > "$target_dir/tmp.json" && mv "$target_dir/tmp.json" "$target_dir/package.json"
 }
 
-# Function to update peer dependency
 bump_peer_dep() {
   local target_dir=$1
   local dependency_name=$2
@@ -23,14 +24,12 @@ bump_peer_dep() {
   jq --arg dep "$dependency_name" --arg version "$version" '.peerDependencies[$dep] = $version' "$target_dir/package.json" > "$target_dir/tmp.json" && mv "$target_dir/tmp.json" "$target_dir/package.json"
 }
 
-# Function to publish package
 publish_package() {
   local target_dir=$1
   cd "$target_dir" || exit 1
   echo "Publishing package in $target_dir"
   npm publish --registry http://coolify-infra:4873
   # npm publish --registry http://localhost:4873
-
 }
 
 # Bump, update dependencies, and publish each package
@@ -38,13 +37,13 @@ publish_package() {
 bump_version "$root_dir/packages/jamtools/core"
 publish_package "$root_dir/packages/jamtools/core"
 
-bump_version "$root_dir/packages/jamtools/platforms/webapp"
-bump_peer_dep "$root_dir/packages/jamtools/platforms/webapp" "jamtools-core"
-publish_package "$root_dir/packages/jamtools/platforms/webapp"
+bump_version "$root_dir/packages/springboard/platforms/webapp"
+bump_peer_dep "$root_dir/packages/springboard/platforms/webapp" "jamtools-core"
+publish_package "$root_dir/packages/springboard/platforms/webapp"
 
-bump_version "$root_dir/packages/jamtools/platforms/node"
-bump_peer_dep "$root_dir/packages/jamtools/platforms/node" "jamtools-core"
-publish_package "$root_dir/packages/jamtools/platforms/node"
+bump_version "$root_dir/packages/springboard/platforms/node"
+bump_peer_dep "$root_dir/packages/springboard/platforms/node" "jamtools-core"
+publish_package "$root_dir/packages/springboard/platforms/node"
 
 bump_version "$root_dir/packages/springboard/data_storage"
 publish_package "$root_dir/packages/springboard/data_storage"

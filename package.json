@@ -33,7 +33,7 @@
     "apps/jamtools/*",
     "packages/jamtools/core",
     "packages/jamtools/features",
-    "packages/jamtools/platforms/*",
+    "packages/springboard/platforms/*",
     "packages/springboard/*",
     "packages/springboard/external/*",
     "packages/*",
