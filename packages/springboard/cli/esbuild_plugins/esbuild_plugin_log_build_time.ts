@@ -2,7 +2,7 @@ const logSuccessfulBuild = () => {
     console.log('\x1b[32m%s\x1b[0m', 'Build errors have been solved :)');
 }
 
-export const esbuildPluginLogBuildTime = () => ({
+export const esbuildPluginLogBuildTime = (label: string) => ({
     name: 'log-build-time',
     setup(build: any) {
         let startTime = 0;
@@ -22,7 +22,7 @@ export const esbuildPluginLogBuildTime = () => ({
 
             hadError = false;
 
-            console.log(`Build finished in ${Date.now() - startTime}ms`);
+            console.log(`Build finished in ${Date.now() - startTime}ms (${label})`);
         });
     },
 });

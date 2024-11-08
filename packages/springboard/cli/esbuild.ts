@@ -91,7 +91,7 @@ const buildApplication = async (buildConfig: BuildConfig) => {
         minify: process.env.NODE_ENV === 'production',
         target: 'es6',
         plugins: [
-            esbuildPluginLogBuildTime(),
+            esbuildPluginLogBuildTime(buildConfig.platform),
             ...(buildConfig.esbuildPlugins?.() || []),
         ],
         external: buildConfig.externals?.(),
@@ -165,7 +165,7 @@ const buildServer = async () => {
         platform: 'node',
         minify: process.env.NODE_ENV === 'production',
         plugins: [
-            esbuildPluginLogBuildTime(),
+            esbuildPluginLogBuildTime('server'),
         ],
         external: externals,
     };

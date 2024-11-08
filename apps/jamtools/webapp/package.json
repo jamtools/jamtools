@@ -2,8 +2,6 @@
   "name": "jamtools-webapp",
   "version": "0.8.0",
   "scripts": {
-    "dev": "npm run build -- --watch",
-    "build": "node esbuild.mjs",
     "build-saas": "npm run build",
     "check-types": "tsc --noEmit",
     "lint": "eslint --ext ts --ext tsx src/",

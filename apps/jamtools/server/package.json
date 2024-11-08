@@ -1,12 +1,16 @@
 {
   "name": "jamtools-server",
   "version": "0.8.0",
+  "main": "./index.ts",
+  "module": "./index.ts",
+  "files": [
+    "index.ts",
+    "src"
+  ],
   "scripts": {
     "start": "node dist/local-server.js",
     "run:watch": "nodemon dist/local-server.js",
-    "dev": "npm-run-all --parallel build:watch run:watch",
     "build:watch": "npm run build-local-server -- --watch",
-    "build": "npm run build-local-server",
     "build-saas": "npm run build",
     "build-local-server": "node esbuild.mjs",
     "check-types": "tsc --noEmit",
