@@ -25,7 +25,7 @@ const createStates = async (moduleAPI: ModuleAPI) => {
 
 const createMacros = async (moduleAPI: ModuleAPI) => {
     return promiseAllObject({
-        myMacro: moduleAPI.createMacro(moduleAPI, '', 'midi_button_input', {}),
+        myMacro: moduleAPI.deps.module.moduleRegistry.getModule('macro').createMacro(moduleAPI, '', 'midi_button_input', {}),
     });
 };
 

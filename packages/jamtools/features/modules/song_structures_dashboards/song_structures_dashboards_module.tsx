@@ -5,7 +5,7 @@ import {Link} from 'react-router-dom';
 import {jamtools} from 'jamtools-core/engine/register';
 import {GuitarChordRootsDisplay, GuitarTabView} from 'jamtools-core/modules/song_structures/components/guitar_tab_view';
 import {Button} from 'jamtools-core/components/Button';
-import {MidiEvent} from 'jamtools-core/modules/macro_module/macro_module_types';
+import {MidiEvent} from '@jamtools/core/modules/macro_module/macro_module_types';
 import {ChordChoice, ChordDisplay} from 'jamtools-core/modules/song_structures/components/chord_display';
 
 declare module 'jamtools-core/module_registry/module_registry' {
@@ -44,8 +44,8 @@ jamtools.registerModule('song_structures_dashboards', {}, async (moduleAPI): Pro
     const musicalKeyboardOutputMacro = await macros.createMacro(moduleAPI, 'keyboard_out', 'musical_keyboard_output', {});
 
     const toggleChordChooseMode = await macros.createMacro(moduleAPI, 'toggle_chord_choose_mode', 'midi_button_input', {enableQwerty: false});
-    // const toggleChordChooseMode = moduleAPI.createMacro();
-    // const toggleScaleChooseMode = moduleAPI.createMacro();
+    // const toggleChordChooseMode = moduleAPI.deps.module.moduleRegistry.getModule('macro').createMacro();
+    // const toggleScaleChooseMode = moduleAPI.deps.module.moduleRegistry.getModule('macro').createMacro();
 
     // const messageState = await states.createSharedState('message', '');
 

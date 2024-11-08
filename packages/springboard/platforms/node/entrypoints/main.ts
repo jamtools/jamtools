@@ -8,7 +8,7 @@ import {NodeKVStoreService} from 'jamtools-platforms-node/services/node_kvstore_
 import {NodeFileStorageService} from 'jamtools-platforms-node/services/node_file_storage_service';
 import {NodeJsonRpcClientAndServer} from 'jamtools-platforms-node/services/node_json_rpc';
 import {JamToolsEngine} from 'jamtools-core/engine/engine';
-import {MidiService, QwertyService} from 'jamtools-core/types/io_types';
+import {MidiService, QwertyService} from '@jamtools/core/types/io_types';
 import {ExtraModuleDependencies} from 'jamtools-core/module_registry/module_registry';
 
 const WS_HOST = process.env.WS_HOST || 'ws://localhost:1337';

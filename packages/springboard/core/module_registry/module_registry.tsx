@@ -51,7 +51,7 @@ export class ModuleRegistry {
     }
 
     getModule<ModuleId extends keyof AllModules>(moduleId: ModuleId): AllModules[ModuleId] {
-        return this.modulesByKey[moduleId] as AllModules[ModuleId];
+        return this.modulesByKey[moduleId] as unknown as AllModules[ModuleId];
     }
 
     getCustomModule(moduleId: string): Module | undefined {

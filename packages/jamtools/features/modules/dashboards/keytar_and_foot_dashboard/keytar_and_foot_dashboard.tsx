@@ -9,7 +9,7 @@ const KeytarAndFootDashboard = async (moduleAPI: ModuleAPI, dashboardName: strin
     const multiOctaveSupervisor = new MultiOctaveSupervisor(moduleAPI, dashboardName + '|multi-octave');
     const singleOctaveSupervisor = new SingleOctaveRootModeSupervisor(moduleAPI, dashboardName + '|single-octave-root-mode');
 
-    const randomNoteMacro = await moduleAPI.createMacro(moduleAPI, 'randomNoteTrigger', 'midi_button_input', {
+    const randomNoteMacro = await moduleAPI.deps.module.moduleRegistry.getModule('macro').createMacro(moduleAPI, 'randomNoteTrigger', 'midi_button_input', {
         onTrigger: () => {
             const randomNoteModule = moduleAPI.deps.module.moduleRegistry.getModule('RandomNote');
             randomNoteModule.togglePlaying();

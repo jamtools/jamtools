@@ -1,5 +1,5 @@
 import {Module, ModuleRegistry} from 'jamtools-core/module_registry/module_registry';
-import {MidiService, QwertyService} from './io_types';
+import {MidiService, QwertyService} from '@jamtools/core/types/io_types';
 import {SharedStateService} from '../services/states/shared_state_service';
 
 export type ModuleCallback<T extends object,> = (coreDeps: CoreDependencies, modDependencies: ModuleDependencies) =>

@@ -21,11 +21,11 @@ jamtools.registerModule('MidiPlayback', {}, async (moduleAPI): Promise<MidiPlayb
 
     const savedMidiFileData = await moduleAPI.statesAPI.createPersistentState<ParsedMidiFile | null>('savedMidiFileData', null);
 
-    const outputDevice = await moduleAPI.createMacro(moduleAPI, 'outputDevice', 'musical_keyboard_output', {});
+    const outputDevice = await moduleAPI.deps.module.moduleRegistry.getModule('macro').createMacro(moduleAPI, 'outputDevice', 'musical_keyboard_output', {});
 
     let currentIndex = -1;
 
-    const inputTrigger = await moduleAPI.createMacro(moduleAPI, 'inputTrigger', 'midi_button_input', {onTrigger: (event) => {
+    const inputTrigger = await moduleAPI.deps.module.moduleRegistry.getModule('macro').createMacro(moduleAPI, 'inputTrigger', 'midi_button_input', {onTrigger: (event) => {
         if (event.event.type !== 'noteon') {
             return;
         }

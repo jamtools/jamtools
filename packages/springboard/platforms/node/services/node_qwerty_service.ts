@@ -1,6 +1,6 @@
 import {Subject} from 'rxjs';
 
-import {QwertyCallbackPayload, QwertyService} from 'jamtools-core/types/io_types';
+import {QwertyCallbackPayload, QwertyService} from '@jamtools/core/types/io_types';
 
 export class NodeQwertyService implements QwertyService {
     constructor() {

@@ -1,10 +1,10 @@
 import React from 'react';
 
 import {ModuleAPI} from 'jamtools-core/engine/module_api';
-import {MidiEvent, MidiEventFull} from 'jamtools-core/modules/macro_module/macro_module_types';
+import {MidiEvent, MidiEventFull} from '@jamtools/core/modules/macro_module/macro_module_types';
 import {Button} from 'jamtools-core/components/Button';
 import {playChord, ChordWithName, noteNames} from './chord_player';
-import {OutputMidiDevice} from 'jamtools-core/modules/macro_module/macro_handlers/outputs/musical_keyboard_output_macro_handler';
+import {OutputMidiDevice} from '@jamtools/core/modules/macro_module/macro_handlers/outputs/musical_keyboard_output_macro_handler';
 import {QRCode} from 'jamtools-core/components/QRCode';
 
 type SingleOctaveRootModeSupervisorMidiState = {
@@ -323,7 +323,7 @@ export class SingleOctaveRootModeSupervisor {
     private createMacros = async () => {
         const makeMacroName = (name: string) => `${this.kvPrefix}|${name}`;
 
-        const singleOctaveInput = await this.moduleAPI.createMacro(this.moduleAPI, makeMacroName('singleOctaveInput'), 'musical_keyboard_paged_octave_input', {
+        const singleOctaveInput = await this.moduleAPI.deps.module.moduleRegistry.getModule('macro').createMacro(this.moduleAPI, makeMacroName('singleOctaveInput'), 'musical_keyboard_paged_octave_input', {
             singleOctave: true,
             enableQwerty: true,
             onTrigger: (event) => {
@@ -331,7 +331,7 @@ export class SingleOctaveRootModeSupervisor {
             },
         });
 
-        const sustainedOutputMute = await this.moduleAPI.createMacro(this.moduleAPI, makeMacroName('sustainedOutputMute'), 'midi_button_input', {
+        const sustainedOutputMute = await this.moduleAPI.deps.module.moduleRegistry.getModule('macro').createMacro(this.moduleAPI, makeMacroName('sustainedOutputMute'), 'midi_button_input', {
             onTrigger: () => {
                 this.midiState = {
                     ...this.midiState,
@@ -344,12 +344,12 @@ export class SingleOctaveRootModeSupervisor {
             },
         });
 
-        const sustainedOutput = await this.moduleAPI.createMacro(this.moduleAPI, makeMacroName('sustainedOutput'), 'musical_keyboard_output', {});
+        const sustainedOutput = await this.moduleAPI.deps.module.moduleRegistry.getModule('macro').createMacro(this.moduleAPI, makeMacroName('sustainedOutput'), 'musical_keyboard_output', {});
 
-        const stacattoOutput = await this.moduleAPI.createMacro(this.moduleAPI, makeMacroName('stacattoOutput'), 'musical_keyboard_output', {});
-        const monoBassOutput = await this.moduleAPI.createMacro(this.moduleAPI, makeMacroName('monoBassOutput'), 'musical_keyboard_output', {});
+        const stacattoOutput = await this.moduleAPI.deps.module.moduleRegistry.getModule('macro').createMacro(this.moduleAPI, makeMacroName('stacattoOutput'), 'musical_keyboard_output', {});
+        const monoBassOutput = await this.moduleAPI.deps.module.moduleRegistry.getModule('macro').createMacro(this.moduleAPI, makeMacroName('monoBassOutput'), 'musical_keyboard_output', {});
 
-        const chooseScaleButton = await this.moduleAPI.createMacro(this.moduleAPI, makeMacroName('chooseScaleButton'), 'midi_button_input', {
+        const chooseScaleButton = await this.moduleAPI.deps.module.moduleRegistry.getModule('macro').createMacro(this.moduleAPI, makeMacroName('chooseScaleButton'), 'midi_button_input', {
             onTrigger: () => {
                 this.toggleChooseScale();
             },

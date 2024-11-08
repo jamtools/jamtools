@@ -2,14 +2,14 @@ import {MIDI_NUMBER_TO_NOTE_NAME_MAPPINGS} from '@jamtools/core/constants/midi_n
 
 export const cycle = (midiNumber: number) => midiNumber % 12;
 
-export const ionianScaleDegreeQualities = {
+export const ionianScaleDegreeQualities: Record<number, 'major' | 'minor' | undefined> = {
     0: 'major',
     2: 'minor',
     4: 'minor',
     5: 'major',
     7: 'major',
     9: 'minor',
-} as const;
+};
 
 export type ScaleDegreeInfo = {
     noteName: string;
