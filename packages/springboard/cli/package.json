@@ -4,6 +4,7 @@
   "main": "index.js",
   "scripts": {
     "build": "NODE_MODULES_PARENT_FOLDER=../../../ npx tsx esbuild.ts",
+    "build-saas": "DISABLE_IO=true NODE_MODULES_PARENT_FOLDER=../../../ npx tsx esbuild.ts",
     "build-with-cli": "NODE_MODULES_PARENT_FOLDER=../../../ npx tsx esbuild.ts",
     "run-node-local": "NODE_KV_STORE_DATA_FILE=kv_data.json node dist/node/dist/index.js",
     "dev": "npm run build -- --watch"

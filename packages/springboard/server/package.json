@@ -11,7 +11,6 @@
     "start": "node dist/local-server.js",
     "run:watch": "nodemon dist/local-server.js",
     "build:watch": "npm run build-local-server -- --watch",
-    "build-saas": "npm run build",
     "build-local-server": "node esbuild.mjs",
     "check-types": "tsc --noEmit",
     "lint": "eslint --ext ts --ext tsx src/",
