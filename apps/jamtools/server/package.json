@@ -1,6 +1,6 @@
 {
   "name": "jamtools-server",
-  "version": "0.6.7",
+  "version": "0.8.0",
   "scripts": {
     "start": "node dist/local-server.js",
     "run:watch": "nodemon dist/local-server.js",
@@ -23,7 +23,7 @@
     "dir": "../../../configs"
   },
   "peerDependencies": {
-    "jamtools-core": "0.6.7",
-    "springboard-data-storage": "0.6.7"
+    "jamtools-core": "0.8.0",
+    "springboard-data-storage": "0.8.0"
   }
 }

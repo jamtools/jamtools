@@ -1,4 +1,4 @@
-import {JSONRPCServer, JSONRPCClient, JSONRPCRequest} from 'json-rpc-2.0';
+import {JSONRPCClient, JSONRPCRequest} from 'json-rpc-2.0';
 import {Context} from 'hono';
 import {WSContext, WSEvents} from 'hono/ws';
 
@@ -7,17 +7,11 @@ type WebsocketInterface = {
 }
 
 export class NodeJsonRpcServer {
-    rpcClient!: JSONRPCClient;
-    rcpServer: JSONRPCServer;
 
-    incomingClients: {[clientId: string]: WebsocketInterface} = {};
-    outgoingClients: {[clientId: string]: JSONRPCClient} = {};
+    private incomingClients: {[clientId: string]: WebsocketInterface} = {};
+    private outgoingClients: {[clientId: string]: JSONRPCClient} = {};
 
-    constructor() {
-        this.rcpServer = new JSONRPCServer();
-    }
-
-    maestroClientId = '';
+    private maestroClientId = '';
 
     public handleConnection = (c: Context): WSEvents => {
         let providedClientId = '';

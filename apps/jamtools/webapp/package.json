@@ -1,6 +1,6 @@
 {
   "name": "jamtools-webapp",
-  "version": "0.6.7",
+  "version": "0.8.0",
   "scripts": {
     "dev": "npm run build -- --watch",
     "build": "node esbuild.mjs",
@@ -10,8 +10,8 @@
     "fix": "npm run lint -- --fix"
   },
   "peerDependencies": {
-    "jamtools-core": "0.6.7",
-    "jamtools-platforms-webapp": "0.6.7",
+    "jamtools-core": "0.8.0",
+    "jamtools-platforms-webapp": "0.8.0",
     "react-router-dom": "^6.25.0"
   },
   "config": {

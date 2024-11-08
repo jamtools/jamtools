@@ -65,11 +65,9 @@ const shouldOutputMetaFile = process.argv.includes('--meta');
 const buildApplication = async (buildConfig: BuildConfig) => {
     const coreFile = buildConfig.platformEntrypoint();
 
-    const moduleIndexFile = process.env.MODULES_INDEX_FILE || '../../../../../../apps/jamtools/modules/index.ts';
+    const applicationEntrypoint = process.env.APPLICATION_ENTRYPOINT || '../../../../../../apps/jamtools/modules/index.ts';
 
-    // const allImports = [coreFile].map(file => `import '${file}';`).join('\n');
-
-    const allImports = [coreFile, moduleIndexFile].map(file => `import '${file}';`).join('\n');
+    const allImports = [coreFile, applicationEntrypoint].map(file => `import '${file}';`).join('\n');
 
     const parentOutDir = process.env.ESBUILD_OUT_DIR || './dist';
     const outDir = `${parentOutDir}/${buildConfig.platform}/dist`;
@@ -97,6 +95,12 @@ const buildApplication = async (buildConfig: BuildConfig) => {
             ...(buildConfig.esbuildPlugins?.() || []),
         ],
         external: buildConfig.externals?.(),
+        alias: {
+            // 'jamtools-core': './jamtools/packages/jamtools/core',
+            // 'jamtools-platforms-webapp': './jamtools/packages/jamtools/platforms/webapp',
+            // 'react': './node_modules/react',
+            // 'jamtools-mantine': './jamtools/packages/springboard/mantine',
+        },
         define: {
             'process.env.WS_HOST': `"${process.env.WS_HOST || ''}"`,
             'process.env.DATA_HOST': `"${process.env.DATA_HOST || ''}"`,
@@ -142,8 +146,19 @@ const buildServer = async () => {
 
     const outFile = path.join(outDir, 'local-server.cjs');
 
+    const coreFile = 'jamtools-server/src/entrypoints/local-server.entrypoint.ts';
+    const serverEntrypoint = process.env.SERVER_ENTRYPOINT;
+
+    let allImports = [coreFile].map(file => `import '${file}';`).join('\n');
+    if (serverEntrypoint) {
+        allImports = [coreFile, serverEntrypoint].map(file => `import '${file}';`).join('\n');
+    }
+
+    const dynamicEntryPath = path.join(outDir, 'dynamic-entry.js');
+    fs.writeFileSync(dynamicEntryPath, allImports);
+
     const buildOptions: EsbuildOptions = {
-        entryPoints: ['jamtools-server/src/entrypoints/local-server.entrypoint.ts'],
+        entryPoints: [dynamicEntryPath],
         bundle: true,
         sourcemap: true,
         outfile: outFile,
@@ -165,3 +180,7 @@ const buildServer = async () => {
 };
 
 setTimeout(main);
+
+process.on('SIGINT', () => {
+    process.exit(0);
+});

@@ -1,23 +1,26 @@
 {
   "name": "@springboardjs/cli",
-  "version": "0.6.7",
+  "version": "0.8.0",
   "main": "index.js",
   "scripts": {
-    "build": "NODE_MODULES_PARENT_FOLDER=../../../ node -r esbuild-runner/register esbuild.ts",
-    "build-with-cli": "NODE_MODULES_PARENT_FOLDER=../../../ node -r esbuild-runner/register esbuild.ts",
+    "build": "NODE_MODULES_PARENT_FOLDER=../../../ npx tsx esbuild.ts",
+    "build-with-cli": "NODE_MODULES_PARENT_FOLDER=../../../ npx tsx esbuild.ts",
     "run-node-local": "NODE_KV_STORE_DATA_FILE=kv_data.json node dist/node/dist/index.js",
     "dev": "npm run build -- --watch"
   },
   "dependencies": {
     "esbuild": "^0.23.0",
-    "esbuild-runner": "^2.2.2",
     "npm-run-all": "^4.1.5",
+    "tsx": "^4.19.2",
     "typescript": "^5.4.5"
   },
   "peerDependencies": {
-    "jamtools-core": "0.6.7",
-    "jamtools-platforms-node": "0.6.7",
-    "jamtools-platforms-webapp": "0.6.7"
+    "jamtools-core": "0.8.0",
+    "jamtools-node": "0.8.0",
+    "jamtools-platforms-node": "0.8.0",
+    "jamtools-platforms-webapp": "0.8.0",
+    "jamtools-server": "0.8.0",
+    "jamtools-webapp": "0.8.0"
   },
   "keywords": [],
   "author": "",

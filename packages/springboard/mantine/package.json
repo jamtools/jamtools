@@ -1,6 +1,6 @@
 {
   "name": "springboard-mantine",
-  "version": "0.6.7",
+  "version": "0.8.0",
   "main": "index.js",
   "scripts": {},
   "keywords": [],
@@ -13,6 +13,6 @@
     "@mantine/hooks": "^7.13.4",
     "@mantine/modals": "^7.13.4",
     "@mantine/notifications": "^7.13.4",
-    "jamtools-core": "0.6.7"
+    "jamtools-core": "0.8.0"
   }
 }

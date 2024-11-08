@@ -1,6 +1,6 @@
 #!/bin/bash
 
-full_version="0.6.7"  # Set the target version here or make it a script argument
+full_version="0.8.0"  # Set the target version here or make it a script argument
 
 root_dir=$(pwd)  # Assuming this script is run from the project root
 
@@ -30,7 +30,9 @@ publish_package() {
   local target_dir=$1
   cd "$target_dir" || exit 1
   echo "Publishing package in $target_dir"
-  npm publish --registry http://localhost:4873
+  npm publish --registry http://coolify-infra:4873
+  # npm publish --registry http://localhost:4873
+
 }
 
 # Bump, update dependencies, and publish each package
@@ -72,6 +74,9 @@ bump_version "$root_dir/packages/springboard/cli"
 bump_peer_dep "$root_dir/packages/springboard/cli" "jamtools-core"
 bump_peer_dep "$root_dir/packages/springboard/cli" "jamtools-platforms-node"
 bump_peer_dep "$root_dir/packages/springboard/cli" "jamtools-platforms-webapp"
+bump_peer_dep "$root_dir/packages/springboard/cli" "jamtools-node"
+bump_peer_dep "$root_dir/packages/springboard/cli" "jamtools-webapp"
+bump_peer_dep "$root_dir/packages/springboard/cli" "jamtools-server"
 publish_package "$root_dir/packages/springboard/cli"
 
 # # npm i

@@ -1,13 +1,13 @@
 {
   "name": "jamtools-platforms-webapp",
-  "version": "0.6.7",
+  "version": "0.8.0",
   "scripts": {
     "check-types": "tsc --noEmit",
     "lint": "eslint --ext ts --ext tsx .",
     "fix": "npm run lint -- --fix"
   },
   "peerDependencies": {
-    "jamtools-core": "0.6.7",
+    "jamtools-core": "0.8.0",
     "react-router-dom": "^6.25.0",
     "webmidi": "^3.1.11"
   },

@@ -6,6 +6,7 @@ import {createNodeWebSocket} from '@hono/node-ws';
 import {trpcServer} from '@hono/trpc-server';
 import {NodeJsonRpcServer} from './services/server_json_rpc';
 import {WebsocketServerCoreDependencies} from './ws_server_core_dependencies';
+import {ServerModuleAPI, serverRegistry} from './register';
 
 export const initApp = (coreDeps: WebsocketServerCoreDependencies) => {
     const app = new Hono();
@@ -47,8 +48,27 @@ export const initApp = (coreDeps: WebsocketServerCoreDependencies) => {
         createContext: ({req}) => ({ /* Add context if needed */}),
     }));
 
+    const registerServerModule: typeof serverRegistry['registerServerModule'] = (cb) => {
+        cb(serverModuleAPI);
+    };
+
+    const registeredServerModuleCallbacks = (serverRegistry.registerServerModule as unknown as {calls: CapturedRegisterServerModuleCall[]}).calls || [];
+    serverRegistry.registerServerModule = registerServerModule;
+
+    const serverModuleAPI: ServerModuleAPI = {
+        hono: app,
+    };
+
+    for (const call of registeredServerModuleCallbacks) {
+        call(serverModuleAPI);
+    }
+
     // Catch-all route for SPA
     app.use('*', serveStatic({root: webappDistFolder, path: 'index.html'}));
 
     return {app, injectWebSocket};
 };
+
+type ServerModuleCallback = (server: ServerModuleAPI) => void;
+
+type CapturedRegisterServerModuleCall = ServerModuleCallback;
