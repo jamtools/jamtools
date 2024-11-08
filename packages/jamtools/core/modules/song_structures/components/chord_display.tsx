@@ -1,5 +1,5 @@
 import React from 'react';
-import {Card} from 'jamtools-core/components/Card';
+import {Card} from 'springboard/components/Card';
 import {MIDI_NUMBER_TO_NOTE_NAME_MAPPINGS} from '@jamtools/core/constants/midi_number_to_note_name_mappings';
 
 export type ChordChoice = {

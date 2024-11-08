@@ -6,9 +6,9 @@ import SlTab from '@shoelace-style/shoelace/dist/react/tab/index.js';
 import SlTabGroup from '@shoelace-style/shoelace/dist/react/tab-group/index.js';
 import SlTabPanel from '@shoelace-style/shoelace/dist/react/tab-panel/index.js';
 
-import {Module} from 'jamtools-core/module_registry/module_registry';
-import {Button} from 'jamtools-core/components/Button';
-import {Details} from 'jamtools-core/components/Details';
+import {Module} from 'springboard/module_registry/module_registry';
+import {Button} from 'springboard/components/Button';
+import {Details} from 'springboard/components/Details';
 
 import {RunLocalButton} from './components/run_local_button';
 import {BottomNavigation} from './components/bottom_navigation/bottom_navigation';

@@ -5,10 +5,10 @@ import {Subject} from 'rxjs';
 import { screen } from 'shadow-dom-testing-library';
 import '@testing-library/jest-dom';
 import {MidiEvent, MidiEventFull} from '@jamtools/core/modules/macro_module/macro_module_types';
-import {makeMockCoreDependencies, makeMockExtraDependences} from 'jamtools-core/test/mock_core_dependencies';
+import {makeMockCoreDependencies, makeMockExtraDependences} from 'springboard/test/mock_core_dependencies';
 
-import {Main} from 'jamtools-platforms-webapp/entrypoints/main';
-import {JamToolsEngine} from 'jamtools-core/engine/engine';
+import {Main} from '@springboardjs/platforms-browser/entrypoints/main';
+import {JamToolsEngine} from 'springboard/engine/engine';
 
 export const getMacroInputTestHelpers = () => {
     const setupTest = async (midiSubject: Subject<MidiEventFull>): Promise<JamToolsEngine> => {

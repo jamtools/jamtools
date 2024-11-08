@@ -5,11 +5,11 @@ import {Subject} from 'rxjs';
 // @ts-ignore: This line suppresses an issue with missing types in wled-client
 import {WLEDClient} from 'wled-client';
 
-import {CoreDependencies, ModuleDependencies} from 'jamtools-core/types/module_types';
-import {BaseModule, ModuleHookValue} from 'jamtools-core/modules/base_module/base_module';
-import {Module} from 'jamtools-core/module_registry/module_registry';
+import {CoreDependencies, ModuleDependencies} from 'springboard/types/module_types';
+import {BaseModule, ModuleHookValue} from 'springboard/modules/base_module/base_module';
+import {Module} from 'springboard/module_registry/module_registry';
 
-import {jamtools} from 'jamtools-core/engine/register';
+import {jamtools} from 'springboard/engine/register';
 
 type WledClientStatus = {
     url: string;
@@ -33,7 +33,7 @@ jamtools.registerClassModule((coreDeps: CoreDependencies, modDependencies: Modul
     return new WledModule(coreDeps, modDependencies);
 });
 
-declare module 'jamtools-core/module_registry/module_registry' {
+declare module 'springboard/module_registry/module_registry' {
     interface AllModules {
         wled: WledModule;
     }

@@ -1,12 +1,12 @@
 import React from 'react';
 import {Subject} from 'rxjs';
 
-import {jamtools} from 'jamtools-core/engine/register';
+import {jamtools} from 'springboard/engine/register';
 import {MidiEventFull} from '@jamtools/core/modules/macro_module/macro_module_types';
 import {getKeyForMacro, InputMacroStateHolders, useInputMacroWaiterAndSaver, savedMidiEventsAreEqual, getKeyForMidiEvent} from './input_macro_handler_utils';
 import {qwertyEventToMidiEvent, savedMidiInputsAreEqual} from './musical_keyboard_input_macro_handler';
 import {MidiEvent} from 'midi-file';
-import {Button} from 'jamtools-core/components/Button';
+import {Button} from 'springboard/components/Button';
 
 type MacroConfigItemMidiButtonInput = {
     onTrigger?(midiEvent: MidiEventFull): void;

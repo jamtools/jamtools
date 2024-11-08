@@ -6,17 +6,17 @@ import {setBasePath} from '@shoelace-style/shoelace/dist/utilities/base-path.js'
 // TODO: make this not use cdn
 setBasePath('https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.16.0/cdn/');
 
-import {CoreDependencies} from 'jamtools-core/types/module_types';
+import {CoreDependencies} from 'springboard/types/module_types';
 
-import {TrpcKVStoreService} from 'jamtools-core/services/trpc_kv_store_client';
+import {TrpcKVStoreService} from 'springboard/services/trpc_kv_store_client';
 
 import {Main} from './main';
-import {BrowserQwertyService} from 'jamtools-platforms-webapp/services/browser_qwerty_service';
-import {BrowserMidiService} from 'jamtools-platforms-webapp/services/browser_midi_service';
-import {BrowserKVStoreService} from 'jamtools-platforms-webapp/services/browser_kvstore_service';
-import {BrowserJsonRpcClientAndServer} from 'jamtools-platforms-webapp/services/browser_json_rpc';
-import {JamToolsEngine} from 'jamtools-core/engine/engine';
-import {ExtraModuleDependencies} from 'jamtools-core/module_registry/module_registry';
+import {BrowserQwertyService} from '@springboardjs/platforms-browser/services/browser_qwerty_service';
+import {BrowserMidiService} from '@springboardjs/platforms-browser/services/browser_midi_service';
+import {BrowserKVStoreService} from '@springboardjs/platforms-browser/services/browser_kvstore_service';
+import {BrowserJsonRpcClientAndServer} from '@springboardjs/platforms-browser/services/browser_json_rpc';
+import {JamToolsEngine} from 'springboard/engine/engine';
+import {ExtraModuleDependencies} from 'springboard/module_registry/module_registry';
 
 const waitForPageLoad = () => new Promise<void>(resolve => {
     window.addEventListener('DOMContentLoaded', () => {

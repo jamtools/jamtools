@@ -1,6 +1,6 @@
 #!/bin/bash
 
-full_version="0.9.5"  # Set the target version here or make it a script argument
+full_version="0.10.0"  # Set the target version here or make it a script argument
 
 root_dir=$(pwd)  # Assuming this script is run from the project root
 
@@ -38,30 +38,38 @@ bump_version "$root_dir/packages/springboard/core"
 publish_package "$root_dir/packages/springboard/core"
 
 bump_version "$root_dir/packages/springboard/platforms/webapp"
-bump_peer_dep "$root_dir/packages/springboard/platforms/webapp" "jamtools-core"
+bump_peer_dep "$root_dir/packages/springboard/platforms/webapp" "springboard"
 publish_package "$root_dir/packages/springboard/platforms/webapp"
 
 bump_version "$root_dir/packages/springboard/platforms/node"
-bump_peer_dep "$root_dir/packages/springboard/platforms/node" "jamtools-core"
+bump_peer_dep "$root_dir/packages/springboard/platforms/node" "springboard"
 publish_package "$root_dir/packages/springboard/platforms/node"
 
 bump_version "$root_dir/packages/springboard/data_storage"
 publish_package "$root_dir/packages/springboard/data_storage"
 
 bump_version "$root_dir/packages/springboard/server"
-bump_peer_dep "$root_dir/packages/springboard/server" "jamtools-core"
-bump_peer_dep "$root_dir/packages/springboard/server" "springboard-data-storage"
+bump_peer_dep "$root_dir/packages/springboard/server" "springboard"
+bump_peer_dep "$root_dir/packages/springboard/server" "@springboardjs/data-storage"
 publish_package "$root_dir/packages/springboard/server"
 
 bump_version "$root_dir/packages/springboard/external/mantine"
-bump_peer_dep "$root_dir/packages/springboard/external/mantine" "jamtools-core"
+bump_peer_dep "$root_dir/packages/springboard/external/mantine" "springboard"
 publish_package "$root_dir/packages/springboard/external/mantine"
 
+bump_version "$root_dir/packages/jamtools/core"
+bump_peer_dep "$root_dir/packages/jamtools/core" "springboard"
+publish_package "$root_dir/packages/jamtools/core"
+
+bump_version "$root_dir/packages/jamtools/features"
+bump_peer_dep "$root_dir/packages/jamtools/features" "@jamtools/core"
+publish_package "$root_dir/packages/jamtools/features"
+
 bump_version "$root_dir/packages/springboard/cli"
-bump_peer_dep "$root_dir/packages/springboard/cli" "jamtools-core"
-bump_peer_dep "$root_dir/packages/springboard/cli" "jamtools-platforms-node"
-bump_peer_dep "$root_dir/packages/springboard/cli" "jamtools-platforms-webapp"
-bump_peer_dep "$root_dir/packages/springboard/cli" "jamtools-server"
+bump_peer_dep "$root_dir/packages/springboard/cli" "springboard"
+bump_peer_dep "$root_dir/packages/springboard/cli" "@springboardjs/platforms-node"
+bump_peer_dep "$root_dir/packages/springboard/cli" "@springboardjs/platforms-browser"
+bump_peer_dep "$root_dir/packages/springboard/cli" "springboard-server"
 publish_package "$root_dir/packages/springboard/cli"
 
 # # npm i

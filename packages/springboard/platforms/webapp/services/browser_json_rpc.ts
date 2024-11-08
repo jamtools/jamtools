@@ -1,5 +1,5 @@
 import {JSONRPCClient, JSONRPCServer} from 'json-rpc-2.0';
-import {Rpc, RpcArgs} from 'jamtools-core/types/module_types';
+import {Rpc, RpcArgs} from 'springboard/types/module_types';
 
 import ReconnectingWebSocket from 'reconnecting-websocket';
 

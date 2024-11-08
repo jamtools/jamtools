@@ -1,6 +1,6 @@
 import React from 'react';
 import {MacroConfigState} from './macro_module';
-import {Details} from 'jamtools-core/components/Details';
+import {Details} from 'springboard/components/Details';
 
 type Props = {
     state: MacroConfigState;

@@ -1,4 +1,4 @@
-import {ErrorResponse, isErrorResponse} from 'jamtools-core/types/response_types';
+import {ErrorResponse, isErrorResponse} from 'springboard/types/response_types';
 
 type UltimateGuitarServiceResponse = {
     data: string;

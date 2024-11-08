@@ -28,9 +28,9 @@ const buildConfigs: BuildConfig[] = [
     {
         platform: 'node',
         platformEntrypoint: () => {
-            let entrypoint = 'jamtools-platforms-node/entrypoints/node_main_entrypoint.ts';
+            let entrypoint = '@springboardjs/platforms-node/entrypoints/node_main_entrypoint.ts';
             if (process.env.DISABLE_IO === 'true') {
-                entrypoint = 'jamtools-platforms-node/entrypoints/node_saas_entrypoint.ts';
+                entrypoint = '@springboardjs/platforms-node/entrypoints/node_saas_entrypoint.ts';
             }
 
             return entrypoint;
@@ -49,12 +49,12 @@ const buildConfigs: BuildConfig[] = [
     },
     {
         platform: 'browser',
-        platformEntrypoint: () => 'jamtools-platforms-webapp/entrypoints/index.tsx',
+        platformEntrypoint: () => '@springboardjs/platforms-browser/entrypoints/index.tsx',
         esbuildPlugins: () => [
             esbuildPluginPlatformInject('browser'),
         ],
         additionalFiles: {
-            'jamtools-platforms-webapp/index.html': 'index.html',
+            '@springboardjs/platforms-browser/index.html': 'index.html',
         },
     },
 ];
@@ -96,8 +96,8 @@ const buildApplication = async (buildConfig: BuildConfig) => {
         ],
         external: buildConfig.externals?.(),
         alias: {
-            // 'jamtools-core': './jamtools/packages/jamtools/core',
-            // 'jamtools-platforms-webapp': './jamtools/packages/jamtools/platforms/webapp',
+            // 'springboard': './jamtools/packages/jamtools/core',
+            // '@springboardjs/platforms-browser': './jamtools/packages/jamtools/platforms/webapp',
             // 'react': './node_modules/react',
             // 'jamtools-mantine': './jamtools/packages/springboard/mantine',
         },
@@ -146,7 +146,7 @@ const buildServer = async () => {
 
     const outFile = path.join(outDir, 'local-server.cjs');
 
-    const coreFile = 'jamtools-server/src/entrypoints/local-server.entrypoint.ts';
+    const coreFile = 'springboard-server/src/entrypoints/local-server.entrypoint.ts';
     const serverEntrypoint = process.env.SERVER_ENTRYPOINT;
 
     let allImports = [coreFile].map(file => `import '${file}';`).join('\n');

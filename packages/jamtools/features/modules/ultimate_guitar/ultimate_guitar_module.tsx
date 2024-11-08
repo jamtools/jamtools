@@ -1,16 +1,16 @@
 import React from 'react';
 
-import {jamtools} from 'jamtools-core/engine/register';
-import {isErrorResponse} from 'jamtools-core/types/response_types';
+import {jamtools} from 'springboard/engine/register';
+import {isErrorResponse} from 'springboard/types/response_types';
 
 import {parseUltimateGuitarHTMLContent} from './ultimate_guitar_utils';
 import {UltimateGuitarService} from './ultimate_guitar_service';
 import {UltimateGuitarMainView} from './components/ultimate_guitar_main_view';
 import {UltimateGuitarSetlist, UltimateGuitarSetlistSong, UltimateGuitarSetlistStatus, UltimateGuitarTab, parseUltimateGuitarTabUrl} from './ultimate_guitar_types';
 import {UltimateGuitarManageView} from './components/ultimate_guitar_manage_view';
-import {generateId} from 'jamtools-core/utils/generate_id';
-import {ModuleAPI} from 'jamtools-core/engine/module_api';
-import {StateSupervisor} from 'jamtools-core/services/states/shared_state_service';
+import {generateId} from 'springboard/utils/generate_id';
+import {ModuleAPI} from 'springboard/engine/module_api';
+import {StateSupervisor} from 'springboard/services/states/shared_state_service';
 import {UltimateGuitarQRCode} from './components/ultimate_guitar_qr_code';
 
 type UltimateGuitarModuleDependencies = {
@@ -24,12 +24,12 @@ type UltimateGuitarModuleReturnValue = {
     // getSong(setlistId: string, songId: string): SavedUltimateGuitarSong;
 }
 
-// declare module 'jamtools-core/module_registry/module_registry' {
+// declare module 'springboard/module_registry/module_registry' {
 //     interface ExtraModuleDependencies {
 //     }
 // }
 
-declare module 'jamtools-core/module_registry/module_registry' {
+declare module 'springboard/module_registry/module_registry' {
     interface AllModules {
         Ultimate_Guitar: UltimateGuitarModuleReturnValue;
     }

@@ -1,11 +1,11 @@
 import {Subject} from 'rxjs';
 
-import {CoreDependencies, ModuleDependencies} from 'jamtools-core/types/module_types';
-import {Module} from 'jamtools-core/module_registry/module_registry';
+import {CoreDependencies, ModuleDependencies} from 'springboard/types/module_types';
+import {Module} from 'springboard/module_registry/module_registry';
 import {MidiInputEventPayload, QwertyCallbackPayload} from '@jamtools/core/types/io_types';
-import {jamtools} from 'jamtools-core/engine/register';
-import {StateSupervisor} from 'jamtools-core/services/states/shared_state_service';
-import {ModuleAPI} from 'jamtools-core/engine/module_api';
+import {jamtools} from 'springboard/engine/register';
+import {StateSupervisor} from 'springboard/services/states/shared_state_service';
+import {ModuleAPI} from 'springboard/engine/module_api';
 import {MidiEvent} from '@jamtools/core/modules/macro_module/macro_module_types';
 
 type IoState = {
@@ -17,7 +17,7 @@ jamtools.registerClassModule((coreDeps: CoreDependencies, modDependencies: Modul
     return new IoModule(coreDeps, modDependencies);
 });
 
-declare module 'jamtools-core/module_registry/module_registry' {
+declare module 'springboard/module_registry/module_registry' {
     interface AllModules {
         io: IoModule;
     }

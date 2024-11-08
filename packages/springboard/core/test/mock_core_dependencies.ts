@@ -2,7 +2,7 @@ import {Subject} from 'rxjs';
 import {DeviceInfo, MidiEvent, MidiEventFull} from '@jamtools/core/modules/macro_module/macro_module_types';
 import {MidiService, QwertyCallbackPayload, QwertyService} from '@jamtools/core/types/io_types';
 import {CoreDependencies, KVStore, Rpc, RpcArgs} from '../types/module_types';
-import {ExtraModuleDependencies} from 'jamtools-core/module_registry/module_registry';
+import {ExtraModuleDependencies} from 'springboard/module_registry/module_registry';
 
 class MockMidiService implements MidiService {
     onInputEvent = new Subject<MidiEventFull>();

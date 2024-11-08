@@ -1,10 +1,10 @@
 import fs from 'fs';
 
-import {makeKyselySqliteInstance} from 'springboard-data-storage/sqlite_db';
+import {makeKyselySqliteInstance} from '@springboardjs/data-storage/sqlite_db';
 
-import {KyselyKVStore} from 'springboard-data-storage/kv_store_db_types';
+import {KyselyKVStore} from '@springboardjs/data-storage/kv_store_db_types';
 
-import {makeKVTrpcRouter, type KVTrpcRouter} from 'springboard-data-storage/kv_api_trpc';
+import {makeKVTrpcRouter, type KVTrpcRouter} from '@springboardjs/data-storage/kv_api_trpc';
 
 export type WebsocketServerCoreDependencies = {
     kvDatabase: KyselyKVStore;

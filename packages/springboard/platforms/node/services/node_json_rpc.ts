@@ -2,7 +2,7 @@ import {JSONRPCClient, JSONRPCServer} from 'json-rpc-2.0';
 import WebSocket from 'isomorphic-ws';
 import ReconnectingWebSocket from 'reconnecting-websocket';
 
-import {KVStore, Rpc, RpcArgs} from 'jamtools-core/types/module_types';
+import {KVStore, Rpc, RpcArgs} from 'springboard/types/module_types';
 
 type ClientParams = {
     clientId: string;

@@ -1,11 +1,11 @@
 import React, {useState} from 'react';
 
-import {Button} from 'jamtools-core/components/Button';
+import {Button} from 'springboard/components/Button';
 
-import {jamtools} from 'jamtools-core/engine/register';
+import {jamtools} from 'springboard/engine/register';
 import {MidiFileParser, ParsedMidiFile} from './midi_file_parser/midi_file_parser';
 
-declare module 'jamtools-core/module_registry/module_registry' {
+declare module 'springboard/module_registry/module_registry' {
     interface AllModules {
         MidiFile: MidiFileModuleReturnValue;
     }

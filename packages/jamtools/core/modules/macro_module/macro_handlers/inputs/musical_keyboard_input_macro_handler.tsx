@@ -4,7 +4,7 @@ import {MidiDeviceAndChannelMap, MidiEventFull, makeHashedMidiDeviceAndChannel} 
 import {QwertyCallbackPayload} from '@jamtools/core/types/io_types';
 import {Subject} from 'rxjs';
 import {QWERTY_TO_MIDI_MAPPINGS} from '@jamtools/core/constants/qwerty_to_midi_mappings';
-import {jamtools} from 'jamtools-core/engine/register';
+import {jamtools} from 'springboard/engine/register';
 import {InputMacroStateHolders, getKeyForMacro, getKeyForMidiEvent, useInputMacroWaiterAndSaver} from './input_macro_handler_utils';
 
 type MusicalKeyboardInputResult = {

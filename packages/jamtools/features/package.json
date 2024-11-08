@@ -1,20 +1,23 @@
 {
-    "name": "jamtools-features",
-    "scripts": {
-        "check-types": "tsc --noEmit",
-        "lint": "eslint --ext ts --ext tsx .",
-        "fix": "npm run lint -- --fix"
-    },
-    "dependencies": {
-        "jamtools-core": "*",
-        "jsdom": "^25.0.0",
-        "qrcode": "^1.5.4",
-        "tonal": "^6.2.0"
-    },
-    "devDependencies": {
-        "@types/qrcode": "^1.5.5"
-    },
-    "config": {
-        "dir": "../../../configs"
-    }
+  "name": "@jamtools/features",
+  "scripts": {
+    "check-types": "tsc --noEmit",
+    "lint": "eslint --ext ts --ext tsx .",
+    "fix": "npm run lint -- --fix"
+  },
+  "dependencies": {
+    "jsdom": "^25.0.0",
+    "qrcode": "^1.5.4",
+    "tonal": "^6.2.0"
+  },
+  "devDependencies": {
+    "@types/qrcode": "^1.5.5"
+  },
+  "config": {
+    "dir": "../../../configs"
+  },
+  "version": "0.10.0",
+  "peerDependencies": {
+    "@jamtools/core": "0.10.0"
+  }
 }

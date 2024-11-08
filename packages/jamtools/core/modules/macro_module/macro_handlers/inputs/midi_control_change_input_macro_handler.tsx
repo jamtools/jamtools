@@ -1,7 +1,7 @@
 import React from 'react';
 import {Subject} from 'rxjs';
 
-import {jamtools} from 'jamtools-core/engine/register';
+import {jamtools} from 'springboard/engine/register';
 import {MidiEventFull} from '@jamtools/core/modules/macro_module/macro_module_types';
 import {getKeyForMacro, InputMacroStateHolders, useInputMacroWaiterAndSaver, savedMidiEventsAreEqual, getKeyForMidiEvent} from './input_macro_handler_utils';
 

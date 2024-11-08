@@ -1,9 +1,9 @@
 import React from 'react';
 
-import {Button} from 'jamtools-core/components/Button';
+import {Button} from 'springboard/components/Button';
 
 import {UltimateGuitarSetlist, UltimateGuitarSetlistSong, UltimateGuitarSetlistStatus, UltimateGuitarTab} from '../ultimate_guitar_types';
-import {Details} from 'jamtools-core/components/Details';
+import {Details} from 'springboard/components/Details';
 import {getTabFromCurrentSetlistData} from '../ultimate_guitar_utils';
 
 type UltimateGuitarManageViewProps = {

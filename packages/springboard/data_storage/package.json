@@ -1,6 +1,6 @@
 {
-  "name": "springboard-data-storage",
-  "version": "0.9.5",
+  "name": "@springboardjs/data-storage",
+  "version": "0.10.0",
   "description": "",
   "main": "index.js",
   "scripts": {},

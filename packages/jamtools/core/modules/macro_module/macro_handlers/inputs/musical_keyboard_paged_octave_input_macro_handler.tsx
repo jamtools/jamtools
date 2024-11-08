@@ -3,9 +3,9 @@ import React, {useEffect, useState} from 'react';
 import {produce} from 'immer';
 import {Subject} from 'rxjs';
 
-import {jamtools} from 'jamtools-core/engine/register';
+import {jamtools} from 'springboard/engine/register';
 import {getKeyForMacro} from './input_macro_handler_utils';
-import {Button} from 'jamtools-core/components/Button';
+import {Button} from 'springboard/components/Button';
 import {savedMidiInputsAreEqual} from './musical_keyboard_input_macro_handler';
 
 import '@jamtools/core/modules/macro_module/macro_module';

@@ -1,11 +1,11 @@
 import React from 'react';
 
-import jamtools from 'jamtools-core';
-import {ModuleAPI} from 'jamtools-core/engine/module_api';
+import jamtools from 'springboard';
+import {ModuleAPI} from 'springboard/engine/module_api';
 import {IndexedDbFileStorageProvider} from './file_storage_providers/indexed_db_file_storage_provider';
 import {FileInfo} from './file_types';
 
-declare module 'jamtools-core/module_registry/module_registry' {
+declare module 'springboard/module_registry/module_registry' {
     interface AllModules {
         Files: FilesModule;
     }

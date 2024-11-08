@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 
-import {KVStore} from 'jamtools-core/types/module_types';
+import {KVStore} from 'springboard/types/module_types';
 
 // TODO: this needs to be optional I think. or just have a sane default
 // the file should be assumed to be in ./data/kv_data.json

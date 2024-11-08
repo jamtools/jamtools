@@ -3,7 +3,7 @@ import React from 'react';
 import {MIDI_NUMBER_TO_NOTE_NAME_MAPPINGS} from '@jamtools/core/constants/midi_number_to_note_name_mappings';
 import {ScaleDegreeInfo} from './root_mode_types';
 
-import {Button} from 'jamtools-core/components/Button';
+import {Button} from 'springboard/components/Button';
 
 type Props = {
     chord: ScaleDegreeInfo | null;

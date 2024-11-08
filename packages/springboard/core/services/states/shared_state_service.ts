@@ -2,7 +2,7 @@ import {produce} from 'immer';
 import {useEffect, useState} from 'react';
 import {Subject} from 'rxjs';
 
-import {CoreDependencies, KVStore, Rpc} from 'jamtools-core/types/module_types';
+import {CoreDependencies, KVStore, Rpc} from 'springboard/types/module_types';
 
 type SharedStateMessage = {
     key: string;

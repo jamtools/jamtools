@@ -2,14 +2,14 @@ import React from 'react';
 
 import '../io/io_module';
 
-import type {Module} from 'jamtools-core/module_registry/module_registry';
+import type {Module} from 'springboard/module_registry/module_registry';
 
-import {CoreDependencies, ModuleDependencies} from 'jamtools-core/types/module_types';
+import {CoreDependencies, ModuleDependencies} from 'springboard/types/module_types';
 import {MacroConfigItem, MacroTypeConfigs} from './macro_module_types';
-import {BaseModule, ModuleHookValue} from 'jamtools-core/modules/base_module/base_module';
+import {BaseModule, ModuleHookValue} from 'springboard/modules/base_module/base_module';
 import {MacroPage} from './macro_page';
-import {CapturedRegisterMacroTypeCall, MacroAPI, MacroCallback, jamtools} from 'jamtools-core/engine/register';
-import {ModuleAPI} from 'jamtools-core/engine/module_api';
+import {CapturedRegisterMacroTypeCall, MacroAPI, MacroCallback, jamtools} from 'springboard/engine/register';
+import {ModuleAPI} from 'springboard/engine/module_api';
 
 import './macro_handlers';
 
@@ -28,7 +28,7 @@ jamtools.registerClassModule((coreDeps: CoreDependencies, modDependencies: Modul
     return new MacroModule(coreDeps, modDependencies);
 });
 
-declare module 'jamtools-core/module_registry/module_registry' {
+declare module 'springboard/module_registry/module_registry' {
     interface AllModules {
         macro: MacroModule;
     }

@@ -1,5 +1,5 @@
-import {Module} from 'jamtools-core/module_registry/module_registry';
-import {CoreDependencies, ModuleDependencies} from 'jamtools-core/types/module_types';
+import {Module} from 'springboard/module_registry/module_registry';
+import {CoreDependencies, ModuleDependencies} from 'springboard/types/module_types';
 import type {ModuleAPI} from './module_api';
 import type {MacroTypeConfigs} from '@jamtools/core/modules/macro_module/macro_module_types';
 

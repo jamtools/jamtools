@@ -1,8 +1,8 @@
 import React from 'react';
 
-import {JamToolsEngine, JamToolsProvider} from 'jamtools-core/engine/engine';
+import {JamToolsEngine, JamToolsProvider} from 'springboard/engine/engine';
 
-import {FrontendRoutes} from 'jamtools-platforms-webapp/frontend_routes';
+import {FrontendRoutes} from '@springboardjs/platforms-browser/frontend_routes';
 
 type Props = {
     engine: JamToolsEngine;

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {jamtools} from 'jamtools-core/engine/register';
+import {jamtools} from 'springboard/engine/register';
 
 jamtools.registerModule('lobby', {}, async (moduleAPI) => {
     moduleAPI.registerRoute('/', {}, () => {

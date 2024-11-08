@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {jamtools} from 'jamtools-core/engine/register';
+import {jamtools} from 'springboard/engine/register';
 
 import {MidiEvent} from '@jamtools/core/modules/macro_module/macro_module_types';
 

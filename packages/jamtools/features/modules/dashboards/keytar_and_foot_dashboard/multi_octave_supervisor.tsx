@@ -1,8 +1,8 @@
 import React from 'react';
 
-import {ModuleAPI} from 'jamtools-core/engine/module_api';
+import {ModuleAPI} from 'springboard/engine/module_api';
 import {MidiEvent, MidiEventFull} from '@jamtools/core/modules/macro_module/macro_module_types';
-import {Button} from 'jamtools-core/components/Button';
+import {Button} from 'springboard/components/Button';
 
 type MultiOctaveSupervisorMidiState = {
     currentlyHeldDownInputNotes: MidiEvent[];

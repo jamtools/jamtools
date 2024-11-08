@@ -1,15 +1,15 @@
 import {JSDOM} from 'jsdom';
 
-import {CoreDependencies} from 'jamtools-core/types/module_types';
+import {CoreDependencies} from 'springboard/types/module_types';
 
-import {TrpcKVStoreService} from 'jamtools-core/services/trpc_kv_store_client';
+import {TrpcKVStoreService} from 'springboard/services/trpc_kv_store_client';
 
-import {NodeKVStoreService} from 'jamtools-platforms-node/services/node_kvstore_service';
-import {NodeFileStorageService} from 'jamtools-platforms-node/services/node_file_storage_service';
-import {NodeJsonRpcClientAndServer} from 'jamtools-platforms-node/services/node_json_rpc';
-import {JamToolsEngine} from 'jamtools-core/engine/engine';
+import {NodeKVStoreService} from '@springboardjs/platforms-node/services/node_kvstore_service';
+import {NodeFileStorageService} from '@springboardjs/platforms-node/services/node_file_storage_service';
+import {NodeJsonRpcClientAndServer} from '@springboardjs/platforms-node/services/node_json_rpc';
+import {JamToolsEngine} from 'springboard/engine/engine';
 import {MidiService, QwertyService} from '@jamtools/core/types/io_types';
-import {ExtraModuleDependencies} from 'jamtools-core/module_registry/module_registry';
+import {ExtraModuleDependencies} from 'springboard/module_registry/module_registry';
 
 const WS_HOST = process.env.WS_HOST || 'ws://localhost:1337';
 const DATA_HOST = process.env.DATA_HOST || 'http://localhost:1337';

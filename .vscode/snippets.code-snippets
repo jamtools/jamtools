@@ -1,13 +1,13 @@
 {
-    "Register new jamtools module": {
+    "Register new springboard module": {
         "prefix": "register-module",
         "scope": "javascript,typescript,typescriptreact",
         "body": [
             "import React from 'react';",
             "",
-            "import jamtools from 'jamtools-core';",
+            "import springboard from 'springboard';",
             "",
-            "declare module 'jamtools-core/module_registry/module_registry' {",
+            "declare module 'springboard/module_registry/module_registry' {",
             "    interface AllModules {",
             "        $1: $1ModuleReturnValue;",
             "    }",
@@ -17,7 +17,7 @@
             "",
             "};",
             "",
-            "jamtools.registerModule('$1', {}, async (moduleAPI): Promise<$1ModuleReturnValue> => {",
+            "springboard.registerModule('$1', {}, async (moduleAPI): Promise<$1ModuleReturnValue> => {",
             "    return {};",
             "});"
         ],

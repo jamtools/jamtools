@@ -4,13 +4,13 @@ import { screen } from 'shadow-dom-testing-library';
 import '@testing-library/jest-dom';
 
 import '@jamtools/core/modules';
-import {JamToolsEngine} from 'jamtools-core/engine/engine';
+import {JamToolsEngine} from 'springboard/engine/engine';
 
-import {makeMockCoreDependencies, makeMockExtraDependences} from 'jamtools-core/test/mock_core_dependencies';
+import {makeMockCoreDependencies, makeMockExtraDependences} from 'springboard/test/mock_core_dependencies';
 import {Subject} from 'rxjs';
 import {QwertyCallbackPayload} from '@jamtools/core/types/io_types';
 import {MidiEventFull} from '@jamtools/core/modules/macro_module/macro_module_types';
-import {jamtools} from 'jamtools-core/engine/register';
+import {jamtools} from 'springboard/engine/register';
 import {getMacroInputTestHelpers} from './macro_input_test_helpers';
 
 describe('MusicalKeyboardInputMacroHandler', () => {

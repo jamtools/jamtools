@@ -1,13 +1,13 @@
 import {ScaleLoader} from 'react-spinners';
 
-import {CoreDependencies, ModuleDependencies} from 'jamtools-core/types/module_types';
+import {CoreDependencies, ModuleDependencies} from 'springboard/types/module_types';
 
 import {ClassModuleCallback, ModuleCallback, RegisterModuleOptions, jamtools} from './register';
 
 import React, {createContext, useContext, useState} from 'react';
 
-import {useMount} from 'jamtools-core/hooks/useMount';
-import {ExtraModuleDependencies, Module, ModuleRegistry} from 'jamtools-core/module_registry/module_registry';
+import {useMount} from 'springboard/hooks/useMount';
+import {ExtraModuleDependencies, Module, ModuleRegistry} from 'springboard/module_registry/module_registry';
 
 import {SharedStateService} from '../services/states/shared_state_service';
 import {ModuleAPI} from './module_api';

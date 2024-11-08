@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import jamtools from 'jamtools-core';
+import jamtools from 'springboard';
 
 import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';

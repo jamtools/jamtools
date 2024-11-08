@@ -1,12 +1,12 @@
 import React from 'react';
 
-import {jamtools} from 'jamtools-core/engine/register';
+import {jamtools} from 'springboard/engine/register';
 
-import {ParsedMidiFile} from 'jamtools-core/modules/midi_files/midi_file_parser/midi_file_parser';
+import {ParsedMidiFile} from '@jamtools/core/modules/midi_files/midi_file_parser/midi_file_parser';
 
-import 'jamtools-core/modules/midi_files/midi_files_module';
+import '@jamtools/core/modules/midi_files/midi_files_module';
 
-declare module 'jamtools-core/module_registry/module_registry' {
+declare module 'springboard/module_registry/module_registry' {
     interface AllModules {
         MidiPlayback: MidiPlaybackModuleReturnValue;
     }
