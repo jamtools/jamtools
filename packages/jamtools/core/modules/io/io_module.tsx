@@ -1,12 +1,12 @@
 import {Subject} from 'rxjs';
 
-import {CoreDependencies, ModuleDependencies} from '~/core/types/module_types';
-import {Module} from '~/core/module_registry/module_registry';
-import {MidiInputEventPayload, QwertyCallbackPayload} from '~/core/types/io_types';
-import {jamtools} from '~/core/engine/register';
-import {StateSupervisor} from '~/core/services/states/shared_state_service';
-import {ModuleAPI} from '~/core/engine/module_api';
-import {MidiEvent} from '~/core/modules/macro_module/macro_module_types';
+import {CoreDependencies, ModuleDependencies} from 'springboard/types/module_types';
+import {Module} from 'springboard/module_registry/module_registry';
+import {MidiInputEventPayload, QwertyCallbackPayload} from '@jamtools/core/types/io_types';
+import {jamtools} from 'springboard/engine/register';
+import {StateSupervisor} from 'springboard/services/states/shared_state_service';
+import {ModuleAPI} from 'springboard/engine/module_api';
+import {MidiEvent} from '@jamtools/core/modules/macro_module/macro_module_types';
 
 type IoState = {
     midiInputDevices: string[];
@@ -17,7 +17,7 @@ jamtools.registerClassModule((coreDeps: CoreDependencies, modDependencies: Modul
     return new IoModule(coreDeps, modDependencies);
 });
 
-declare module '~/core/module_registry/module_registry' {
+declare module 'springboard/module_registry/module_registry' {
     interface AllModules {
         io: IoModule;
     }

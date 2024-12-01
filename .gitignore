@@ -6,5 +6,8 @@ site
 typedoc_docs
 kv.db
 .env
-ultimate_guitar_cookie.ts
 kv_data.json
+
+verdaccio
+esbuild_meta.json
+stats.html

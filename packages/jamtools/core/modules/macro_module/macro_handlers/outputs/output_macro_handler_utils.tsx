@@ -1,10 +1,10 @@
 import React from 'react';
 
-import {MacroAPI} from '~/core/engine/register';
-import {StateSupervisor} from '~/core/services/states/shared_state_service';
+import {MacroAPI} from 'springboard/engine/register';
+import {StateSupervisor} from 'springboard/services/states/shared_state_service';
 import {AddingOutputDeviceState, Edit, SavedOutputDeviceState} from './components/output_macro_edit';
-import {SoundfontPeripheral} from '~/core/peripherals/outputs/soundfont_peripheral';
-import {MidiEvent} from '~/core/modules/macro_module/macro_module_types';
+import {SoundfontPeripheral} from '../../../../peripherals/outputs/soundfont_peripheral';
+import {MidiEvent} from '@jamtools/core/modules/macro_module/macro_module_types';
 
 export type OutputMacroStateHolders = {
     editing: StateSupervisor<boolean>;

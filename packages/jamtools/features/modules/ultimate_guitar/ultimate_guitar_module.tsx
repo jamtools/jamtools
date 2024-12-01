@@ -1,16 +1,16 @@
 import React from 'react';
 
-import {jamtools} from '~/core/engine/register';
-import {isErrorResponse} from '~/core/types/response_types';
+import {jamtools} from 'springboard/engine/register';
+import {isErrorResponse} from 'springboard/types/response_types';
 
 import {parseUltimateGuitarHTMLContent} from './ultimate_guitar_utils';
-import type {UltimateGuitarService} from './ultimate_guitar_service';
+import {UltimateGuitarService} from './ultimate_guitar_service';
 import {UltimateGuitarMainView} from './components/ultimate_guitar_main_view';
 import {UltimateGuitarSetlist, UltimateGuitarSetlistSong, UltimateGuitarSetlistStatus, UltimateGuitarTab, parseUltimateGuitarTabUrl} from './ultimate_guitar_types';
 import {UltimateGuitarManageView} from './components/ultimate_guitar_manage_view';
-import {generateId} from '~/core/utils/generate_id';
-import {ModuleAPI} from '~/core/engine/module_api';
-import {StateSupervisor} from '~/core/services/states/shared_state_service';
+import {generateId} from 'springboard/utils/generate_id';
+import {ModuleAPI} from 'springboard/engine/module_api';
+import {StateSupervisor} from 'springboard/services/states/shared_state_service';
 import {UltimateGuitarQRCode} from './components/ultimate_guitar_qr_code';
 
 type UltimateGuitarModuleDependencies = {
@@ -24,13 +24,12 @@ type UltimateGuitarModuleReturnValue = {
     // getSong(setlistId: string, songId: string): SavedUltimateGuitarSong;
 }
 
-declare module '~/core/module_registry/module_registry' {
-    interface ExtraModuleDependencies {
-        Ultimate_Guitar: UltimateGuitarModuleDependencies;
-    }
-}
+// declare module 'springboard/module_registry/module_registry' {
+//     interface ExtraModuleDependencies {
+//     }
+// }
 
-declare module '~/core/module_registry/module_registry' {
+declare module 'springboard/module_registry/module_registry' {
     interface AllModules {
         Ultimate_Guitar: UltimateGuitarModuleReturnValue;
     }
@@ -202,8 +201,12 @@ class Actions {
 
         const foundTab = tabs.find(t => t.url === args.url);
         if (!foundTab) {
-            const deps = this.moduleAPI.deps.extra.Ultimate_Guitar;
-            const tab = await handleSubmitTabUrl(args.url, deps);
+            const ugService = new UltimateGuitarService();
+            const tab = await handleSubmitTabUrl(args.url, {
+                // TODO: this code is unimplemented now, to get rid of ExtraModuleDependencies
+                domParser: (htmlString: string) => document,
+                ultimateGuitarService: ugService,
+            });
             if (typeof tab === 'string') {
                 throw new Error(tab);
             }

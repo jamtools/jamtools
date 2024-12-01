@@ -1,6 +1,4 @@
-import {ErrorResponse, isErrorResponse} from '~/core/types/response_types';
-
-// import ugCookie from './ultimate_guitar_cookie';
+import {ErrorResponse, isErrorResponse} from 'springboard/types/response_types';
 
 type UltimateGuitarServiceResponse = {
     data: string;

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {jamtools} from '~/core/engine/register';
+import {jamtools} from 'springboard/engine/register';
 
 // import {GuitarComponent} from './song_structures/components/guitar';
 

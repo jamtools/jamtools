@@ -1,10 +1,12 @@
 import React from 'react';
 
-import {jamtools} from '~/core/engine/register';
+import {jamtools} from 'springboard/engine/register';
 
-import {ParsedMidiFile} from '~/core/services/midi_file_parser/midi_file_parser';
+import {ParsedMidiFile} from '@jamtools/core/modules/midi_files/midi_file_parser/midi_file_parser';
 
-declare module '~/core/module_registry/module_registry' {
+import '@jamtools/core/modules/midi_files/midi_files_module';
+
+declare module 'springboard/module_registry/module_registry' {
     interface AllModules {
         MidiPlayback: MidiPlaybackModuleReturnValue;
     }
@@ -19,11 +21,11 @@ jamtools.registerModule('MidiPlayback', {}, async (moduleAPI): Promise<MidiPlayb
 
     const savedMidiFileData = await moduleAPI.statesAPI.createPersistentState<ParsedMidiFile | null>('savedMidiFileData', null);
 
-    const outputDevice = await moduleAPI.createMacro(moduleAPI, 'outputDevice', 'musical_keyboard_output', {});
+    const outputDevice = await moduleAPI.deps.module.moduleRegistry.getModule('macro').createMacro(moduleAPI, 'outputDevice', 'musical_keyboard_output', {});
 
     let currentIndex = -1;
 
-    const inputTrigger = await moduleAPI.createMacro(moduleAPI, 'inputTrigger', 'midi_button_input', {onTrigger: (event) => {
+    const inputTrigger = await moduleAPI.deps.module.moduleRegistry.getModule('macro').createMacro(moduleAPI, 'inputTrigger', 'midi_button_input', {onTrigger: (event) => {
         if (event.event.type !== 'noteon') {
             return;
         }

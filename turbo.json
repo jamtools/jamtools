@@ -4,11 +4,13 @@
       "build": {
         "dependsOn": ["^build"],
         "outputs": ["dist"],
+        "cache": false,
         "env": ["WS_HOST", "DATA_HOST", "NODE_ENV"]
       },
       "build-saas": {
         "dependsOn": ["^build-saas"],
         "outputs": ["dist"],
+        "cache": false,
         "env": ["WS_HOST", "DATA_HOST", "NODE_ENV"]
       },
       "check-types": {

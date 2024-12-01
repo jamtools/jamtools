@@ -1,10 +1,10 @@
 import React from 'react';
 
-import {MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
+import {MidiEventFull} from '@jamtools/core/modules/macro_module/macro_module_types';
 
 import {SavedMacroValues} from './saved_macro_values';
 import {CaptureForm} from './capture_form';
-import {Button} from '~/core/components/Button';
+import {Button} from 'springboard/components/Button';
 
 type EditProps = {
     editing: boolean;

@@ -1,6 +1,6 @@
-import {jamtools} from '~/core/engine/register';
+import {jamtools} from 'springboard/engine/register';
 
-declare module '~/core/module_registry/module_registry' {
+declare module 'springboard/module_registry/module_registry' {
     interface AllModules {
         RandomNote: RandomNoteModuleReturnValue;
     }

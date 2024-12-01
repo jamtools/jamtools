@@ -1,0 +1,32 @@
+{
+  "name": "springboard-server",
+  "version": "0.11.4",
+  "main": "./index.ts",
+  "module": "./index.ts",
+  "files": [
+    "index.ts",
+    "src"
+  ],
+  "scripts": {
+    "start": "node dist/local-server.js",
+    "run:watch": "nodemon dist/local-server.js",
+    "build:watch": "npm run build-local-server -- --watch",
+    "build-local-server": "node esbuild.mjs",
+    "check-types": "tsc --noEmit",
+    "lint": "eslint --ext ts --ext tsx src/",
+    "fix": "npm run lint -- --fix"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.2",
+    "@hono/node-ws": "^1.0.4",
+    "@hono/trpc-server": "^0.3.2",
+    "hono": "^4.6.7"
+  },
+  "config": {
+    "dir": "../../../configs"
+  },
+  "peerDependencies": {
+    "springboard": "0.11.4",
+    "@springboardjs/data-storage": "0.11.4"
+  }
+}

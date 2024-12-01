@@ -1,8 +1,8 @@
 import React from 'react';
 
-import {jamtools} from '~/core/engine/register';
-import {ModuleAPI} from '~/core/engine/module_api';
-import {Button} from '~/core/components/Button';
+import {jamtools} from 'springboard/engine/register';
+import {ModuleAPI} from 'springboard/engine/module_api';
+import {Button} from 'springboard/components/Button';
 
 type AwaitedRecord<Obj extends Record<string, Promise<any>>> = {
     [Key in keyof Obj]: Awaited<Obj[Key]>;
@@ -25,7 +25,7 @@ const createStates = async (moduleAPI: ModuleAPI) => {
 
 const createMacros = async (moduleAPI: ModuleAPI) => {
     return promiseAllObject({
-        myMacro: moduleAPI.createMacro(moduleAPI, '', 'midi_button_input', {}),
+        myMacro: moduleAPI.deps.module.moduleRegistry.getModule('macro').createMacro(moduleAPI, '', 'midi_button_input', {}),
     });
 };
 
@@ -75,7 +75,7 @@ const registerRoutes = (moduleAPI: ModuleAPI, states: States, macros: Macros, ac
     });
 };
 
-declare module '~/core/module_registry/module_registry' {
+declare module 'springboard/module_registry/module_registry' {
     interface AllModules {
         ModuleOrSnackTemplate: ModuleOrSnackTemplateModuleReturnValue;
     }

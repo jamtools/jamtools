@@ -1,8 +1,8 @@
 import React from 'react';
 import {Subject} from 'rxjs';
 
-import {jamtools} from '~/core/engine/register';
-import {MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
+import {jamtools} from 'springboard/engine/register';
+import {MidiEventFull} from '@jamtools/core/modules/macro_module/macro_module_types';
 import {getKeyForMacro, InputMacroStateHolders, useInputMacroWaiterAndSaver, savedMidiEventsAreEqual, getKeyForMidiEvent} from './input_macro_handler_utils';
 
 type MacroConfigItemMidiControlChangeInput = {
@@ -17,7 +17,7 @@ export type MidiControlChangeInputResult = {
     };
 };
 
-declare module '~/core/modules/macro_module/macro_module_types' {
+declare module '@jamtools/core/modules/macro_module/macro_module_types' {
     interface MacroTypeConfigs {
         midi_control_change_input: {
             input: MacroConfigItemMidiControlChangeInput;

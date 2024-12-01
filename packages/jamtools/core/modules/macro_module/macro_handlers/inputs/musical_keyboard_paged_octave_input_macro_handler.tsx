@@ -1,13 +1,16 @@
 import React, {useEffect, useState} from 'react';
 
 import {produce} from 'immer';
+import {Subject} from 'rxjs';
+
+import {jamtools} from 'springboard/engine/register';
+import {getKeyForMacro} from './input_macro_handler_utils';
+import {Button} from 'springboard/components/Button';
+import {savedMidiInputsAreEqual} from './musical_keyboard_input_macro_handler';
+
+import '@jamtools/core/modules/macro_module/macro_module';
 
 import {MidiEventFull} from '../../macro_module_types';
-import {Subject} from 'rxjs';
-import {jamtools} from '~/core/engine/register';
-import {getKeyForMacro} from './input_macro_handler_utils';
-import {Button} from '~/core/components/Button';
-import {savedMidiInputsAreEqual} from './musical_keyboard_input_macro_handler';
 
 type MusicalKeyboardPagedOctaveInputResult = {
     subject: Subject<MidiEventFull>;
@@ -22,7 +25,7 @@ type MacroConfigItemMusicalKeyboardPagedOctaveInput = {
     enableQwerty?: boolean;
 }
 
-declare module '~/core/modules/macro_module/macro_module_types' {
+declare module '@jamtools/core/modules/macro_module/macro_module_types' {
     interface MacroTypeConfigs {
         musical_keyboard_paged_octave_input: {
             input: MacroConfigItemMusicalKeyboardPagedOctaveInput;
@@ -65,9 +68,10 @@ jamtools.registerMacroType(
             macroAPI.onDestroy(subscription.unsubscribe);
         }
 
-        const keyboardMacro = await macroAPI.moduleAPI.createMacro(macroAPI.moduleAPI, fieldName + '|keyboard_input', 'musical_keyboard_input', {enableQwerty: conf.enableQwerty});
+        const keyboardMacro = await macroAPI.moduleAPI.deps.module.moduleRegistry.getModule('macro').createMacro(macroAPI.moduleAPI, fieldName + '|keyboard_input', 'musical_keyboard_input', {enableQwerty: conf.enableQwerty});
 
-        const pageDownMacro = await macroAPI.moduleAPI.createMacro(macroAPI.moduleAPI, fieldName + '|page_down', 'midi_button_input', {
+
+        const pageDownMacro = await macroAPI.moduleAPI.deps.module.moduleRegistry.getModule('macro').createMacro(macroAPI.moduleAPI, fieldName + '|page_down', 'midi_button_input', {
             includeRelease: false,
             onTrigger: () => {
                 const currentConfig = pagedOctaveInputStoredConfig.getState();
@@ -80,7 +84,7 @@ jamtools.registerMacroType(
             },
         });
 
-        const pageUpMacro = await macroAPI.moduleAPI.createMacro(macroAPI.moduleAPI, fieldName + '|page_up', 'midi_button_input', {
+        const pageUpMacro = await macroAPI.moduleAPI.deps.module.moduleRegistry.getModule('macro').createMacro(macroAPI.moduleAPI, fieldName + '|page_up', 'midi_button_input', {
             includeRelease: false,
             onTrigger: () => {
                 const currentConfig = pagedOctaveInputStoredConfig.getState();

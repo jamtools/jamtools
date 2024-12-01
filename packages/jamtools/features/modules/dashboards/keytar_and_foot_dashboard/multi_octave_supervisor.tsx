@@ -1,8 +1,8 @@
 import React from 'react';
 
-import {ModuleAPI} from '~/core/engine/module_api';
-import {MidiEvent, MidiEventFull} from '~/core/modules/macro_module/macro_module_types';
-import {Button} from '~/core/components/Button';
+import {ModuleAPI} from 'springboard/engine/module_api';
+import {MidiEvent, MidiEventFull} from '@jamtools/core/modules/macro_module/macro_module_types';
+import {Button} from 'springboard/components/Button';
 
 type MultiOctaveSupervisorMidiState = {
     currentlyHeldDownInputNotes: MidiEvent[];
@@ -130,13 +130,13 @@ export class MultiOctaveSupervisor {
     private createMacros = async () => {
         const makeMacroName = (name: string) => `${this.kvPrefix}|${name}`;
 
-        const pagedOctaveInput = await this.moduleAPI.createMacro(this.moduleAPI, makeMacroName('pagedOctaveInput'), 'musical_keyboard_paged_octave_input', {
+        const pagedOctaveInput = await this.moduleAPI.deps.module.moduleRegistry.getModule('macro').createMacro(this.moduleAPI, makeMacroName('pagedOctaveInput'), 'musical_keyboard_paged_octave_input', {
             onTrigger: (event) => {
                 this.handleKeyboardNote(event);
             },
         });
 
-        const midiOutput = await this.moduleAPI.createMacro(this.moduleAPI, makeMacroName('midiOutput'), 'musical_keyboard_output', {});
+        const midiOutput = await this.moduleAPI.deps.module.moduleRegistry.getModule('macro').createMacro(this.moduleAPI, makeMacroName('midiOutput'), 'musical_keyboard_output', {});
 
         return {
             pagedOctaveInput,
