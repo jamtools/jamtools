@@ -14,7 +14,7 @@ export type MidiDeviceAndChannelMap<Value> = {
 }
 
 export type MidiEvent = {
-    type: 'noteon' | 'noteoff' | 'cc';
+    type: 'noteon' | 'noteoff' | 'cc' | 'program';
     number: number;
     channel: number;
     velocity?: number;

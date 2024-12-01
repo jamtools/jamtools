@@ -8,3 +8,4 @@ import './ultimate_guitar/ultimate_guitar_module';
 import './midi_playback/midi_playback_module';
 
 import './dashboards/dashboards_module';
+import './eventide/eventide_module';
