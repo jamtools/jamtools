@@ -52,7 +52,7 @@ springbord.registerModule('Eventide', {}, async (moduleAPI) => {
                 ];
             }
 
-            return [...currentState, args.presetName]
+            return [...currentState, args.presetName];
         });
     });
 
@@ -113,7 +113,7 @@ springbord.registerModule('Eventide', {}, async (moduleAPI) => {
                             type='checkbox'
                             checked={isFavorited}
                             onChange={() => {
-                                togglePresetFavorited({presetName: selectedPresetName})
+                                togglePresetFavorited({presetName: selectedPresetName});
                             }}
                         />
                     </>
