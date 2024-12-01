@@ -97,6 +97,10 @@ export class BrowserMidiService implements MidiService {
             output.sendControlChange(event.number, event.value, {
                 channels: event.channel,
             });
+        } else if (event.type === 'program') {
+            output.sendProgramChange(event.number, {
+                channels: event.channel,
+            });
         }
     };
 

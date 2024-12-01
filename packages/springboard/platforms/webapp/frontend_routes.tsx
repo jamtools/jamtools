@@ -4,7 +4,7 @@ import {
     createBrowserRouter,
 
     // use hash router for electron
-    // createHashRouter,
+    createHashRouter,
     Link,
     RouteObject,
     RouterProvider,
@@ -60,7 +60,9 @@ export const FrontendRoutes = () => {
         element: <span/>,
     });
 
-    const router = createBrowserRouter([
+    const routerContructor = (globalThis as {useHashRouter?: boolean}).useHashRouter ? createHashRouter : createBrowserRouter;
+
+    const router = routerContructor([
         {
             path: '/',
             element: <Layout modules={mods}><RootPath modules={mods}/></Layout>

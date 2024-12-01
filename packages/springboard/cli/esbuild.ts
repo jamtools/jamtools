@@ -6,6 +6,8 @@ import esbuild from 'esbuild';
 import {esbuildPluginLogBuildTime} from './esbuild_plugins/esbuild_plugin_log_build_time';
 import {esbuildPluginPlatformInject} from './esbuild_plugins/esbuild_plugin_platform_inject.js';
 
+import {sassPlugin} from 'esbuild-sass-plugin';
+
 type EsbuildOptions = Parameters<typeof esbuild.build>[0];
 
 type BuildConfig = {
@@ -16,60 +18,58 @@ type BuildConfig = {
     additionalFiles?: Record<string, string>;
 }
 
-const main = async () => {
-    for (const buildConfig of buildConfigs) {
-        await buildApplication(buildConfig);
-    }
-
-    await buildServer();
+export const platformBrowserBuildConfig: BuildConfig = {
+    platform: 'browser',
+    platformEntrypoint: () => '@springboardjs/platforms-browser/entrypoints/index.tsx',
+    esbuildPlugins: () => [
+        esbuildPluginPlatformInject('browser'),
+    ],
+    additionalFiles: {
+        '@springboardjs/platforms-browser/index.html': 'index.html',
+    },
 };
 
-const buildConfigs: BuildConfig[] = [
-    {
-        platform: 'node',
-        platformEntrypoint: () => {
-            let entrypoint = '@springboardjs/platforms-node/entrypoints/node_main_entrypoint.ts';
-            if (process.env.DISABLE_IO === 'true') {
-                entrypoint = '@springboardjs/platforms-node/entrypoints/node_saas_entrypoint.ts';
-            }
+export const platformNodeBuildConfig: BuildConfig = {
+    platform: 'node',
+    platformEntrypoint: () => {
+        let entrypoint = '@springboardjs/platforms-node/entrypoints/node_main_entrypoint.ts';
+        if (process.env.DISABLE_IO === 'true') {
+            entrypoint = '@springboardjs/platforms-node/entrypoints/node_saas_entrypoint.ts';
+        }
 
-            return entrypoint;
-        },
-        esbuildPlugins: () => [
-            esbuildPluginPlatformInject('node'),
-        ],
-        externals: () => {
-            let externals = ['@julusian/midi', 'easymidi', 'jsdom'];
-            if (process.env.DISABLE_IO === 'true') {
-                externals = ['jsdom'];
-            }
+        return entrypoint;
+    },
+    esbuildPlugins: () => [
+        esbuildPluginPlatformInject('node'),
+    ],
+    externals: () => {
+        let externals = ['@julusian/midi', 'easymidi', 'jsdom'];
+        if (process.env.DISABLE_IO === 'true') {
+            externals = ['jsdom'];
+        }
 
-            return externals;
-        },
+        return externals;
     },
-    {
-        platform: 'browser',
-        platformEntrypoint: () => '@springboardjs/platforms-browser/entrypoints/index.tsx',
-        esbuildPlugins: () => [
-            esbuildPluginPlatformInject('browser'),
-        ],
-        additionalFiles: {
-            '@springboardjs/platforms-browser/index.html': 'index.html',
-        },
-    },
-];
+};
 
 const watchForChanges = process.argv.includes('--watch');
 const shouldOutputMetaFile = process.argv.includes('--meta');
 
-const buildApplication = async (buildConfig: BuildConfig) => {
+export type ApplicationBuildOptions = {
+    editBuildOptions?: (options: EsbuildOptions) => void;
+    esbuildOutDir?: string;
+    applicationEntrypoint?: string;
+    nodeModulesParentFolder?: string;
+};
+
+export const buildApplication = async (buildConfig: BuildConfig, options?: ApplicationBuildOptions) => {
     const coreFile = buildConfig.platformEntrypoint();
 
-    const applicationEntrypoint = process.env.APPLICATION_ENTRYPOINT || '../../../../../../apps/jamtools/modules/index.ts';
+    const applicationEntrypoint = process.env.APPLICATION_ENTRYPOINT || options?.applicationEntrypoint || '../../../../../../apps/jamtools/modules/index.ts';
 
     const allImports = [coreFile, applicationEntrypoint].map(file => `import '${file}';`).join('\n');
 
-    const parentOutDir = process.env.ESBUILD_OUT_DIR || './dist';
+    const parentOutDir = process.env.ESBUILD_OUT_DIR || options?.esbuildOutDir || './dist';
     const outDir = `${parentOutDir}/${buildConfig.platform}/dist`;
 
     if (!fs.existsSync(outDir)) {
@@ -92,6 +92,7 @@ const buildApplication = async (buildConfig: BuildConfig) => {
         target: 'es6',
         plugins: [
             esbuildPluginLogBuildTime(buildConfig.platform),
+            sassPlugin(),
             ...(buildConfig.esbuildPlugins?.() || []),
         ],
         external: buildConfig.externals?.(),
@@ -108,6 +109,8 @@ const buildApplication = async (buildConfig: BuildConfig) => {
         },
     };
 
+    options?.editBuildOptions?.(esbuildOptions);
+
     if (watchForChanges) {
         const ctx = await esbuild.context(esbuildOptions);
         await ctx.watch();
@@ -121,7 +124,7 @@ const buildApplication = async (buildConfig: BuildConfig) => {
     }
 
     if (buildConfig.additionalFiles) {
-        const nodeModulesParentFolder = process.env.NODE_MODULES_PARENT_FOLDER || '.';
+        const nodeModulesParentFolder = process.env.NODE_MODULES_PARENT_FOLDER || options?.nodeModulesParentFolder || '.';
 
         for (const srcFileName of Object.keys(buildConfig.additionalFiles)) {
             const destFileName = buildConfig.additionalFiles[srcFileName];
@@ -134,10 +137,15 @@ const buildApplication = async (buildConfig: BuildConfig) => {
     }
 };
 
-const buildServer = async () => {
+export type ServerBuildOptions = {
+    esbuildOutDir?: string;
+    serverEntrypoint?: string;
+};
+
+export const buildServer = async (options?: ServerBuildOptions) => {
     const externals = ['better-sqlite3'];
 
-    const parentOutDir = process.env.ESBUILD_OUT_DIR || './dist';
+    const parentOutDir = process.env.ESBUILD_OUT_DIR || options?.esbuildOutDir || './dist';
     const outDir = `${parentOutDir}/server/dist`;
 
     if (!fs.existsSync(outDir)) {
@@ -147,7 +155,7 @@ const buildServer = async () => {
     const outFile = path.join(outDir, 'local-server.cjs');
 
     const coreFile = 'springboard-server/src/entrypoints/local-server.entrypoint.ts';
-    const serverEntrypoint = process.env.SERVER_ENTRYPOINT;
+    const serverEntrypoint = process.env.SERVER_ENTRYPOINT || options?.serverEntrypoint;
 
     let allImports = [coreFile].map(file => `import '${file}';`).join('\n');
     if (serverEntrypoint) {
@@ -178,9 +186,3 @@ const buildServer = async () => {
         await esbuild.build(buildOptions);
     }
 };
-
-setTimeout(main);
-
-process.on('SIGINT', () => {
-    process.exit(0);
-});

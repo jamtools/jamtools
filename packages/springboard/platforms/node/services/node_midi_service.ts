@@ -160,6 +160,13 @@ export class NodeMidiService implements MidiService {
             };
 
             output.send(midiEvent.type, cc);
+        } else if (midiEvent.type === 'program') {
+            const program: easymidi.Program = {
+                channel: midiEvent.channel as Channel,
+                number: midiEvent.number,
+            };
+
+            output.send(midiEvent.type, program);
         }
     };
 

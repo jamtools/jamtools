@@ -34,7 +34,7 @@ const useShowNavbar = (modules: Module[]) => {
             if (route.startsWith('/')) {
                 cleanedRoute = cleanedRoute.substring(1);
             }
-            if (!cleanedRoute.endsWith('/')) {
+            if (cleanedRoute && !cleanedRoute.endsWith('/')) {
                 cleanedRoute += '/';
             }
 

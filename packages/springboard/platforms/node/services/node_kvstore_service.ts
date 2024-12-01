@@ -14,6 +14,11 @@ if (fs.existsSync(DATA_FILE_NAME)) {
     const initialKVDataString = fs.readFileSync(DATA_FILE_NAME).toString();
     allKVData = JSON.parse(initialKVDataString) as Record<string, Record<string, string>>;
 } else {
+    const folder = DATA_FILE_NAME.split('/').slice(0, -1).join('/');
+    if (folder) {
+        fs.mkdirSync(folder, {recursive: true});
+    }
+
     fs.writeFileSync(DATA_FILE_NAME, '{}');
 }
 
