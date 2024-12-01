@@ -1,10 +1,10 @@
 {
     "entryPoints": [
-        "../packages/jamtools/core/engine/module_api.ts",
-        "../packages/jamtools/core/engine/register.ts",
+        "../packages/springboard/core/engine/module_api.ts",
+        "../packages/springboard/core/engine/register.ts",
     ],
     "entryPointStrategy": "expand",
-    "tsconfig": "../packages/jamtools/tsconfig.json",
+    "tsconfig": "../packages/springboard/core/tsconfig.json",
     // "entryPoints": ["src/index.ts"], // Adjust to your entry point files
     // "out": "docs/typedoc_docs", // Set the output directory within your MkDocs docs folder
     "plugin": ["typedoc-plugin-markdown"], // Specify the markdown plugin
