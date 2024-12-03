@@ -1,11 +1,11 @@
-The Springboard module system is the basis on which pieces of an application are built on top of. A given module uses the [ModuleAPI](../typedoc_docs/module_api/classes/ModuleAPI.md) to register certain components and states with the application.
+A Springboard application is typically comprised of several modules. A given module uses the [ModuleAPI](../typedoc_docs/module_api/classes/ModuleAPI.md) to register components, actions, and states with the application.
 
-Some things the ModuleAPI allows modules to do:
+The ModuleAPI allows modules to:
 
-- Register routes to render React components
+- Register routes and render React components
 - Create remote actions and shared states
 - Receive dependencies through dependency injection
-- Expose functions and utilties for other modules to use
+- Expose functions and utilties for other modules to use. This typcially includes actions, states, or reusable React components.
 - Interact with other modules by consuming their exposed functions/properties
 
 Modules can play a few different types of roles:
