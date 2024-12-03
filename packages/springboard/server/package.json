@@ -8,10 +8,8 @@
     "src"
   ],
   "scripts": {
-    "start": "node dist/local-server.js",
-    "run:watch": "nodemon dist/local-server.js",
-    "build:watch": "npm run build-local-server -- --watch",
-    "build-local-server": "node esbuild.mjs",
+    "start": "node ../cli/dist/server/dist/local-server.cjs",
+    "dev": "node --watch --watch-preserve-output ../cli/dist/server/dist/local-server.cjs",
     "check-types": "tsc --noEmit",
     "lint": "eslint --ext ts --ext tsx src/",
     "fix": "npm run lint -- --fix"

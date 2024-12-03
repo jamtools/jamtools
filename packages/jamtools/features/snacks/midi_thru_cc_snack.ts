@@ -1,8 +1,6 @@
 import {jamtools} from 'springboard/engine/register';
 
 jamtools.registerModule('midi_thru_cc', {}, async (moduleAPI) => {
-    console.log('running snack: midi thru cc');
-
     const macroModule = moduleAPI.deps.module.moduleRegistry.getModule('macro');
 
     const [input, output] = await Promise.all([

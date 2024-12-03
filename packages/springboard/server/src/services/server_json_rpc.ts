@@ -7,7 +7,6 @@ type WebsocketInterface = {
 }
 
 export class NodeJsonRpcServer {
-
     private incomingClients: {[clientId: string]: WebsocketInterface} = {};
     private outgoingClients: {[clientId: string]: JSONRPCClient} = {};
 

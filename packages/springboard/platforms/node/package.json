@@ -2,6 +2,8 @@
   "name": "@springboardjs/platforms-node",
   "version": "0.11.4",
   "scripts": {
+    "start": "node ../../cli/dist/node/dist/index.js",
+    "dev": "node --watch --watch-preserve-output ../../cli/dist/node/dist/index.js",
     "check-types": "tsc --noEmit",
     "lint": "eslint --ext ts --ext tsx .",
     "fix": "npm run lint -- --fix"
