@@ -8,8 +8,8 @@
     "src"
   ],
   "scripts": {
-    "start": "node ../cli/dist/server/dist/local-server.cjs",
-    "dev": "node --watch --watch-preserve-output ../cli/dist/server/dist/local-server.cjs",
+    "start": "WEBAPP_FOLDER=../cli/dist/browser node ../cli/dist/server/dist/local-server.cjs",
+    "dev": "WEBAPP_FOLDER=../cli/dist/browser node --watch --watch-preserve-output ../cli/dist/server/dist/local-server.cjs",
     "check-types": "tsc --noEmit",
     "lint": "eslint --ext ts --ext tsx src/",
     "fix": "npm run lint -- --fix"

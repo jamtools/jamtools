@@ -37,6 +37,7 @@ export class JamToolsEngine {
         }
 
         this.sharedStateService = new SharedStateService(this.coreDeps);
+        await this.sharedStateService.initialize();
 
         this.moduleRegistry = new ModuleRegistry();
 

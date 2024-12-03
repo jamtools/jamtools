@@ -24,6 +24,18 @@ class MockQwertyService implements QwertyService {
 class MockKVStore implements KVStore {
     constructor(private store: Record<string, string> = {}) {}
 
+    getAll = async () => {
+        const entriesAsRecord: Record<string, any> = {};
+        for (const key of Object.keys(this.store)) {
+            const value = this.store[key];
+            if (value) {
+                entriesAsRecord[key] = JSON.parse(value);
+            }
+        }
+
+        return entriesAsRecord;
+    };
+
     get = async <T>(key: string): Promise<T | null> => {
         const value = this.store[key];
         if (value) {
@@ -34,7 +46,7 @@ class MockKVStore implements KVStore {
     };
 
     set = async <T>(key: string, value: T): Promise<void> => {
-
+        this.store[key] = JSON.stringify(value);
     };
 }
 

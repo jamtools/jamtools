@@ -29,6 +29,15 @@ export class SharedStateService {
         this.rpc.registerRpc(SharedStateRpcMethods.GET_ALL_SHARED_STATE, this.receiveRpcGetAllSharedState);
     }
 
+    initialize = async () => {
+        const allValues = await this.coreDeps.storage.remote.getAll();
+        if (allValues) {
+            for (const key of Object.keys(allValues)) {
+                this.setCachedValue(key, allValues[key]);
+            }
+        }
+    };
+
     subscribe = <Value>(key: string, cb: SubscribeCallback<Value>) => {
         this.subscriptions[key] = this.subscriptions[key] || [];
         this.subscriptions[key].push(cb);

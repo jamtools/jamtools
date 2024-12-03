@@ -17,6 +17,20 @@ export class TrpcKVStoreService implements KVStore {
     constructor(private serverUrl: string) {}
     private trpc = createKVStoreTrpcClient(this.serverUrl);
 
+    getAll = async () => {
+        const allEntries = await this.trpc.kvGetAll.query();
+        if (!allEntries) {
+            return null;
+        }
+
+        const entriesAsRecord: Record<string, any> = {};
+        for (const entry of allEntries) {
+            entriesAsRecord[entry.key] = JSON.parse(entry.value);
+        }
+
+        return entriesAsRecord;
+    };
+
     get = async <T>(key: string) => {
         const result = await this.trpc.kvGet.query({key});
         if (!result) {
