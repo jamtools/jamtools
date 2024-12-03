@@ -131,8 +131,6 @@ jamtools.registerModule('chord_families', {}, async (moduleAPI) => {
         });
     };
 
-    console.log('running snack: root mode');
-
     moduleAPI.registerRoute('', {}, () => {
         const state = rootModeState.useState();
 

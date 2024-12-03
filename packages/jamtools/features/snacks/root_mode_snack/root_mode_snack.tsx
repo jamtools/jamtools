@@ -24,8 +24,6 @@ jamtools.registerModule('root_mode_module', {}, async (moduleAPI) => {
         });
     };
 
-    console.log('running snack: root mode');
-
     moduleAPI.registerRoute('', {}, () => {
         const state = rootModeState.useState();
 

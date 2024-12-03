@@ -31,12 +31,12 @@
       "dev": {
         "persistent": true,
         "cache": false,
-        "env": ["WS_HOST", "DATA_HOST", "NODE_ENV"]
+        "env": ["WS_HOST", "DATA_HOST", "NODE_ENV", "DISABLE_IO"]
       },
       "start": {
         "persistent": true,
         "cache": false,
-        "env": ["PORT", "WS_HOST", "DATA_HOST"]
+        "env": ["PORT", "WS_HOST", "DATA_HOST", "DISABLE_IO"]
       }
     }
   }

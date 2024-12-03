@@ -157,9 +157,16 @@ export class StatesAPI {
     public createPersistentState = async <State>(stateName: string, initialValue: State): Promise<StateSupervisor<State>> => {
         const fullKey = `${this.prefix}|state.persistent|${stateName}`;
 
-        const storedValue = await this.coreDeps.storage.remote.get<State>(fullKey);
-        if (storedValue !== null) {
-            initialValue = storedValue;
+        const cachedValue = this.modDeps.services.sharedStateService.getCachedValue(fullKey) as State | undefined;
+        if (cachedValue !== undefined) {
+            initialValue = cachedValue;
+        } else {
+            const storedValue = await this.coreDeps.storage.remote.get<State>(fullKey);
+            if (storedValue !== null) { // this should really used undefined for a signal instead
+                initialValue = storedValue;
+            } else if (this.coreDeps.isMaestro()) {
+                await this.coreDeps.storage.remote.set<State>(fullKey, initialValue);
+            }
         }
 
         const supervisor = new SharedStateSupervisor(fullKey, initialValue, this.modDeps.services.sharedStateService);

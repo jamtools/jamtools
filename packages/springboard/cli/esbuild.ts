@@ -114,7 +114,7 @@ export const buildApplication = async (buildConfig: BuildConfig, options?: Appli
     if (watchForChanges) {
         const ctx = await esbuild.context(esbuildOptions);
         await ctx.watch();
-        console.log('Watching for changes...');
+        console.log(`Watching for changes for ${buildConfig.platform} application build...`);
         return;
     }
 
@@ -181,7 +181,7 @@ export const buildServer = async (options?: ServerBuildOptions) => {
     if (watchForChanges) {
         const ctx = await esbuild.context(buildOptions);
         await ctx.watch();
-        console.log('Watching for changes...');
+        console.log('Watching for changes for server build...');
     } else {
         await esbuild.build(buildOptions);
     }
