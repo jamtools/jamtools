@@ -1,9 +1,7 @@
-Developer Documentation
+# Springboard
 
-- [ModuleAPI](typedoc_docs/module_api/classes/ModuleAPI)
-- [StatesAPI](typedoc_docs/module_api/classes/StatesAPI)
+Springboard is a highly flexible cross-platform application framework based on React and JSON-RPC. The framework embraces isomorphism as much as possible, with support for dependency injection for each deployment context, which allows the application to easily pivot how things work in the different environments.
 
-{%
-    include-markdown "typedoc_docs/README.md"
-    heading-offset=1
-%}
+👈
+To learn more, check out the documentation
+👈

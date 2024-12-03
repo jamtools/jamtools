@@ -3,6 +3,7 @@
         "../packages/springboard/core/engine/module_api.ts",
         "../packages/springboard/core/engine/register.ts",
     ],
+    "disableSources": true,
     "entryPointStrategy": "expand",
     "tsconfig": "../packages/springboard/core/tsconfig.json",
     // "entryPoints": ["src/index.ts"], // Adjust to your entry point files
