@@ -11,11 +11,17 @@ import {Subject} from 'rxjs';
 import {QwertyCallbackPayload} from '@jamtools/core/types/io_types';
 import {MidiEventFull} from '@jamtools/core/modules/macro_module/macro_module_types';
 import {jamtools} from 'springboard/engine/register';
+import {MockQwertyService} from '@jamtools/core/test/services/mock_qwerty_service';
+import {MockMidiService} from '@jamtools/core/test/services/mock_midi_service';
+import {setIoDependencyCreator} from '@jamtools/core/modules/io/io_module';
+import {macroTypeRegistry} from '@jamtools/core/modules/macro_module/registered_macro_types';
+
 import {getMacroInputTestHelpers} from './macro_input_test_helpers';
 
 describe('MusicalKeyboardInputMacroHandler', () => {
     beforeEach(() => {
         jamtools.reset();
+        macroTypeRegistry.reset();
     });
 
     it('should handle qwerty events', async () => {
@@ -23,7 +29,17 @@ describe('MusicalKeyboardInputMacroHandler', () => {
         const extraDeps = makeMockExtraDependences();
 
         const qwertySubject = new Subject<QwertyCallbackPayload>();
-        coreDeps.inputs.qwerty.onInputEvent = qwertySubject;
+
+        const mockQwerty = new MockQwertyService();
+        mockQwerty.onInputEvent = qwertySubject;
+        const mockMidi = new MockMidiService();
+
+        setIoDependencyCreator(() => ({
+            qwerty: mockQwerty,
+            midi: mockMidi,
+        }));
+
+        // coreDeps.inputs.qwerty.onInputEvent = qwertySubject;
 
         const engine = new JamToolsEngine(coreDeps, extraDeps);
         await engine.initialize();

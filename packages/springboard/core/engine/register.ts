@@ -1,13 +1,10 @@
 import {Module} from 'springboard/module_registry/module_registry';
 import {CoreDependencies, ModuleDependencies} from 'springboard/types/module_types';
 import type {ModuleAPI} from './module_api';
-import type {MacroTypeConfigs} from '@jamtools/core/modules/macro_module/macro_module_types';
 
 export type RegisterRouteOptions = {
     hideNavbar?: boolean;
 };
-
-export type MacroOptions = {};
 
 export type ModuleCallback<ModuleReturnValue extends object> = (moduleAPI: ModuleAPI) =>
 Promise<ModuleReturnValue> | ModuleReturnValue;
@@ -22,38 +19,7 @@ export type JamTools = {
         cb: ModuleCallback<ModuleReturnValue>,
     ) => void;
     registerClassModule: <T extends object>(cb: ClassModuleCallback<T>) => void;
-    registerMacroType: RegisterMacroType;
     reset: () => void;
-};
-
-export type MacroAPI = {
-    moduleAPI: ModuleAPI;
-    onDestroy: (cb: () => void) => void;
-};
-
-export type RegisterMacroTypeOptions = {
-
-}
-
-export type MacroCallback<MacroInputConf extends object, MacroReturnValue extends object> = (macroAPI: MacroAPI, macroInputConf: MacroInputConf, fieldName: string) =>
-Promise<MacroReturnValue> | MacroReturnValue;
-
-type RegisterMacroType = <MacroTypeId extends keyof MacroTypeConfigs, MacroTypeOptions extends object>(
-    macroTypeId: MacroTypeId,
-    options: MacroTypeOptions,
-    cb: MacroCallback<MacroTypeConfigs[MacroTypeId]['input'], MacroTypeConfigs[MacroTypeId]['output']>,
-) => void;
-
-export type CapturedRegisterMacroTypeCall = [string, RegisterMacroTypeOptions, MacroCallback<any, any>];
-
-const registerMacroType = <MacroOptions extends RegisterMacroTypeOptions, MacroInputConf extends object, MacroReturnValue extends object>(
-    macroName: string,
-    options: MacroOptions,
-    cb: MacroCallback<MacroInputConf, MacroReturnValue>,
-) => {
-    const calls = (registerMacroType as unknown as {calls: CapturedRegisterMacroTypeCall[]}).calls || [];
-    calls.push([macroName, options, cb]);
-    (registerMacroType as unknown as {calls: CapturedRegisterMacroTypeCall[]}).calls = calls;
 };
 
 export type RegisterModuleOptions = {
@@ -83,11 +49,9 @@ const registerClassModule = <T extends object>(cb: ClassModuleCallback<T>) => {
 export const jamtools: JamTools = {
     registerModule,
     registerClassModule,
-    registerMacroType,
     reset: () => {
         jamtools.registerModule = registerModule;
         jamtools.registerClassModule = registerClassModule;
-        jamtools.registerMacroType = registerMacroType;
     },
 };
 

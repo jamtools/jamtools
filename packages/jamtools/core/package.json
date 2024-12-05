@@ -16,9 +16,11 @@
     "springboard": "0.11.4"
   },
   "dependencies": {
+    "easymidi": "^3.0.1",
     "midi-file": "^1.2.4",
     "react-guitar": "^1.1.2",
     "soundfont-player": "^0.12.0",
+    "webmidi": "^3.1.11",
     "wled-client": "^0.22.1"
   },
   "devDependencies": {},

@@ -14,7 +14,7 @@ describe('ModuleAPI', () => {
         const engine = new JamToolsEngine(coreDeps, extraDeps);
         await engine.initialize();
 
-        const mod = await engine.registerModule('Test_MusicalKeyboardInputMacro', {}, async (moduleAPI) => {
+        const mod = await engine.registerModule('TestModule', {}, async (moduleAPI) => {
             const state = await moduleAPI.statesAPI.createSharedState('hey', {yep: 'yeah'});
             return {
                 state,

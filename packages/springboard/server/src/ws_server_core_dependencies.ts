@@ -11,9 +11,11 @@ export type WebsocketServerCoreDependencies = {
     kvTrpcRouter: KVTrpcRouter;
 };
 
+const SQLITE_DATABASE_FILE = process.env.SQLITE_DATABASE_FILE || 'data/kv.db';
+
 export const makeWebsocketServerCoreDependenciesWithSqlite = async (): Promise<WebsocketServerCoreDependencies> => {
     await fs.promises.mkdir('data', {recursive: true});
-    const db = await makeKyselySqliteInstance('data/kv.db');
+    const db = await makeKyselySqliteInstance(SQLITE_DATABASE_FILE);
 
     return {
         kvDatabase: db,

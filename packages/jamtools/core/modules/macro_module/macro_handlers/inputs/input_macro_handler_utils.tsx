@@ -1,11 +1,11 @@
 import React from 'react';
 import {Subject} from 'rxjs';
 
-import {MacroAPI} from 'springboard/engine/register';
 import {MidiEventFull} from '@jamtools/core/modules/macro_module/macro_module_types';
 import {StateSupervisor} from 'springboard/services/states/shared_state_service';
 
 import {Edit} from './components/edit_macro';
+import {MacroAPI} from 'modules/macro_module/registered_macro_types';
 
 type MidiInputMacroPayload = {
     subject: Subject<MidiEventFull>;

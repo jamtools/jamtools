@@ -1,5 +1,4 @@
 import {Module, ModuleRegistry} from 'springboard/module_registry/module_registry';
-import {MidiService, QwertyService} from '@jamtools/core/types/io_types';
 import {SharedStateService} from '../services/states/shared_state_service';
 
 export type ModuleCallback<T extends object,> = (coreDeps: CoreDependencies, modDependencies: ModuleDependencies) =>
@@ -12,10 +11,6 @@ export type JamTools = {
 export type CoreDependencies = {
     log: (...s: any[]) => void;
     showError: (error: string) => void;
-    inputs: {
-        qwerty: QwertyService;
-        midi: MidiService;
-    };
     files: {
         saveFile: (name: string, content: string) => Promise<void>;
     };

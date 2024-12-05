@@ -8,18 +8,12 @@ import {NodeKVStoreService} from '@springboardjs/platforms-node/services/node_kv
 import {NodeFileStorageService} from '@springboardjs/platforms-node/services/node_file_storage_service';
 import {NodeJsonRpcClientAndServer} from '@springboardjs/platforms-node/services/node_json_rpc';
 import {JamToolsEngine} from 'springboard/engine/engine';
-import {MidiService, QwertyService} from '@jamtools/core/types/io_types';
 import {ExtraModuleDependencies} from 'springboard/module_registry/module_registry';
 
 const WS_HOST = process.env.WS_HOST || 'ws://localhost:1337';
 const DATA_HOST = process.env.DATA_HOST || 'http://localhost:1337';
 
-type Services = {
-    qwerty: QwertyService;
-    midi: MidiService;
-}
-
-export const startJamTools = async (services: Services): Promise<JamToolsEngine> => {
+export const startJamTools = async (): Promise<JamToolsEngine> => {
     const kvStore = new TrpcKVStoreService(DATA_HOST);
     // const kvStore = new NodeKVStoreService('persistent');
 
@@ -29,10 +23,6 @@ export const startJamTools = async (services: Services): Promise<JamToolsEngine>
     const coreDeps: CoreDependencies = {
         log: console.log,
         showError: console.error,
-        inputs: {
-            qwerty: services.qwerty,
-            midi: services.midi,
-        },
         storage: {
             remote: kvStore,
             userAgent: sessionStore,

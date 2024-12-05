@@ -7,6 +7,54 @@ import {jamtools} from 'springboard/engine/register';
 import {StateSupervisor} from 'springboard/services/states/shared_state_service';
 import {ModuleAPI} from 'springboard/engine/module_api';
 import {MidiEvent} from '@jamtools/core/modules/macro_module/macro_module_types';
+import {MockMidiService} from '@jamtools/core/test/services/mock_midi_service';
+import {MockQwertyService} from '@jamtools/core/test/services/mock_qwerty_service';
+
+import {MidiService, QwertyService} from '@jamtools/core/types/io_types';
+
+type IoDeps = {
+    midi: MidiService;
+    qwerty: QwertyService;
+}
+
+let createIoDependencies = (): IoDeps => {
+    return {
+        qwerty: new MockQwertyService(),
+        midi: new MockMidiService(),
+    };
+};
+
+// @platform "node"
+import {NodeQwertyService} from '@jamtools/core/services/node/node_qwerty_service';
+import {NodeMidiService} from '@jamtools/core/services/node/node_midi_service';
+
+createIoDependencies = () => {
+    const qwerty = new NodeQwertyService();
+    const midi = new NodeMidiService();
+    return {
+        qwerty,
+        midi,
+    };
+};
+// @platform end
+
+// @platform "browser"
+import {BrowserQwertyService} from '@jamtools/core/services/browser/browser_qwerty_service';
+import {BrowserMidiService} from '@jamtools/core/services/browser/browser_midi_service';
+
+createIoDependencies = () => {
+    const qwerty = new BrowserQwertyService(document);
+    const midi = new BrowserMidiService();
+    return {
+        qwerty,
+        midi,
+    };
+};
+// @platform end
+
+export const setIoDependencyCreator = (func: typeof createIoDependencies) => {
+    createIoDependencies = func;
+};
 
 type IoState = {
     midiInputDevices: string[];
@@ -38,17 +86,25 @@ export class IoModule implements Module<IoState> {
 
     midiDeviceState!: StateSupervisor<IoState>;
 
+    private ioDeps: IoDeps;
+
+    constructor(private coreDeps: CoreDependencies, private moduleDeps: ModuleDependencies) {
+        this.ioDeps = createIoDependencies();
+    }
+
     initialize = async (moduleAPI: ModuleAPI) => {
-        const qwertySubscription = this.coreDeps.inputs.qwerty.onInputEvent.subscribe(event => {
+        await this.ioDeps.midi.initialize();
+
+        const qwertySubscription = this.ioDeps.qwerty.onInputEvent.subscribe(event => {
             this.qwertyInputSubject.next(event);
         }); this.cleanup.push(qwertySubscription.unsubscribe);
 
-        const midiSubscription = this.coreDeps.inputs.midi.onInputEvent.subscribe(event => {
+        const midiSubscription = this.ioDeps.midi.onInputEvent.subscribe(event => {
             this.midiInputSubject.next(event);
         }); this.cleanup.push(midiSubscription.unsubscribe);
 
-        const inputs = this.coreDeps.inputs.midi.getInputs();
-        const outputs = this.coreDeps.inputs.midi.getOutputs();
+        const inputs = this.ioDeps.midi.getInputs();
+        const outputs = this.ioDeps.midi.getOutputs();
 
         const state: IoState = {
             midiInputDevices: inputs,
@@ -59,7 +115,7 @@ export class IoModule implements Module<IoState> {
     };
 
     public sendMidiEvent = (outputName: string, midiEvent: MidiEvent) => {
-        this.coreDeps.inputs.midi.send(outputName, midiEvent);
+        this.ioDeps.midi.send(outputName, midiEvent);
     };
 
     onNewMidiDeviceFound = (deviceInfo: {name: string}) => {
@@ -73,6 +129,4 @@ export class IoModule implements Module<IoState> {
             });
         }
     };
-
-    constructor(private coreDeps: CoreDependencies, private moduleDeps: ModuleDependencies) {}
 }

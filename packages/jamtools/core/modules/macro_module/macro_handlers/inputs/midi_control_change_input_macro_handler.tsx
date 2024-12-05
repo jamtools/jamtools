@@ -1,9 +1,9 @@
 import React from 'react';
 import {Subject} from 'rxjs';
 
-import {jamtools} from 'springboard/engine/register';
 import {MidiEventFull} from '@jamtools/core/modules/macro_module/macro_module_types';
 import {getKeyForMacro, InputMacroStateHolders, useInputMacroWaiterAndSaver, savedMidiEventsAreEqual, getKeyForMidiEvent} from './input_macro_handler_utils';
+import {macroTypeRegistry} from '@jamtools/core/modules/macro_module/registered_macro_types';
 
 type MacroConfigItemMidiControlChangeInput = {
     onTrigger?(midiEvent: MidiEventFull): void;
@@ -26,7 +26,7 @@ declare module '@jamtools/core/modules/macro_module/macro_module_types' {
     }
 }
 
-jamtools.registerMacroType('midi_control_change_input', {}, async (macroAPI, conf, fieldName) => {
+macroTypeRegistry.registerMacroType('midi_control_change_input', {}, async (macroAPI, conf, fieldName) => {
     const editing = await macroAPI.moduleAPI.statesAPI.createSharedState(getKeyForMacro('editing', fieldName), false);
     const waitingForConfiguration = await macroAPI.moduleAPI.statesAPI.createSharedState(getKeyForMacro('waiting_for_configuration', fieldName), false);
     const capturedMidiEvent = await macroAPI.moduleAPI.statesAPI.createSharedState<MidiEventFull | null>(getKeyForMacro('captured_midi_event', fieldName), null);

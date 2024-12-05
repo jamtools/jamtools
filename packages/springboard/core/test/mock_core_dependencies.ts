@@ -1,25 +1,5 @@
-import {Subject} from 'rxjs';
-import {DeviceInfo, MidiEvent, MidiEventFull} from '@jamtools/core/modules/macro_module/macro_module_types';
-import {MidiService, QwertyCallbackPayload, QwertyService} from '@jamtools/core/types/io_types';
 import {CoreDependencies, KVStore, Rpc, RpcArgs} from '../types/module_types';
 import {ExtraModuleDependencies} from 'springboard/module_registry/module_registry';
-
-class MockMidiService implements MidiService {
-    onInputEvent = new Subject<MidiEventFull>();
-    onDeviceStatusChange = new Subject<DeviceInfo & {status: 'connected' | 'disconnected'}>();
-
-    initialize = async () => {};
-
-    getInputs = () => [];
-    getOutputs = () => [];
-    send = (outputName: string, event: MidiEvent) => {};
-}
-
-class MockQwertyService implements QwertyService {
-    onInputEvent = new Subject<QwertyCallbackPayload>();
-
-    initialize = async () => {};
-}
 
 class MockKVStore implements KVStore {
     constructor(private store: Record<string, string> = {}) {}
@@ -77,10 +57,6 @@ export const makeMockCoreDependencies = ({store}: MakeMockCoreDependenciesOption
         isMaestro: () => true,
         showError: console.error,
         log: () => {},
-        inputs: {
-            midi: new MockMidiService(),
-            qwerty: new MockQwertyService(),
-        },
         storage: {
             remote: new MockKVStore(store),
             userAgent: new MockKVStore(store),

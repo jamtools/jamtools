@@ -3,7 +3,6 @@ import React, {useEffect, useState} from 'react';
 import {produce} from 'immer';
 import {Subject} from 'rxjs';
 
-import {jamtools} from 'springboard/engine/register';
 import {getKeyForMacro} from './input_macro_handler_utils';
 import {Button} from 'springboard/components/Button';
 import {savedMidiInputsAreEqual} from './musical_keyboard_input_macro_handler';
@@ -11,6 +10,7 @@ import {savedMidiInputsAreEqual} from './musical_keyboard_input_macro_handler';
 import '@jamtools/core/modules/macro_module/macro_module';
 
 import {MidiEventFull} from '../../macro_module_types';
+import {macroTypeRegistry} from '@jamtools/core/modules/macro_module/registered_macro_types';
 
 type MusicalKeyboardPagedOctaveInputResult = {
     subject: Subject<MidiEventFull>;
@@ -46,7 +46,7 @@ const initialUserDefinedConfig: PagedOctaveInputStoredConfig = {
     numberOfOctaves: 2,
 };
 
-jamtools.registerMacroType(
+macroTypeRegistry.registerMacroType(
     'musical_keyboard_paged_octave_input',
     {},
     async (macroAPI, conf, fieldName): Promise<MusicalKeyboardPagedOctaveInputResult> => {

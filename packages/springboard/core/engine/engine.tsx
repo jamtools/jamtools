@@ -25,8 +25,6 @@ export class JamToolsEngine {
     private sharedStateService!: SharedStateService;
 
     initialize = async () => {
-        // how can we make sure each thing is initialized without adding more stuff here? maybe this is best for now
-        await this.coreDeps.inputs.midi.initialize();
         const websocketConnected = await this.coreDeps.rpc.initialize();
         if (!websocketConnected) {
             if ('confirm' in globalThis) {
