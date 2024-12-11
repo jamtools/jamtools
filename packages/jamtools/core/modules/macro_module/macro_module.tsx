@@ -8,7 +8,7 @@ import {CoreDependencies, ModuleDependencies} from 'springboard/types/module_typ
 import {MacroConfigItem, MacroTypeConfigs} from './macro_module_types';
 import {BaseModule, ModuleHookValue} from 'springboard/modules/base_module/base_module';
 import {MacroPage} from './macro_page';
-import {jamtools} from 'springboard/engine/register';
+import springboard from 'springboard';
 import {CapturedRegisterMacroTypeCall, MacroAPI, MacroCallback} from '@jamtools/core/modules/macro_module/registered_macro_types';
 import {ModuleAPI} from 'springboard/engine/module_api';
 
@@ -26,7 +26,7 @@ type MacroHookValue = ModuleHookValue<MacroModule>;
 
 const macroContext = React.createContext<MacroHookValue>({} as MacroHookValue);
 
-jamtools.registerClassModule((coreDeps: CoreDependencies, modDependencies: ModuleDependencies) => {
+springboard.registerClassModule((coreDeps: CoreDependencies, modDependencies: ModuleDependencies) => {
     return new MacroModule(coreDeps, modDependencies);
 });
 

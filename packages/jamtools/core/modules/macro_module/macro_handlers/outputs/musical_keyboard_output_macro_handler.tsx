@@ -1,7 +1,5 @@
 import React from 'react';
 
-import {jamtools} from 'springboard/engine/register';
-
 import {MidiEvent} from '@jamtools/core/modules/macro_module/macro_module_types';
 
 export interface OutputMidiDevice {

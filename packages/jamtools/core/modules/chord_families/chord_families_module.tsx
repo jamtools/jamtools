@@ -3,7 +3,7 @@ import React from 'react';
 import {ScaleDegreeInfo, cycle, getScaleDegreeFromScaleAndNote, ionianScaleDegreeQualities} from './root_mode_snack/root_mode_types';
 
 import {RootModeComponent} from './root_mode_snack/root_mode_component';
-import {jamtools} from 'springboard/engine/register';
+import springboard from 'springboard';
 
 type State = {
     chord: ScaleDegreeInfo | null;
@@ -99,13 +99,13 @@ declare module 'springboard/module_registry/module_registry' {
     }
 }
 
-// jamtools.registerModule('chord_families_test', {}, async (moduleAPI) => {
+// springboard.registerModule('chord_families_test', {}, async (moduleAPI) => {
 //     const chordFamiliesModule = moduleAPI.deps.module.moduleRegistry.getModule('chord_families');
 
 //     const data = chordFamiliesModule.getChordFamilyHandler('mykey');
 // });
 
-jamtools.registerModule('chord_families', {}, async (moduleAPI) => {
+springboard.registerModule('chord_families', {}, async (moduleAPI) => {
     const savedData = await moduleAPI.statesAPI.createPersistentState<ChordFamilyData[]>('all_chord_families', []);
 
     const getChordFamilyHandler = (key: string): ChordFamilyHandler => {

@@ -2,7 +2,7 @@ import {ScaleLoader} from 'react-spinners';
 
 import {CoreDependencies, ModuleDependencies} from 'springboard/types/module_types';
 
-import {ClassModuleCallback, ModuleCallback, RegisterModuleOptions, jamtools} from './register';
+import {ClassModuleCallback, ModuleCallback, RegisterModuleOptions, springboard} from './register';
 
 import React, {createContext, useContext, useState} from 'react';
 
@@ -15,7 +15,7 @@ import {ModuleAPI} from './module_api';
 type CapturedRegisterModuleCalls = [string, RegisterModuleOptions, ModuleCallback<any>];
 type CapturedRegisterClassModuleCalls = ClassModuleCallback<any>;
 
-export class JamToolsEngine {
+export class Springboard {
     public moduleRegistry!: ModuleRegistry;
 
     constructor(public coreDeps: CoreDependencies, public extraModuleDependencies: ExtraModuleDependencies) {}
@@ -39,11 +39,11 @@ export class JamToolsEngine {
 
         this.moduleRegistry = new ModuleRegistry();
 
-        const registeredClassModuleCallbacks = (jamtools.registerClassModule as unknown as {calls: CapturedRegisterClassModuleCalls[]}).calls || [];
-        jamtools.registerClassModule = this.registerClassModule;
+        const registeredClassModuleCallbacks = (springboard.registerClassModule as unknown as {calls: CapturedRegisterClassModuleCalls[]}).calls || [];
+        springboard.registerClassModule = this.registerClassModule;
 
-        const registeredModuleCallbacks = (jamtools.registerModule as unknown as {calls: CapturedRegisterModuleCalls[]}).calls || [];
-        jamtools.registerModule = this.registerModule;
+        const registeredModuleCallbacks = (springboard.registerModule as unknown as {calls: CapturedRegisterModuleCalls[]}).calls || [];
+        springboard.registerModule = this.registerModule;
 
         for (const modClassCallback of registeredClassModuleCallbacks) {
             await this.registerClassModule(modClassCallback);
@@ -126,18 +126,18 @@ const isModuleEnabled = (mod: Module) => {
     return true;
 };
 
-export const useJamToolsEngine = () => {
+export const useSpringboardEngine = () => {
     return useContext(engineContext);
 };
 
-type JamToolsProviderProps = React.PropsWithChildren<{
-    engine: JamToolsEngine;
+type SpringboardProviderProps = React.PropsWithChildren<{
+    engine: Springboard;
 }>;
 
-const engineContext = createContext<JamToolsEngine>({} as JamToolsEngine);
+const engineContext = createContext<Springboard>({} as Springboard);
 
-export const JamToolsProvider = (props: JamToolsProviderProps) => {
-    const [engine, setEngine] = useState<JamToolsEngine | null>(null);
+export const SpringboardProvider = (props: SpringboardProviderProps) => {
+    const [engine, setEngine] = useState<Springboard | null>(null);
 
     useMount(async () => {
         await props.engine.initialize();

@@ -1,17 +1,17 @@
-import {JamToolsEngine} from 'springboard/engine/engine';
+import {Springboard} from 'springboard/engine/engine';
 import {makeMockCoreDependencies, makeMockExtraDependences} from 'springboard/test/mock_core_dependencies';
-import {jamtools} from 'springboard/engine/register';
+import springboard from 'springboard';
 
 describe('ModuleAPI', () => {
     beforeEach(() => {
-        jamtools.reset();
+        springboard.reset();
     });
 
     it('should create shared state', async () => {
         const coreDeps = makeMockCoreDependencies({store: {}});
         const extraDeps = makeMockExtraDependences();
 
-        const engine = new JamToolsEngine(coreDeps, extraDeps);
+        const engine = new Springboard(coreDeps, extraDeps);
         await engine.initialize();
 
         const mod = await engine.registerModule('TestModule', {}, async (moduleAPI) => {

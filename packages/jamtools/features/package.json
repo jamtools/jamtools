@@ -1,6 +1,6 @@
 {
   "name": "@jamtools/features",
-  "version": "0.11.4",
+  "version": "0.13.0-rc1",
   "scripts": {
     "check-types": "tsc --noEmit",
     "lint": "eslint --ext ts --ext tsx .",
@@ -18,6 +18,6 @@
     "dir": "../../../configs"
   },
   "peerDependencies": {
-    "@jamtools/core": "0.11.4"
+    "@jamtools/core": "0.13.0-rc1"
   }
 }

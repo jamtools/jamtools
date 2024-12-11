@@ -1,10 +1,10 @@
 import React from 'react';
 
-import {jamtools} from 'springboard/engine/register';
+import springboard from 'springboard';
 
 // import {GuitarComponent} from './song_structures/components/guitar';
 
-jamtools.registerModule('daw_interaction', {}, async (moduleAPI) => {
+springboard.registerModule('daw_interaction', {}, async (moduleAPI) => {
     const sliderPositionState1 = await moduleAPI.statesAPI.createSharedState('slider_position_1', 0);
     const sliderPositionState2 = await moduleAPI.statesAPI.createSharedState('slider_position_2', 0);
 

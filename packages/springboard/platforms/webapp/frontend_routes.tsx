@@ -11,7 +11,7 @@ import {
     useNavigate,
 } from 'react-router-dom';
 
-import {useJamToolsEngine} from 'springboard/engine/engine';
+import {useSpringboardEngine} from 'springboard/engine/engine';
 import {Module, RegisteredRoute} from 'springboard/module_registry/module_registry';
 
 import {Layout} from './layout';
@@ -27,7 +27,7 @@ const CustomRoute = (props: {component: RegisteredRoute['component']}) => {
 };
 
 export const FrontendRoutes = () => {
-    const engine = useJamToolsEngine();
+    const engine = useSpringboardEngine();
 
     const mods = engine.moduleRegistry.useModules();
 

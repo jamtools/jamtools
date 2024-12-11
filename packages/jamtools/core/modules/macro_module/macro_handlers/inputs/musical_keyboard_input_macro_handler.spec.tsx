@@ -4,13 +4,13 @@ import { screen } from 'shadow-dom-testing-library';
 import '@testing-library/jest-dom';
 
 import '@jamtools/core/modules';
-import {JamToolsEngine} from 'springboard/engine/engine';
+import {Springboard} from 'springboard/engine/engine';
+import springboard from 'springboard';
 
 import {makeMockCoreDependencies, makeMockExtraDependences} from 'springboard/test/mock_core_dependencies';
 import {Subject} from 'rxjs';
 import {QwertyCallbackPayload} from '@jamtools/core/types/io_types';
 import {MidiEventFull} from '@jamtools/core/modules/macro_module/macro_module_types';
-import {jamtools} from 'springboard/engine/register';
 import {MockQwertyService} from '@jamtools/core/test/services/mock_qwerty_service';
 import {MockMidiService} from '@jamtools/core/test/services/mock_midi_service';
 import {setIoDependencyCreator} from '@jamtools/core/modules/io/io_module';
@@ -20,7 +20,7 @@ import {getMacroInputTestHelpers} from './macro_input_test_helpers';
 
 describe('MusicalKeyboardInputMacroHandler', () => {
     beforeEach(() => {
-        jamtools.reset();
+        springboard.reset();
         macroTypeRegistry.reset();
     });
 
@@ -41,7 +41,7 @@ describe('MusicalKeyboardInputMacroHandler', () => {
 
         // coreDeps.inputs.qwerty.onInputEvent = qwertySubject;
 
-        const engine = new JamToolsEngine(coreDeps, extraDeps);
+        const engine = new Springboard(coreDeps, extraDeps);
         await engine.initialize();
 
         const calls: MidiEventFull[] = [];

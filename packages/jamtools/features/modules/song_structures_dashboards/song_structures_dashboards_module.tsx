@@ -2,7 +2,7 @@ import React from 'react';
 
 import {Link} from 'react-router-dom';
 
-import {jamtools} from 'springboard/engine/register';
+import springboard from 'springboard';
 import {GuitarChordRootsDisplay, GuitarTabView} from '@jamtools/core/modules/song_structures/components/guitar_tab_view';
 import {Button} from 'springboard/components/Button';
 import {MidiEvent} from '@jamtools/core/modules/macro_module/macro_module_types';
@@ -28,7 +28,7 @@ const initialGuitarDisplaySettings: GuitarDisplaySettings = {
     showLetters: false,
 };
 
-jamtools.registerModule('song_structures_dashboards', {}, async (moduleAPI): Promise<SongStructuresDashboardsModuleReturnValue> => {
+springboard.registerModule('song_structures_dashboards', {}, async (moduleAPI): Promise<SongStructuresDashboardsModuleReturnValue> => {
     const states = moduleAPI.statesAPI;
     const macros = moduleAPI.deps.module.moduleRegistry.getModule('macro');
 

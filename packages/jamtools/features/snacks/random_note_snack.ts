@@ -1,4 +1,4 @@
-import {jamtools} from 'springboard/engine/register';
+import springboard from 'springboard';
 
 declare module 'springboard/module_registry/module_registry' {
     interface AllModules {
@@ -10,7 +10,7 @@ type RandomNoteModuleReturnValue = {
     togglePlaying: () => void;
 }
 
-jamtools.registerModule('RandomNote', {}, async (moduleAPI): Promise<RandomNoteModuleReturnValue> => {
+springboard.registerModule('RandomNote', {}, async (moduleAPI): Promise<RandomNoteModuleReturnValue> => {
     const macroModule = moduleAPI.deps.module.moduleRegistry.getModule('macro');
 
     const inputTrigger = await macroModule.createMacro(moduleAPI, 'Input trigger', 'musical_keyboard_input', {enableQwerty: false});

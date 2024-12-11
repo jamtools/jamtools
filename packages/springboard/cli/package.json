@@ -1,6 +1,6 @@
 {
   "name": "springboard-cli",
-  "version": "0.11.4",
+  "version": "0.13.0-rc1",
   "main": "index.js",
   "scripts": {
     "build": "NODE_MODULES_PARENT_FOLDER=../../../ npx tsx cli.ts",
@@ -18,10 +18,10 @@
     "typescript": "^5.4.5"
   },
   "peerDependencies": {
-    "springboard": "0.11.4",
-    "@springboardjs/platforms-node": "0.11.4",
-    "@springboardjs/platforms-browser": "0.11.4",
-    "springboard-server": "0.11.4"
+    "springboard": "0.13.0-rc1",
+    "@springboardjs/platforms-node": "0.13.0-rc1",
+    "@springboardjs/platforms-browser": "0.13.0-rc1",
+    "springboard-server": "0.13.0-rc1"
   },
   "keywords": [],
   "author": "",

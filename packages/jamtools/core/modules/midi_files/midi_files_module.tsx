@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 
 import {Button} from 'springboard/components/Button';
 
-import {jamtools} from 'springboard/engine/register';
+import springboard from 'springboard';
 import {MidiFileParser, ParsedMidiFile} from './midi_file_parser/midi_file_parser';
 
 declare module 'springboard/module_registry/module_registry' {
@@ -21,7 +21,7 @@ type MidiFileModuleReturnValue = {
     };
 };
 
-jamtools.registerModule('MidiFile', {}, async (moduleAPI): Promise<MidiFileModuleReturnValue> => {
+springboard.registerModule('MidiFile', {}, async (moduleAPI): Promise<MidiFileModuleReturnValue> => {
     return {
         components: {
             Upload: (props: UploadComponentProps) => {

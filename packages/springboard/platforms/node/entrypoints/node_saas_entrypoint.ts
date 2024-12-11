@@ -1,5 +1,5 @@
-import {startJamTools} from './main';
+import {startNodeApp} from './main';
 
-startJamTools().then(async engine => {
+startNodeApp().then(async engine => {
     await new Promise(() => {});
 });

@@ -1,6 +1,6 @@
 import '@jamtools/core/modules';
 
-import {JamToolsEngine} from 'springboard/engine/engine';
+import {Springboard} from 'springboard/engine/engine';
 import {makeMockCoreDependencies, makeMockExtraDependences} from 'springboard/test/mock_core_dependencies';
 
 describe('IoModule', () => {
@@ -8,7 +8,7 @@ describe('IoModule', () => {
         const coreDeps = makeMockCoreDependencies({store: {}});
         const extraDeps = makeMockExtraDependences();
 
-        const engine = new JamToolsEngine(coreDeps, extraDeps);
+        const engine = new Springboard(coreDeps, extraDeps);
         await engine.initialize();
 
         const ioModule = engine.moduleRegistry.getModule('io');

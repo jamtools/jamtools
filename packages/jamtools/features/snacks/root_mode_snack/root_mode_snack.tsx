@@ -3,14 +3,14 @@ import React from 'react';
 import {ScaleDegreeInfo, cycle, getScaleDegreeFromScaleAndNote} from './root_mode_types';
 
 import {RootModeComponent} from './root_mode_component';
-import {jamtools} from 'springboard/engine/register';
+import springboard from 'springboard';
 
 type State = {
     chord: ScaleDegreeInfo | null;
     scale: number;
 }
 
-jamtools.registerModule('root_mode_module', {}, async (moduleAPI) => {
+springboard.registerModule('root_mode_module', {}, async (moduleAPI) => {
     // C major on page load
     let scale = 0;
 

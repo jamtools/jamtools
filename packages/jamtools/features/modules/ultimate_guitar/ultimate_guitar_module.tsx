@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {jamtools} from 'springboard/engine/register';
+import springboard from 'springboard';
 import {isErrorResponse} from 'springboard/types/response_types';
 
 import {parseUltimateGuitarHTMLContent} from './ultimate_guitar_utils';
@@ -35,7 +35,7 @@ declare module 'springboard/module_registry/module_registry' {
     }
 }
 
-jamtools.registerModule('Ultimate_Guitar', {}, async (moduleAPI): Promise<UltimateGuitarModuleReturnValue> => {
+springboard.registerModule('Ultimate_Guitar', {}, async (moduleAPI): Promise<UltimateGuitarModuleReturnValue> => {
     const states = new States(moduleAPI);
     await states.initialize();
 

@@ -5,7 +5,7 @@ import {MidiEventFull} from '@jamtools/core/modules/macro_module/macro_module_ty
 import {StateSupervisor} from 'springboard/services/states/shared_state_service';
 
 import {Edit} from './components/edit_macro';
-import {MacroAPI} from 'modules/macro_module/registered_macro_types';
+import {MacroAPI} from '@jamtools/core/modules/macro_module/registered_macro_types';
 
 type MidiInputMacroPayload = {
     subject: Subject<MidiEventFull>;

@@ -12,7 +12,7 @@ Promise<ModuleReturnValue> | ModuleReturnValue;
 export type ClassModuleCallback<T extends object> = (coreDeps: CoreDependencies, modDependencies: ModuleDependencies) =>
 Promise<Module<T>> | Module<T>;
 
-export type JamTools = {
+export type SpringboardRegistry = {
     registerModule: <ModuleOptions extends RegisterModuleOptions, ModuleReturnValue extends object>(
         moduleId: string,
         options: ModuleOptions,
@@ -46,13 +46,13 @@ const registerClassModule = <T extends object>(cb: ClassModuleCallback<T>) => {
     (registerClassModule as unknown as {calls: CapturedRegisterClassModuleCalls[]}).calls = calls;
 };
 
-export const jamtools: JamTools = {
+export const springboard: SpringboardRegistry = {
     registerModule,
     registerClassModule,
     reset: () => {
-        jamtools.registerModule = registerModule;
-        jamtools.registerClassModule = registerClassModule;
+        springboard.registerModule = registerModule;
+        springboard.registerClassModule = registerClassModule;
     },
 };
 
-(globalThis as unknown as {jamtools: JamTools}).jamtools = jamtools;
+(globalThis as unknown as {springboard: SpringboardRegistry}).springboard = springboard;

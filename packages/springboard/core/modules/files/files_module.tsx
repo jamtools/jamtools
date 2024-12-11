@@ -1,6 +1,6 @@
 import React from 'react';
 
-import jamtools from 'springboard';
+import springboard from 'springboard';
 import {ModuleAPI} from 'springboard/engine/module_api';
 import {IndexedDbFileStorageProvider} from './file_storage_providers/indexed_db_file_storage_provider';
 import {FileInfo} from './file_types';
@@ -40,7 +40,7 @@ type FilesModule = {
     useFiles: () => FileInfo[];
 }
 
-jamtools.registerModule('Files', {}, async (moduleAPI): Promise<FilesModule> => {
+springboard.registerModule('Files', {}, async (moduleAPI): Promise<FilesModule> => {
     const allStoredFiles = await moduleAPI.statesAPI.createPersistentState<FileInfo[]>('allStoredFiles', []);
 
     const fileUploader = new IndexedDbFileStorageProvider();

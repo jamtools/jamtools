@@ -3,7 +3,7 @@ import {SharedStateService} from '../services/states/shared_state_service';
 
 export type ModuleCallback<T extends object,> = (coreDeps: CoreDependencies, modDependencies: ModuleDependencies) =>
 Promise<Module<T>> | Module<T>;
-export type JamTools = {
+export type Springboard = {
     registerClassModule: <T extends object>(cb: ModuleCallback<T>) => void;
     registerClassModulee: <T extends object>(cb: ModuleCallback<T>) => void;
 };
