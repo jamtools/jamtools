@@ -1,6 +1,6 @@
 #!/bin/bash
 
-full_version="0.12.0"  # Set the target version here or make it a script argument
+full_version="0.13.0-rc1"  # Set the target version here or make it a script argument
 
 root_dir=$(pwd)  # Assuming this script is run from the project root
 
@@ -28,9 +28,9 @@ publish_package() {
   local target_dir=$1
   cd "$target_dir" || exit 1
   echo "Publishing package in $target_dir"
-  npm publish --access public
+  # npm publish --access public
   # npm publish --registry http://coolify-infra:4873
-  # npm publish --registry http://localhost:4873
+  npm publish --registry http://localhost:4873
 }
 
 # Bump, update dependencies, and publish each package
