@@ -102,11 +102,12 @@ export type StateSupervisor<State> = {
     subject: Subject<State>;
     getState(): State;
     setState(stateOrCallback: State | StateCallback<State>): Promise<unknown>;
-    setStateImmer(immerCallback: StateCallback<State>): Promise<unknown>;
+    setStateImmer(immerCallback: StateCallbackImmer<State>): Promise<unknown>;
     useState(): State;
 }
 
 type StateCallback<State> = (state: State) => State;
+type StateCallbackImmer<State> = (state: State) => void;
 
 export class UserAgentStateSupervisor<State> implements StateSupervisor<State> {
     public subject: Subject<State> = new Subject();
@@ -133,9 +134,9 @@ export class UserAgentStateSupervisor<State> implements StateSupervisor<State> {
         return this.userAgentStore.set(this.key, stateOrCallback);
     };
 
-    public setStateImmer = async (immerCallback: StateCallback<State>): Promise<unknown> => {
+    public setStateImmer = async (immerCallback: StateCallbackImmer<State>): Promise<void> => {
         const result = produce(this.getState(), immerCallback);
-        return this.setState(result);
+        await this.setState(result);
     };
 
     public useState = (): State => {
@@ -171,9 +172,9 @@ export class SharedStateSupervisor<State> implements StateSupervisor<State> {
         return this.sharedStateService.sendRpcSetSharedState(this.key, state);
     };
 
-    public setStateImmer = async (immerCallback: StateCallback<State>): Promise<unknown> => {
+    public setStateImmer = async (immerCallback: StateCallbackImmer<State>): Promise<void> => {
         const result = produce(this.getState(), immerCallback);
-        return this.setState(result);
+        await this.setState(result);
     };
 
     public useState = (): State => {

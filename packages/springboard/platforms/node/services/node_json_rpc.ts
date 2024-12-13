@@ -20,6 +20,9 @@ export class NodeJsonRpcClientAndServer implements Rpc {
         this.clientId = await this.getClientId();
 
         this.rpcServer = new JSONRPCServer();
+
+        await new Promise(r => setTimeout(r, 1000));
+
         const connected = await this.initializeWebsocket();
         return connected;
     };

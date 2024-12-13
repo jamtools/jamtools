@@ -1,6 +1,6 @@
 {
   "name": "@springboardjs/platforms-node",
-  "version": "0.13.0-rc1",
+  "version": "0.13.0-rc5",
   "scripts": {
     "start": "node ../../cli/dist/node/dist/index.js",
     "dev": "node --watch --watch-preserve-output ../../cli/dist/node/dist/index.js",
@@ -10,7 +10,7 @@
   },
   "peerDependencies": {
     "isomorphic-ws": "^4.0.1",
-    "springboard": "0.13.0-rc1",
+    "springboard": "0.13.0-rc5",
     "ws": "^8.18.0"
   },
   "config": {
