@@ -70,6 +70,12 @@ publish_package "$root_dir/packages/springboard/external/mantine"
 
 sleep 1
 
+bump_version "$root_dir/packages/springboard/external/shoelace"
+bump_peer_dep "$root_dir/packages/springboard/external/shoelace" "springboard"
+publish_package "$root_dir/packages/springboard/external/shoelace"
+
+sleep 1
+
 bump_version "$root_dir/packages/jamtools/core"
 bump_peer_dep "$root_dir/packages/jamtools/core" "springboard"
 publish_package "$root_dir/packages/jamtools/core"
@@ -78,6 +84,7 @@ sleep 1
 
 bump_version "$root_dir/packages/jamtools/features"
 bump_peer_dep "$root_dir/packages/jamtools/features" "@jamtools/core"
+bump_peer_dep "$root_dir/packages/jamtools/features" "@springboardjs/shoelace"
 publish_package "$root_dir/packages/jamtools/features"
 
 sleep 1
