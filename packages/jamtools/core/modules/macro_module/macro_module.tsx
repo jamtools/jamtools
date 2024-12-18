@@ -8,10 +8,12 @@ import {CoreDependencies, ModuleDependencies} from 'springboard/types/module_typ
 import {MacroConfigItem, MacroTypeConfigs} from './macro_module_types';
 import {BaseModule, ModuleHookValue} from 'springboard/modules/base_module/base_module';
 import {MacroPage} from './macro_page';
-import {CapturedRegisterMacroTypeCall, MacroAPI, MacroCallback, jamtools} from 'springboard/engine/register';
+import springboard from 'springboard';
+import {CapturedRegisterMacroTypeCall, MacroAPI, MacroCallback} from '@jamtools/core/modules/macro_module/registered_macro_types';
 import {ModuleAPI} from 'springboard/engine/module_api';
 
 import './macro_handlers';
+import {macroTypeRegistry} from './registered_macro_types';
 
 type ModuleId = string;
 
@@ -24,7 +26,7 @@ type MacroHookValue = ModuleHookValue<MacroModule>;
 
 const macroContext = React.createContext<MacroHookValue>({} as MacroHookValue);
 
-jamtools.registerClassModule((coreDeps: CoreDependencies, modDependencies: ModuleDependencies) => {
+springboard.registerClassModule((coreDeps: CoreDependencies, modDependencies: ModuleDependencies) => {
     return new MacroModule(coreDeps, modDependencies);
 });
 
@@ -82,8 +84,8 @@ export class MacroModule implements Module<MacroConfigState> {
     };
 
     initialize = async () => {
-        const registeredMacroCallbacks = (jamtools.registerMacroType as unknown as {calls: CapturedRegisterMacroTypeCall[]}).calls || [];
-        jamtools.registerMacroType = this.registerMacroType;
+        const registeredMacroCallbacks = (macroTypeRegistry.registerMacroType as unknown as {calls: CapturedRegisterMacroTypeCall[]}).calls || [];
+        macroTypeRegistry.registerMacroType = this.registerMacroType;
 
         for (const macroType of registeredMacroCallbacks) {
             this.registerMacroType(...macroType);

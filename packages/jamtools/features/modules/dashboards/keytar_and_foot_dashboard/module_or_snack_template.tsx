@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {jamtools} from 'springboard/engine/register';
+import springboard from 'springboard';
 import {ModuleAPI} from 'springboard/engine/module_api';
 import {Button} from 'springboard/components/Button';
 
@@ -33,7 +33,7 @@ type Actions = {
     changeTheThing: (args: {newValue: string}) => void;
 }
 
-jamtools.registerModule('ModuleOrSnackTemplate', {}, async (moduleAPI): Promise<ModuleOrSnackTemplateModuleReturnValue> => {
+springboard.registerModule('ModuleOrSnackTemplate', {}, async (moduleAPI): Promise<ModuleOrSnackTemplateModuleReturnValue> => {
     const states = await createStates(moduleAPI);
     const macros = await createMacros(moduleAPI);
 

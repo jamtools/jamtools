@@ -52,7 +52,6 @@ export const platformNodeBuildConfig: BuildConfig = {
     },
 };
 
-const watchForChanges = process.argv.includes('--watch');
 const shouldOutputMetaFile = process.argv.includes('--meta');
 
 export type ApplicationBuildOptions = {
@@ -60,12 +59,16 @@ export type ApplicationBuildOptions = {
     esbuildOutDir?: string;
     applicationEntrypoint?: string;
     nodeModulesParentFolder?: string;
+    watch?: boolean;
 };
 
 export const buildApplication = async (buildConfig: BuildConfig, options?: ApplicationBuildOptions) => {
     const coreFile = buildConfig.platformEntrypoint();
 
-    const applicationEntrypoint = process.env.APPLICATION_ENTRYPOINT || options?.applicationEntrypoint || '../../../../../../apps/jamtools/modules/index.ts';
+    const applicationEntrypoint = process.env.APPLICATION_ENTRYPOINT || options?.applicationEntrypoint;
+    if (!applicationEntrypoint) {
+        throw new Error('No application entrypoint provided');
+    }
 
     const allImports = [coreFile, applicationEntrypoint].map(file => `import '${file}';`).join('\n');
 
@@ -111,7 +114,25 @@ export const buildApplication = async (buildConfig: BuildConfig, options?: Appli
 
     options?.editBuildOptions?.(esbuildOptions);
 
-    if (watchForChanges) {
+    if (buildConfig.additionalFiles) {
+        let nodeModulesParentFolder = process.env.NODE_MODULES_PARENT_FOLDER || options?.nodeModulesParentFolder;
+        if (!nodeModulesParentFolder) {
+            nodeModulesParentFolder = await findNodeModulesParentFolder();
+        }
+        if (!nodeModulesParentFolder) {
+            throw new Error('Failed to find node_modules folder in current directory and parent directories')
+        }
+
+        for (const srcFileName of Object.keys(buildConfig.additionalFiles)) {
+            const destFileName = buildConfig.additionalFiles[srcFileName];
+
+            const fullSrcFilePath = path.join(nodeModulesParentFolder, 'node_modules', srcFileName);
+            const fullDestFilePath = `${outDir}/${destFileName}`;
+            await fs.promises.copyFile(fullSrcFilePath, fullDestFilePath);
+        }
+    }
+
+    if (options?.watch) {
         const ctx = await esbuild.context(esbuildOptions);
         await ctx.watch();
         console.log(`Watching for changes for ${buildConfig.platform} application build...`);
@@ -122,24 +143,12 @@ export const buildApplication = async (buildConfig: BuildConfig, options?: Appli
     if (shouldOutputMetaFile) {
         await fs.promises.writeFile('esbuild_meta.json', JSON.stringify(result.metafile));
     }
-
-    if (buildConfig.additionalFiles) {
-        const nodeModulesParentFolder = process.env.NODE_MODULES_PARENT_FOLDER || options?.nodeModulesParentFolder || '.';
-
-        for (const srcFileName of Object.keys(buildConfig.additionalFiles)) {
-            const destFileName = buildConfig.additionalFiles[srcFileName];
-
-            const fullSrcFilePath = path.join(nodeModulesParentFolder, 'node_modules', srcFileName);
-
-            const fullDestFilePath = `${outDir}/${destFileName}`
-            await fs.promises.copyFile(fullSrcFilePath, fullDestFilePath);
-        }
-    }
 };
 
 export type ServerBuildOptions = {
     esbuildOutDir?: string;
     serverEntrypoint?: string;
+    watch?: boolean;
 };
 
 export const buildServer = async (options?: ServerBuildOptions) => {
@@ -178,11 +187,36 @@ export const buildServer = async (options?: ServerBuildOptions) => {
         external: externals,
     };
 
-    if (watchForChanges) {
+    if (options?.watch) {
         const ctx = await esbuild.context(buildOptions);
         await ctx.watch();
         console.log('Watching for changes for server build...');
     } else {
         await esbuild.build(buildOptions);
     }
+};
+
+const findNodeModulesParentFolder = async () => {
+    let currentDir = process.cwd();
+
+    while (true) {
+        try {
+            const nodeModulesPath = path.join(currentDir, 'node_modules');
+            const stats = await fs.promises.stat(nodeModulesPath);
+
+            if (stats.isDirectory()) {
+                return currentDir;
+            }
+        } catch (error) {
+            const parentDir = path.dirname(currentDir);
+
+            if (parentDir === currentDir) {
+                break;
+            }
+
+            currentDir = parentDir;
+        }
+    }
+
+    return undefined;
 };

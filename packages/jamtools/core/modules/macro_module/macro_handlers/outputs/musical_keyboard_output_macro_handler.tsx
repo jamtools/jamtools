@@ -1,7 +1,5 @@
 import React from 'react';
 
-import {jamtools} from 'springboard/engine/register';
-
 import {MidiEvent} from '@jamtools/core/modules/macro_module/macro_module_types';
 
 export interface OutputMidiDevice {
@@ -15,6 +13,7 @@ export interface OutputMidiDevice {
 import {getKeyForMacro} from '../inputs/input_macro_handler_utils';
 import {AddingOutputDeviceState, SavedOutputDeviceState} from './components/output_macro_edit';
 import {OutputMacroStateHolders, checkSavedMidiOutputsAreEqual, useOutputMacroWaiterAndSaver} from './output_macro_handler_utils';
+import {macroTypeRegistry} from '@jamtools/core/modules/macro_module/registered_macro_types';
 
 type MusicalKeyboardOutputMacroConfig = {
     allowLocal?: boolean;
@@ -29,7 +28,7 @@ declare module '@jamtools/core/modules/macro_module/macro_module_types' {
     }
 }
 
-jamtools.registerMacroType(
+macroTypeRegistry.registerMacroType(
     'musical_keyboard_output',
     {},
     (async (macroAPI, inputConf, fieldName) => {

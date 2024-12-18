@@ -9,7 +9,7 @@ import {CoreDependencies, ModuleDependencies} from 'springboard/types/module_typ
 import {BaseModule, ModuleHookValue} from 'springboard/modules/base_module/base_module';
 import {Module} from 'springboard/module_registry/module_registry';
 
-import {jamtools} from 'springboard/engine/register';
+import springboard from 'springboard';
 
 type WledClientStatus = {
     url: string;
@@ -29,7 +29,7 @@ type WledHookValue = ModuleHookValue<WledModule>;
 
 const WledContext = createContext<WledHookValue>({} as WledHookValue);
 
-jamtools.registerClassModule((coreDeps: CoreDependencies, modDependencies: ModuleDependencies) => {
+springboard.registerClassModule((coreDeps: CoreDependencies, modDependencies: ModuleDependencies) => {
     return new WledModule(coreDeps, modDependencies);
 });
 

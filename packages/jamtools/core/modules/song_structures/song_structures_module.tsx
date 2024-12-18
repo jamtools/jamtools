@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {jamtools} from 'springboard/engine/register';
+import springboard from 'springboard';
 
 declare module 'springboard/module_registry/module_registry' {
     interface AllModules {
@@ -12,6 +12,6 @@ type SongStructuresModuleReturnValue = {
 
 };
 
-jamtools.registerModule('song_structures', {}, async (moduleAPI): Promise<SongStructuresModuleReturnValue> => {
+springboard.registerModule('song_structures', {}, async (moduleAPI): Promise<SongStructuresModuleReturnValue> => {
     return {};
 });

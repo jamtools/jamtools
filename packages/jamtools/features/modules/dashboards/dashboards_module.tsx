@@ -2,7 +2,7 @@ import React from 'react';
 
 import {Link} from 'react-router-dom';
 
-import {jamtools} from 'springboard/engine/register';
+import springboard from 'springboard';
 
 import {ModuleAPI} from 'springboard/engine/module_api';
 
@@ -24,7 +24,7 @@ type DashboardsModuleReturnValue = {
 
 };
 
-jamtools.registerModule('Dashboards', {}, async (moduleAPI): Promise<DashboardsModuleReturnValue> => {
+springboard.registerModule('Dashboards', {}, async (moduleAPI): Promise<DashboardsModuleReturnValue> => {
     const promises = allDashboards.map(d => d.dashboard(moduleAPI, d.id));
     await Promise.all(promises);
 

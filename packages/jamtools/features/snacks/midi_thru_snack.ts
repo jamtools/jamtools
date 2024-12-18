@@ -1,6 +1,6 @@
-import {jamtools} from 'springboard/engine/register';
+import springboard from 'springboard';
 
-jamtools.registerModule('midi_thru', {}, async (moduleAPI) => {
+springboard.registerModule('midi_thru', {}, async (moduleAPI) => {
     const macroModule = moduleAPI.deps.module.moduleRegistry.getModule('macro');
 
     const [input, output] = await Promise.all([

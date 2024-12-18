@@ -8,20 +8,27 @@ import {MidiEvent, MidiEventFull} from '@jamtools/core/modules/macro_module/macr
 import {makeMockCoreDependencies, makeMockExtraDependences} from 'springboard/test/mock_core_dependencies';
 
 import {Main} from '@springboardjs/platforms-browser/entrypoints/main';
-import {JamToolsEngine} from 'springboard/engine/engine';
+import {Springboard} from 'springboard/engine/engine';
+import {setIoDependencyCreator} from '@jamtools/core/modules/io/io_module';
+import {MockMidiService} from '@jamtools/core/test/services/mock_midi_service';
+import {MockQwertyService} from '@jamtools/core/test/services/mock_qwerty_service';
 
 export const getMacroInputTestHelpers = () => {
-    const setupTest = async (midiSubject: Subject<MidiEventFull>): Promise<JamToolsEngine> => {
+    const setupTest = async (midiSubject: Subject<MidiEventFull>): Promise<Springboard> => {
         const coreDeps = makeMockCoreDependencies({store: {}});
         const extraDeps = makeMockExtraDependences();
 
-        // const midiSubject = new Subject<MidiEventFull>();
-        coreDeps.inputs.midi = {
-            ...coreDeps.inputs.midi,
-            onInputEvent: midiSubject,
-        };
+        setIoDependencyCreator(() => {
+            const midi = new MockMidiService();
+            midi.onInputEvent = midiSubject;
 
-        const engine = new JamToolsEngine(coreDeps, extraDeps);
+            return {
+                midi,
+                qwerty: new MockQwertyService(),
+            };
+        });
+
+        const engine = new Springboard(coreDeps, extraDeps);
 
         const { container } = render(
             <Main

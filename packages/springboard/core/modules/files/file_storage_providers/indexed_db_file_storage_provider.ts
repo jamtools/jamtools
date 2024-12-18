@@ -1,3 +1,12 @@
+// probably don't want this file in springboard core
+// probably @springboardjs/file-storage instead
+// idk just keep it in core for now I guess
+// the issue I have is that the `dexie` dependency is a requirement atm
+// maybe put this in @springboardjs/platforms-browser
+// ideally there's no dependency on anything, and this just works in indexdb
+// this doesn't belong in springboard core though
+
+
 import Dexie, {type EntityTable} from 'dexie';
 
 import {FileInfo} from '../file_types';

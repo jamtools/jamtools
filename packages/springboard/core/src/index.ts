@@ -1,7 +1,7 @@
 // import * as engine from '../engine/engine';
-import {jamtools} from '../engine/register';
+import {springboard} from '../engine/register';
 
-// export const JamToolsEngine = engine.JamToolsEngine;
-// export const JamToolsProvider = engine.JamToolsProvider;
+// export const Springboard = engine.Springboard;
+// export const SpringboardProvider = engine.SpringboardProvider;
 
-export default jamtools;
+export default springboard;

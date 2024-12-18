@@ -1,16 +1,30 @@
 {
   "name": "springboard-cli",
-  "version": "0.11.4",
+  "version": "0.13.0-rc5",
   "main": "index.js",
+  "bin": {
+    "sb": "dist/cli.js"
+  },
+  "types": "./types",
+  "files": [
+    "dist",
+    "src"
+  ],
   "scripts": {
-    "build": "NODE_MODULES_PARENT_FOLDER=../../../ npx tsx cli.ts",
-    "build-saas": "DISABLE_IO=true NODE_MODULES_PARENT_FOLDER=../../../ npx tsx cli.ts",
-    "build-with-cli": "NODE_MODULES_PARENT_FOLDER=../../../ npx tsx cli.ts",
+    "build": "npx tsx src/cli.ts build ../../../apps/jamtools/modules/index.ts",
+    "build-saas": "DISABLE_IO=true npx tsx src/cli.ts build ../../../apps/jamtools/modules/index.ts",
+    "build-with-cli": "npx tsx cli.ts build ../../../apps/jamtools/modules/index.ts",
     "run-node-local": "NODE_KV_STORE_DATA_FILE=kv_data.json node dist/node/dist/index.js",
     "start": "npm run run-node-local",
-    "dev": "npm run build -- --watch"
+    "dev": "npm run build -- --watch",
+    "prepublishOnly": "npm run clean && npm run build-cli && npm run add-header",
+    "clean": "rm -rf dist",
+    "build-cli": "tsc",
+    "add-header": "./scripts/add-node-executable-header.sh"
   },
   "dependencies": {
+    "commander": "^12.1.0",
+    "concurrently": "^9.1.0",
     "esbuild": "^0.23.0",
     "esbuild-sass-plugin": "^3.3.1",
     "npm-run-all": "^4.1.5",
@@ -18,13 +32,16 @@
     "typescript": "^5.4.5"
   },
   "peerDependencies": {
-    "springboard": "0.11.4",
-    "@springboardjs/platforms-node": "0.11.4",
-    "@springboardjs/platforms-browser": "0.11.4",
-    "springboard-server": "0.11.4"
+    "@springboardjs/platforms-browser": "0.13.0-rc5",
+    "@springboardjs/platforms-node": "0.13.0-rc5",
+    "springboard": "0.13.0-rc5",
+    "springboard-server": "0.13.0-rc5"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "tsup": "^8.3.5"
+  }
 }

@@ -1,7 +1,5 @@
 import React from 'react';
 
-import {jamtools} from 'springboard/engine/register';
-
 export interface MidiControlChangeOutputMacroOutput {
     send(value: number): void;
     initialize?: () => Promise<void>;
@@ -13,6 +11,7 @@ export interface MidiControlChangeOutputMacroOutput {
 import {getKeyForMacro} from '../inputs/input_macro_handler_utils';
 import {AddingOutputDeviceState, Edit, SavedOutputDeviceState} from './components/output_macro_edit';
 import {OutputMacroStateHolders, checkSavedMidiOutputsAreEqual, useOutputMacroWaiterAndSaver} from './output_macro_handler_utils';
+import {macroTypeRegistry} from '@jamtools/core/modules/macro_module/registered_macro_types';
 
 type MidiControlChangeOutputMacroConfig = {
 };
@@ -26,7 +25,7 @@ declare module '@jamtools/core/modules/macro_module/macro_module_types' {
     }
 }
 
-jamtools.registerMacroType(
+macroTypeRegistry.registerMacroType(
     'midi_control_change_output',
     {},
     (async (macroAPI, inputConf, fieldName) => {

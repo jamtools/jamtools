@@ -4,8 +4,8 @@ import {MidiDeviceAndChannelMap, MidiEventFull, makeHashedMidiDeviceAndChannel} 
 import {QwertyCallbackPayload} from '@jamtools/core/types/io_types';
 import {Subject} from 'rxjs';
 import {QWERTY_TO_MIDI_MAPPINGS} from '@jamtools/core/constants/qwerty_to_midi_mappings';
-import {jamtools} from 'springboard/engine/register';
 import {InputMacroStateHolders, getKeyForMacro, getKeyForMidiEvent, useInputMacroWaiterAndSaver} from './input_macro_handler_utils';
+import {macroTypeRegistry} from '@jamtools/core/modules/macro_module/registered_macro_types';
 
 type MusicalKeyboardInputResult = {
     subject: Subject<MidiEventFull>;
@@ -37,7 +37,7 @@ const QWERTY_DEVICE_NAME = 'qwerty';
 const QWERTY_CHANNEL_NUMBER = 0;
 const QWERTY_DEVICE_AND_CHANNEL = makeHashedMidiDeviceAndChannel({device: 'qwerty', channel: 0});
 
-jamtools.registerMacroType(
+macroTypeRegistry.registerMacroType(
     'musical_keyboard_input',
     {},
     async (macroAPI, conf, fieldName): Promise<MusicalKeyboardInputResult> => {

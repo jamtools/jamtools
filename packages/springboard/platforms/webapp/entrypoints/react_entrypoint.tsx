@@ -11,11 +11,9 @@ import {CoreDependencies} from 'springboard/types/module_types';
 import {TrpcKVStoreService} from 'springboard/services/trpc_kv_store_client';
 
 import {Main} from './main';
-import {BrowserQwertyService} from '@springboardjs/platforms-browser/services/browser_qwerty_service';
-import {BrowserMidiService} from '@springboardjs/platforms-browser/services/browser_midi_service';
 import {BrowserKVStoreService} from '@springboardjs/platforms-browser/services/browser_kvstore_service';
 import {BrowserJsonRpcClientAndServer} from '@springboardjs/platforms-browser/services/browser_json_rpc';
-import {JamToolsEngine} from 'springboard/engine/engine';
+import {Springboard} from 'springboard/engine/engine';
 import {ExtraModuleDependencies} from 'springboard/module_registry/module_registry';
 
 const waitForPageLoad = () => new Promise<void>(resolve => {
@@ -34,9 +32,7 @@ if (location.protocol === 'https:') {
 const WS_HOST = process.env.WS_HOST || `${wsProtocol}://${location.host}`;
 const DATA_HOST = process.env.DATA_HOST || `${httpProtocol}://${location.host}`;
 
-export const startJamToolsAndRenderApp = async (): Promise<JamToolsEngine> => {
-    const qwertyService = new BrowserQwertyService(document);
-    const midiService = new BrowserMidiService();
+export const startAndRenderBrowserApp = async (): Promise<Springboard> => {
     const rpc = new BrowserJsonRpcClientAndServer(`${WS_HOST}/ws`);
 
     // const kvStore = new BrowserKVStoreService(localStorage);
@@ -49,10 +45,6 @@ export const startJamToolsAndRenderApp = async (): Promise<JamToolsEngine> => {
     const coreDeps: CoreDependencies = {
         log: console.log,
         showError: (error: string) => alert(error),
-        inputs: {
-            qwerty: qwertyService,
-            midi: midiService,
-        },
         storage: {
             remote: kvStore,
             userAgent: userAgentKVStore,
@@ -67,7 +59,7 @@ export const startJamToolsAndRenderApp = async (): Promise<JamToolsEngine> => {
     const extraDeps: ExtraModuleDependencies = {
     };
 
-    const engine = new JamToolsEngine(coreDeps, extraDeps);
+    const engine = new Springboard(coreDeps, extraDeps);
 
     await waitForPageLoad();
 
