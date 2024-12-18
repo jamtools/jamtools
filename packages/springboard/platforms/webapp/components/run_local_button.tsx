@@ -1,5 +1,4 @@
 import React from 'react';
-import {Button} from 'springboard/components/Button';
 
 const isLocal = localStorage.getItem('isLocal') === 'true';
 
@@ -21,8 +20,8 @@ export const RunLocalButton = () => {
     };
 
     return (
-        <Button onClick={onClick}>
+        <button onClick={onClick}>
             {labelToDisplay}
-        </Button>
+        </button>
     );
 };

@@ -2,10 +2,9 @@ import React from 'react';
 
 import {ModuleAPI} from 'springboard/engine/module_api';
 import {MidiEvent, MidiEventFull} from '@jamtools/core/modules/macro_module/macro_module_types';
-import {Button} from 'springboard/components/Button';
 import {playChord, ChordWithName, noteNames} from './chord_player';
 import {OutputMidiDevice} from '@jamtools/core/modules/macro_module/macro_handlers/outputs/musical_keyboard_output_macro_handler';
-import {QRCode} from 'springboard/components/QRCode';
+import {QRCode} from '@jamtools/features/components/QRCode';
 
 type SingleOctaveRootModeSupervisorMidiState = {
     currentlyHeldDownInputNotes: MidiEvent[];
@@ -253,13 +252,13 @@ export class SingleOctaveRootModeSupervisor {
 
         return (
             <>
-                <Button onClick={() => this.actions.toggleDebugging({})}>
+                <button onClick={() => this.actions.toggleDebugging({})}>
                     {enableDebugging ? 'Disable debugging' : 'Enable debugging'}
-                </Button>
+                </button>
 
-                <Button onClick={() => setShowDebugData(!showDebugData)}>
+                <button onClick={() => setShowDebugData(!showDebugData)}>
                     {showDebugData ? 'Hide debug data' : 'Show debug data'}
-                </Button>
+                </button>
 
                 {showDebugData && (
                     <>

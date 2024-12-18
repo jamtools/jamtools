@@ -28,6 +28,7 @@ export type Module<State extends object = any> = {
     subject?: Subject<State>;
     routes?: Record<string, RegisteredRoute>;
     bottomNavigationTabs?: NavigationItemConfig[];
+    applicationShell?: React.ElementType<React.PropsWithChildren<{modules: Module[]}>>;
 };
 
 // this interface is meant to be extended by each individual module file through interface merging

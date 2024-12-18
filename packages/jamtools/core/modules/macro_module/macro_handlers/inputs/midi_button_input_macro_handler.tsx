@@ -4,7 +4,6 @@ import {Subject} from 'rxjs';
 import {MidiEventFull} from '@jamtools/core/modules/macro_module/macro_module_types';
 import {getKeyForMacro, InputMacroStateHolders, useInputMacroWaiterAndSaver, savedMidiEventsAreEqual, getKeyForMidiEvent} from './input_macro_handler_utils';
 import {qwertyEventToMidiEvent, savedMidiInputsAreEqual} from './musical_keyboard_input_macro_handler';
-import {Button} from 'springboard/components/Button';
 import {macroTypeRegistry} from '@jamtools/core/modules/macro_module/registered_macro_types';
 
 type MacroConfigItemMidiButtonInput = {
@@ -70,11 +69,11 @@ macroTypeRegistry.registerMacroType('midi_button_input', {}, async (macroAPI, co
         components: {
             ...initialMacroReturnValue.components,
             show: () => (
-                <Button
+                <button
                     onClick={() => onPress({})}
                 >
                     Action {fieldName.split('|').pop()}
-                </Button>
+                </button>
             ),
         }
     };

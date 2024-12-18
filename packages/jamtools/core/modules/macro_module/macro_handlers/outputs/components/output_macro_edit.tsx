@@ -1,5 +1,4 @@
 import React from 'react';
-import {Button} from 'springboard/components/Button';
 
 export const ALL_CHANNEL_NUMBERS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16] as const;
 
@@ -34,11 +33,11 @@ export const Edit = (props: EditProps) => {
     if (!props.editing) {
         return (
             <div>
-                <Button
+                <button
                     onClick={props.onEdit}
                 >
                     Edit
-                </Button>
+                </button>
                 {props.savedDevices.length}
             </div>
         );
@@ -46,11 +45,11 @@ export const Edit = (props: EditProps) => {
 
     return (
         <div>
-            <Button
+            <button
                 onClick={props.onCancelEdit}
             >
                 Cancel
-            </Button>
+            </button>
 
             <SavedOutputs
                 askToDelete={props.askToDelete}
@@ -155,11 +154,11 @@ const QueuedDevice = (props: QueuedDeviceProps) => {
                     )}
                     <div>
                         {enableConfirmButton && (
-                            <Button
+                            <button
                                 onClick={() => props.onConfirm()}
                             >
                                 Confirm
-                            </Button>
+                            </button>
                         )}
                     </div>
                 </div>

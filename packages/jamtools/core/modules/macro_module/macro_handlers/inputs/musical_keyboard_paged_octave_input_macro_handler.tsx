@@ -4,7 +4,6 @@ import {produce} from 'immer';
 import {Subject} from 'rxjs';
 
 import {getKeyForMacro} from './input_macro_handler_utils';
-import {Button} from 'springboard/components/Button';
 import {savedMidiInputsAreEqual} from './musical_keyboard_input_macro_handler';
 
 import '@jamtools/core/modules/macro_module/macro_module';
@@ -153,17 +152,17 @@ macroTypeRegistry.registerMacroType(
 
                     if (!show) {
                         return (
-                            <Button onClick={() => showConfigurationFormState.setState(true)}>
+                            <button onClick={() => showConfigurationFormState.setState(true)}>
                                 Show paged keyboard configuration
-                            </Button>
+                            </button>
                         );
                     }
 
                     return (
                         <div>
-                            <Button onClick={() => showConfigurationFormState.setState(false)}>
+                            <button onClick={() => showConfigurationFormState.setState(false)}>
                                 Hide paged keyvboard configuration
-                            </Button>
+                            </button>
                             <div>
                                 Macro configs:
 
@@ -173,17 +172,17 @@ macroTypeRegistry.registerMacroType(
                                 {!conf.singleOctave && (
                                     <>
                                         Number of octaves:
-                                        <form>
+                                        <div>
                                             <input
                                                 type='number'
                                                 onChange={event => setNumberOfOctaves(parseInt(event.target.value))}
                                                 value={numberOfOctaves}
                                                 disabled={conf.singleOctave}
                                             />
-                                            <Button onClick={() => submitNumberOfOctaves({numberOfOctaves})}>
+                                            <button onClick={() => submitNumberOfOctaves({numberOfOctaves})}>
                                                 Confirm
-                                            </Button>
-                                        </form>
+                                            </button>
+                                        </div>
 
                                         Page down:
                                         <pageDownMacro.components.edit />

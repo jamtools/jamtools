@@ -1,6 +1,5 @@
 import React from 'react';
 import {MacroConfigState} from './macro_module';
-import {Details} from 'springboard/components/Details';
 
 type Props = {
     state: MacroConfigState;
@@ -23,9 +22,8 @@ export const MacroPage = (props: Props) => {
                             maxWidth: '400px',
                         }}
                     >
-                        <Details
-                            summary={moduleId}
-                        >
+                        <details>
+                            <summary>{moduleId}</summary>
                             <ul>
                                 {fieldNames.map((fieldName) => {
                                     const mapping = c[fieldName];
@@ -40,7 +38,7 @@ export const MacroPage = (props: Props) => {
                                     );
                                 })}
                             </ul>
-                        </Details>
+                        </details>
                     </li>
                 );
             })}

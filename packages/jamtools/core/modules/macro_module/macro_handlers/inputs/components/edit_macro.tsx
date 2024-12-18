@@ -4,7 +4,6 @@ import {MidiEventFull} from '@jamtools/core/modules/macro_module/macro_module_ty
 
 import {SavedMacroValues} from './saved_macro_values';
 import {CaptureForm} from './capture_form';
-import {Button} from 'springboard/components/Button';
 
 type EditProps = {
     editing: boolean;
@@ -21,11 +20,11 @@ export const Edit = (props: EditProps) => {
     if (!props.editing) {
         return (
             <div>
-                <Button
+                <button
                     onClick={props.onEdit}
                 >
                     Edit
-                </Button>
+                </button>
                 {props.saved.length}
             </div>
         );
@@ -49,11 +48,11 @@ export const Edit = (props: EditProps) => {
 
     return (
         <div>
-            <Button
+            <button
                 onClick={props.onCancelEdit}
             >
                 Cancel
-            </Button>
+            </button>
             {captureForm}
             {savedValues}
         </div>

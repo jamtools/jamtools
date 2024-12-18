@@ -2,7 +2,6 @@ import React from 'react';
 
 import springboard from 'springboard';
 import {ModuleAPI} from 'springboard/engine/module_api';
-import {Button} from 'springboard/components/Button';
 
 type AwaitedRecord<Obj extends Record<string, Promise<any>>> = {
     [Key in keyof Obj]: Awaited<Obj[Key]>;
@@ -63,13 +62,13 @@ const registerRoutes = (moduleAPI: ModuleAPI, states: States, macros: Macros, ac
         return (
             <div>
                 My state: {myState.toString()}
-                <Button
+                <button
                     onClick={() => actions.changeTheThing({
                         newValue: Math.random().toString().slice(2),
                     })}
                 >
                     Change value
-                </Button>
+                </button>
             </div>
         );
     });

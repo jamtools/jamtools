@@ -1,7 +1,6 @@
 import React from 'react';
 
 import GuitarImport from 'react-guitar';
-import {Card} from 'springboard/components/Card';
 import {ChordChoice} from './chord_display';
 const Guitar = (GuitarImport as unknown as {default: typeof GuitarImport}).default;
 
@@ -107,10 +106,10 @@ export const BasicGuitarTabView = (props: Props) => {
     // }
 
     return (
-        <Card
+        <div
             style={{
                 margin: '20px',
-                // border: 'solid 2px',
+                border: 'solid 2px',
             }}
         >
             <pre style={{
@@ -123,7 +122,7 @@ export const BasicGuitarTabView = (props: Props) => {
             }}>
                 {fullText}
             </pre>
-        </Card>
+        </div>
     );
 };
 

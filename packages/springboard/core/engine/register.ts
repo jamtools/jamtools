@@ -3,7 +3,7 @@ import {CoreDependencies, ModuleDependencies} from 'springboard/types/module_typ
 import type {ModuleAPI} from './module_api';
 
 export type RegisterRouteOptions = {
-    hideNavbar?: boolean;
+    hideApplicationShell?: boolean;
 };
 
 export type ModuleCallback<ModuleReturnValue extends object> = (moduleAPI: ModuleAPI) =>

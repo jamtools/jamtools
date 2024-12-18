@@ -2,7 +2,6 @@ import React from 'react';
 
 import {MidiEventFull} from '@jamtools/core/modules/macro_module/macro_module_types';
 import {getKeyForMidiEvent} from '../input_macro_handler_utils';
-import {Button} from 'springboard/components/Button';
 
 type CaptureFormProps = {
     waiting: boolean;
@@ -13,22 +12,22 @@ type CaptureFormProps = {
 };
 export const CaptureForm = ({waiting, toggleWaiting, confirmMacro, captured}: CaptureFormProps) => {
     return (
-        <form>
+        <div>
             <p>
                 Waiting {new String(waiting)}
             </p>
             {waiting ? (
                 <>
-                    <Button
+                    <button
                         onClick={() => toggleWaiting({})}
                     >
                         Cancel
-                    </Button>
-                    <Button
+                    </button>
+                    <button
                         onClick={() => confirmMacro({})}
                     >
                         Confirm
-                    </Button>
+                    </button>
                     <div>
                         Captured:
                         {captured && (
@@ -39,12 +38,12 @@ export const CaptureForm = ({waiting, toggleWaiting, confirmMacro, captured}: Ca
                     </div>
                 </>
             ) : (
-                <Button
+                <button
                     onClick={() => toggleWaiting({})}
                 >
                     Capture
-                </Button>
+                </button>
             )}
-        </form>
+        </div>
     );
 };

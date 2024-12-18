@@ -3,8 +3,6 @@ import React from 'react';
 import {MIDI_NUMBER_TO_NOTE_NAME_MAPPINGS} from '@jamtools/core/constants/midi_number_to_note_name_mappings';
 import {ScaleDegreeInfo} from './root_mode_types';
 
-import {Button} from 'springboard/components/Button';
-
 type Props = {
     chord: ScaleDegreeInfo | null;
     scale: number;
@@ -19,7 +17,7 @@ export const RootModeComponent = (props: Props) => {
             <div>
                 Scale: {scaleRootNoteName} Major
             </div>
-            <Button onClick={props.onClick}>Change scale</Button>
+            <button onClick={props.onClick}>Change scale</button>
 
             {props.chord && (
                 <div>

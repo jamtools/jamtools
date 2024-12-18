@@ -112,7 +112,10 @@ const RenderModuleRoutes = ({mod}: {mod: Module}) => {
 
                     return (
                         <li key={path}>
-                            <Link to={`/modules/${mod.moduleId}${suffix}`}>
+                            <Link
+                                data-testid={`link-to-/modules/${mod.moduleId}${suffix}`}
+                                to={`/modules/${mod.moduleId}${suffix}`}
+                            >
                                 {path || '/'}
                             </Link>
                         </li>

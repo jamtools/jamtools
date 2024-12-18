@@ -1,6 +1,6 @@
 #!/bin/bash
 
-full_version="0.13.0-rc5"  # Set the target version here or make it a script argument
+full_version="0.14.0-rc1"  # Set the target version here or make it a script argument
 
 root_dir=$(pwd)  # Assuming this script is run from the project root
 

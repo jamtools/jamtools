@@ -1,7 +1,6 @@
 import React from 'react';
 
 import springboard from 'springboard';
-import {Button} from 'springboard/components/Button';
 
 springboard.registerModule('phone_jam', {}, async (moduleAPI) => {
     const outputMacro = await moduleAPI.deps.module.moduleRegistry.getModule('macro').createMacro(moduleAPI, 'local_output', 'musical_keyboard_output', {allowLocal: true});
@@ -35,11 +34,11 @@ const PhoneJamView = (props: PhoneJamViewProps) => {
             </h1>
 
             <div>
-                <Button
+                <button
                     onClick={props.onClickPlaySound}
                 >
                     Play sound
-                </Button>
+                </button>
             </div>
         </div>
     );

@@ -1,6 +1,6 @@
 {
   "name": "springboard",
-  "version": "0.13.0-rc5",
+  "version": "0.13.0",
   "type": "module",
   "scripts": {
     "test": "vitest --run",
@@ -33,7 +33,6 @@
     "rxjs": "^7.0.0"
   },
   "dependencies": {
-    "@shoelace-style/shoelace": "^2.16.0",
     "dexie": "^4.0.9",
     "immer": "^10.1.1",
     "react-spinners": "^0.14.1",

@@ -1,11 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 
-import {setBasePath} from '@shoelace-style/shoelace/dist/utilities/base-path.js';
-
-// TODO: make this not use cdn
-setBasePath('https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.16.0/cdn/');
-
 import {CoreDependencies} from 'springboard/types/module_types';
 
 import {TrpcKVStoreService} from 'springboard/services/trpc_kv_store_client';
