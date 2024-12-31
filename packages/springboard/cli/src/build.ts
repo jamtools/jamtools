@@ -92,7 +92,7 @@ export const buildApplication = async (buildConfig: BuildConfig, options?: Appli
         outfile: outFile,
         platform: buildConfig.platform,
         minify: process.env.NODE_ENV === 'production',
-        target: 'es6',
+        target: 'es2020',
         plugins: [
             esbuildPluginLogBuildTime(buildConfig.platform),
             sassPlugin(),
@@ -100,10 +100,6 @@ export const buildApplication = async (buildConfig: BuildConfig, options?: Appli
         ],
         external: buildConfig.externals?.(),
         alias: {
-            // 'springboard': './jamtools/packages/jamtools/core',
-            // '@springboardjs/platforms-browser': './jamtools/packages/jamtools/platforms/webapp',
-            // 'react': './node_modules/react',
-            // 'jamtools-mantine': './jamtools/packages/springboard/mantine',
         },
         define: {
             'process.env.WS_HOST': `"${process.env.WS_HOST || ''}"`,

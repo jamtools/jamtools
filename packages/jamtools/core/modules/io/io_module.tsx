@@ -81,8 +81,9 @@ export class IoModule implements Module<IoState> {
         midiOutputDevices: [],
     };
 
-    qwertyInputSubject: Subject<QwertyCallbackPayload> = new Subject();
-    midiInputSubject: Subject<MidiInputEventPayload> = new Subject();
+    qwertyInputSubject!: Subject<QwertyCallbackPayload>;
+    midiInputSubject!: Subject<MidiInputEventPayload>;
+    midiDeviceStatusSubject!: typeof this.ioDeps.midi.onDeviceStatusChange;
 
     midiDeviceState!: StateSupervisor<IoState>;
 
@@ -95,13 +96,9 @@ export class IoModule implements Module<IoState> {
     initialize = async (moduleAPI: ModuleAPI) => {
         await this.ioDeps.midi.initialize();
 
-        const qwertySubscription = this.ioDeps.qwerty.onInputEvent.subscribe(event => {
-            this.qwertyInputSubject.next(event);
-        }); this.cleanup.push(qwertySubscription.unsubscribe);
-
-        const midiSubscription = this.ioDeps.midi.onInputEvent.subscribe(event => {
-            this.midiInputSubject.next(event);
-        }); this.cleanup.push(midiSubscription.unsubscribe);
+        this.qwertyInputSubject = this.ioDeps.qwerty.onInputEvent;
+        this.midiInputSubject = this.ioDeps.midi.onInputEvent;
+        this.midiDeviceStatusSubject = this.ioDeps.midi.onDeviceStatusChange;
 
         const inputs = this.ioDeps.midi.getInputs();
         const outputs = this.ioDeps.midi.getOutputs();

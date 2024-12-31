@@ -59,7 +59,7 @@ export const startAndRenderBrowserApp = async (): Promise<Springboard> => {
     await waitForPageLoad();
 
     const rootElem = document.createElement('div');
-    rootElem.style.overflowY = 'scroll';
+    // rootElem.style.overflowY = 'scroll';
     document.body.appendChild(rootElem);
 
     const root = ReactDOM.createRoot(rootElem);

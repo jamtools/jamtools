@@ -8,9 +8,17 @@ export class BrowserKVStoreService implements KVStore {
 
         const entriesAsRecord: Record<string, any> = {};
         for (const key of allKeys) {
+            // if (key.startsWith('iconify')) {
+            //     continue;
+            // }
+
             const value = this.ls.getItem(key);
             if (value) {
-                entriesAsRecord[key] = JSON.parse(value);
+                try {
+                    entriesAsRecord[key] = JSON.parse(value);
+                } catch (e) {
+                    // eslint-disable-line no-empty
+                }
             }
         }
 
