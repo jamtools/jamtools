@@ -142,6 +142,7 @@ export const buildApplication = async (buildConfig: BuildConfig, options?: Appli
 };
 
 export type ServerBuildOptions = {
+    coreFile?: string;
     esbuildOutDir?: string;
     serverEntrypoint?: string;
     watch?: boolean;
@@ -160,7 +161,7 @@ export const buildServer = async (options?: ServerBuildOptions) => {
 
     const outFile = path.join(outDir, 'local-server.cjs');
 
-    const coreFile = 'springboard-server/src/entrypoints/local-server.entrypoint.ts';
+    const coreFile = options?.coreFile || 'springboard-server/src/entrypoints/local-server.entrypoint.ts';
     const serverEntrypoint = process.env.SERVER_ENTRYPOINT || options?.serverEntrypoint;
 
     let allImports = [coreFile].map(file => `import '${file}';`).join('\n');
