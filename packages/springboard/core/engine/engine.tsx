@@ -157,6 +157,17 @@ export const SpringboardProvider = (props: SpringboardProviderProps) => {
         );
     }
 
+    return (
+        <SpringboardProviderPure
+            engine={engine}
+        >
+            {props.children}
+        </SpringboardProviderPure>
+    );
+};
+
+export const SpringboardProviderPure = (props: SpringboardProviderProps) => {
+    const {engine} = props;
     const mods = engine.moduleRegistry.getModules();
 
     let stackedProviders: React.ReactNode = props.children;
