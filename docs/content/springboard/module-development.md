@@ -1,4 +1,4 @@
-A Springboard application is typically comprised of several modules. A given module uses the [ModuleAPI](../typedoc_docs/module_api/classes/ModuleAPI.md) to register components, actions, and states with the application.
+A Springboard application is typically comprised of several modules. A given module uses the [ModuleAPI](../typedoc_docs/module_api/classes/ModuleAPI.md) to register components, actions, and states with the application. When a module is initialized, it's given its own copy of the `ModuleAPI`. Any actions or states created will be scoped to the given module's state namespace behind the scenes.
 
 The ModuleAPI allows modules to:
 
@@ -7,11 +7,12 @@ The ModuleAPI allows modules to:
 - Receive dependencies through dependency injection
 - Expose functions and utilties for other modules to use. This typcially includes actions, states, or reusable React components.
 - Interact with other modules by consuming their exposed functions/properties
+- When the same module is defined on two devices, any actions defined can be called between devices.
 
 Modules can play a few different types of roles:
 
-- Utility - A utility module exposes things for other modules to use, and likely does not register any routes. An example of this kind of module is the [MIDI IO Module](https://github.com/jamtools/jamtools/blob/main/packages/jamtools/core/modules/io/io_module.tsx), which currently just exposes a way for other modules to interact with MIDI devices and qwerty keyboards.
-- Feature - A feature-level module implements certain features for your application. These modules typically register routes and interact with other modules to faciliate cohesion and "getting shit done".
+- Feature - A feature-level module implements certain features for your application. These modules typically register routes and interact with other modules to faciliate cohesion and "get shit done".
+- Utility - A utility module exposes things for other modules to use, and likely does not register any routes. An example utility module is the [Macro Module](https://github.com/jamtools/jamtools/blob/main/packages/jamtools/core/modules/io/io_module.tsx), which exposes functions for other modules to declare MIDI entrypoints for a given feature.
 - Initializer - An initializer module does some initial setup for an application. This kind of module is typically not needed for small applications, though these modules become useful when deployment use cases are complicated. You may want to have some specific initialization on a mobile app versus desktop app, for instance.
 
 ---

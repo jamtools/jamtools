@@ -1,4 +1,5 @@
 Springboard is heavily influenced by the requirements of Jam Tools, which entails:
+
 - Easily interact with MIDI instruments
 - Configure the MIDI instruments from a device other than the device with the MIDI instruments connected
 - Be able to run the application as a fullstack app or as a standalone browser application
