@@ -145,6 +145,7 @@ export type ServerBuildOptions = {
     esbuildOutDir?: string;
     serverEntrypoint?: string;
     watch?: boolean;
+    editBuildOptions?: (options: EsbuildOptions) => void;
 };
 
 export const buildServer = async (options?: ServerBuildOptions) => {
@@ -182,6 +183,8 @@ export const buildServer = async (options?: ServerBuildOptions) => {
         ],
         external: externals,
     };
+
+    options?.editBuildOptions?.(buildOptions);
 
     if (options?.watch) {
         const ctx = await esbuild.context(buildOptions);
