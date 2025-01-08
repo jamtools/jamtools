@@ -75,7 +75,8 @@ const Tabs = (props: TabsProps) => {
 
     const showRoute = (modId: string, route: string) => {
         if (route.startsWith('/')) {
-            route = route.substring(1);
+            navigate(route);
+            return;
         }
         navigate(`/modules/${modId}/${route}`);
     };
@@ -87,7 +88,13 @@ const Tabs = (props: TabsProps) => {
                 data-testid={`navbar_module_link-${m.moduleId}`}
                 panel={m.moduleId}
                 active={m.moduleId === moduleId}
-                onClick={() => showRoute(m.moduleId, '')}
+                onClick={() => {
+                    if (m.routes && '/' in m.routes) {
+                        showRoute(m.moduleId, '/');
+                    } else if (m.routes && '' in m.routes) {
+                        showRoute(m.moduleId, '');
+                    }
+                }}
             >
                 {m.moduleId}
             </SlTab>

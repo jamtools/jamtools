@@ -13,7 +13,7 @@ springboard.registerModule('phone_jam', {}, async (moduleAPI) => {
         }, 1000);
     };
 
-    moduleAPI.registerRoute('/', {}, () => {
+    moduleAPI.registerRoute('', {}, () => {
         return (
             <PhoneJamView
                 onClickPlaySound={playSound}

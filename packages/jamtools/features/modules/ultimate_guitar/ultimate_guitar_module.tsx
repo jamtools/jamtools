@@ -41,7 +41,7 @@ springboard.registerModule('Ultimate_Guitar', {}, async (moduleAPI): Promise<Ult
 
     const actions = new Actions(moduleAPI, states);
 
-    moduleAPI.registerRoute('/', {hideApplicationShell: true}, () => (
+    moduleAPI.registerRoute('', {hideApplicationShell: true}, () => (
         <UltimateGuitarMainView
             currentSetlistStatus={states.currentSetlistStatus.useState()}
             savedSetlists={states.savedSetlists.useState()}
