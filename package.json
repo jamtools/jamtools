@@ -30,7 +30,7 @@
     "turbo": "^2.0.6"
   },
   "workspaces": [
-    "apps/jamtools/*",
+    "apps/jamtools",
     "packages/jamtools/core",
     "packages/jamtools/features",
     "packages/springboard/platforms/*",
