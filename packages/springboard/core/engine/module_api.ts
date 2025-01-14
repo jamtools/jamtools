@@ -54,6 +54,10 @@ export class ModuleAPI {
         }
     };
 
+    registerApplicationShell = (component: React.ElementType<React.PropsWithChildren<{modules: Module[]}>>) => {
+        this.module.applicationShell = component;
+    };
+
     registerBottomNavigationTabs = (navigationItemConfig: NavigationItemConfig[]) => {
         this.module.bottomNavigationTabs = navigationItemConfig;
         if (this.modDeps.moduleRegistry.getCustomModule(this.module.moduleId)) {

@@ -32,27 +32,42 @@ export const FrontendRoutes = () => {
     const mods = engine.moduleRegistry.useModules();
 
     const moduleRoutes: RouteObject[] = [];
+
+    const rootRouteObjects: RouteObject[] = [];
+
     for (const mod of mods) {
         if (!mod.routes) {
             continue;
         }
 
         const routes = mod.routes;
-        moduleRoutes.push({
-            path: mod.moduleId,
-            children: Object.keys(routes).map((path): RouteObject => {
-                const Component = routes[path].component;
-                const fixedPath = path.startsWith('/') ? path.slice(1) : path;
-                return {
-                    path: fixedPath,
-                    element: (
-                        <Layout modules={mods}>
-                            <CustomRoute component={Component}/>
-                        </Layout>
-                    ),
-                };
-            }),
+
+        const thisModRoutes: RouteObject[] = [];
+
+        Object.keys(routes).forEach(path => {
+            const Component = routes[path].component;
+            const routeObject: RouteObject = {
+                path,
+                element: (
+                    <Layout modules={mods}>
+                        <CustomRoute component={Component}/>
+                    </Layout>
+                ),
+            };
+
+            if (path.startsWith('/')) {
+                rootRouteObjects.push(routeObject);
+            } else {
+                thisModRoutes.push(routeObject);
+            }
         });
+
+        if (thisModRoutes.length) {
+            moduleRoutes.push({
+                path: mod.moduleId,
+                children: thisModRoutes,
+            });
+        }
     }
 
     moduleRoutes.push({
@@ -62,16 +77,26 @@ export const FrontendRoutes = () => {
 
     const routerContructor = (globalThis as {useHashRouter?: boolean}).useHashRouter ? createHashRouter : createBrowserRouter;
 
-    const router = routerContructor([
-        {
-            path: '/',
-            element: <Layout modules={mods}><RootPath modules={mods}/></Layout>
-        },
+    const allRoutes: RouteObject[] = [
+        ...rootRouteObjects,
         {
             path: '/modules',
             children: moduleRoutes,
         },
-    ]);
+        {
+            path: '/routes',
+            element: <Layout modules={mods}><RootPath modules={mods}/></Layout>
+        },
+    ];
+
+    if (!rootRouteObjects.find(r => r.path === '/')) {
+        allRoutes.push({
+            path: '/',
+            element: <Layout modules={mods}><RootPath modules={mods}/></Layout>
+        });
+    }
+
+    const router = routerContructor(allRoutes);
 
     return (
         <RouterProvider router={router}/>
@@ -110,9 +135,14 @@ const RenderModuleRoutes = ({mod}: {mod: Module}) => {
                         }
                     }
 
+                    const href = path.startsWith('/') ? path : `/modules/${mod.moduleId}${suffix}`;
+
                     return (
                         <li key={path}>
-                            <Link to={`/modules/${mod.moduleId}${suffix}`}>
+                            <Link
+                                data-testid={`link-to-${href}`}
+                                to={href}
+                            >
                                 {path || '/'}
                             </Link>
                         </li>

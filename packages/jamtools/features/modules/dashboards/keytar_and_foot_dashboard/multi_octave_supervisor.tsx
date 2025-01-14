@@ -2,7 +2,6 @@ import React from 'react';
 
 import {ModuleAPI} from 'springboard/engine/module_api';
 import {MidiEvent, MidiEventFull} from '@jamtools/core/modules/macro_module/macro_module_types';
-import {Button} from 'springboard/components/Button';
 
 type MultiOctaveSupervisorMidiState = {
     currentlyHeldDownInputNotes: MidiEvent[];
@@ -82,13 +81,13 @@ export class MultiOctaveSupervisor {
 
         return (
             <>
-                <Button onClick={() => this.actions.toggleDebugging({})}>
+                <button onClick={() => this.actions.toggleDebugging({})}>
                     {enableDebugging ? 'Disable debugging' : 'Enable debugging'}
-                </Button>
+                </button>
 
-                <Button onClick={() => setShowDebugData(!showDebugData)}>
+                <button onClick={() => setShowDebugData(!showDebugData)}>
                     {showDebugData ? 'Hide debug data' : 'Show debug data'}
-                </Button>
+                </button>
 
                 {showDebugData && (
                     <>

@@ -70,7 +70,7 @@ springbord.registerModule('Eventide', {}, async (moduleAPI) => {
     };
 
     // hideNavbar should really be "hideApplicationShell", and also be a global option
-    moduleAPI.registerRoute('', {hideNavbar: false}, () => {
+    moduleAPI.registerRoute('', {hideApplicationShell: false}, () => {
         const currentPreset = currentPresetState.useState();
         const favoritedPresets = favoritedPresetsState.useState();
 
@@ -151,7 +151,7 @@ springbord.registerModule('Eventide', {}, async (moduleAPI) => {
                     <summary>
                         Bank number form
                     </summary>
-                    <form>
+                    <div>
                         <div>
                             <label>Bank number</label>
                             <input
@@ -179,7 +179,7 @@ springbord.registerModule('Eventide', {}, async (moduleAPI) => {
                         >
                             Submit
                         </button>
-                    </form>
+                    </div>
                 </details>
             </div>
         );

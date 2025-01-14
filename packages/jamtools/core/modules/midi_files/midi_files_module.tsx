@@ -1,7 +1,5 @@
 import React, {useState} from 'react';
 
-import {Button} from 'springboard/components/Button';
-
 import springboard from 'springboard';
 import {MidiFileParser, ParsedMidiFile} from './midi_file_parser/midi_file_parser';
 
@@ -59,7 +57,7 @@ springboard.registerModule('MidiFile', {}, async (moduleAPI): Promise<MidiFileMo
                 };
 
                 return (
-                    <form>
+                    <div>
                         <div>
                             <input
                                 type='file'
@@ -67,14 +65,14 @@ springboard.registerModule('MidiFile', {}, async (moduleAPI): Promise<MidiFileMo
                             />
                         </div>
                         <div>
-                            <Button
+                            <button
                                 onClick={handleFormSubmission}
                                 disabled={!parsedMidiFile}
                             >
                                 Submit
-                            </Button>
+                            </button>
                         </div>
-                    </form>
+                    </div>
 
                 );
             },

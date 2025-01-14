@@ -5,7 +5,7 @@ Macros can be used as primitives to compose simple or complex features. They pro
 The following macro types are exposed by the Macro module:
 
 - Inputs:
-    - `musical_keyboard_input` - Receive MIDI "note" events for a MIDI keyboard chosen by the user. This is useful for receiving tonal input from a MIDI keyboard.
+    - `musical_keyboard_input` - Receive MIDI events for a MIDI keyboard chosen by the user. This is useful for receiving tonal input from a MIDI keyboard. The stored mapping consists of the midi controller, and a midi channel. Feature-level code generally doesn't need to know these details.
     - `midi_control_change_input` - Receive MIDI events for a specific [controller change](https://cmtext.indiana.edu/MIDI/chapter3_controller_change.php) input chosen by the user, like a slider or knob. This is useful for receiving a spectrum of data from one control.
     - `midi_button_input` - Receive MIDI events for a specific MIDI controller button or note chosen by the user. This is useful for running a specific action when the given button is pressed.
 - Outputs
@@ -31,7 +31,7 @@ springboard.registerModule('MidiThru', {}, async (moduleAPI) => {
     const outputMacro = await macroModule.createMacro(moduleAPI, 'My MIDI Output', 'musical_keyboard_output', {});
 
     // Subscribe to events from the MIDI keyboard(s) chosen by the user for the "My MIDI Input" macro defined above
-    inputmacro.subject.subscribe(evt => {
+    inputMacro.subject.subscribe(evt => {
         outputMacro.send(evt.event); // Send the same MIDI event to the configured MIDI output device
     });
 

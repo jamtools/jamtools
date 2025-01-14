@@ -1,6 +1,6 @@
 {
   "name": "springboard-cli",
-  "version": "0.13.0-rc5",
+  "version": "0.14.1",
   "main": "index.js",
   "bin": {
     "sb": "dist/cli.js"
@@ -27,21 +27,21 @@
     "concurrently": "^9.1.0",
     "esbuild": "^0.23.0",
     "esbuild-sass-plugin": "^3.3.1",
-    "npm-run-all": "^4.1.5",
-    "tsx": "^4.19.2",
     "typescript": "^5.4.5"
   },
   "peerDependencies": {
-    "@springboardjs/platforms-browser": "0.13.0-rc5",
-    "@springboardjs/platforms-node": "0.13.0-rc5",
-    "springboard": "0.13.0-rc5",
-    "springboard-server": "0.13.0-rc5"
+    "@springboardjs/platforms-browser": "0.14.1",
+    "@springboardjs/platforms-node": "0.14.1",
+    "springboard": "0.14.1",
+    "springboard-server": "0.14.1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
-    "tsup": "^8.3.5"
+    "npm-run-all": "^4.1.5",
+    "tsup": "^8.3.5",
+    "tsx": "^4.19.2"
   }
 }

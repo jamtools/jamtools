@@ -1,11 +1,9 @@
 #!/bin/bash
 
-full_version="0.13.0-rc5"  # Set the target version here or make it a script argument
+full_version="0.14.0"
 
-root_dir=$(pwd)  # Assuming this script is run from the project root
-
-# exit script if anything fails
 set e
+root_dir=$(pwd)
 
 bump_version() {
   local target_dir=$1
@@ -28,12 +26,19 @@ publish_package() {
   local target_dir=$1
   cd "$target_dir" || exit 1
   echo "Publishing package in $target_dir"
-  # npm publish --access public
-  # npm publish --registry http://coolify-infra:4873
-  npm publish --registry http://localhost:4873
-}
 
-# Bump, update dependencies, and publish each package
+  # RC publish to npm
+  # npm publish --access public --tag rc
+
+  # Production publish to npm
+  npm publish --access public --tag latest
+
+  # RC publish to verdaccio
+  # npm publish --registry http://localhost:4873 --access public --tag rc
+
+  # Production publish to verdaccio
+  # npm publish --registry http://localhost:4873 --access public --tag latest
+}
 
 bump_version "$root_dir/packages/springboard/core"
 publish_package "$root_dir/packages/springboard/core"
@@ -70,6 +75,12 @@ publish_package "$root_dir/packages/springboard/external/mantine"
 
 sleep 1
 
+bump_version "$root_dir/packages/springboard/external/shoelace"
+bump_peer_dep "$root_dir/packages/springboard/external/shoelace" "springboard"
+publish_package "$root_dir/packages/springboard/external/shoelace"
+
+sleep 1
+
 bump_version "$root_dir/packages/jamtools/core"
 bump_peer_dep "$root_dir/packages/jamtools/core" "springboard"
 publish_package "$root_dir/packages/jamtools/core"
@@ -78,6 +89,7 @@ sleep 1
 
 bump_version "$root_dir/packages/jamtools/features"
 bump_peer_dep "$root_dir/packages/jamtools/features" "@jamtools/core"
+bump_peer_dep "$root_dir/packages/jamtools/features" "@springboardjs/shoelace"
 publish_package "$root_dir/packages/jamtools/features"
 
 sleep 1

@@ -2,7 +2,6 @@ import React from 'react';
 
 import {MidiEventFull} from '@jamtools/core/modules/macro_module/macro_module_types';
 import {getKeyForMidiEvent} from '../input_macro_handler_utils';
-import {Button} from 'springboard/components/Button';
 
 export type SavedMacroValues = {
     saved: MidiEventFull[];
@@ -16,11 +15,11 @@ export const SavedMacroValues = ({saved, onClickDelete}: SavedMacroValues) => {
                 return (
                     <li key={key}>
                         {key}
-                        <Button
+                        <button
                             onClick={() => onClickDelete(event)}
                         >
                             Delete
-                        </Button>
+                        </button>
                     </li>
                 );
             })}

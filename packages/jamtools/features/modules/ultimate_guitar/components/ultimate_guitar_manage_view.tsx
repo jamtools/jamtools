@@ -1,9 +1,6 @@
 import React from 'react';
 
-import {Button} from 'springboard/components/Button';
-
 import {UltimateGuitarSetlist, UltimateGuitarSetlistSong, UltimateGuitarSetlistStatus, UltimateGuitarTab} from '../ultimate_guitar_types';
-import {Details} from 'springboard/components/Details';
 import {getTabFromCurrentSetlistData} from '../ultimate_guitar_utils';
 
 type UltimateGuitarManageViewProps = {
@@ -43,9 +40,9 @@ export const UltimateGuitarManageView = (props: UltimateGuitarManageViewProps) =
             <h3>
                 {currentSongName}
             </h3>
-            <Button onClick={props.gotoNextSong}>
+            <button onClick={props.gotoNextSong}>
                 Next Song
-            </Button>
+            </button>
         </div>
     );
 
@@ -87,8 +84,9 @@ const CreateNewSetlistForm = (props: CreateNewSetlistFormProps) => {
     const [draftSetlistName, setDraftSetlistName] = React.useState('');
 
     return (
-        <Details summary='Create new setlist'>
-            <form style={{border: '1px solid', padding: '15px', margin: '15px'}}>
+        <details>
+            <summary>Create new setlist</summary>
+            <div style={{border: '1px solid', padding: '15px', margin: '15px'}}>
                 <label>
                     Setlist name
                 </label>
@@ -96,16 +94,16 @@ const CreateNewSetlistForm = (props: CreateNewSetlistFormProps) => {
                     value={draftSetlistName}
                     onChange={e => setDraftSetlistName(e.target.value)}
                 />
-                <Button
+                <button
                     onClick={async () => {
                         await props.createSetlist(draftSetlistName);
                         setDraftSetlistName('');
                     }}
                 >
                     Submit
-                </Button>
-            </form>
-        </Details>
+                </button>
+            </div>
+        </details>
     );
 };
 
@@ -155,17 +153,15 @@ const SetlistDetails = (props: SetlistDetailsProps) => {
     };
 
     return (
-        <Details
-            key={setlist.id}
-            summary={setlist.name}
-        >
+        <details>
+            <summary>{setlist.name}</summary>
             <div>
-                <Button onClick={() => props.startSetlist(props.setlist.id)}>
+                <button onClick={() => props.startSetlist(props.setlist.id)}>
                     Start Setlist
-                </Button>
-                <Button onClick={submitQueue}>
+                </button>
+                <button onClick={submitQueue}>
                     Submit Queue
-                </Button>
+                </button>
             </div>
             <div>
                 Add new tab
@@ -173,14 +169,14 @@ const SetlistDetails = (props: SetlistDetailsProps) => {
                     value={draftTabUrl}
                     onChange={e => setDraftTabUrl(e.target.value)}
                 />
-                <Button
+                <button
                     onClick={async () => {
                         await props.addTabUrlToSetlist(setlist.id, draftTabUrl);
                         setDraftTabUrl('');
                     }}
                 >
                     Submit
-                </Button>
+                </button>
             </div>
             <ul>
                 {setlist.songs.map((song, i) => {
@@ -208,7 +204,7 @@ const SetlistDetails = (props: SetlistDetailsProps) => {
                     );
                 })}
             </ul>
-        </Details>
+        </details>
     );
 };
 
@@ -248,48 +244,48 @@ const SetlistSong = (props: SetlistSongProps) => {
             style={{fontWeight: props.isCurrentSong ? 'bold' : 'inherit'}}
         >
             {tabName}
-            <Button onClick={props.gotoSong}>
+            <button onClick={props.gotoSong}>
                 Go to song
-            </Button>
-            <Button
+            </button>
+            <button
                 onClick={() => props.queueSong(props.song)}
                 style={{marginLeft: '10px'}}
             >
                 Queue {props.queued && '✓'}
-            </Button>
-            <Button
+            </button>
+            <button
                 style={{marginLeft: '10px'}}
                 onClick={handleTransposeButtonClick}
             >
                 Transpose {transposeValue}
-            </Button>
+            </button>
             {(editingTranspose !== null) && (
                 <>
-                    <Button
+                    <button
                         style={{marginLeft: '10px'}}
                         onClick={() => setEditingTranspose(editingTranspose - 1)}
                     >
                         -
-                    </Button>
+                    </button>
                     {editingTranspose}
-                    <Button
+                    <button
                         style={{marginLeft: '10px'}}
                         onClick={() => setEditingTranspose(editingTranspose + 1)}
                     >
                         +
-                    </Button>
-                    <Button
+                    </button>
+                    <button
                         style={{marginLeft: '10px'}}
                         onClick={handleTransposeCancel}
                     >
                         Cancel
-                    </Button>
-                    <Button
+                    </button>
+                    <button
                         style={{marginLeft: '10px'}}
                         onClick={handleTransposeConfirm}
                     >
                         Confirm
-                    </Button>
+                    </button>
                 </>
             )}
         </li>

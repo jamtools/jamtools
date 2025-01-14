@@ -53,7 +53,7 @@ export const getMacroInputTestHelpers = () => {
     };
 
     const gotoMacroPage = async () => {
-        const macroPageLink = screen.getByTestId('navbar_module_link-macro');
+        const macroPageLink = screen.getByTestId('link-to-/modules/macro');
         // const macroPageLink = container.querySelector('a[href="/modules/macro/"]');
         expect(macroPageLink).toBeInTheDocument();
 

@@ -10,8 +10,10 @@ import {NodeJsonRpcClientAndServer} from '@springboardjs/platforms-node/services
 import {Springboard} from 'springboard/engine/engine';
 import {ExtraModuleDependencies} from 'springboard/module_registry/module_registry';
 
-const WS_HOST = process.env.WS_HOST || 'ws://localhost:1337';
-const DATA_HOST = process.env.DATA_HOST || 'http://localhost:1337';
+const port = process.env.PORT || 1337;
+
+const WS_HOST = process.env.WS_HOST || `ws://localhost:${port}`;
+const DATA_HOST = process.env.DATA_HOST || `http://localhost:${port}`;
 
 export const startNodeApp = async (): Promise<Springboard> => {
     const kvStore = new TrpcKVStoreService(DATA_HOST);

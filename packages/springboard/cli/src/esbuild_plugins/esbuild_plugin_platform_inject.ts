@@ -9,7 +9,7 @@ export const esbuildPluginPlatformInject = (platform: 'node' | 'browser') => {
 
         // Replace platform-specific blocks based on the platform
         const platformRegex = new RegExp(`\/\/ @platform "${platform}"([\\s\\S]*?)\/\/ @platform end`, 'g');
-        const otherPlatformRegex = new RegExp(`\/\/ @platform "(node|browser)"([\\s\\S]*?)\/\/ @platform end`, 'g');
+        const otherPlatformRegex = new RegExp(`\/\/ @platform "(node|browser|react-native)"([\\s\\S]*?)\/\/ @platform end`, 'g');
 
         // Include only the code relevant to the current platform
         source = source.replace(platformRegex, '$1');

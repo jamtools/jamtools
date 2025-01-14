@@ -1,6 +1,6 @@
 {
   "name": "springboard-server",
-  "version": "0.13.0-rc5",
+  "version": "0.14.1",
   "main": "./index.ts",
   "module": "./index.ts",
   "files": [
@@ -17,14 +17,14 @@
   "dependencies": {
     "@hono/node-server": "^1.13.2",
     "@hono/node-ws": "^1.0.4",
-    "@hono/trpc-server": "^0.3.2",
-    "hono": "^4.6.7"
+    "@hono/trpc-server": "^0.3.2"
   },
   "config": {
     "dir": "../../../configs"
   },
   "peerDependencies": {
-    "springboard": "0.13.0-rc5",
-    "@springboardjs/data-storage": "0.13.0-rc5"
+    "hono": "^4.6.7",
+    "springboard": "0.14.1",
+    "@springboardjs/data-storage": "0.14.1"
   }
 }

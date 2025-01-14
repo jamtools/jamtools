@@ -92,7 +92,7 @@ export const buildApplication = async (buildConfig: BuildConfig, options?: Appli
         outfile: outFile,
         platform: buildConfig.platform,
         minify: process.env.NODE_ENV === 'production',
-        target: 'es6',
+        target: 'es2020',
         plugins: [
             esbuildPluginLogBuildTime(buildConfig.platform),
             sassPlugin(),
@@ -100,10 +100,6 @@ export const buildApplication = async (buildConfig: BuildConfig, options?: Appli
         ],
         external: buildConfig.externals?.(),
         alias: {
-            // 'springboard': './jamtools/packages/jamtools/core',
-            // '@springboardjs/platforms-browser': './jamtools/packages/jamtools/platforms/webapp',
-            // 'react': './node_modules/react',
-            // 'jamtools-mantine': './jamtools/packages/springboard/mantine',
         },
         define: {
             'process.env.WS_HOST': `"${process.env.WS_HOST || ''}"`,
@@ -146,9 +142,11 @@ export const buildApplication = async (buildConfig: BuildConfig, options?: Appli
 };
 
 export type ServerBuildOptions = {
+    coreFile?: string;
     esbuildOutDir?: string;
     serverEntrypoint?: string;
     watch?: boolean;
+    editBuildOptions?: (options: EsbuildOptions) => void;
 };
 
 export const buildServer = async (options?: ServerBuildOptions) => {
@@ -163,7 +161,7 @@ export const buildServer = async (options?: ServerBuildOptions) => {
 
     const outFile = path.join(outDir, 'local-server.cjs');
 
-    const coreFile = 'springboard-server/src/entrypoints/local-server.entrypoint.ts';
+    const coreFile = options?.coreFile || 'springboard-server/src/entrypoints/local-server.entrypoint.ts';
     const serverEntrypoint = process.env.SERVER_ENTRYPOINT || options?.serverEntrypoint;
 
     let allImports = [coreFile].map(file => `import '${file}';`).join('\n');
@@ -186,6 +184,8 @@ export const buildServer = async (options?: ServerBuildOptions) => {
         ],
         external: externals,
     };
+
+    options?.editBuildOptions?.(buildOptions);
 
     if (options?.watch) {
         const ctx = await esbuild.context(buildOptions);

@@ -3,10 +3,10 @@ import React from 'react';
 import {Link} from 'react-router-dom';
 
 import springboard from 'springboard';
-import {GuitarChordRootsDisplay, GuitarTabView} from '@jamtools/core/modules/song_structures/components/guitar_tab_view';
-import {Button} from 'springboard/components/Button';
 import {MidiEvent} from '@jamtools/core/modules/macro_module/macro_module_types';
-import {ChordChoice, ChordDisplay} from '@jamtools/core/modules/song_structures/components/chord_display';
+
+import {GuitarChordRootsDisplay, GuitarTabView} from '@jamtools/features/modules/song_structures/components/guitar_tab_view';
+import {ChordChoice, ChordDisplay} from '@jamtools/features/modules/song_structures/components/chord_display';
 
 declare module 'springboard/module_registry/module_registry' {
     interface AllModules {
@@ -141,9 +141,9 @@ springboard.registerModule('song_structures_dashboards', {}, async (moduleAPI): 
         return (
             <div>
                 <Link to='/modules/song_structures_dashboards/bass_guitar'>
-                    <Button>
+                    <button>
                         Go to Bass Guitar
-                    </Button>
+                    </button>
                 </Link>
             </div>
         );
@@ -182,16 +182,16 @@ springboard.registerModule('song_structures_dashboards', {}, async (moduleAPI): 
             <>
                 <div>
                     <div>
-                        <Button
+                        <button
                             onClick={() => state.setState({...state.getState(), showLetters: !state.getState().showLetters})}
                         >
                             {displaySettings.showLetters ? 'Hide' : 'Show'} {' Letters'}
-                        </Button>
-                        <Button
+                        </button>
+                        <button
                             onClick={() => state.setState({...state.getState(), showGuitar: !state.getState().showGuitar})}
                         >
                             {displaySettings.showGuitar ? 'Hide' : 'Show'} {' Guitar'}
-                        </Button>
+                        </button>
                     </div>
                     {displaySettings.showLetters && (
                         <div>
