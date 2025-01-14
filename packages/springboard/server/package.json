@@ -1,6 +1,6 @@
 {
   "name": "springboard-server",
-  "version": "0.14.0-rc7",
+  "version": "0.14.0-rc9",
   "main": "./index.ts",
   "module": "./index.ts",
   "files": [
@@ -24,7 +24,7 @@
   },
   "peerDependencies": {
     "hono": "^4.6.7",
-    "springboard": "0.14.0-rc7",
-    "@springboardjs/data-storage": "0.14.0-rc7"
+    "springboard": "0.14.0-rc9",
+    "@springboardjs/data-storage": "0.14.0-rc9"
   }
 }

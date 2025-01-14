@@ -1,6 +1,6 @@
 {
   "name": "springboard",
-  "version": "0.14.0-rc7",
+  "version": "0.14.0-rc9",
   "type": "module",
   "scripts": {
     "test": "vitest --run",
@@ -35,7 +35,6 @@
   "dependencies": {
     "dexie": "^4.0.9",
     "immer": "^10.1.1",
-    "react-spinners": "^0.14.1",
     "reconnecting-websocket": "^4.4.0",
     "ws": "^8.18.0"
   },

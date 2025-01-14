@@ -1,6 +1,6 @@
 {
   "name": "@springboardjs/shoelace",
-  "version": "0.14.0-rc7",
+  "version": "0.14.0-rc9",
   "main": "index.js",
   "scripts": {},
   "dependencies": {
@@ -11,6 +11,6 @@
   "license": "ISC",
   "description": "",
   "peerDependencies": {
-    "springboard": "0.14.0-rc7"
+    "springboard": "0.14.0-rc9"
   }
 }

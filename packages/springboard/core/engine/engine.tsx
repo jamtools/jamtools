@@ -1,5 +1,3 @@
-import {RingLoader} from 'react-spinners';
-
 import {CoreDependencies, ModuleDependencies} from 'springboard/types/module_types';
 
 import {ClassModuleCallback, ModuleCallback, RegisterModuleOptions, springboard} from './register';
@@ -183,17 +181,9 @@ export const SpringboardProviderPure = (props: SpringboardProviderProps) => {
 };
 
 const Loader = () => {
-    const [color, setColor] = useState('#222');
-
     return (
         <div style={{display: 'flex', justifyContent: 'center', marginTop: '50px'}}>
-            <RingLoader
-                color={color}
-                size={100}
-                onClick={() => {
-                    setColor('#ae1');
-                }}
-            />
+            Loading...
         </div>
     );
 };
