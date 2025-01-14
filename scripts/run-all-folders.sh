@@ -1,6 +1,6 @@
 #!/bin/bash
 
-full_version="0.14.0-rc11"
+full_version="0.14.0"
 
 set e
 root_dir=$(pwd)
@@ -28,10 +28,10 @@ publish_package() {
   echo "Publishing package in $target_dir"
 
   # RC publish to npm
-  npm publish --access public --tag rc
+  # npm publish --access public --tag rc
 
   # Production publish to npm
-  # npm publish --access public --tag latest
+  npm publish --access public --tag latest
 
   # RC publish to verdaccio
   # npm publish --registry http://localhost:4873 --access public --tag rc
