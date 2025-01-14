@@ -1,14 +1,14 @@
 {
   "name": "@springboardjs/platforms-browser",
-  "version": "0.14.0-rc9",
+  "version": "0.14.0-rc11",
   "scripts": {
     "check-types": "tsc --noEmit",
     "lint": "eslint --ext ts --ext tsx .",
     "fix": "npm run lint -- --fix"
   },
   "peerDependencies": {
-    "springboard": "0.14.0-rc9",
-    "react-router-dom": "^7.1.1"
+    "springboard": "0.14.0-rc11",
+    "react-router-dom": "^6 || ^7"
   },
   "config": {
     "dir": "../../../../configs"

@@ -1,11 +1,9 @@
 #!/bin/bash
 
-full_version="0.14.0-rc1"  # Set the target version here or make it a script argument
+full_version="0.14.0-rc11"
 
-root_dir=$(pwd)  # Assuming this script is run from the project root
-
-# exit script if anything fails
 set e
+root_dir=$(pwd)
 
 bump_version() {
   local target_dir=$1
@@ -28,12 +26,19 @@ publish_package() {
   local target_dir=$1
   cd "$target_dir" || exit 1
   echo "Publishing package in $target_dir"
-  # npm publish --access public
-  # npm publish --registry http://coolify-infra:4873
-  npm publish --registry http://localhost:4873
-}
 
-# Bump, update dependencies, and publish each package
+  # RC publish to npm
+  npm publish --access public --tag rc
+
+  # Production publish to npm
+  # npm publish --access public --tag latest
+
+  # RC publish to verdaccio
+  # npm publish --registry http://localhost:4873 --access public --tag rc
+
+  # Production publish to verdaccio
+  # npm publish --registry http://localhost:4873 --access public --tag latest
+}
 
 bump_version "$root_dir/packages/springboard/core"
 publish_package "$root_dir/packages/springboard/core"
