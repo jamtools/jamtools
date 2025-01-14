@@ -1,4 +1,4 @@
-import {ScaleLoader} from 'react-spinners';
+import {RingLoader} from 'react-spinners';
 
 import {CoreDependencies, ModuleDependencies} from 'springboard/types/module_types';
 
@@ -18,7 +18,7 @@ type CapturedRegisterClassModuleCalls = ClassModuleCallback<any>;
 export class Springboard {
     public moduleRegistry!: ModuleRegistry;
 
-    constructor(public coreDeps: CoreDependencies, public extraModuleDependencies: ExtraModuleDependencies) {}
+    constructor(public coreDeps: CoreDependencies, public extraModuleDependencies: ExtraModuleDependencies) { }
 
     private initializeCallbacks: (() => void)[] = [];
 
@@ -146,14 +146,7 @@ export const SpringboardProvider = (props: SpringboardProviderProps) => {
 
     if (!engine) {
         return (
-            <div style={{textAlign: 'center', marginTop: '50px'}}>
-                <ScaleLoader
-                    color="#eee"
-                    radius={10}
-                    height={50}
-                    width={20}
-                />
-            </div>
+            <Loader />
         );
     }
 
@@ -186,5 +179,21 @@ export const SpringboardProviderPure = (props: SpringboardProviderProps) => {
         <engineContext.Provider value={engine}>
             {stackedProviders}
         </engineContext.Provider>
+    );
+};
+
+const Loader = () => {
+    const [color, setColor] = useState('#222');
+
+    return (
+        <div style={{display: 'flex', justifyContent: 'center', marginTop: '50px'}}>
+            <RingLoader
+                color={color}
+                size={100}
+                onClick={() => {
+                    setColor('#ae1');
+                }}
+            />
+        </div>
     );
 };

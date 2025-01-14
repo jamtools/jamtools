@@ -135,7 +135,7 @@ const RenderModuleRoutes = ({mod}: {mod: Module}) => {
                         }
                     }
 
-                    const href = path.startsWith('/') ? path : `/modules/${mod.moduleId}${suffix}`
+                    const href = path.startsWith('/') ? path : `/modules/${mod.moduleId}${suffix}`;
 
                     return (
                         <li key={path}>

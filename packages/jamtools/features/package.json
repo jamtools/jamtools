@@ -1,6 +1,6 @@
 {
   "name": "@jamtools/features",
-  "version": "0.14.0-rc1",
+  "version": "0.14.0-rc7",
   "scripts": {
     "check-types": "tsc --noEmit",
     "lint": "eslint --ext ts --ext tsx .",
@@ -9,7 +9,9 @@
   "dependencies": {
     "jsdom": "^25.0.0",
     "qrcode": "^1.5.4",
-    "tonal": "^6.2.0"
+    "react-guitar": "^1.1.2",
+    "tonal": "^6.2.0",
+    "wled-client": "^0.22.1"
   },
   "devDependencies": {
     "@types/qrcode": "^1.5.5"
@@ -18,7 +20,7 @@
     "dir": "../../../configs"
   },
   "peerDependencies": {
-    "@jamtools/core": "0.14.0-rc1",
-    "@springboardjs/shoelace": "0.14.0-rc1"
+    "@jamtools/core": "0.14.0-rc7",
+    "@springboardjs/shoelace": "0.14.0-rc7"
   }
 }
