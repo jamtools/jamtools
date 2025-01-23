@@ -24,33 +24,33 @@ let createIoDependencies = (): IoDeps => {
     };
 };
 
-// @platform "browser"
-import {BrowserQwertyService} from '@jamtools/core/services/browser/browser_qwerty_service';
-import {BrowserMidiService} from '@jamtools/core/services/browser/browser_midi_service';
+// // @platform "browser"
+// import {BrowserQwertyService} from '@jamtools/core/services/browser/browser_qwerty_service';
+// import {BrowserMidiService} from '@jamtools/core/services/browser/browser_midi_service';
 
-createIoDependencies = () => {
-    const qwerty = new BrowserQwertyService(document);
-    const midi = new BrowserMidiService();
-    return {
-        qwerty,
-        midi,
-    };
-};
-// @platform end
+// createIoDependencies = () => {
+//     const qwerty = new BrowserQwertyService(document);
+//     const midi = new BrowserMidiService();
+//     return {
+//         qwerty,
+//         midi,
+//     };
+// };
+// // @platform end
 
-// @platform "node"
-import {NodeQwertyService} from '@jamtools/core/services/node/node_qwerty_service';
-import {NodeMidiService} from '@jamtools/core/services/node/node_midi_service';
+// // @platform "node"
+// import {NodeQwertyService} from '@jamtools/core/services/node/node_qwerty_service';
+// import {NodeMidiService} from '@jamtools/core/services/node/node_midi_service';
 
-createIoDependencies = () => {
-    const qwerty = new NodeQwertyService();
-    const midi = new NodeMidiService();
-    return {
-        qwerty,
-        midi,
-    };
-};
-// @platform end
+// createIoDependencies = () => {
+//     const qwerty = new NodeQwertyService();
+//     const midi = new NodeMidiService();
+//     return {
+//         qwerty,
+//         midi,
+//     };
+// };
+// // @platform end
 
 export const setIoDependencyCreator = (func: typeof createIoDependencies) => {
     createIoDependencies = func;
