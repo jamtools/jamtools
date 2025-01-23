@@ -1,6 +1,6 @@
 import {CoreDependencies, ModuleDependencies} from 'springboard/types/module_types';
 
-import {ClassModuleCallback, ModuleCallback, RegisterModuleOptions, springboard} from './register';
+import {ClassModuleCallback, DefineModuleFuncReturnValue, ModuleCallback, RegisterModuleOptions, springboard} from './register';
 
 import React, {createContext, useContext, useState} from 'react';
 
@@ -54,6 +54,87 @@ export class Springboard {
         for (const cb of this.initializeCallbacks) {
             cb();
         }
+    };
+
+    initialize2 = async () => {
+        const websocketConnected = await this.coreDeps.rpc.initialize();
+        if (!websocketConnected) {
+            if ('confirm' in globalThis) {
+                if (confirm('failed to connect to websocket server. run in local browser mode?')) {
+                    this.coreDeps.isMaestro = () => true;
+                }
+            }
+        }
+
+        this.sharedStateService = new SharedStateService(this.coreDeps);
+        await this.sharedStateService.initialize();
+
+        this.moduleRegistry = new ModuleRegistry();
+
+        const registeredModules = this.preRegisteredModules;
+        for (const mod of registeredModules) {
+            await this.initializeModule(mod.definedModule, mod.options);
+        }
+
+
+        // const registeredClassModuleCallbacks = (springboard.registerClassModule as unknown as {calls: CapturedRegisterClassModuleCalls[]}).calls || [];
+        // springboard.registerClassModule = this.registerClassModule;
+
+        // const registeredModuleCallbacks = (springboard.registerModule as unknown as {calls: CapturedRegisterModuleCalls[]}).calls || [];
+        // springboard.registerModule = this.registerModule;
+
+        // for (const modClassCallback of registeredClassModuleCallbacks) {
+        //     await this.registerClassModule(modClassCallback);
+        // }
+
+        // for (const modFuncCallback of registeredModuleCallbacks) {
+        //     await this.registerModule(modFuncCallback[0], modFuncCallback[1], modFuncCallback[2]);
+        // }
+
+        for (const cb of this.initializeCallbacks) {
+            cb();
+        }
+    };
+
+    preRegisteredModules: {
+        definedModule: DefineModuleFuncReturnValue<any, any>;
+        options?: {
+            externalDependencies?: Partial<any>,
+        }
+    }[] = [];
+
+    private initializeModule = async <ModuleId extends string, ExternalDependencies extends object | undefined>(
+        definedModule: DefineModuleFuncReturnValue<ModuleId, ExternalDependencies>,
+        options?: {
+            externalDependencies?: Partial<ExternalDependencies>,
+        },
+    ) => {
+        const mod: Module = {moduleId: definedModule.moduleId};
+        const moduleAPI = new ModuleAPI(mod, 'engine', this.coreDeps, this.makeDerivedDependencies(), this.extraModuleDependencies);
+
+        const moduleReturnValue = await definedModule.initialize(moduleAPI, definedModule.options?.externalDependencies ? {
+            externalDependencies: {
+                ...definedModule.options!.externalDependencies!,
+                ...options?.externalDependencies,
+            },
+        }: {externalDependencies: {} as any});
+
+        Object.assign(mod, moduleReturnValue);
+
+        this.moduleRegistry.registerModule(mod);
+        return {module: mod, api: moduleReturnValue};
+    }
+
+    public registerModule2 = <ModuleId extends string, ExternalDependencies extends object>(
+        definedModule: DefineModuleFuncReturnValue<ModuleId, ExternalDependencies>,
+        options?: {
+            externalDependencies?: Partial<ExternalDependencies>,
+        },
+    ) => {
+        this.preRegisteredModules.push({
+            definedModule,
+            options,
+        });
     };
 
     public registerModule = async <ModuleOptions extends RegisterModuleOptions, ModuleReturnValue extends object>(

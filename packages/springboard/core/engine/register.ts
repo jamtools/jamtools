@@ -20,11 +20,65 @@ export type SpringboardRegistry = {
     ) => void;
     registerClassModule: <T extends object>(cb: ClassModuleCallback<T>) => void;
     reset: () => void;
+    defineModule: <ModuleId extends string, ExternalDependencies extends object, ModuleOptions extends DefineModuleOptions<ExternalDependencies>, ModuleReturnValue extends object>(
+        moduleId: ModuleId,
+        options: ModuleOptions & {externalDependencies: ExternalDependencies},
+        cb: DefineModuleCallback<ModuleReturnValue, ExternalDependencies>,
+    ) => DefineModuleFuncReturnValue<ModuleId, ExternalDependencies>;
 };
+
+export type DefineModuleCallback<ModuleReturnValue extends object, ExternalDependencies extends object> = (moduleAPI: ModuleAPI, deps: {externalDependencies: ExternalDependencies}) =>
+    Promise<ModuleReturnValue> | ModuleReturnValue;
 
 export type RegisterModuleOptions = {
 
 };
+
+export type DefineModuleOptions<ExternalDependencies extends object> = {
+    externalDependencies?: ExternalDependencies;
+};
+
+export type DefineModuleFuncReturnValue<ModuleId extends string, ExternalDependencies extends object | undefined> = {
+    moduleId: ModuleId;
+    options: DefineModuleOptions<ExternalDependencies>
+    initialize: DefineModuleCallback<any, ExternalDependencies>;
+}
+
+const mod = springboard.defineModule('Main', {
+    externalDependencies: {
+        x: async () => {
+            return 'hey'
+        }
+    },
+}, async (m, deps) => {
+    deps.externalDependencies.x().then(s => s.length);
+});
+
+type RegisterModuleFunc = <ModuleId extends string, ExternalDependencies extends object>(
+    definedModule: DefineModuleFuncReturnValue<ModuleId, ExternalDependencies>,
+    options?: {
+        externalDependencies?: Partial<ExternalDependencies>;
+    }
+) => {
+
+}
+
+const registerModule2 = <ModuleId extends string, ExternalDependencies extends object>(
+    definedModule: DefineModuleFuncReturnValue<ModuleId, ExternalDependencies>,
+    options?: {
+        externalDependencies?: Partial<ExternalDependencies>,
+    },
+) => {
+
+}
+
+registerModule2(mod, {
+    externalDependencies: {
+        x: async () => '',
+    },
+});
+
+registerModule2(mod);
 
 type CapturedRegisterModuleCall = [string, RegisterModuleOptions, ModuleCallback<any>];
 
@@ -52,6 +106,15 @@ export const springboard: SpringboardRegistry = {
     reset: () => {
         springboard.registerModule = registerModule;
         springboard.registerClassModule = registerClassModule;
+    },
+    defineModule: (moduleId, options, cb) => {
+        return {
+            moduleId,
+            options,
+            initialize: async (moduleAPI, deps) => {
+                return cb(moduleAPI, deps);
+            },
+        }
     },
 };
 
