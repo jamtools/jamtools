@@ -1,6 +1,6 @@
 #!/bin/bash
 
-full_version="0.14.0"
+full_version="0.15.0-rc1"
 
 set e
 root_dir=$(pwd)
@@ -31,10 +31,10 @@ publish_package() {
   # npm publish --access public --tag rc
 
   # Production publish to npm
-  npm publish --access public --tag latest
+  # npm publish --access public --tag latest
 
   # RC publish to verdaccio
-  # npm publish --registry http://localhost:4873 --access public --tag rc
+  npm publish --registry http://localhost:4873 --access public --tag rc
 
   # Production publish to verdaccio
   # npm publish --registry http://localhost:4873 --access public --tag latest

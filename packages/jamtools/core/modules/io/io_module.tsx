@@ -17,7 +17,7 @@ type IoDeps = {
     qwerty: QwertyService;
 }
 
-let createIoDependencies = (): IoDeps => {
+let createIoDependencies = async (): Promise<IoDeps> => {
     return {
         qwerty: new MockQwertyService(),
         midi: new MockMidiService(),
@@ -25,10 +25,10 @@ let createIoDependencies = (): IoDeps => {
 };
 
 // @platform "browser"
-import {BrowserQwertyService} from '@jamtools/core/services/browser/browser_qwerty_service';
-import {BrowserMidiService} from '@jamtools/core/services/browser/browser_midi_service';
+createIoDependencies = async () => {
+    const {BrowserQwertyService} = await import('@jamtools/core/services/browser/browser_qwerty_service');
+    const {BrowserMidiService} = await import('@jamtools/core/services/browser/browser_midi_service');
 
-createIoDependencies = () => {
     const qwerty = new BrowserQwertyService(document);
     const midi = new BrowserMidiService();
     return {
@@ -39,10 +39,10 @@ createIoDependencies = () => {
 // @platform end
 
 // @platform "node"
-import {NodeQwertyService} from '@jamtools/core/services/node/node_qwerty_service';
-import {NodeMidiService} from '@jamtools/core/services/node/node_midi_service';
+createIoDependencies = async () => {
+    const {NodeQwertyService} = await import('@jamtools/core/services/node/node_qwerty_service');
+    const {NodeMidiService} = await import('@jamtools/core/services/node/node_midi_service');
 
-createIoDependencies = () => {
     const qwerty = new NodeQwertyService();
     const midi = new NodeMidiService();
     return {
@@ -87,13 +87,13 @@ export class IoModule implements Module<IoState> {
 
     midiDeviceState!: StateSupervisor<IoState>;
 
-    private ioDeps: IoDeps;
+    private ioDeps!: IoDeps;
 
     constructor(private coreDeps: CoreDependencies, private moduleDeps: ModuleDependencies) {
-        this.ioDeps = createIoDependencies();
     }
 
     initialize = async (moduleAPI: ModuleAPI) => {
+        this.ioDeps = await createIoDependencies();
         await this.ioDeps.midi.initialize();
 
         this.qwertyInputSubject = this.ioDeps.qwerty.onInputEvent;

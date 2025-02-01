@@ -1,7 +1,8 @@
-import {Hono} from 'hono';
+import {Context, Hono} from 'hono';
 
 export type ServerModuleAPI = {
     hono: Hono;
+    hooks: ServerHooks;
 }
 
 export type ServerModuleCallback = (server: ServerModuleAPI) => void;
@@ -24,4 +25,10 @@ export type ServerModuleRegistry = {
 
 export const serverRegistry: ServerModuleRegistry = {
     registerServerModule,
+};
+
+export type RpcMiddleware = (c: Context) => Promise<object>;
+
+type ServerHooks = {
+    registerRpcMiddleware: (cb: RpcMiddleware) => void;
 };

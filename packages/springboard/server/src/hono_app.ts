@@ -3,14 +3,55 @@ import path from 'path';
 import {Hono} from 'hono';
 import {serveStatic} from '@hono/node-server/serve-static';
 import {createNodeWebSocket} from '@hono/node-ws';
+import {cors} from 'hono/cors';
 import {trpcServer} from '@hono/trpc-server';
+
+import {NodeAppDependencies} from '@springboardjs/platforms-node/entrypoints/main';
+import {KVStoreFromKysely} from '@springboardjs/data-storage/kv_api_kysely';
+import {NodeKVStoreService} from '@springboardjs/platforms-node/services/node_kvstore_service';
+import {NodeLocalJsonRpcClientAndServer} from '@springboardjs/platforms-node/services/node_local_json_rpc';
+
 import {NodeJsonRpcServer} from './services/server_json_rpc';
 import {WebsocketServerCoreDependencies} from './ws_server_core_dependencies';
-import {ServerModuleAPI, serverRegistry} from './register';
+import {RpcMiddleware, ServerModuleAPI, serverRegistry} from './register';
 
-export const initApp = (coreDeps: WebsocketServerCoreDependencies) => {
+type InitAppReturnValue = {
+    app: Hono;
+    injectWebSocket: ReturnType<typeof createNodeWebSocket>['injectWebSocket'];
+    nodeAppDependencies: NodeAppDependencies;
+};
+
+export const initApp = (coreDeps: WebsocketServerCoreDependencies): InitAppReturnValue => {
+    let rpc: NodeLocalJsonRpcClientAndServer | undefined;
+    const rpcMiddlewares: RpcMiddleware[] = [];
+
     const app = new Hono();
-    const service = new NodeJsonRpcServer();
+
+    app.use('*', cors());
+
+    const service = new NodeJsonRpcServer({
+        processRequest: async (message) => {
+            return rpc!.processRequest(message);
+        },
+        rpcMiddlewares,
+    });
+
+    const remoteKV = new KVStoreFromKysely(coreDeps.kvDatabase);
+    const userAgentStore = new NodeKVStoreService('userAgent');
+
+    rpc = new NodeLocalJsonRpcClientAndServer({
+        broadcastMessage: (message) => {
+            return service.broadcastMessage(message);
+        },
+    });
+
+    const nodeAppDependencies: NodeAppDependencies = {
+        rpc,
+        storage: {
+            remote: remoteKV,
+            userAgent: userAgentStore,
+        },
+    };
 
     const webappFolder = process.env.WEBAPP_FOLDER || './dist/browser';
     const webappDistFolder = path.join(webappFolder, './dist');
@@ -60,6 +101,11 @@ export const initApp = (coreDeps: WebsocketServerCoreDependencies) => {
 
     const serverModuleAPI: ServerModuleAPI = {
         hono: app,
+        hooks: {
+            registerRpcMiddleware: (cb) => {
+                rpcMiddlewares.push(cb);
+            },
+        },
     };
 
     for (const call of registeredServerModuleCallbacks) {
@@ -69,7 +115,7 @@ export const initApp = (coreDeps: WebsocketServerCoreDependencies) => {
     // Catch-all route for SPA
     app.use('*', serveStatic({root: webappDistFolder, path: 'index.html'}));
 
-    return {app, injectWebSocket};
+    return {app, injectWebSocket, nodeAppDependencies};
 };
 
 type ServerModuleCallback = (server: ServerModuleAPI) => void;

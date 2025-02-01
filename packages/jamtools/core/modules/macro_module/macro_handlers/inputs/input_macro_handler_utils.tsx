@@ -39,7 +39,13 @@ type MacroSaverOptions = {
 
 type CheckSavedMidiEventsAreEqual = (event1: MidiEventFull, event2: MidiEventFull) => boolean;
 
-export const useInputMacroWaiterAndSaver = async (macroAPI: MacroAPI, states: InputMacroStateHolders, options: MacroSaverOptions, fieldName: string, checkSavedMidiEventsAreEqual: CheckSavedMidiEventsAreEqual): Promise<MidiInputMacroPayload> => {
+export const useInputMacroWaiterAndSaver = async (
+    macroAPI: MacroAPI,
+    states: InputMacroStateHolders,
+    options: MacroSaverOptions,
+    fieldName: string,
+    checkSavedMidiEventsAreEqual: CheckSavedMidiEventsAreEqual,
+): Promise<MidiInputMacroPayload> => {
     const editingState = states.editing;
     const waitingForConfiguration = states.waiting;
     const capturedMidiEvent = states.captured;

@@ -1,16 +1,14 @@
 {
   "name": "@springboardjs/platforms-node",
-  "version": "0.14.1",
+  "version": "0.15.0-rc1",
   "scripts": {
-    "start": "node ../../cli/dist/node/dist/index.js",
-    "dev": "sleep 1 && node --watch --watch-preserve-output ../../cli/dist/node/dist/index.js",
     "check-types": "tsc --noEmit",
     "lint": "eslint --ext ts --ext tsx .",
     "fix": "npm run lint -- --fix"
   },
   "peerDependencies": {
     "isomorphic-ws": "^4.0.1",
-    "springboard": "0.14.1",
+    "springboard": "0.15.0-rc1",
     "ws": "^8.18.0"
   },
   "config": {

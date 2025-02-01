@@ -102,18 +102,12 @@ export class MacroModule implements Module<MacroConfigState> {
             return undefined;
         }
 
-        const savedCallbacks: (() => void)[] = [];
-
         const macroAPI: MacroAPI = {
             moduleAPI,
             onDestroy: (cb: () => void) => {
-                savedCallbacks.push(cb);
+                moduleAPI.onDestroy(cb);
             },
         };
-
-        // TODO: call all savedCallbacks on destroy
-        // we'll want to store these in the engine
-        // or make another class that maintains that state
 
         const result = await registeredMacroType[2](macroAPI, conf, fieldName);
         return result;

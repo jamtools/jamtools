@@ -23,6 +23,24 @@ type ActionCallback<Args extends object, ReturnValue = any> = (args: Args) => Pr
  * The API provided in the callback when calling `registerModule`. The ModuleAPI is the entrypoint in the framework for everything pertaining to creating a module.
 */
 export class ModuleAPI {
+    private destroyCallbacks: Function[] = [];
+
+    public onDestroy = (cb: Function) => {
+        this.destroyCallbacks.push(cb);
+    }
+
+    public destroy = () => {
+        for (const cb of this.destroyCallbacks) {
+            try {
+                cb();
+            } catch (e) {
+                console.error('destroy callback failed in StatesAPI', e);
+            }
+        }
+
+        this.statesAPI.destroy();
+    };
+
     public readonly deps: {core: CoreDependencies; module: ModuleDependencies, extra: ExtraModuleDependencies};
 
     constructor(private module: Module, private prefix: string, private coreDeps: CoreDependencies, private modDeps: ModuleDependencies, extraDeps: ExtraModuleDependencies) {
@@ -125,6 +143,22 @@ export class ModuleAPI {
  * The States API is used for creating shared, persistent, and user-scoped states.
 */
 export class StatesAPI {
+    private destroyCallbacks: Function[] = [];
+
+    public onDestroy = (cb: Function) => {
+        this.destroyCallbacks.push(cb);
+    }
+
+    public destroy = () => {
+        for (const cb of this.destroyCallbacks) {
+            try {
+                cb();
+            } catch (e) {
+                console.error('destroy callback failed in StatesAPI', e);
+            }
+        }
+    };
+
     constructor(private prefix: string, private coreDeps: CoreDependencies, private modDeps: ModuleDependencies) {
 
     }
@@ -149,7 +183,7 @@ export class StatesAPI {
             initialValue = cachedValue;
         } else {
             const storedValue = await this.coreDeps.storage.remote.get<State>(fullKey);
-            if (storedValue !== null) { // this should really used undefined for a signal instead
+            if (storedValue !== null && storedValue !== undefined) { // this should really only use undefined for a signal
                 initialValue = storedValue;
             } else if (this.coreDeps.isMaestro()) {
                 await this.coreDeps.storage.remote.set<State>(fullKey, initialValue);
@@ -162,9 +196,10 @@ export class StatesAPI {
         // this createPersistentState function is not Maestro friendly
         // every time you access coreDeps, that's the case
         // persistent state has been a weird thing
-        supervisor.subjectForKVStorePublish.subscribe(async value => {
+        const sub = supervisor.subjectForKVStorePublish.subscribe(async value => {
             await this.coreDeps.storage.remote.set(fullKey, value);
         });
+        this.onDestroy(sub.unsubscribe);
 
         return supervisor;
     };

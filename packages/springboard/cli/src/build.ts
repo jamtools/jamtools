@@ -32,10 +32,8 @@ export const platformBrowserBuildConfig: BuildConfig = {
 export const platformNodeBuildConfig: BuildConfig = {
     platform: 'node',
     platformEntrypoint: () => {
-        let entrypoint = '@springboardjs/platforms-node/entrypoints/node_main_entrypoint.ts';
-        if (process.env.DISABLE_IO === 'true') {
-            entrypoint = '@springboardjs/platforms-node/entrypoints/node_saas_entrypoint.ts';
-        }
+        // const entrypoint = '@springboardjs/platforms-node/entrypoints/node_main_entrypoint.ts';
+        const entrypoint = '@springboardjs/platforms-node/entrypoints/node_flexible_entrypoint.ts';
 
         return entrypoint;
     },
@@ -70,7 +68,12 @@ export const buildApplication = async (buildConfig: BuildConfig, options?: Appli
         throw new Error('No application entrypoint provided');
     }
 
-    const allImports = [coreFile, applicationEntrypoint].map(file => `import '${file}';`).join('\n');
+    const allImports = `import initApp from '${coreFile}';
+import '${applicationEntrypoint}';
+export default initApp;
+`
+
+    // const allImports = [coreFile, applicationEntrypoint].map(file => `import '${file}';`).join('\n');
 
     const parentOutDir = process.env.ESBUILD_OUT_DIR || options?.esbuildOutDir || './dist';
     const outDir = `${parentOutDir}/${buildConfig.platform}/dist`;
@@ -145,12 +148,13 @@ export type ServerBuildOptions = {
     coreFile?: string;
     esbuildOutDir?: string;
     serverEntrypoint?: string;
+    applicationDistPath?: string;
     watch?: boolean;
     editBuildOptions?: (options: EsbuildOptions) => void;
 };
 
 export const buildServer = async (options?: ServerBuildOptions) => {
-    const externals = ['better-sqlite3'];
+    const externals = ['better-sqlite3', '@julusian/midi', 'easymidi', 'jsdom'];
 
     const parentOutDir = process.env.ESBUILD_OUT_DIR || options?.esbuildOutDir || './dist';
     const outDir = `${parentOutDir}/server/dist`;
@@ -162,27 +166,40 @@ export const buildServer = async (options?: ServerBuildOptions) => {
     const outFile = path.join(outDir, 'local-server.cjs');
 
     const coreFile = options?.coreFile || 'springboard-server/src/entrypoints/local-server.entrypoint.ts';
+    const applicationDistPath = options?.applicationDistPath || '../../node/dist/dynamic-entry.js';
+    // const applicationDistPath = options?.applicationDistPath || '../../node/dist/index.js';
     const serverEntrypoint = process.env.SERVER_ENTRYPOINT || options?.serverEntrypoint;
 
-    let allImports = [coreFile].map(file => `import '${file}';`).join('\n');
+    let allImports = `import createDeps from '${coreFile}';`;
     if (serverEntrypoint) {
-        allImports = [coreFile, serverEntrypoint].map(file => `import '${file}';`).join('\n');
+        allImports += `import '${serverEntrypoint}';`;
     }
+
+    allImports += `import app from '${applicationDistPath}';
+createDeps().then(deps => app(deps));
+`;
 
     const dynamicEntryPath = path.join(outDir, 'dynamic-entry.js');
     fs.writeFileSync(dynamicEntryPath, allImports);
 
     const buildOptions: EsbuildOptions = {
         entryPoints: [dynamicEntryPath],
+        metafile: shouldOutputMetaFile,
         bundle: true,
         sourcemap: true,
         outfile: outFile,
         platform: 'node',
         minify: process.env.NODE_ENV === 'production',
+        target: 'es2020',
         plugins: [
             esbuildPluginLogBuildTime('server'),
+            esbuildPluginPlatformInject('node'),
+            sassPlugin(),
         ],
         external: externals,
+        define: {
+            'process.env.NODE_ENV': `"${process.env.NODE_ENV || ''}"`,
+        },
     };
 
     options?.editBuildOptions?.(buildOptions);
