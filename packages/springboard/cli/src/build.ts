@@ -6,8 +6,6 @@ import esbuild from 'esbuild';
 import {esbuildPluginLogBuildTime} from './esbuild_plugins/esbuild_plugin_log_build_time';
 import {esbuildPluginPlatformInject} from './esbuild_plugins/esbuild_plugin_platform_inject.js';
 
-import {sassPlugin} from 'esbuild-sass-plugin';
-
 type EsbuildOptions = Parameters<typeof esbuild.build>[0];
 
 type BuildConfig = {
@@ -98,7 +96,6 @@ export default initApp;
         target: 'es2020',
         plugins: [
             esbuildPluginLogBuildTime(buildConfig.platform),
-            sassPlugin(),
             ...(buildConfig.esbuildPlugins?.() || []),
         ],
         external: buildConfig.externals?.(),
@@ -194,7 +191,6 @@ createDeps().then(deps => app(deps));
         plugins: [
             esbuildPluginLogBuildTime('server'),
             esbuildPluginPlatformInject('node'),
-            sassPlugin(),
         ],
         external: externals,
         define: {
