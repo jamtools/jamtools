@@ -78,6 +78,9 @@ export const platformFetchBuildConfig: BuildConfig = {
 const copyDesktopFiles = async (desktopPlatform: string) => {
     await fs.promises.mkdir(`apps/desktop_${desktopPlatform}/app/dist`, {recursive: true});
 
+    const {execSync} = await import('node:child_process');
+    execSync('ls -R dist', {stdio: 'inherit'});
+
     await fs.promises.copyFile(
         `dist/${desktopPlatform}/browser/dist/index.css`,
         `apps/desktop_${desktopPlatform}/app/dist/index.css`,
