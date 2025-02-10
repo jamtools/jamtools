@@ -75,6 +75,32 @@ export class MacroModule implements Module<MacroConfigState> {
         return result!;
     };
 
+    public createMacros = async <
+        T extends Record<string, keyof MacroTypeConfigs>,
+        MacroConfigs extends {[K in keyof T]: {
+            type: T[K],
+            config: MacroTypeConfigs[T[K]]['input']
+        }}
+    >(moduleAPI: ModuleAPI, macros: MacroConfigs): Promise<{[K in keyof MacroConfigs]: MacroTypeConfigs[MacroConfigs[K]['type']]['output']}> => {
+        const keys = Object.keys(macros);
+        const promises = keys.map(async key => {
+            const {type, config} = macros[key];
+            return {
+                macro: await this.createMacro(moduleAPI, key, type, config),
+                key,
+            };
+        });
+
+        const result = {} as {[K in keyof MacroConfigs]: MacroTypeConfigs[MacroConfigs[K]['type']]['output']};
+
+        const createdMacros = await Promise.all(promises);
+        for (const key of keys) {
+            (result[key] as any) = createdMacros.find(m => m.key === key)!.macro;
+        }
+
+        return result;
+    };
+
     public registerMacroType = <MacroTypeOptions extends object, MacroInputConf extends object, MacroReturnValue extends object>(
         macroName: string,
         options: MacroTypeOptions,

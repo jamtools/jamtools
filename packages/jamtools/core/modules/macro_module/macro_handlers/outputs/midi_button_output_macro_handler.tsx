@@ -7,25 +7,24 @@ import {macroTypeRegistry} from '@jamtools/core/modules/macro_module/registered_
 
 type Base = Omit<MidiOutputMacroPayload, 'send'>;
 
-export type MidiControlChangeOutputMacroOutput = Base & {
-    send(value: number): void;
+export type MidiButtonOutputMacroOutput = Base & {
+    send(args: {release: boolean} | {releaseTimeout: number}): void;
 };
 
-
-type MidiControlChangeOutputMacroConfig = {
+type MidiButtonOutputMacroConfig = {
 };
 
 declare module '@jamtools/core/modules/macro_module/macro_module_types' {
     interface MacroTypeConfigs {
-        midi_control_change_output: {
-            input: MidiControlChangeOutputMacroConfig;
-            output: MidiControlChangeOutputMacroOutput;
+        midi_button_output: {
+            input: MidiButtonOutputMacroConfig;
+            output: MidiButtonOutputMacroOutput;
         }
     }
 }
 
 macroTypeRegistry.registerMacroType(
-    'midi_control_change_output',
+    'midi_button_output',
     {},
     (async (macroAPI, inputConf, fieldName) => {
         const editingState = await macroAPI.moduleAPI.statesAPI.createSharedState(getKeyForMacro('editing', fieldName), false);
@@ -42,15 +41,26 @@ macroTypeRegistry.registerMacroType(
 
         const ioModule = macroAPI.moduleAPI.deps.module.moduleRegistry.getModule('io');
 
-        const send = (value: number) => {
+        const send = (args: {release: boolean} | {releaseTimeout: number}) => {
             const saved = savedOutputDevices.getState();
             for (const device of saved) {
+                const initialEventType = 'release' in args && args.release ? 'noteoff' : 'noteon';
+
                 ioModule.sendMidiEvent(device.device, {
-                    type: 'cc',
+                    type: initialEventType,
                     number: device.note!,
                     channel: device.channel,
-                    value,
                 });
+
+                if ('releaseTimeout' in args && args.releaseTimeout) {
+                    setTimeout(() => {
+                        ioModule.sendMidiEvent(device.device, {
+                            type: 'noteoff',
+                            number: device.note!,
+                            channel: device.channel,
+                        });
+                    }, args.releaseTimeout);
+                }
             }
         };
 

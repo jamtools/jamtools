@@ -88,17 +88,18 @@ export class IoModule implements Module<IoState> {
     midiDeviceState!: StateSupervisor<IoState>;
 
     private ioDeps!: IoDeps;
+    private isMidiInitialized = false;
 
     constructor(private coreDeps: CoreDependencies, private moduleDeps: ModuleDependencies) {
     }
 
-    initialize = async (moduleAPI: ModuleAPI) => {
-        this.ioDeps = await createIoDependencies();
-        await this.ioDeps.midi.initialize();
+    ensureListening = async () => {
+        if (this.isMidiInitialized) {
+            return;
+        }
 
-        this.qwertyInputSubject = this.ioDeps.qwerty.onInputEvent;
-        this.midiInputSubject = this.ioDeps.midi.onInputEvent;
-        this.midiDeviceStatusSubject = this.ioDeps.midi.onDeviceStatusChange;
+        this.isMidiInitialized = true;
+        await this.ioDeps.midi.initialize();
 
         const inputs = this.ioDeps.midi.getInputs();
         const outputs = this.ioDeps.midi.getOutputs();
@@ -108,10 +109,29 @@ export class IoModule implements Module<IoState> {
             midiOutputDevices: outputs,
         };
 
+        this.midiDeviceState.setState(state);
+    };
+
+    initialize = async (moduleAPI: ModuleAPI) => {
+        this.ioDeps = await createIoDependencies();
+
+        this.qwertyInputSubject = this.ioDeps.qwerty.onInputEvent;
+        this.midiInputSubject = this.ioDeps.midi.onInputEvent;
+        this.midiDeviceStatusSubject = this.ioDeps.midi.onDeviceStatusChange;
+
+        // const inputs = this.ioDeps.midi.getInputs();
+        // const outputs = this.ioDeps.midi.getOutputs();
+
+        const state: IoState = {
+            midiInputDevices: [],
+            midiOutputDevices: [],
+        };
+
         this.midiDeviceState = await moduleAPI.statesAPI.createSharedState('plugged_in_midi_devices', state);
     };
 
     public sendMidiEvent = (outputName: string, midiEvent: MidiEvent) => {
+        this.ensureListening();
         this.ioDeps.midi.send(outputName, midiEvent);
     };
 

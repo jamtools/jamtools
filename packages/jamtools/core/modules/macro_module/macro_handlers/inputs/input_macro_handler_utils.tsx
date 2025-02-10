@@ -7,7 +7,8 @@ import {StateSupervisor} from 'springboard/services/states/shared_state_service'
 import {Edit} from './components/edit_macro';
 import {MacroAPI} from '@jamtools/core/modules/macro_module/registered_macro_types';
 
-type MidiInputMacroPayload = {
+export type MidiInputMacroPayload = {
+    states: InputMacroStateHolders;
     subject: Subject<MidiEventFull>;
     components: {
         edit: React.ElementType;
@@ -51,6 +52,10 @@ export const useInputMacroWaiterAndSaver = async (
     const capturedMidiEvent = states.captured;
     const savedMidiEvents = states.savedMidiEvents;
 
+    if (savedMidiEvents.getState().length) {
+        macroAPI.moduleAPI.getModule('io').ensureListening();
+    }
+
     const createAction = <Args extends object>(actionName: string, cb: (args: Args) => void) => {
         return macroAPI.moduleAPI.createAction(`macro|${fieldName}|${actionName}`, {}, async (args: Args) => {
             return cb(args);
@@ -58,7 +63,12 @@ export const useInputMacroWaiterAndSaver = async (
     };
 
     const toggleWaiting = createAction('toggle_waiting_input', async () => {
-        waitingForConfiguration.setState(!waitingForConfiguration.getState());
+        const currentlyWaiting = waitingForConfiguration.getState();
+        if (!currentlyWaiting) {
+            macroAPI.moduleAPI.getModule('io').ensureListening();
+        }
+
+        waitingForConfiguration.setState(!currentlyWaiting);
     });
 
     const confirmMacro = createAction('confirm_macro', async () => {
@@ -110,6 +120,7 @@ export const useInputMacroWaiterAndSaver = async (
     });
 
     const returnValue: MidiInputMacroPayload = {
+        states,
         subject,
         components: {
             edit: () => {

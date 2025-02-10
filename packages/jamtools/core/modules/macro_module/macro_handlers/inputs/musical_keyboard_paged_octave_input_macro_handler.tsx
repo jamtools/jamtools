@@ -107,7 +107,7 @@ macroTypeRegistry.registerMacroType(
         });
 
         const keyboardSub = keyboardMacro.subject.subscribe(event => {
-            const savedEvents = keyboardMacro.getStoredEvents();
+            const savedEvents = keyboardMacro.states.savedMidiEvents.getState();
             const matchedEvent = savedEvents.find(e => savedMidiInputsAreEqual(e, event));
             if (!matchedEvent && event.deviceInfo.name !== 'qwerty') { // TODO: qwerty hack
                 return;

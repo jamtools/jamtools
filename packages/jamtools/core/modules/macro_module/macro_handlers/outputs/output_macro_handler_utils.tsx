@@ -12,11 +12,12 @@ export type OutputMacroStateHolders = {
     savedMidiOutputs: StateSupervisor<SavedOutputDeviceState[]>;
 };
 
-type MidiOutputMacroPayload = {
+export type MidiOutputMacroPayload = {
     components: {
         edit: React.ElementType;
     };
     send: (midiEvent: MidiEvent) => void;
+    states: OutputMacroStateHolders;
 }
 
 type OutputMacroSaverOptions = {
@@ -187,6 +188,7 @@ export const useOutputMacroWaiterAndSaver = async (macroAPI: MacroAPI, states: O
     };
 
     return {
+        states,
         components,
         send,
     };
