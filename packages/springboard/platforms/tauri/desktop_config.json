@@ -110,7 +110,8 @@
     "files": {
         "pkg.json": {
             "assets": [
-                "../../node_modules/better-sqlite3/build/Release/*"
+                "../../node_modules/better-sqlite3/build/Release/*",
+                "../../dist/browser/dist/*"
             ]
         }
     }
