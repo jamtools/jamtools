@@ -60,13 +60,15 @@ jobs:
         rm -rf apps/desktop_tauri && mv apps/myapp apps/desktop_tauri
       shell: bash
 
-    - name: Patch Tauri app directory with config values
-      run: ../../packages/springboard/platforms/tauri/scripts/update_desktop_project.sh
-      working-directory: ./apps/desktop_tauri
-
     - name: Install project node modules
       run: npm i
       # run: pnpm i
+
+    # TODO: install @springboardjs/platforms-tauri if not already installed
+
+    - name: Patch Tauri app directory with config values
+      run: ../../node_modules/@springboardjs/platforms-tauri/scripts/update_desktop_project.sh
+      working-directory: ./apps/desktop_tauri
 
     - name: Build app
       run: |
@@ -85,7 +87,7 @@ jobs:
         rustup target add ${{ inputs.tauri_target }}
 
     - name: Build node sidecar with pkg
-      run: node ../../packages/springboard/platforms/tauri/scripts/build-tauri-sidecar.mjs
+      run: node ../../node_modules/@springboardjs/platforms-tauri/scripts/build-tauri-sidecar.mjs
       working-directory: ./apps/desktop_tauri
       env:
         PKG_TARGET: ${{ inputs.pkg_target }}
