@@ -26,7 +26,7 @@ jobs:
             tauri_target: ''
             pkg_target: 'node20-windows-x64'
 
-    uses: ./packages/springboard/platforms/tauri/workflows/desktop_build.yml
+    uses: ./.github/workflows/desktop_build.yml
     with:
       platform: ${{ matrix.platform }}
       tauri_args: ${{ matrix.args }}
