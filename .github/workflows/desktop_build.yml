@@ -71,7 +71,8 @@ jobs:
     - name: Build app
       run: |
         touch .env
-        npm run build-desktop
+        npm run build-all
+        # npm run build-desktop
         # pnpm run build-desktop
 
     - name: Fetch Rust dependencies

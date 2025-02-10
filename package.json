@@ -19,7 +19,7 @@
     "fix": "TURBO_NO_UPDATE_NOTIFIER=true turbo run fix",
     "ci": "TURBO_NO_UPDATE_NOTIFIER=true turbo run lint check-types build test --output-logs errors-only",
     "heroku-postbuild": "NODE_ENV=production npm run build-saas",
-    "build-desktop": "ESBUILD_OUTDIR=$PWD/dist RUN_SIDECAR_FROM_WEBVIEW=true npx tsx packages/springboard/cli/src/cli.ts build ./apps/empty_jamtools_app/index.ts --platforms desktop",
+    "build-desktop": "RUN_SIDECAR_FROM_WEBVIEW=true npx tsx packages/springboard/cli/src/cli.ts build ./apps/empty_jamtools_app/index.ts --platforms desktop",
     "build-all": "RUN_SIDECAR_FROM_WEBVIEW=true npx tsx packages/springboard/cli/src/cli.ts build ./apps/empty_jamtools_app/index.ts --platforms all"
   },
   "keywords": [],
