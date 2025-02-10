@@ -1,7 +1,8 @@
 import path from 'path';
 
-import {Hono} from 'hono';
-import {serveStatic} from '@hono/node-server/serve-static';
+import {Context, Hono} from 'hono';
+// import {serveStatic} from '@hono/node-server/serve-static';
+import {serveStatic} from 'hono/serve-static';
 import {createNodeWebSocket} from '@hono/node-ws';
 import {cors} from 'hono/cors';
 import {trpcServer} from '@hono/trpc-server';
@@ -22,7 +23,6 @@ type InitAppReturnValue = {
 };
 
 export const initApp = (coreDeps: WebsocketServerCoreDependencies): InitAppReturnValue => {
-    let rpc: NodeLocalJsonRpcClientAndServer | undefined;
     const rpcMiddlewares: RpcMiddleware[] = [];
 
     const app = new Hono();
@@ -39,7 +39,7 @@ export const initApp = (coreDeps: WebsocketServerCoreDependencies): InitAppRetur
     const remoteKV = new KVStoreFromKysely(coreDeps.kvDatabase);
     const userAgentStore = new NodeKVStoreService('userAgent');
 
-    rpc = new NodeLocalJsonRpcClientAndServer({
+    const rpc = new NodeLocalJsonRpcClientAndServer({
         broadcastMessage: (message) => {
             return service.broadcastMessage(message);
         },
@@ -60,13 +60,60 @@ export const initApp = (coreDeps: WebsocketServerCoreDependencies): InitAppRetur
 
     app.get('/ws', upgradeWebSocket(c => service.handleConnection(c)));
 
-    app.use('/', serveStatic({root: webappDistFolder, path: 'index.html'}));
-    app.use('/dist/index.js', serveStatic({root: webappDistFolder, path: '/index.js'}));
-    app.use('/dist/index.css', serveStatic({root: webappDistFolder, path: '/index.css'}));
-    app.use('/dist/manifest.json', serveStatic({root: webappDistFolder, path: '/manifest.json'}));
+    // this is necessary because https://github.com/honojs/hono/issues/3483
+    // node-server serveStatic is missing absolute path support
+    const serveFile = async (path: string, contentType: string, c: Context) => {
+        try {
+            const fullPath = `${webappDistFolder}/${path}`;
+            const fs = await import('node:fs');
+            const data = await fs.promises.readFile(fullPath, 'utf-8');
+            c.header('Content-Type', contentType);
+            c.status(200);
+            return data;
+        } catch (error) {
+            console.error('Error serving fallback file:', error);
+            c.status(404);
+            return '404 Not Found';
+        }
+    };
+
+    app.use('/', serveStatic({
+        root: webappDistFolder,
+        path: 'index.html',
+        getContent: async (path, c) => {
+            return serveFile('index.html', 'text/html', c);
+        }
+    }));
+    app.use('/dist/index.js', serveStatic({
+        root: webappDistFolder,
+        path: '/index.js',
+        getContent: async (path, c) => {
+            return serveFile('index.js', 'application/javascript', c);
+        }
+    }));
+    app.use('/dist/index.css', serveStatic({
+        root: webappDistFolder,
+        path: '/index.css',
+        getContent: async (path, c) => {
+            return serveFile('index.css', 'text/css', c);
+        }
+    }));
+    app.use('/dist/manifest.json', serveStatic({
+        root: webappDistFolder,
+        path: '/manifest.json',
+        getContent: async (path, c) => {
+            return serveFile('manifest.json', 'application/json', c);
+        }
+    }));
 
     if (process.env.NODE_ENV !== 'production') {
-        app.use('/dist/index.js.map', serveStatic({root: webappDistFolder, path: '/index.js.map'}));
+        app.use('/dist/index.js.map', serveStatic({
+            root: webappDistFolder,
+            path: '/index.js.map',
+            getContent: async (path, c) => {
+                return serveFile('index.js.map', 'application/javascript', c);
+            }
+        }));
     }
 
     // OTEL traces route
@@ -113,7 +160,13 @@ export const initApp = (coreDeps: WebsocketServerCoreDependencies): InitAppRetur
     }
 
     // Catch-all route for SPA
-    app.use('*', serveStatic({root: webappDistFolder, path: 'index.html'}));
+    app.use('*', serveStatic({
+        root: webappDistFolder,
+        path: 'index.html',
+        getContent: async (path, c) => {
+            return serveFile('index.html', 'text/html', c);
+        }
+    }));
 
     return {app, injectWebSocket, nodeAppDependencies};
 };

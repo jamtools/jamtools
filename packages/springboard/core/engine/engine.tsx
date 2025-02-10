@@ -24,7 +24,7 @@ export class Springboard {
 
     initialize = async () => {
         const websocketConnected = await this.coreDeps.rpc.initialize();
-        if (!websocketConnected) {
+        if (!websocketConnected && !this.coreDeps.isMaestro()) {
             if ('confirm' in globalThis) {
                 if (confirm('failed to connect to websocket server. run in local browser mode?')) {
                     this.coreDeps.isMaestro = () => true;

@@ -6,6 +6,8 @@ import esbuild from 'esbuild';
 import {esbuildPluginLogBuildTime} from './esbuild_plugins/esbuild_plugin_log_build_time';
 import {esbuildPluginPlatformInject} from './esbuild_plugins/esbuild_plugin_platform_inject.js';
 
+export type SpringboardPlatform = 'all' | 'main' | 'mobile' | 'desktop' | 'browser_offline';
+
 type EsbuildOptions = Parameters<typeof esbuild.build>[0];
 
 type BuildConfig = {
@@ -18,13 +20,18 @@ type BuildConfig = {
 
 export const platformBrowserBuildConfig: BuildConfig = {
     platform: 'browser',
-    platformEntrypoint: () => '@springboardjs/platforms-browser/entrypoints/index.tsx',
+    platformEntrypoint: () => '@springboardjs/platforms-browser/entrypoints/online_entrypoint.ts',
     esbuildPlugins: () => [
         esbuildPluginPlatformInject('browser'),
     ],
     additionalFiles: {
         '@springboardjs/platforms-browser/index.html': 'index.html',
     },
+};
+
+export const platformOfflineBrowserBuildConfig: BuildConfig = {
+    ...platformBrowserBuildConfig,
+    platformEntrypoint: () => '@springboardjs/platforms-browser/entrypoints/offline_entrypoint.ts',
 };
 
 export const platformNodeBuildConfig: BuildConfig = {
@@ -46,6 +53,66 @@ export const platformNodeBuildConfig: BuildConfig = {
 
         return externals;
     },
+};
+
+export const platformFetchBuildConfig: BuildConfig = {
+    platform: 'node',
+    platformEntrypoint: () => {
+        const entrypoint = '@springboardjs/platforms-node/entrypoints/node_flexible_entrypoint.ts';
+
+        return entrypoint;
+    },
+    esbuildPlugins: () => [
+        esbuildPluginPlatformInject('node'),
+    ],
+    externals: () => {
+        let externals = ['@julusian/midi', 'easymidi', 'jsdom'];
+        if (process.env.DISABLE_IO === 'true') {
+            externals = ['jsdom'];
+        }
+
+        return externals;
+    },
+};
+
+const copyDesktopFiles = async (desktopPlatform: string) => {
+    await fs.promises.mkdir(`apps/desktop_${desktopPlatform}/app/dist`, {recursive: true});
+
+    await fs.promises.copyFile(
+        `dist/${desktopPlatform}/browser/dist/index.css`,
+        `apps/desktop_${desktopPlatform}/app/dist/index.css`,
+    );
+
+    await fs.promises.copyFile(
+        `dist/${desktopPlatform}/browser/dist/index.js`,
+        `apps/desktop_${desktopPlatform}/app/dist/index.js`,
+    );
+
+    await fs.promises.copyFile(
+        `dist/${desktopPlatform}/browser/dist/index.html`,
+        `apps/desktop_${desktopPlatform}/app/index.html`,
+    );
+};
+
+export const platformTauriWebviewBuildConfig: BuildConfig = {
+    ...platformBrowserBuildConfig,
+    platformEntrypoint: () => '@springboardjs/platforms-tauri/entrypoints/platform_tauri_browser.tsx',
+    esbuildPlugins: () => [
+        ...platformBrowserBuildConfig.esbuildPlugins!(),
+        {
+            name: 'onBuildEnd',
+            setup(build: any) {
+                build.onEnd(async (result: any) => {
+                    await copyDesktopFiles('tauri');
+                });
+            },
+        },
+    ],
+};
+
+export const platformTauriMaestroBuildConfig: BuildConfig = {
+    ...platformNodeBuildConfig,
+    platformEntrypoint: () => '@springboardjs/platforms-tauri/entrypoints/platform_tauri_maestro.ts',
 };
 
 const shouldOutputMetaFile = process.argv.includes('--meta');
@@ -73,17 +140,27 @@ export default initApp;
 
     // const allImports = [coreFile, applicationEntrypoint].map(file => `import '${file}';`).join('\n');
 
-    const parentOutDir = process.env.ESBUILD_OUT_DIR || options?.esbuildOutDir || './dist';
-    const outDir = `${parentOutDir}/${buildConfig.platform}/dist`;
+    const parentOutDir = process.env.ESBUILD_OUT_DIR || './dist';
+    const childDir = options?.esbuildOutDir;
 
-    if (!fs.existsSync(outDir)) {
-        fs.mkdirSync(outDir, {recursive: true});
+    let outDir = parentOutDir;
+    if (childDir) {
+        outDir += '/' + childDir;
     }
 
-    const dynamicEntryPath = path.join(outDir, 'dynamic-entry.js');
+    const fullOutDir = `${outDir}/${buildConfig.platform}/dist`;
+
+    if (!fs.existsSync(fullOutDir)) {
+        fs.mkdirSync(fullOutDir, {recursive: true});
+    }
+
+    const dynamicEntryPath = path.join(fullOutDir, 'dynamic-entry.js');
     fs.writeFileSync(dynamicEntryPath, allImports);
 
-    const outFile = path.join(outDir, 'index.js');
+    const outFile = path.join(fullOutDir, 'index.js');
+
+    const externals = buildConfig.externals?.() || [];
+    externals.push('better-sqlite3');
 
     const esbuildOptions: EsbuildOptions = {
         entryPoints: [dynamicEntryPath],
@@ -98,7 +175,7 @@ export default initApp;
             esbuildPluginLogBuildTime(buildConfig.platform),
             ...(buildConfig.esbuildPlugins?.() || []),
         ],
-        external: buildConfig.externals?.(),
+        external: externals,
         alias: {
         },
         define: {
@@ -123,7 +200,7 @@ export default initApp;
             const destFileName = buildConfig.additionalFiles[srcFileName];
 
             const fullSrcFilePath = path.join(nodeModulesParentFolder, 'node_modules', srcFileName);
-            const fullDestFilePath = `${outDir}/${destFileName}`;
+            const fullDestFilePath = `${fullOutDir}/${destFileName}`;
             await fs.promises.copyFile(fullSrcFilePath, fullDestFilePath);
         }
     }
@@ -153,14 +230,21 @@ export type ServerBuildOptions = {
 export const buildServer = async (options?: ServerBuildOptions) => {
     const externals = ['better-sqlite3', '@julusian/midi', 'easymidi', 'jsdom'];
 
-    const parentOutDir = process.env.ESBUILD_OUT_DIR || options?.esbuildOutDir || './dist';
-    const outDir = `${parentOutDir}/server/dist`;
+    const parentOutDir = process.env.ESBUILD_OUT_DIR || './dist';
+    const childDir = options?.esbuildOutDir;
 
-    if (!fs.existsSync(outDir)) {
-        fs.mkdirSync(outDir, {recursive: true});
+    let outDir = parentOutDir;
+    if (childDir) {
+        outDir += '/' + childDir;
     }
 
-    const outFile = path.join(outDir, 'local-server.cjs');
+    const fullOutDir = `${outDir}/server/dist`;
+
+    if (!fs.existsSync(fullOutDir)) {
+        fs.mkdirSync(fullOutDir, {recursive: true});
+    }
+
+    const outFile = path.join(fullOutDir, 'local-server.cjs');
 
     const coreFile = options?.coreFile || 'springboard-server/src/entrypoints/local-server.entrypoint.ts';
     const applicationDistPath = options?.applicationDistPath || '../../node/dist/dynamic-entry.js';
@@ -176,7 +260,7 @@ export const buildServer = async (options?: ServerBuildOptions) => {
 createDeps().then(deps => app(deps));
 `;
 
-    const dynamicEntryPath = path.join(outDir, 'dynamic-entry.js');
+    const dynamicEntryPath = path.join(fullOutDir, 'dynamic-entry.js');
     fs.writeFileSync(dynamicEntryPath, allImports);
 
     const buildOptions: EsbuildOptions = {

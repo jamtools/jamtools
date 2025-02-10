@@ -1,6 +1,6 @@
 {
   "name": "springboard",
-  "version": "0.15.0-rc1",
+  "version": "0.15.0-rc2",
   "type": "module",
   "scripts": {
     "test": "vitest --run",

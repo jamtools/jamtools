@@ -30,7 +30,7 @@ class MockKVStore implements KVStore {
     };
 }
 
-class MockRpcService implements Rpc {
+export class MockRpcService implements Rpc {
     callRpc = async <Args, Return>(name: string, args: Args, rpcArgs?: RpcArgs | undefined) => {
         return {} as Return;
     };

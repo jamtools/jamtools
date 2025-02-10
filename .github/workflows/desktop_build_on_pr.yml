@@ -1,0 +1,35 @@
+name: Desktop Build Default Platform
+
+on:
+  pull_request:
+
+jobs:
+  dispatch:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: 'macos-latest'
+            args: '--target aarch64-apple-darwin'
+            tauri_target: 'aarch64-apple-darwin'
+            pkg_target: 'node20-macos-arm64'
+          # - platform: 'macos-latest'
+          #   args: '--target x86_64-apple-darwin'
+          #   tauri_target: 'x86_64-apple-darwin'
+          #   pkg_target: 'node20-macos-x64'
+          # - platform: 'ubuntu-22.04'
+          #   args: ''
+          #   tauri_target: ''
+          #   pkg_target: 'node20-linux-x64'
+          # - platform: 'windows-latest'
+          #   args: ''
+          #   tauri_target: ''
+          #   pkg_target: 'node20-windows-x64'
+
+    uses: ./packages/springboard/platforms/tauri/workflows/desktop_build.yml
+    with:
+      platform: ${{ matrix.platform }}
+      tauri_args: ${{ matrix.args }}
+      tauri_target: ${{ matrix.tauri_target }}
+      pkg_target: ${{ matrix.pkg_target }}
+      sign_app: false

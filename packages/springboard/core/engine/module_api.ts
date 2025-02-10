@@ -27,7 +27,7 @@ export class ModuleAPI {
 
     public onDestroy = (cb: Function) => {
         this.destroyCallbacks.push(cb);
-    }
+    };
 
     public destroy = () => {
         for (const cb of this.destroyCallbacks) {
@@ -56,6 +56,8 @@ export class ModuleAPI {
     */
     public readonly statesAPI = new StatesAPI(this.fullPrefix, this.coreDeps, this.modDeps);
 
+    getModule = this.modDeps.moduleRegistry.getModule.bind(this.modDeps.moduleRegistry);
+
     /**
      * Register a route with the application's React router. The route will be accessible from the browser at [myserver.com/modules/(module_id)/(route)](). The route will also be registered to the application's navigation bar.
     */
@@ -81,6 +83,35 @@ export class ModuleAPI {
         if (this.modDeps.moduleRegistry.getCustomModule(this.module.moduleId)) {
             this.modDeps.moduleRegistry.refreshModules();
         }
+    };
+
+    createStates = async <States extends Record<string, any>>(states: States): Promise<{[K in keyof States]: StateSupervisor<States[K]>}> => {
+        const keys = Object.keys(states);
+        const promises = keys.map(async key => {
+            return {
+                state: await this.statesAPI.createPersistentState(key, states[key]),
+                key,
+            };
+        });
+
+        const result = {} as {[K in keyof States]: StateSupervisor<States[K]>};
+
+        const supervisors = await Promise.all(promises);
+        for (const key of keys) {
+            (result[key] as StateSupervisor<States[keyof States]>) = supervisors.find(s => s.key === key as any)!.state;
+        }
+
+        return result;
+    };
+
+    createActions = <Actions extends Record<string, ActionCallback<any, any>>>(actions: Actions): Actions => {
+        const keys = Object.keys(actions);
+
+        for (const key of keys) {
+            (actions[key] as ActionCallback<any, any>) = this.createAction(key, {}, actions[key]);
+        }
+
+        return actions;
     };
 
     /**
@@ -147,7 +178,7 @@ export class StatesAPI {
 
     public onDestroy = (cb: Function) => {
         this.destroyCallbacks.push(cb);
-    }
+    };
 
     public destroy = () => {
         for (const cb of this.destroyCallbacks) {

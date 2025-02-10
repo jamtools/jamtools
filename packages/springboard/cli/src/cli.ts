@@ -5,7 +5,8 @@ import concurrently from 'concurrently';
 
 import packageJSON from '../package.json';
 
-import {buildApplication, buildServer, platformBrowserBuildConfig, platformNodeBuildConfig} from './build';
+import {buildApplication, buildServer, platformBrowserBuildConfig, platformNodeBuildConfig, platformOfflineBrowserBuildConfig, platformTauriMaestroBuildConfig, platformTauriWebviewBuildConfig, SpringboardPlatform} from './build';
+import {esbuildPluginTransformAwaitImportToRequire} from './esbuild_plugins/esbuild_plugin_transform_await_import';
 
 program
     .name('sb')
@@ -28,6 +29,11 @@ program
         applicationEntrypoint = path.resolve(applicationEntrypoint);
 
         await buildApplication(platformBrowserBuildConfig, {
+            applicationEntrypoint,
+            watch: true,
+        });
+
+        await buildApplication(platformNodeBuildConfig, {
             applicationEntrypoint,
             watch: true,
         });
@@ -63,7 +69,13 @@ program
     .usage('sb build src/index.tsx')
     .argument('entrypoint')
     .option('-w, --watch', 'Watch for file changes')
-    .action(async (entrypoint: string, options: {watch?: boolean}) => {
+    .option('-p, --platforms <PLATFORM>,<PLATFORM>', 'Platforms to build for')
+    .action(async (entrypoint: string, options: {watch?: boolean, offline?: boolean, platforms?: string}) => {
+        let platformToBuild = process.env.SPRINGBOARD_PLATFORM_VARIANT || options.platforms as SpringboardPlatform;
+        if (!platformToBuild) {
+            platformToBuild = 'main';
+        }
+
         let applicationEntrypoint = entrypoint;
 
         const cwd = process.cwd();
@@ -73,19 +85,90 @@ program
 
         applicationEntrypoint = path.resolve(applicationEntrypoint);
 
-        await buildApplication(platformBrowserBuildConfig, {
-            applicationEntrypoint,
-            watch: options.watch,
-        });
+        console.log(`Building application variants "${platformToBuild}"`);
 
-        await buildApplication(platformNodeBuildConfig, {
-            applicationEntrypoint,
-            watch: options.watch,
-        });
+        const platformsToBuild = new Set<SpringboardPlatform>(platformToBuild.split(',') as SpringboardPlatform[]);
 
-        await buildServer({
-            watch: options.watch,
-        });
+        if (
+            platformsToBuild.has('all') ||
+            platformsToBuild.has('main')
+        ) {
+            await buildApplication(platformBrowserBuildConfig, {
+                applicationEntrypoint,
+                watch: options.watch,
+            });
+
+            await buildApplication(platformNodeBuildConfig, {
+                applicationEntrypoint,
+                watch: options.watch,
+            });
+
+            await buildServer({
+                watch: options.watch,
+            });
+        }
+
+        if (
+            platformsToBuild.has('all') ||
+            platformsToBuild.has('browser_offline')
+        ) {
+            await buildApplication(platformOfflineBrowserBuildConfig, {
+                applicationEntrypoint,
+                watch: options.watch,
+                esbuildOutDir: 'browser_offline',
+            });
+        }
+
+        if (
+            platformsToBuild.has('all') ||
+            platformsToBuild.has('desktop')
+        ) {
+            await buildApplication(platformTauriWebviewBuildConfig, {
+                applicationEntrypoint,
+                watch: options.watch,
+                esbuildOutDir: './tauri',
+                editBuildOptions: (buildOptions) => {
+                    buildOptions.define = {
+                        ...buildOptions.define,
+                        'process.env.DATA_HOST': "'http://127.0.0.1:1337'",
+                        'process.env.WS_HOST': "'ws://127.0.0.1:1337'",
+                        'process.env.RUN_SIDECAR_FROM_WEBVIEW': `${process.env.RUN_SIDECAR_FROM_WEBVIEW && process.env.RUN_SIDECAR_FROM_WEBVIEW !== 'false'}`,
+                    };
+                },
+            });
+
+            await buildApplication(platformTauriMaestroBuildConfig, {
+                applicationEntrypoint,
+                watch: options.watch,
+                esbuildOutDir: './tauri',
+            });
+
+            await buildServer({
+                watch: options.watch,
+                applicationDistPath: `${cwd}/dist/tauri/node/dist/dynamic-entry.js`,
+                esbuildOutDir: './tauri',
+                editBuildOptions: (buildOptions) => {
+                    buildOptions.plugins!.push(esbuildPluginTransformAwaitImportToRequire);
+                }
+            });
+        }
+
+        // if (
+        //     platformsToBuild.has('all') ||
+        //     platformsToBuild.has('mobile')
+        // ) {
+        //     await buildRNWebview();
+        // }
+
+        // if (
+        //     platformsToBuild.has('all') ||
+        //     platformsToBuild.has('browser_offline')
+        // ) {
+        //     await buildBrowserOffline();
+        // }
+
+
+
     });
 
 program
