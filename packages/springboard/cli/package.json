@@ -1,6 +1,6 @@
 {
   "name": "springboard-cli",
-  "version": "0.15.0-rc2",
+  "version": "0.15.0-rc4",
   "main": "index.js",
   "bin": {
     "sb": "dist/cli.js"
@@ -11,7 +11,7 @@
     "src"
   ],
   "scripts": {
-    "build": "npx tsx src/cli.ts build ../../../apps/jamtools/modules/index.ts",
+    "build": "npx tsx src/cli.ts build ../../../apps/handraiser/index.ts",
     "build-saas": "DISABLE_IO=true npx tsx src/cli.ts build ../../../apps/jamtools/modules/index.ts",
     "build-with-cli": "npx tsx cli.ts build ../../../apps/jamtools/modules/index.ts",
     "run-node-local": "NODE_KV_STORE_DATA_FILE=kv_data.json node dist/node/dist/index.js",
@@ -33,10 +33,10 @@
     "typescript": "^5.4.5"
   },
   "peerDependencies": {
-    "@springboardjs/platforms-browser": "0.15.0-rc2",
-    "@springboardjs/platforms-node": "0.15.0-rc2",
-    "springboard": "0.15.0-rc2",
-    "springboard-server": "0.15.0-rc2"
+    "@springboardjs/platforms-browser": "0.15.0-rc4",
+    "@springboardjs/platforms-node": "0.15.0-rc4",
+    "springboard": "0.15.0-rc4",
+    "springboard-server": "0.15.0-rc4"
   },
   "keywords": [],
   "author": "",

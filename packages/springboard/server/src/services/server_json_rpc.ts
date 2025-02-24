@@ -96,6 +96,8 @@ export class NodeJsonRpcServer {
                             Object.assign(rpcContext, middlewareResult);
                         } catch (e) {
                             incomingClients[clientId]?.send(JSON.stringify({
+                                jsonrpc: '2.0',
+                                id: jsonMessage.id,
                                 error: (e as Error).message,
                             }));
                             return;

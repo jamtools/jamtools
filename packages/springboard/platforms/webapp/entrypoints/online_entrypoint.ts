@@ -1,5 +1,5 @@
-import {BrowserJsonRpcClientAndServer} from 'services/browser_json_rpc';
-import {BrowserKVStoreService} from 'services/browser_kvstore_service';
+import {BrowserJsonRpcClientAndServer} from '../services/browser_json_rpc';
+import {BrowserKVStoreService} from '../services/browser_kvstore_service';
 import {TrpcKVStoreService} from 'springboard/services/trpc_kv_store_client';
 import {startAndRenderBrowserApp} from './react_entrypoint';
 

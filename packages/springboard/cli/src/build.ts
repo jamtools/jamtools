@@ -184,6 +184,7 @@ export default initApp;
             'process.env.WS_HOST': `"${process.env.WS_HOST || ''}"`,
             'process.env.DATA_HOST': `"${process.env.DATA_HOST || ''}"`,
             'process.env.NODE_ENV': `"${process.env.NODE_ENV || ''}"`,
+            'process.env.DISABLE_IO': `"${process.env.DISABLE_IO || ''}"`,
         },
     };
 

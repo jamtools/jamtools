@@ -41,7 +41,7 @@ export class MacroModule implements Module<MacroConfigState> {
 
     registeredMacroTypes: CapturedRegisterMacroTypeCall[] = [];
 
-    constructor(private coreDeps: CoreDependencies, private moduleDeps: ModuleDependencies) {}
+    constructor(private coreDeps: CoreDependencies, private moduleDeps: ModuleDependencies) { }
 
     routes = {
         '': {
@@ -76,12 +76,16 @@ export class MacroModule implements Module<MacroConfigState> {
     };
 
     public createMacros = async <
-        T extends Record<string, keyof MacroTypeConfigs>,
-        MacroConfigs extends {[K in keyof T]: {
-            type: T[K],
-            config: MacroTypeConfigs[T[K]]['input']
-        }}
-    >(moduleAPI: ModuleAPI, macros: MacroConfigs): Promise<{[K in keyof MacroConfigs]: MacroTypeConfigs[MacroConfigs[K]['type']]['output']}> => {
+        MacroConfigs extends {
+            [K in string]: {
+                type: keyof MacroTypeConfigs;
+            } & (
+                {[T in keyof MacroTypeConfigs]: {type: T; config: MacroTypeConfigs[T]['input']}}[keyof MacroTypeConfigs]
+            )
+        }
+    >(moduleAPI: ModuleAPI, macros: MacroConfigs): Promise<{
+        [K in keyof MacroConfigs]: MacroTypeConfigs[MacroConfigs[K]['type']]['output'];
+    }> => {
         const keys = Object.keys(macros);
         const promises = keys.map(async key => {
             const {type, config} = macros[key];

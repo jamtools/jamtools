@@ -40,6 +40,13 @@ createIoDependencies = async () => {
 
 // @platform "node"
 createIoDependencies = async () => {
+    if (process.env.DISABLE_IO === 'true') {
+        return {
+            qwerty: new MockQwertyService(),
+            midi: new MockMidiService(),
+        };
+    }
+
     const {NodeQwertyService} = await import('@jamtools/core/services/node/node_qwerty_service');
     const {NodeMidiService} = await import('@jamtools/core/services/node/node_midi_service');
 

@@ -34,7 +34,7 @@ export const startAndRenderBrowserApp = async (browserDeps: BrowserDependencies)
 
     const engine = new Springboard(coreDeps, extraDeps);
 
-    await waitForPageLoad();
+    // await waitForPageLoad();
 
     const rootElem = document.createElement('div');
     // rootElem.style.overflowY = 'scroll';
