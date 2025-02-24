@@ -18,6 +18,27 @@ on:
       sign_app:
         required: true
         type: boolean
+      GITHUB_TOKEN:
+        required: false
+        type: string
+      APPLE_CERTIFICATE:
+        required: false
+        type: string
+      APPLE_CERTIFICATE_PASSWORD:
+        required: false
+        type: string
+      APPLE_SIGNING_IDENTITY:
+        required: false
+        type: string
+      APPLE_ID:
+        required: false
+        type: string
+      APPLE_PASSWORD:
+        required: false
+        type: string
+      APPLE_TEAM_ID:
+        required: false
+        type: string
 
 jobs:
   build_tauri:
@@ -96,17 +117,17 @@ jobs:
     - name: Set macOS signing environment variables
       run: |
         if ${{ inputs.sign_app }}; then
-          echo "APPLE_CERTIFICATE=${{ secrets.APPLE_CERTIFICATE }}" >> $GITHUB_ENV
-          echo "APPLE_CERTIFICATE_PASSWORD=${{ secrets.APPLE_CERTIFICATE_PASSWORD }}" >> $GITHUB_ENV
-          echo "APPLE_SIGNING_IDENTITY=${{ secrets.APPLE_SIGNING_IDENTITY }}" >> $GITHUB_ENV
-          echo "APPLE_ID=${{ secrets.APPLE_ID }}" >> $GITHUB_ENV
-          echo "APPLE_PASSWORD=${{ secrets.APPLE_PASSWORD }}" >> $GITHUB_ENV
-          echo "APPLE_TEAM_ID=${{ secrets.APPLE_TEAM_ID }}" >> $GITHUB_ENV
+          echo "APPLE_CERTIFICATE=${{ inputs.APPLE_CERTIFICATE }}" >> $GITHUB_ENV
+          echo "APPLE_CERTIFICATE_PASSWORD=${{ inputs.APPLE_CERTIFICATE_PASSWORD }}" >> $GITHUB_ENV
+          echo "APPLE_SIGNING_IDENTITY=${{ inputs.APPLE_SIGNING_IDENTITY }}" >> $GITHUB_ENV
+          echo "APPLE_ID=${{ inputs.APPLE_ID }}" >> $GITHUB_ENV
+          echo "APPLE_PASSWORD=${{ inputs.APPLE_PASSWORD }}" >> $GITHUB_ENV
+          echo "APPLE_TEAM_ID=${{ inputs.APPLE_TEAM_ID }}" >> $GITHUB_ENV
         fi
 
     - uses: tauri-apps/tauri-action@v0
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
       with:
         projectPath: 'apps/desktop_tauri'
         includeDebug: true
