@@ -1,8 +1,10 @@
 import type {Context, Hono} from 'hono';
+import type {Springboard} from 'springboard/engine/engine';
 
 export type ServerModuleAPI = {
     hono: Hono;
     hooks: ServerHooks;
+    getEngine: () => Springboard;
 }
 
 export type ServerModuleCallback = (server: ServerModuleAPI) => void;

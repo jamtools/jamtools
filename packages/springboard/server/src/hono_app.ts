@@ -15,6 +15,7 @@ import {NodeLocalJsonRpcClientAndServer} from '@springboardjs/platforms-node/ser
 import {NodeJsonRpcServer} from './services/server_json_rpc';
 import {WebsocketServerCoreDependencies} from './ws_server_core_dependencies';
 import {RpcMiddleware, ServerModuleAPI, serverRegistry} from './register';
+import {Springboard} from 'springboard/engine/engine';
 
 type InitAppReturnValue = {
     app: Hono;
@@ -45,14 +46,6 @@ export const initApp = (coreDeps: WebsocketServerCoreDependencies): InitAppRetur
         },
     });
 
-    const nodeAppDependencies: NodeAppDependencies = {
-        rpc,
-        storage: {
-            remote: remoteKV,
-            userAgent: userAgentStore,
-        },
-    };
-
     const webappFolder = process.env.WEBAPP_FOLDER || './dist/browser';
     const webappDistFolder = path.join(webappFolder, './dist');
 
@@ -81,6 +74,7 @@ export const initApp = (coreDeps: WebsocketServerCoreDependencies): InitAppRetur
         root: webappDistFolder,
         path: 'index.html',
         getContent: async (path, c) => {
+            c.res.headers.append('Cache-Control', 'no-store');
             return serveFile('index.html', 'text/html', c);
         }
     }));
@@ -88,6 +82,7 @@ export const initApp = (coreDeps: WebsocketServerCoreDependencies): InitAppRetur
         root: webappDistFolder,
         path: '/index.js',
         getContent: async (path, c) => {
+            c.res.headers.append('Cache-Control', 'no-store');
             return serveFile('index.js', 'application/javascript', c);
         }
     }));
@@ -95,6 +90,7 @@ export const initApp = (coreDeps: WebsocketServerCoreDependencies): InitAppRetur
         root: webappDistFolder,
         path: '/index.css',
         getContent: async (path, c) => {
+            c.res.headers.append('Cache-Control', 'no-store');
             return serveFile('index.css', 'text/css', c);
         }
     }));
@@ -139,24 +135,44 @@ export const initApp = (coreDeps: WebsocketServerCoreDependencies): InitAppRetur
         createContext: ({req}) => ({ /* Add context if needed */}),
     }));
 
+    let storedEngine: Springboard | undefined;
+
+    const nodeAppDependencies: NodeAppDependencies = {
+        rpc,
+        storage: {
+            remote: remoteKV,
+            userAgent: userAgentStore,
+        },
+        injectEngine: (engine: Springboard) => {
+            if (storedEngine) {
+                throw new Error('Engine already injected');
+            }
+
+            storedEngine = engine;
+        },
+    };
+
+    const makeServerModuleAPI = (): ServerModuleAPI => {
+        return {
+            hono: app,
+            hooks: {
+                registerRpcMiddleware: (cb) => {
+                    rpcMiddlewares.push(cb);
+                },
+            },
+            getEngine: () => storedEngine!,
+        };
+    };
+
     const registerServerModule: typeof serverRegistry['registerServerModule'] = (cb) => {
-        cb(serverModuleAPI);
+        cb(makeServerModuleAPI());
     };
 
     const registeredServerModuleCallbacks = (serverRegistry.registerServerModule as unknown as {calls: CapturedRegisterServerModuleCall[]}).calls || [];
     serverRegistry.registerServerModule = registerServerModule;
 
-    const serverModuleAPI: ServerModuleAPI = {
-        hono: app,
-        hooks: {
-            registerRpcMiddleware: (cb) => {
-                rpcMiddlewares.push(cb);
-            },
-        },
-    };
-
     for (const call of registeredServerModuleCallbacks) {
-        call(serverModuleAPI);
+        call(makeServerModuleAPI());
     }
 
     // Catch-all route for SPA

@@ -1,6 +1,10 @@
 #!/bin/bash
 
-full_version="0.15.0-rc2"
+if [ -n "$1" ]; then
+  full_version="$1"
+else
+  full_version="0.15.0-rc5"
+fi
 
 set e
 root_dir=$(pwd)
@@ -28,10 +32,10 @@ publish_package() {
   echo "Publishing package in $target_dir"
 
   # RC publish to npm
-  # npm publish --access public --tag rc
+  npm publish --access public --tag rc
 
   # Production publish to npm
-  npm publish --access public --tag latest
+  # npm publish --access public --tag latest
 
   # RC publish to verdaccio
   # npm publish --registry http://localhost:4873 --access public --tag rc
