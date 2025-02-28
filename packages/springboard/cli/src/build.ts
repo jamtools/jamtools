@@ -5,6 +5,7 @@ import esbuild from 'esbuild';
 
 import {esbuildPluginLogBuildTime} from './esbuild_plugins/esbuild_plugin_log_build_time';
 import {esbuildPluginPlatformInject} from './esbuild_plugins/esbuild_plugin_platform_inject.js';
+import {esbuildPluginHtmlGenerate} from './esbuild_plugins/esbuild_plugin_html_generate';
 
 export type SpringboardPlatform = 'all' | 'main' | 'mobile' | 'desktop' | 'browser_offline';
 
@@ -13,7 +14,7 @@ type EsbuildOptions = Parameters<typeof esbuild.build>[0];
 type BuildConfig = {
     platform: NonNullable<EsbuildOptions['platform']>;
     platformEntrypoint: () => string;
-    esbuildPlugins?: () => any[];
+    esbuildPlugins?: (args: {outDir: string; nodeModulesParentDir: string}) => any[];
     externals?: () => string[];
     additionalFiles?: Record<string, string>;
 }
@@ -21,11 +22,12 @@ type BuildConfig = {
 export const platformBrowserBuildConfig: BuildConfig = {
     platform: 'browser',
     platformEntrypoint: () => '@springboardjs/platforms-browser/entrypoints/online_entrypoint.ts',
-    esbuildPlugins: () => [
+    esbuildPlugins: (args) => [
         esbuildPluginPlatformInject('browser'),
+        esbuildPluginHtmlGenerate(args.outDir, `${args.nodeModulesParentDir}/node_modules/@springboardjs/platforms-browser/index.html`),
     ],
     additionalFiles: {
-        '@springboardjs/platforms-browser/index.html': 'index.html',
+        // '@springboardjs/platforms-browser/index.html': 'index.html',
     },
 };
 
@@ -164,9 +166,20 @@ export default initApp;
     const externals = buildConfig.externals?.() || [];
     externals.push('better-sqlite3');
 
+    let nodeModulesParentFolder = process.env.NODE_MODULES_PARENT_FOLDER || options?.nodeModulesParentFolder;
+    if (!nodeModulesParentFolder) {
+        nodeModulesParentFolder = await findNodeModulesParentFolder();
+    }
+    if (!nodeModulesParentFolder) {
+        throw new Error('Failed to find node_modules folder in current directory and parent directories')
+    }
+
     const esbuildOptions: EsbuildOptions = {
         entryPoints: [dynamicEntryPath],
-        metafile: shouldOutputMetaFile,
+        metafile: true,
+        assetNames: '[dir]/[name]-[hash]',
+        chunkNames: '[dir]/[name]-[hash]',
+        entryNames: '[dir]/[name]-[hash]',
         bundle: true,
         sourcemap: true,
         outfile: outFile,
@@ -175,7 +188,7 @@ export default initApp;
         target: 'es2020',
         plugins: [
             esbuildPluginLogBuildTime(buildConfig.platform),
-            ...(buildConfig.esbuildPlugins?.() || []),
+            ...(buildConfig.esbuildPlugins?.({outDir: fullOutDir, nodeModulesParentDir: nodeModulesParentFolder}) || []),
         ],
         external: externals,
         alias: {
@@ -191,14 +204,6 @@ export default initApp;
     options?.editBuildOptions?.(esbuildOptions);
 
     if (buildConfig.additionalFiles) {
-        let nodeModulesParentFolder = process.env.NODE_MODULES_PARENT_FOLDER || options?.nodeModulesParentFolder;
-        if (!nodeModulesParentFolder) {
-            nodeModulesParentFolder = await findNodeModulesParentFolder();
-        }
-        if (!nodeModulesParentFolder) {
-            throw new Error('Failed to find node_modules folder in current directory and parent directories')
-        }
-
         for (const srcFileName of Object.keys(buildConfig.additionalFiles)) {
             const destFileName = buildConfig.additionalFiles[srcFileName];
 
@@ -292,7 +297,10 @@ createDeps().then(deps => app(deps));
         await ctx.watch();
         console.log('Watching for changes for server build...');
     } else {
-        await esbuild.build(buildOptions);
+        const result = await esbuild.build(buildOptions);
+        if (shouldOutputMetaFile) {
+            await fs.promises.writeFile('esbuild_meta_server.json', JSON.stringify(result.metafile));
+        }
     }
 };
 

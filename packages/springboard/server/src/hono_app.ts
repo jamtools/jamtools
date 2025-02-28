@@ -78,22 +78,24 @@ export const initApp = (coreDeps: WebsocketServerCoreDependencies): InitAppRetur
             return serveFile('index.html', 'text/html', c);
         }
     }));
-    app.use('/dist/index.js', serveStatic({
-        root: webappDistFolder,
-        path: '/index.js',
-        getContent: async (path, c) => {
-            c.res.headers.append('Cache-Control', 'no-store');
-            return serveFile('index.js', 'application/javascript', c);
+
+    app.use('/dist/:file', async (c, next) => {
+        const requestedFile = c.req.param('file');
+
+        if (requestedFile.endsWith('.map') && process.env.NODE_ENV === 'production') {
+            return c.text('Source map disabled', 404);
         }
-    }));
-    app.use('/dist/index.css', serveStatic({
-        root: webappDistFolder,
-        path: '/index.css',
-        getContent: async (path, c) => {
-            c.res.headers.append('Cache-Control', 'no-store');
-            return serveFile('index.css', 'text/css', c);
-        }
-    }));
+
+        return serveStatic({
+            root: webappDistFolder,
+            path: `/${requestedFile}`,
+            getContent: async (path, c) => {
+                const contentType = requestedFile.endsWith('.js') ? 'text/javascript' : 'text/css';
+                return serveFile(requestedFile, contentType, c);
+            }
+        })(c, next);
+    });
+
     app.use('/dist/manifest.json', serveStatic({
         root: webappDistFolder,
         path: '/manifest.json',
@@ -101,16 +103,6 @@ export const initApp = (coreDeps: WebsocketServerCoreDependencies): InitAppRetur
             return serveFile('manifest.json', 'application/json', c);
         }
     }));
-
-    if (process.env.NODE_ENV !== 'production') {
-        app.use('/dist/index.js.map', serveStatic({
-            root: webappDistFolder,
-            path: '/index.js.map',
-            getContent: async (path, c) => {
-                return serveFile('index.js.map', 'application/javascript', c);
-            }
-        }));
-    }
 
     // OTEL traces route
     app.post('/v1/traces', async (c) => {
