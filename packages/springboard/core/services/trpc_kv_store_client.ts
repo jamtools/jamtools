@@ -14,8 +14,11 @@ const createKVStoreTrpcClient = (serverUrl: string) => {
 };
 
 export class TrpcKVStoreService implements KVStore {
-    constructor(private serverUrl: string) {}
-    private trpc = createKVStoreTrpcClient(this.serverUrl);
+    private trpc: ReturnType<typeof createKVStoreTrpcClient>;
+
+    constructor(serverUrl: string) {
+        this.trpc = createKVStoreTrpcClient(serverUrl);
+    }
 
     getAll = async () => {
         const allEntries = await this.trpc.kvGetAll.query();

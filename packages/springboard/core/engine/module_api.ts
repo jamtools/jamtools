@@ -25,18 +25,20 @@ type ActionCallback<Args extends object, ReturnValue = any> = (args: Args) => Pr
 export class ModuleAPI {
     public readonly deps: {core: CoreDependencies; module: ModuleDependencies, extra: ExtraModuleDependencies};
 
-    constructor(private module: Module, private prefix: string, private coreDeps: CoreDependencies, private modDeps: ModuleDependencies, extraDeps: ExtraModuleDependencies) {
-        this.deps = {core: coreDeps, module: modDeps, extra: extraDeps};
-    }
-
-    public readonly moduleId = this.module.moduleId;
-
-    public readonly fullPrefix = `${this.prefix}|module|${this.module.moduleId}`;
+    public readonly moduleId;
+    public readonly fullPrefix;
 
     /**
      * Create shared and persistent pieces of state, scoped to this specific module.
     */
-    public readonly statesAPI = new StatesAPI(this.fullPrefix, this.coreDeps, this.modDeps);
+    public readonly statesAPI: StatesAPI;
+
+    constructor(private module: Module, private prefix: string, private coreDeps: CoreDependencies, private modDeps: ModuleDependencies, extraDeps: ExtraModuleDependencies) {
+        this.deps = {core: coreDeps, module: modDeps, extra: extraDeps};
+        this.moduleId = module.moduleId;
+        this.fullPrefix = `${prefix}|module|${module.moduleId}`;
+        this.statesAPI = new StatesAPI(this.fullPrefix, this.coreDeps, this.modDeps);
+    }
 
     /**
      * Register a route with the application's React router. The route will be accessible from the browser at [myserver.com/modules/(module_id)/(route)](). The route will also be registered to the application's navigation bar.
