@@ -96,7 +96,12 @@ export const FrontendRoutes = () => {
         });
     }
 
-    const router = routerContructor(allRoutes);
+    const router = routerContructor(allRoutes, {
+        future: {
+            v7_relativeSplatPath: true,
+            // v7_startTransition: true,
+        },
+    });
 
     return (
         <RouterProvider router={router}/>

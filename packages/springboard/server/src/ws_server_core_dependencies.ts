@@ -14,7 +14,10 @@ export type WebsocketServerCoreDependencies = {
 const SQLITE_DATABASE_FILE = process.env.SQLITE_DATABASE_FILE || 'data/kv.db';
 
 export const makeWebsocketServerCoreDependenciesWithSqlite = async (): Promise<WebsocketServerCoreDependencies> => {
-    await fs.promises.mkdir('data', {recursive: true});
+    if (SQLITE_DATABASE_FILE.startsWith('data/')) {
+        await fs.promises.mkdir('data', {recursive: true});
+    }
+
     const db = await makeKyselySqliteInstance(SQLITE_DATABASE_FILE);
 
     return {

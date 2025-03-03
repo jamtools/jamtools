@@ -23,6 +23,24 @@ type ActionCallback<Args extends object, ReturnValue = any> = (args: Args) => Pr
  * The API provided in the callback when calling `registerModule`. The ModuleAPI is the entrypoint in the framework for everything pertaining to creating a module.
 */
 export class ModuleAPI {
+    private destroyCallbacks: Function[] = [];
+
+    public onDestroy = (cb: Function) => {
+        this.destroyCallbacks.push(cb);
+    };
+
+    public destroy = () => {
+        for (const cb of this.destroyCallbacks) {
+            try {
+                cb();
+            } catch (e) {
+                console.error('destroy callback failed in StatesAPI', e);
+            }
+        }
+
+        this.statesAPI.destroy();
+    };
+
     public readonly deps: {core: CoreDependencies; module: ModuleDependencies, extra: ExtraModuleDependencies};
 
     constructor(private module: Module, private prefix: string, private coreDeps: CoreDependencies, private modDeps: ModuleDependencies, extraDeps: ExtraModuleDependencies) {
@@ -37,6 +55,8 @@ export class ModuleAPI {
      * Create shared and persistent pieces of state, scoped to this specific module.
     */
     public readonly statesAPI = new StatesAPI(this.fullPrefix, this.coreDeps, this.modDeps);
+
+    getModule = this.modDeps.moduleRegistry.getModule.bind(this.modDeps.moduleRegistry);
 
     /**
      * Register a route with the application's React router. The route will be accessible from the browser at [myserver.com/modules/(module_id)/(route)](). The route will also be registered to the application's navigation bar.
@@ -63,6 +83,35 @@ export class ModuleAPI {
         if (this.modDeps.moduleRegistry.getCustomModule(this.module.moduleId)) {
             this.modDeps.moduleRegistry.refreshModules();
         }
+    };
+
+    createStates = async <States extends Record<string, any>>(states: States): Promise<{[K in keyof States]: StateSupervisor<States[K]>}> => {
+        const keys = Object.keys(states);
+        const promises = keys.map(async key => {
+            return {
+                state: await this.statesAPI.createPersistentState(key, states[key]),
+                key,
+            };
+        });
+
+        const result = {} as {[K in keyof States]: StateSupervisor<States[K]>};
+
+        const supervisors = await Promise.all(promises);
+        for (const key of keys) {
+            (result[key] as StateSupervisor<States[keyof States]>) = supervisors.find(s => s.key === key as any)!.state;
+        }
+
+        return result;
+    };
+
+    createActions = <Actions extends Record<string, ActionCallback<any, any>>>(actions: Actions): Actions => {
+        const keys = Object.keys(actions);
+
+        for (const key of keys) {
+            (actions[key] as ActionCallback<any, any>) = this.createAction(key, {}, actions[key]);
+        }
+
+        return actions;
     };
 
     /**
@@ -125,6 +174,22 @@ export class ModuleAPI {
  * The States API is used for creating shared, persistent, and user-scoped states.
 */
 export class StatesAPI {
+    private destroyCallbacks: Function[] = [];
+
+    public onDestroy = (cb: Function) => {
+        this.destroyCallbacks.push(cb);
+    };
+
+    public destroy = () => {
+        for (const cb of this.destroyCallbacks) {
+            try {
+                cb();
+            } catch (e) {
+                console.error('destroy callback failed in StatesAPI', e);
+            }
+        }
+    };
+
     constructor(private prefix: string, private coreDeps: CoreDependencies, private modDeps: ModuleDependencies) {
 
     }
@@ -149,7 +214,7 @@ export class StatesAPI {
             initialValue = cachedValue;
         } else {
             const storedValue = await this.coreDeps.storage.remote.get<State>(fullKey);
-            if (storedValue !== null) { // this should really used undefined for a signal instead
+            if (storedValue !== null && storedValue !== undefined) { // this should really only use undefined for a signal
                 initialValue = storedValue;
             } else if (this.coreDeps.isMaestro()) {
                 await this.coreDeps.storage.remote.set<State>(fullKey, initialValue);
@@ -162,9 +227,10 @@ export class StatesAPI {
         // this createPersistentState function is not Maestro friendly
         // every time you access coreDeps, that's the case
         // persistent state has been a weird thing
-        supervisor.subjectForKVStorePublish.subscribe(async value => {
+        const sub = supervisor.subjectForKVStorePublish.subscribe(async value => {
             await this.coreDeps.storage.remote.set(fullKey, value);
         });
+        this.onDestroy(sub.unsubscribe);
 
         return supervisor;
     };

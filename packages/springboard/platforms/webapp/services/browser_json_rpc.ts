@@ -9,7 +9,7 @@ type ClientParams = {
 
 export class BrowserJsonRpcClientAndServer implements Rpc {
     rpcClient?: JSONRPCClient<ClientParams>;
-    rpcServer!: JSONRPCServer;
+    rpcServer?: JSONRPCServer;
 
     constructor (private url: string) {}
 
@@ -32,7 +32,7 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
     };
 
     registerRpc = <Args, Return>(method: string, cb: (args: Args) => Promise<Return>) => {
-        this.rpcServer.addMethod(method, async (args) => {
+        this.rpcServer?.addMethod(method, async (args) => {
             const result = await cb(args);
             // console.log(`received RPC call for ${method}. Returned:`, result)
             return result;
@@ -76,7 +76,7 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
 
             if (jsonMessage.jsonrpc === '2.0' && jsonMessage.method) {
                 // Handle incoming RPC requests coming from the server to run in this client
-                const result = await this.rpcServer.receive(jsonMessage);
+                const result = await this.rpcServer?.receive(jsonMessage);
                 if (result) {
                     (result as any).clientId = (jsonMessage as unknown as any).clientId;
                 }

@@ -1,0 +1,163 @@
+name: Build Tauri App for "MacOS arm64"
+
+on:
+  workflow_call:
+    inputs:
+      platform:
+        required: true
+        type: string
+      tauri_args:
+        required: true
+        type: string
+      tauri_target:
+        required: true
+        type: string
+      pkg_target:
+        required: true
+        type: string
+      sign_app:
+        required: true
+        type: boolean
+      GITHUB_TOKEN:
+        required: false
+        type: string
+      APPLE_CERTIFICATE:
+        required: false
+        type: string
+      APPLE_CERTIFICATE_PASSWORD:
+        required: false
+        type: string
+      APPLE_SIGNING_IDENTITY:
+        required: false
+        type: string
+      APPLE_ID:
+        required: false
+        type: string
+      APPLE_PASSWORD:
+        required: false
+        type: string
+      APPLE_TEAM_ID:
+        required: false
+        type: string
+
+jobs:
+  build_tauri:
+    runs-on: ${{ inputs.platform }}
+    steps:
+    - uses: actions/checkout@v3
+    # - name: Install pnpm
+    #   uses: pnpm/action-setup@v4
+    #   with:
+    #     version: 9.13.2
+    - name: Install Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        # cache: 'pnpm'
+
+    - name: Install Rust stable
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Install OS dependencies (ubuntu only)
+      if: inputs.platform == 'ubuntu-22.04'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libwebkit2gtk-4.0-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+    - name: Scaffold Tauri app
+      run: npx create-tauri-app@4.5.9 myapp -- --template vanilla --yes
+      working-directory: ./apps
+
+    - name: Remove and move directories (Windows)
+      if: ${{ inputs.platform == 'windows-latest' }}
+      run: |
+        Remove-Item -Recurse -Force apps\desktop_tauri
+        Move-Item apps\myapp apps\desktop_tauri
+      shell: pwsh
+
+    - name: Remove and move directories (Unix)
+      if: ${{ inputs.platform != 'windows-latest' }}
+      run: |
+        rm -rf apps/desktop_tauri && mv apps/myapp apps/desktop_tauri
+      shell: bash
+
+    - name: Install project node modules
+      run: npm i
+      # run: pnpm i
+
+    # TODO: install @springboardjs/platforms-tauri if not already installed
+
+    - name: Patch Tauri app directory with config values
+      run: ../../node_modules/@springboardjs/platforms-tauri/scripts/update_desktop_project.sh
+      working-directory: ./apps/desktop_tauri
+
+    - name: Build app
+      run: |
+        touch .env
+        npm run build-all
+        # npm run build-desktop
+        # pnpm run build-desktop
+
+    - name: Fetch Rust dependencies
+      run: cargo fetch
+      working-directory: ./apps/desktop_tauri/src-tauri
+
+    - name: Conditionally Install Rust Target (macOS)
+      if: inputs.platform == 'macos-latest'
+      run: |
+        rustup target add ${{ inputs.tauri_target }}
+
+    - name: Build node sidecar with pkg
+      run: node ../../node_modules/@springboardjs/platforms-tauri/scripts/build-tauri-sidecar.mjs
+      working-directory: ./apps/desktop_tauri
+      env:
+        PKG_TARGET: ${{ inputs.pkg_target }}
+        TAURI_TARGET: ${{ inputs.tauri_target }}
+
+    - name: Set macOS signing environment variables
+      run: |
+        if ${{ inputs.sign_app }}; then
+          echo "APPLE_CERTIFICATE=${{ inputs.APPLE_CERTIFICATE }}" >> $GITHUB_ENV
+          echo "APPLE_CERTIFICATE_PASSWORD=${{ inputs.APPLE_CERTIFICATE_PASSWORD }}" >> $GITHUB_ENV
+          echo "APPLE_SIGNING_IDENTITY=${{ inputs.APPLE_SIGNING_IDENTITY }}" >> $GITHUB_ENV
+          echo "APPLE_ID=${{ inputs.APPLE_ID }}" >> $GITHUB_ENV
+          echo "APPLE_PASSWORD=${{ inputs.APPLE_PASSWORD }}" >> $GITHUB_ENV
+          echo "APPLE_TEAM_ID=${{ inputs.APPLE_TEAM_ID }}" >> $GITHUB_ENV
+        fi
+
+    - uses: tauri-apps/tauri-action@v0
+      env:
+        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
+      with:
+        projectPath: 'apps/desktop_tauri'
+        includeDebug: true
+        includeRelease: true
+        # tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
+        # releaseName: 'App v__VERSION__'
+        # releaseBody: 'See the assets to download this version and install.'
+        # releaseDraft: true
+        # prerelease: false
+        args: ${{ inputs.tauri_args }}
+
+        # - name: Build Tauri application
+        #   run: npm run build
+        #   working-directory: ./apps/desktop_tauri
+
+    - name: Archive built artifacts
+      run: |
+        # Find all `bundle` directories
+        find ./apps/desktop_tauri/src-tauri/target -type d -name "bundle" | while read -r dir; do
+          # Extract the relative path starting after `target/`
+          RELATIVE_PATH="${dir#./apps/desktop_tauri/src-tauri/target/}"
+
+          # Copy the `bundle` directory to the corresponding artifacts folder
+          DEST_DIR="artifacts/${{ inputs.platform }}/$(dirname "$RELATIVE_PATH")"
+          mkdir -p "$DEST_DIR"
+          cp -r "$dir" "$DEST_DIR"
+        done
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: tauri-build-${{ inputs.platform }}-${{ inputs.tauri_target }}
+        path: artifacts/${{ inputs.platform }}

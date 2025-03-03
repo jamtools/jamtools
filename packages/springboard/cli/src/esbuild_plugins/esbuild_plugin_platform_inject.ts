@@ -1,10 +1,12 @@
 import fs from 'fs';
 
-export const esbuildPluginPlatformInject = (platform: 'node' | 'browser') => {
+import type {Plugin} from 'esbuild';
+
+export const esbuildPluginPlatformInject = (platform: 'node' | 'browser'): Plugin => {
   return {
     name: 'platform-macro',
-    setup(build: any) {
-      build.onLoad({ filter: /\.tsx?$/ }, async (args: any) => {
+    setup(build) {
+      build.onLoad({ filter: /\.tsx?$/ }, async (args) => {
         let source = await fs.promises.readFile(args.path, 'utf8');
 
         // Replace platform-specific blocks based on the platform
@@ -19,7 +21,7 @@ export const esbuildPluginPlatformInject = (platform: 'node' | 'browser') => {
 
         return {
           contents: source,
-          loader: args.path.split('.').pop(),
+          loader: args.path.split('.').pop() as 'js',
         };
       });
     },

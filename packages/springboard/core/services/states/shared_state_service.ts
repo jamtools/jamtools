@@ -151,6 +151,7 @@ export class SharedStateSupervisor<State> implements StateSupervisor<State> {
     constructor(private key: string, initialValue: State, private sharedStateService: SharedStateService) {
         this.sharedStateService.setCachedValue<State>(key, initialValue);
         this.sharedStateService.subscribe<State>(key, (state => {
+            this.sharedStateService.setCachedValue(key, state);
             this.subject.next(state);
         }));
     }

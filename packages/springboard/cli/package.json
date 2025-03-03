@@ -1,6 +1,6 @@
 {
   "name": "springboard-cli",
-  "version": "0.14.1",
+  "version": "0.15.0-rc8",
   "main": "index.js",
   "bin": {
     "sb": "dist/cli.js"
@@ -11,11 +11,15 @@
     "src"
   ],
   "scripts": {
-    "build": "npx tsx src/cli.ts build ../../../apps/jamtools/modules/index.ts",
+    "build": "npx tsx src/cli.ts build ../../../apps/handraiser/index.ts",
     "build-saas": "DISABLE_IO=true npx tsx src/cli.ts build ../../../apps/jamtools/modules/index.ts",
     "build-with-cli": "npx tsx cli.ts build ../../../apps/jamtools/modules/index.ts",
     "run-node-local": "NODE_KV_STORE_DATA_FILE=kv_data.json node dist/node/dist/index.js",
     "start": "npm run run-node-local",
+    "build-empty-app": "npx tsx src/cli.ts build ../../../apps/empty_app/index.ts --platforms browser_offline",
+    "build-empty-jamtools-app": "npx tsx src/cli.ts build ../../../apps/empty_jamtools_app/index.ts --platforms browser_offline",
+    "build-empty-jamtools-app-desktop": "npx tsx src/cli.ts build ../../../apps/empty_jamtools_app/index.ts --platforms desktop",
+    "build-empty-jamtools-app-all": "npx tsx src/cli.ts build ../../../apps/empty_jamtools_app/index.ts --platforms all",
     "dev": "npm run build -- --watch",
     "prepublishOnly": "npm run clean && npm run build-cli && npm run add-header",
     "clean": "rm -rf dist",
@@ -26,14 +30,13 @@
     "commander": "^12.1.0",
     "concurrently": "^9.1.0",
     "esbuild": "^0.23.0",
-    "esbuild-sass-plugin": "^3.3.1",
     "typescript": "^5.4.5"
   },
   "peerDependencies": {
-    "@springboardjs/platforms-browser": "0.14.1",
-    "@springboardjs/platforms-node": "0.14.1",
-    "springboard": "0.14.1",
-    "springboard-server": "0.14.1"
+    "@springboardjs/platforms-browser": "0.15.0-rc8",
+    "@springboardjs/platforms-node": "0.15.0-rc8",
+    "springboard": "0.15.0-rc8",
+    "springboard-server": "0.15.0-rc8"
   },
   "keywords": [],
   "author": "",
@@ -42,6 +45,7 @@
   "devDependencies": {
     "npm-run-all": "^4.1.5",
     "tsup": "^8.3.5",
-    "tsx": "^4.19.2"
+    "tsx": "^4.19.2",
+    "wrangler": "^3.107.3"
   }
 }
