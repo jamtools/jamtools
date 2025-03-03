@@ -14,6 +14,7 @@ setTimeout(() => {
 
     startAndRenderBrowserApp({
         rpc,
+        isLocal: true,
         storage: {
             userAgent: userAgentKVStore,
             remote: remoteKvStore,

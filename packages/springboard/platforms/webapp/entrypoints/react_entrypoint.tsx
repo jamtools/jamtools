@@ -13,10 +13,10 @@ const waitForPageLoad = () => new Promise<void>(resolve => {
     });
 });
 
-type BrowserDependencies = Pick<CoreDependencies, 'rpc' | 'storage'>
+type BrowserDependencies = Pick<CoreDependencies, 'rpc' | 'storage'> & {isLocal?: boolean};
 
 export const startAndRenderBrowserApp = async (browserDeps: BrowserDependencies): Promise<Springboard> => {
-    const isLocal = localStorage.getItem('isLocal') === 'true';
+    const isLocal = browserDeps.isLocal || localStorage.getItem('isLocal') === 'true';
 
     const coreDeps: CoreDependencies = {
         log: console.log,
