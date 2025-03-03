@@ -3,7 +3,7 @@
 if [ -n "$1" ]; then
   full_version="$1"
 else
-  full_version="0.15.0-rc5"
+  full_version="0.15.0-rc8"
 fi
 
 set e

@@ -1,8 +1,9 @@
 import fs from 'fs';
 
 import type {Plugin} from 'esbuild';
+import type {DocumentMeta} from 'src/build';
 
-export const esbuildPluginHtmlGenerate = (outDir: string, htmlFilePath: string): Plugin => {
+export const esbuildPluginHtmlGenerate = (outDir: string, htmlFilePath: string, documentMeta?: DocumentMeta): Plugin => {
     return {
         name: 'html-asset-insert',
         setup(build) {
@@ -23,6 +24,25 @@ export const esbuildPluginHtmlGenerate = (outDir: string, htmlFilePath: string):
                         const fname = f.split('/').pop();
                         const cssTag = `<link rel="stylesheet" href="/dist/${fname}">`;
                         htmlFileContent = htmlFileContent.replace(headEnd, `${cssTag}\n${headEnd}`);
+                    }
+                }
+
+                if (documentMeta) {
+                    const title = documentMeta.title || '';
+                    if (title) {
+                        htmlFileContent = htmlFileContent.replace(/<title>(.*?)<\/title>/, `<title>${title}</title>`);
+                    }
+
+                    for (const [key, value] of Object.entries(documentMeta)) {
+                        if (key === 'title') {
+                            htmlFileContent = htmlFileContent.replace(/<title>(.*?)<\/title>/, `<title>${title}</title>`);
+                        } else if (key === 'Content-Security-Policy') {
+                            const metaTag = `<meta http-equiv="${key}" content="${value}">`;
+                            htmlFileContent = htmlFileContent.replace('</head>', `${metaTag}</head>`);
+                        } else {
+                            const metaTag = `<meta property="${key}" content="${value}">`;
+                            htmlFileContent = htmlFileContent.replace('</head>', `${metaTag}</head>`);
+                        }
                     }
                 }
 

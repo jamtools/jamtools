@@ -1,6 +1,6 @@
 {
   "name": "springboard-cli",
-  "version": "0.15.0-rc4",
+  "version": "0.15.0-rc8",
   "main": "index.js",
   "bin": {
     "sb": "dist/cli.js"
@@ -33,10 +33,10 @@
     "typescript": "^5.4.5"
   },
   "peerDependencies": {
-    "@springboardjs/platforms-browser": "0.15.0-rc4",
-    "@springboardjs/platforms-node": "0.15.0-rc4",
-    "springboard": "0.15.0-rc4",
-    "springboard-server": "0.15.0-rc4"
+    "@springboardjs/platforms-browser": "0.15.0-rc8",
+    "@springboardjs/platforms-node": "0.15.0-rc8",
+    "springboard": "0.15.0-rc8",
+    "springboard-server": "0.15.0-rc8"
   },
   "keywords": [],
   "author": "",

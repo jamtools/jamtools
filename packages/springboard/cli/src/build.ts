@@ -14,17 +14,43 @@ type EsbuildOptions = Parameters<typeof esbuild.build>[0];
 type BuildConfig = {
     platform: NonNullable<EsbuildOptions['platform']>;
     platformEntrypoint: () => string;
-    esbuildPlugins?: (args: {outDir: string; nodeModulesParentDir: string}) => any[];
+    esbuildPlugins?: (args: {outDir: string; nodeModulesParentDir: string, documentMeta?: DocumentMeta}) => any[];
     externals?: () => string[];
     additionalFiles?: Record<string, string>;
 }
+
+export type ApplicationBuildOptions = {
+    documentMeta?: DocumentMeta;
+    editBuildOptions?: (options: EsbuildOptions) => void;
+    esbuildOutDir?: string;
+    applicationEntrypoint?: string;
+    nodeModulesParentFolder?: string;
+    watch?: boolean;
+};
+
+export type DocumentMeta = {
+    title?: string;
+    description?: string;
+    'Content-Security-Policy'?: string;
+    keywords?: string;
+    author?: string;
+    robots?: string;
+    'og:title'?: string;
+    'og:description'?: string;
+    'og:image'?: string;
+    'og:url'?: string;
+} & Record<string, string>;
 
 export const platformBrowserBuildConfig: BuildConfig = {
     platform: 'browser',
     platformEntrypoint: () => '@springboardjs/platforms-browser/entrypoints/online_entrypoint.ts',
     esbuildPlugins: (args) => [
         esbuildPluginPlatformInject('browser'),
-        esbuildPluginHtmlGenerate(args.outDir, `${args.nodeModulesParentDir}/node_modules/@springboardjs/platforms-browser/index.html`),
+        esbuildPluginHtmlGenerate(
+            args.outDir,
+            `${args.nodeModulesParentDir}/node_modules/@springboardjs/platforms-browser/index.html`,
+            args.documentMeta,
+        ),
     ],
     additionalFiles: {
         // '@springboardjs/platforms-browser/index.html': 'index.html',
@@ -101,8 +127,8 @@ const copyDesktopFiles = async (desktopPlatform: string) => {
 export const platformTauriWebviewBuildConfig: BuildConfig = {
     ...platformBrowserBuildConfig,
     platformEntrypoint: () => '@springboardjs/platforms-tauri/entrypoints/platform_tauri_browser.tsx',
-    esbuildPlugins: () => [
-        ...platformBrowserBuildConfig.esbuildPlugins!(),
+    esbuildPlugins: (args) => [
+        ...platformBrowserBuildConfig.esbuildPlugins!(args),
         {
             name: 'onBuildEnd',
             setup(build: any) {
@@ -120,14 +146,6 @@ export const platformTauriMaestroBuildConfig: BuildConfig = {
 };
 
 const shouldOutputMetaFile = process.argv.includes('--meta');
-
-export type ApplicationBuildOptions = {
-    editBuildOptions?: (options: EsbuildOptions) => void;
-    esbuildOutDir?: string;
-    applicationEntrypoint?: string;
-    nodeModulesParentFolder?: string;
-    watch?: boolean;
-};
 
 export const buildApplication = async (buildConfig: BuildConfig, options?: ApplicationBuildOptions) => {
     const coreFile = buildConfig.platformEntrypoint();
@@ -188,7 +206,11 @@ export default initApp;
         target: 'es2020',
         plugins: [
             esbuildPluginLogBuildTime(buildConfig.platform),
-            ...(buildConfig.esbuildPlugins?.({outDir: fullOutDir, nodeModulesParentDir: nodeModulesParentFolder}) || []),
+            ...(buildConfig.esbuildPlugins?.({
+                outDir: fullOutDir,
+                nodeModulesParentDir: nodeModulesParentFolder,
+                documentMeta: options?.documentMeta,
+            }) || []),
         ],
         external: externals,
         alias: {

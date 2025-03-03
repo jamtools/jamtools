@@ -74,7 +74,9 @@ export const initApp = (coreDeps: WebsocketServerCoreDependencies): InitAppRetur
         root: webappDistFolder,
         path: 'index.html',
         getContent: async (path, c) => {
-            c.res.headers.append('Cache-Control', 'no-store');
+            c.res.headers.append('Cache-Control', 'no-store, no-cache, must-revalidate');
+            c.res.headers.append('Pragma', 'no-cache');
+            c.res.headers.append('Expires', '0');
             return serveFile('index.html', 'text/html', c);
         }
     }));
@@ -172,6 +174,9 @@ export const initApp = (coreDeps: WebsocketServerCoreDependencies): InitAppRetur
         root: webappDistFolder,
         path: 'index.html',
         getContent: async (path, c) => {
+            c.res.headers.append('Cache-Control', 'no-store, no-cache, must-revalidate');
+            c.res.headers.append('Pragma', 'no-cache');
+            c.res.headers.append('Expires', '0');
             return serveFile('index.html', 'text/html', c);
         }
     }));
