@@ -1,4 +1,4 @@
-The Macro module exposes functionality to allow the user to configure their own MIDI devices to use a given feature of your application. This means there are no hardcoded MIDI device names in your code, so your application can be used by any user. The Macro module uses the [MIDI IO module](./midi-io-module.md) to interact with MIDI devices.
+The Macro module exposes functionality to allow the user to configure their own MIDI devices to use a given feature of your application. This means there are no hardcoded MIDI device names in your code, so your application can be used by any user. A macro can capture unlimited mapped inputs from different instruments, so it remembers every mapping that you've had mapped to that feature, and they can be individually added/deleted by the user.
 
 Macros can be used as primitives to compose simple or complex features. They provide a way to interact with MIDI devices, while having the feature-level code be agnostic to the MIDI device being used.
 
@@ -11,7 +11,7 @@ The following macro types are exposed by the Macro module:
 - Outputs
     - `musical_keyboard_output` - Send MIDI events to a MIDI keyboard chosen by the user. This is useful for sending tonal information to a DAW or hardware synth.
     - `midi_control_change_output` - Send MIDI events for a controller change output chosen by the user. This is useful for changing things on a DAW effect like the dry/wet or intensity setting.
-    - `midi_button_output` - Send MIDI events for a specific button/note chosen by the user. This is useful to send discrete messages to a toggleable setting in a DAW. (note this is one is actually not implemented as of the time of writing this)
+    - `midi_button_output` - Send MIDI events for a specific button/note chosen by the user. This is useful to send discrete messages to a toggleable setting in a DAW.
 
 ## Examples
 
