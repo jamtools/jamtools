@@ -5,7 +5,7 @@ import concurrently from 'concurrently';
 
 import packageJSON from '../package.json';
 
-import {buildApplication, buildServer, platformBrowserBuildConfig, platformNodeBuildConfig, platformOfflineBrowserBuildConfig, platformTauriMaestroBuildConfig, platformTauriWebviewBuildConfig, SpringboardPlatform} from './build';
+import {buildApplication, buildServer, platformBrowserBuildConfig, platformNodeBuildConfig, platformOfflineBrowserBuildConfig, platformPartykitBrowserBuildConfig, platformPartykitServerBuildConfig, platformTauriMaestroBuildConfig, platformTauriWebviewBuildConfig, SpringboardPlatform} from './build';
 import {esbuildPluginTransformAwaitImportToRequire} from './esbuild_plugins/esbuild_plugin_transform_await_import';
 
 program
@@ -38,11 +38,6 @@ program
             watch: true,
         });
 
-        await buildApplication(platformNodeBuildConfig, {
-            applicationEntrypoint,
-            watch: true,
-        });
-
         await buildServer({
             watch: true,
         });
@@ -54,7 +49,6 @@ program
         concurrently(
             [
                 {command: `node ${nodeArgs} dist/server/dist/local-server.cjs`, name: 'Server', prefixColor: 'blue'},
-                {command: `node ${nodeArgs} dist/node/dist/index.js`, name: 'Node Maestro', prefixColor: 'green'},
             ],
             {
                 prefix: 'name',
@@ -153,6 +147,23 @@ program
             });
         }
 
+        if (
+            platformsToBuild.has('all') ||
+            platformsToBuild.has('partykit')
+        ) {
+            await buildApplication(platformPartykitBrowserBuildConfig, {
+                applicationEntrypoint,
+                watch: options.watch,
+                esbuildOutDir: 'partykit',
+            });
+
+            await buildApplication(platformPartykitServerBuildConfig, {
+                applicationEntrypoint,
+                watch: options.watch,
+                esbuildOutDir: 'partykit',
+            });
+        }
+
         // if (
         //     platformsToBuild.has('all') ||
         //     platformsToBuild.has('mobile')
@@ -166,9 +177,6 @@ program
         // ) {
         //     await buildBrowserOffline();
         // }
-
-
-
     });
 
 program

@@ -1,0 +1,21 @@
+{
+  "name": "@springboardjs/platforms-partykit",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "partykit dev",
+    "deploy": "partykit deploy --with-vars",
+    "check-types": "tsc --noEmit"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "partysocket": "^1.0.3",
+    "springboard": "0.15.0-rc8"
+  },
+  "devDependencies": {
+    "partykit": "^0.0.111"
+  }
+}

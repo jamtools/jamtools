@@ -6,6 +6,7 @@ import esbuild from 'esbuild';
 import {esbuildPluginLogBuildTime} from './esbuild_plugins/esbuild_plugin_log_build_time';
 import {esbuildPluginPlatformInject} from './esbuild_plugins/esbuild_plugin_platform_inject.js';
 import {esbuildPluginHtmlGenerate} from './esbuild_plugins/esbuild_plugin_html_generate';
+import {esbuildPluginPartykitConfig} from './esbuild_plugins/esbuild_plugin_partykit_config';
 
 export type SpringboardPlatform = 'all' | 'main' | 'mobile' | 'desktop' | 'browser_offline';
 
@@ -13,13 +14,16 @@ type EsbuildOptions = Parameters<typeof esbuild.build>[0];
 
 type BuildConfig = {
     platform: NonNullable<EsbuildOptions['platform']>;
+    name?: string;
     platformEntrypoint: () => string;
     esbuildPlugins?: (args: {outDir: string; nodeModulesParentDir: string, documentMeta?: DocumentMeta}) => any[];
     externals?: () => string[];
     additionalFiles?: Record<string, string>;
+    fingerprint?: boolean;
 }
 
 export type ApplicationBuildOptions = {
+    name?: string;
     documentMeta?: DocumentMeta;
     editBuildOptions?: (options: EsbuildOptions) => void;
     esbuildOutDir?: string;
@@ -43,6 +47,7 @@ export type DocumentMeta = {
 
 export const platformBrowserBuildConfig: BuildConfig = {
     platform: 'browser',
+    fingerprint: true,
     platformEntrypoint: () => '@springboardjs/platforms-browser/entrypoints/online_entrypoint.ts',
     esbuildPlugins: (args) => [
         esbuildPluginPlatformInject('browser'),
@@ -83,24 +88,25 @@ export const platformNodeBuildConfig: BuildConfig = {
     },
 };
 
-export const platformFetchBuildConfig: BuildConfig = {
-    platform: 'node',
+export const platformPartykitServerBuildConfig: BuildConfig = {
+    platform: 'neutral',
     platformEntrypoint: () => {
-        const entrypoint = '@springboardjs/platforms-node/entrypoints/node_flexible_entrypoint.ts';
-
+        const entrypoint = '@springboardjs/platforms-partykit/src/entrypoints/partykit_server_entrypoint.ts';
         return entrypoint;
     },
-    esbuildPlugins: () => [
-        esbuildPluginPlatformInject('node'),
+    esbuildPlugins: (args) => [
+        esbuildPluginPlatformInject('fetch'),
+        esbuildPluginPartykitConfig(args.outDir),
     ],
     externals: () => {
-        let externals = ['@julusian/midi', 'easymidi', 'jsdom'];
-        if (process.env.DISABLE_IO === 'true') {
-            externals = ['jsdom'];
-        }
-
+        const externals = ['@julusian/midi', 'easymidi', 'jsdom', 'node:async_hooks'];
         return externals;
     },
+};
+
+export const platformPartykitBrowserBuildConfig: BuildConfig = {
+    ...platformBrowserBuildConfig,
+    platformEntrypoint: () => '@springboardjs/platforms-partykit/src/entrypoints/partykit_browser_entrypoint.tsx',
 };
 
 const copyDesktopFiles = async (desktopPlatform: string) => {
@@ -192,20 +198,27 @@ export default initApp;
         throw new Error('Failed to find node_modules folder in current directory and parent directories')
     }
 
+    const platformName = buildConfig.name || buildConfig.platform;
+    const appName = options?.name;
+    const fullName = appName ? appName + '-' + platformName : platformName;
+
     const esbuildOptions: EsbuildOptions = {
         entryPoints: [dynamicEntryPath],
         metafile: true,
-        assetNames: '[dir]/[name]-[hash]',
-        chunkNames: '[dir]/[name]-[hash]',
-        entryNames: '[dir]/[name]-[hash]',
+        ...(buildConfig.fingerprint ? {
+            assetNames: '[dir]/[name]-[hash]',
+            chunkNames: '[dir]/[name]-[hash]',
+            entryNames: '[dir]/[name]-[hash]',
+        }: {}),
         bundle: true,
         sourcemap: true,
         outfile: outFile,
         platform: buildConfig.platform,
+        mainFields: buildConfig.platform === 'neutral' ? ['module', 'main'] : undefined,
         minify: process.env.NODE_ENV === 'production',
         target: 'es2020',
         plugins: [
-            esbuildPluginLogBuildTime(buildConfig.platform),
+            esbuildPluginLogBuildTime(fullName),
             ...(buildConfig.esbuildPlugins?.({
                 outDir: fullOutDir,
                 nodeModulesParentDir: nodeModulesParentFolder,

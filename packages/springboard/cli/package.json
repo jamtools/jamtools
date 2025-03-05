@@ -20,6 +20,7 @@
     "build-empty-jamtools-app": "npx tsx src/cli.ts build ../../../apps/empty_jamtools_app/index.ts --platforms browser_offline",
     "build-empty-jamtools-app-desktop": "npx tsx src/cli.ts build ../../../apps/empty_jamtools_app/index.ts --platforms desktop",
     "build-empty-jamtools-app-all": "npx tsx src/cli.ts build ../../../apps/empty_jamtools_app/index.ts --platforms all",
+    "build-partykit": "ESBUILD_OUT_DIR=../platforms/partykit/dist npx tsx src/cli.ts build ../../../apps/games/tic_tac_toe/tic_tac_toe.tsx --platforms partykit",
     "dev": "npm run build -- --watch",
     "prepublishOnly": "npm run clean && npm run build-cli && npm run add-header",
     "clean": "rm -rf dist",
