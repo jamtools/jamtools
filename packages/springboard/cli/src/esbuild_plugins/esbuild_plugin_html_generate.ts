@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 
 import type {Plugin} from 'esbuild';
-import type {DocumentMeta} from 'src/build';
+import type {DocumentMeta} from '../build';
 
 export const esbuildPluginHtmlGenerate = (outDir: string, htmlFilePath: string, documentMeta?: DocumentMeta): Plugin => {
     return {

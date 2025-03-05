@@ -8,7 +8,7 @@ import {esbuildPluginPlatformInject} from './esbuild_plugins/esbuild_plugin_plat
 import {esbuildPluginHtmlGenerate} from './esbuild_plugins/esbuild_plugin_html_generate';
 import {esbuildPluginPartykitConfig} from './esbuild_plugins/esbuild_plugin_partykit_config';
 
-export type SpringboardPlatform = 'all' | 'main' | 'mobile' | 'desktop' | 'browser_offline';
+export type SpringboardPlatform = 'all' | 'main' | 'mobile' | 'desktop' | 'browser_offline' | 'partykit';
 
 type EsbuildOptions = Parameters<typeof esbuild.build>[0];
 
