@@ -78,13 +78,6 @@ export class ModuleAPI {
         this.module.applicationShell = component;
     };
 
-    registerBottomNavigationTabs = (navigationItemConfig: NavigationItemConfig[]) => {
-        this.module.bottomNavigationTabs = navigationItemConfig;
-        if (this.modDeps.moduleRegistry.getCustomModule(this.module.moduleId)) {
-            this.modDeps.moduleRegistry.refreshModules();
-        }
-    };
-
     createStates = async <States extends Record<string, any>>(states: States): Promise<{[K in keyof States]: StateSupervisor<States[K]>}> => {
         const keys = Object.keys(states);
         const promises = keys.map(async key => {

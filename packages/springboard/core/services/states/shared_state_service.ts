@@ -101,8 +101,8 @@ export class SharedStateService {
 export type StateSupervisor<State> = {
     subject: Subject<State>;
     getState(): State;
-    setState(stateOrCallback: State | StateCallback<State>): Promise<unknown>;
-    setStateImmer(immerCallback: StateCallbackImmer<State>): Promise<unknown>;
+    setState(stateOrCallback: State | StateCallback<State>): State;
+    setStateImmer(immerCallback: StateCallbackImmer<State>): State;
     useState(): State;
 }
 
@@ -121,22 +121,22 @@ export class UserAgentStateSupervisor<State> implements StateSupervisor<State> {
         return this.currentValue;
     };
 
-    public setState = async (stateOrCallback: State | StateCallback<State>): Promise<unknown> => {
-        if (typeof stateOrCallback === 'function') {
-            const cb = stateOrCallback as StateCallback<State>;
+    public setState = (state: State | StateCallback<State>): State => {
+        if (typeof state === 'function') {
+            const cb = state as StateCallback<State>;
             const result = cb(this.getState());
-            this.setState(result);
-            return;
+            return this.setState(result);
         }
 
-        this.currentValue = stateOrCallback;
+        this.currentValue = state;
         this.subject.next(this.currentValue);
-        return this.userAgentStore.set(this.key, stateOrCallback);
+        this.userAgentStore.set(this.key, state);
+        return state;
     };
 
-    public setStateImmer = async (immerCallback: StateCallbackImmer<State>): Promise<void> => {
+    public setStateImmer = (immerCallback: StateCallbackImmer<State>): State => {
         const result = produce(this.getState(), immerCallback);
-        await this.setState(result);
+        return this.setState(result);
     };
 
     public useState = (): State => {
@@ -160,22 +160,22 @@ export class SharedStateSupervisor<State> implements StateSupervisor<State> {
         return this.sharedStateService.getCachedValue(this.key)!;
     };
 
-    public setState = async (state: State | StateCallback<State>): Promise<unknown> => {
+    public setState = (state: State | StateCallback<State>): State => {
         if (typeof state === 'function') {
             const cb = state as StateCallback<State>;
             const result = cb(this.getState());
-            this.setState(result);
-            return;
+            return this.setState(result);
         }
 
         this.subject.next(state);
         this.subjectForKVStorePublish.next(state);
-        return this.sharedStateService.sendRpcSetSharedState(this.key, state);
+        this.sharedStateService.sendRpcSetSharedState(this.key, state);
+        return state;
     };
 
-    public setStateImmer = async (immerCallback: StateCallbackImmer<State>): Promise<void> => {
+    public setStateImmer = (immerCallback: StateCallbackImmer<State>): State => {
         const result = produce(this.getState(), immerCallback);
-        await this.setState(result);
+        return this.setState(result);
     };
 
     public useState = (): State => {

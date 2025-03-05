@@ -27,7 +27,6 @@ export type Module<State extends object = any> = {
     state?: State;
     subject?: Subject<State>;
     routes?: Record<string, RegisteredRoute>;
-    bottomNavigationTabs?: NavigationItemConfig[];
     applicationShell?: React.ElementType<React.PropsWithChildren<{modules: Module[]}>>;
 };
 
