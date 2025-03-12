@@ -7,23 +7,35 @@ import {Main} from './main';
 import {Springboard} from 'springboard/engine/engine';
 import {ExtraModuleDependencies} from 'springboard/module_registry/module_registry';
 
+import {watchForChanges} from './esbuild_watch_for_changes';
+
 const waitForPageLoad = () => new Promise<void>(resolve => {
     window.addEventListener('DOMContentLoaded', () => {
         resolve();
     });
 });
 
-type BrowserDependencies = Pick<CoreDependencies, 'rpc' | 'storage'> & {isLocal?: boolean};
+type BrowserDependencies = Pick<CoreDependencies, 'rpc' | 'storage'> & {
+    isLocal?: boolean;
+    dev?: {
+        reloadCss?: boolean;
+        reloadJs?: boolean;
+    };
+};
 
 export const startAndRenderBrowserApp = async (browserDeps: BrowserDependencies): Promise<Springboard> => {
     const isLocal = browserDeps.isLocal || localStorage.getItem('isLocal') === 'true';
+
+    if (browserDeps.dev?.reloadCss || browserDeps.dev?.reloadJs) {
+        watchForChanges(browserDeps.dev?.reloadCss, browserDeps.dev?.reloadJs);
+    }
 
     const coreDeps: CoreDependencies = {
         log: console.log,
         showError: (error: string) => alert(error),
         storage: browserDeps.storage,
         files: {
-            saveFile: async () => {},
+            saveFile: async () => { },
         },
         rpc: browserDeps.rpc,
         isMaestro: () => isLocal,

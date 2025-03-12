@@ -31,6 +31,10 @@ program
         await buildApplication(platformBrowserBuildConfig, {
             applicationEntrypoint,
             watch: true,
+            dev: {
+                reloadCss: true,
+                reloadJs: true,
+            },
         });
 
         await buildApplication(platformNodeBuildConfig, {

@@ -30,6 +30,10 @@ export type ApplicationBuildOptions = {
     applicationEntrypoint?: string;
     nodeModulesParentFolder?: string;
     watch?: boolean;
+    dev?: {
+        reloadCss?: boolean;
+        reloadJs?: boolean;
+    };
 };
 
 export type DocumentMeta = {
@@ -209,7 +213,7 @@ export default initApp;
             assetNames: '[dir]/[name]-[hash]',
             chunkNames: '[dir]/[name]-[hash]',
             entryNames: '[dir]/[name]-[hash]',
-        }: {}),
+        } : {}),
         bundle: true,
         sourcemap: true,
         outfile: outFile,
@@ -233,6 +237,8 @@ export default initApp;
             'process.env.DATA_HOST': `"${process.env.DATA_HOST || ''}"`,
             'process.env.NODE_ENV': `"${process.env.NODE_ENV || ''}"`,
             'process.env.DISABLE_IO': `"${process.env.DISABLE_IO || ''}"`,
+            'process.env.RELOAD_CSS': `"${options?.dev?.reloadCss || ''}"`,
+            'process.env.RELOAD_JS': `"${options?.dev?.reloadJs || ''}"`,
         },
     };
 
@@ -252,6 +258,11 @@ export default initApp;
         const ctx = await esbuild.context(esbuildOptions);
         await ctx.watch();
         console.log(`Watching for changes for ${buildConfig.platform} application build...`);
+
+        if (options?.dev?.reloadCss || options?.dev?.reloadJs) {
+            await ctx.serve();
+        }
+
         return;
     }
 
