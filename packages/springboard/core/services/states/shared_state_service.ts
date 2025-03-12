@@ -1,6 +1,7 @@
 import {produce} from 'immer';
-import {useEffect, useState} from 'react';
 import {Subject} from 'rxjs';
+
+import {useSubject} from 'springboard/module_registry/module_registry';
 
 import {CoreDependencies, KVStore, Rpc} from 'springboard/types/module_types';
 
@@ -130,6 +131,7 @@ export class UserAgentStateSupervisor<State> implements StateSupervisor<State> {
 
         this.currentValue = state;
         this.subject.next(this.currentValue);
+        console.log('subject.next', this.currentValue);
         this.userAgentStore.set(this.key, state);
         return state;
     };
@@ -182,17 +184,3 @@ export class SharedStateSupervisor<State> implements StateSupervisor<State> {
         return useSubject<State>(this.getState(), this.subject)!;
     };
 }
-
-export const useSubject = <T,>(initialData: T, subject: Subject<T>): T => {
-    const [data, setData] = useState(initialData);
-
-    useEffect(() => {
-        const subscription = subject.subscribe((newData) => {
-            setData(newData);
-        });
-
-        return () => subscription.unsubscribe();
-    }, []);
-
-    return data;
-};
