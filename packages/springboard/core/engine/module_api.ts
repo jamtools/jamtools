@@ -3,12 +3,16 @@ import {ExtraModuleDependencies, Module, NavigationItemConfig, RegisteredRoute} 
 import {CoreDependencies, ModuleDependencies} from '../types/module_types';
 import {RegisterRouteOptions} from './register';
 
-type ActionOptions = object;
+type ActionConfigOptions = object;
+
+export type ActionCallOptions = {
+    mode?: 'local' | 'remote';
+}
 
 /**
  * The Action callback
 */
-type ActionCallback<Args extends object, ReturnValue = any> = (args: Args) => Promise<ReturnValue>;
+type ActionCallback<Args extends object, ReturnValue = any> = (args: Args, options?: ActionCallOptions) => Promise<ReturnValue>;
 
 // this would make it so modules/plugins can extend the module API dynamically through interface merging
 // export interface ModuleAPI {
@@ -97,7 +101,9 @@ export class ModuleAPI {
         return result;
     };
 
-    createActions = <Actions extends Record<string, ActionCallback<any, any>>>(actions: Actions): Actions => {
+    createActions = <Actions extends Record<string, ActionCallback<any, any>>>(
+        actions: Actions
+    ): { [K in keyof Actions]: (payload: Parameters<Actions[K]>[0], options?: ActionCallOptions) => Promise<ReturnType<Actions[K]>> } => {
         const keys = Object.keys(actions);
 
         for (const key of keys) {
@@ -110,7 +116,7 @@ export class ModuleAPI {
     /**
      * Create an action to be run on the Maestro device. If the produced action is called from the Maestro device, the framework just calls the provided callback. If it is called from another device, the framework calls the action via RPC to the Maestro device. In most cases, any main logic or calls to shared state changes should be done in an action.
     */
-    createAction = <Options extends ActionOptions, Args extends object, ReturnValue>(actionName: string, options: Options, cb: ActionCallback<Args, ReturnValue>): typeof cb => {
+    createAction = <Options extends ActionConfigOptions, Args extends object, ReturnValue extends undefined | void | null | object | number>(actionName: string, options: Options, cb: ActionCallback<Args, ReturnValue>): ((args: Args, options?: ActionCallOptions) => Promise<ReturnValue>) => {
         const fullActionName = `${this.fullPrefix}|action|${actionName}`;
 
         // if (options.broadcast) {
@@ -119,40 +125,19 @@ export class ModuleAPI {
 
         this.coreDeps.rpc.registerRpc(fullActionName, cb);
 
-        if (this.coreDeps.isMaestro()) {
-            // TODO: make error handling better in actions. we probably shouldn't log stack traces to the console if it's a user error
-            return async (args: Args) => {
-                try {
-                    return cb(args) as ReturnValue;
-                } catch (e) {
-                    const errorMessage = `Error running action '${fullActionName}': ${new String(e)}`;
-                    this.coreDeps.showError(errorMessage);
-
-                    throw e;
-                }
-            };
-        }
-
-        return async (args: Args) => {
-            if (this.coreDeps.isMaestro()) {
-                try {
-                    return cb(args) as ReturnValue;
-                } catch (e) {
-                    const errorMessage = `Error running action '${fullActionName}': ${new String(e)}`;
-                    this.coreDeps.showError(errorMessage);
-
-                    throw e;
-                }
-            }
-
+        return async (args: Args, options?: ActionCallOptions) => {
             try {
-                const result = await this.coreDeps.rpc.callRpc<Args, ReturnValue>(fullActionName, args);
-                if (typeof result === 'string') {
-                    this.coreDeps.showError(result);
-                    throw new Error(result);
-                }
+                if (this.coreDeps.isMaestro() || options?.mode === 'local') {
+                    return cb(args) as ReturnValue;
+                } else {
+                    const result = await this.coreDeps.rpc.callRpc<Args, ReturnValue>(fullActionName, args);
+                    if (typeof result === 'string') { // TODO: make this not think a string is an error
+                        this.coreDeps.showError(result);
+                        throw new Error(result);
+                    }
 
-                return result;
+                    return result;
+                }
             } catch (e) {
                 const errorMessage = `Error running action '${fullActionName}': ${new String(e)}`;
                 this.coreDeps.showError(errorMessage);

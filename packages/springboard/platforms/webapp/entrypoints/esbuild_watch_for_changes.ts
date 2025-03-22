@@ -8,7 +8,7 @@ export const watchForChanges = (reloadCss?: boolean, reloadJs?: boolean) => {
 
                 if (url.host === location.host && url.pathname.startsWith('/dist/index-')) {
                     const next = link.cloneNode() as HTMLLinkElement;
-                    next.href = added[0] + '?' + Math.random().toString(36).slice(2);
+                    next.href = '/dist' + added[0] + '?' + Math.random().toString(36).slice(2);
                     next.onload = () => link.remove();
                     link.parentNode!.insertBefore(next, link.nextSibling);
                     return;

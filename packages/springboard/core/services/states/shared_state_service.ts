@@ -131,7 +131,6 @@ export class UserAgentStateSupervisor<State> implements StateSupervisor<State> {
 
         this.currentValue = state;
         this.subject.next(this.currentValue);
-        console.log('subject.next', this.currentValue);
         this.userAgentStore.set(this.key, state);
         return state;
     };
