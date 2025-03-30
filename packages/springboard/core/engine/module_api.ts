@@ -43,18 +43,20 @@ export class ModuleAPI {
 
     public readonly deps: {core: CoreDependencies; module: ModuleDependencies, extra: ExtraModuleDependencies};
 
-    constructor(private module: Module, private prefix: string, private coreDeps: CoreDependencies, private modDeps: ModuleDependencies, extraDeps: ExtraModuleDependencies) {
-        this.deps = {core: coreDeps, module: modDeps, extra: extraDeps};
-    }
-
-    public readonly moduleId = this.module.moduleId;
-
-    public readonly fullPrefix = `${this.prefix}|module|${this.module.moduleId}`;
+    public readonly moduleId;
+    public readonly fullPrefix;
 
     /**
      * Create shared and persistent pieces of state, scoped to this specific module.
     */
-    public readonly statesAPI = new StatesAPI(this.fullPrefix, this.coreDeps, this.modDeps);
+    public readonly statesAPI: StatesAPI;
+
+    constructor(private module: Module, private prefix: string, private coreDeps: CoreDependencies, private modDeps: ModuleDependencies, extraDeps: ExtraModuleDependencies) {
+        this.deps = {core: coreDeps, module: modDeps, extra: extraDeps};
+        this.moduleId = module.moduleId;
+        this.fullPrefix = `${prefix}|module|${module.moduleId}`;
+        this.statesAPI = new StatesAPI(this.fullPrefix, this.coreDeps, this.modDeps);
+    }
 
     getModule = this.modDeps.moduleRegistry.getModule.bind(this.modDeps.moduleRegistry);
 
