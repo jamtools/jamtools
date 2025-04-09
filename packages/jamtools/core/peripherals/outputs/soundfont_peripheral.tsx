@@ -1,6 +1,6 @@
 import Soundfont from 'soundfont-player';
 
-import {MidiEvent, convertMidiNumberToNoteAndOctave} from '@jamtools/core/modules/macro_module/macro_module_types';
+import {BaseMidiEventPayload, convertMidiNumberToNoteAndOctave} from '@jamtools/core/modules/macro_module/macro_module_types';
 
 type HeldDownSoundfontNotes = {
     number: number;
@@ -40,7 +40,7 @@ export class SoundfontPeripheral {
 
     // TODO: define React components in this file for choosing instruments. need Edit and Short components to show in output macro view
 
-    public send = (midiEvent: MidiEvent) => {
+    public send = (midiEvent: BaseMidiEventPayload) => {
         if (!this.soundfont) {
             console.log('sending midi event from node process');
             return;

@@ -21,6 +21,8 @@ export type MidiEvent = {
     value?: number;
 }
 
+export type BaseMidiEventPayload = Omit<MidiEvent, 'channel'> & {channel?: MidiEvent['channel']};
+
 export const convertMidiNumberToNoteAndOctave = (midiNumber: number): string => {
     const noteName = MIDI_NUMBER_TO_NOTE_NAME_MAPPINGS[(midiNumber % 12) as keyof typeof MIDI_NUMBER_TO_NOTE_NAME_MAPPINGS];
 

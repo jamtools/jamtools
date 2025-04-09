@@ -6,10 +6,10 @@ springboard.registerModule('phone_jam', {}, async (moduleAPI) => {
     const outputMacro = await moduleAPI.deps.module.moduleRegistry.getModule('macro').createMacro(moduleAPI, 'local_output', 'musical_keyboard_output', {allowLocal: true});
 
     const playSound = () => {
-        outputMacro.send({type: 'noteon', channel: 0, number: 36, velocity: 100});
+        outputMacro.send({type: 'noteon', number: 36, velocity: 100});
 
         setTimeout(() => {
-            outputMacro.send({type: 'noteoff', channel: 0, number: 36});
+            outputMacro.send({type: 'noteoff', number: 36});
         }, 1000);
     };
 

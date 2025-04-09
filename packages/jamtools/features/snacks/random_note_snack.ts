@@ -27,7 +27,6 @@ springboard.registerModule('RandomNote', {}, async (moduleAPI): Promise<RandomNo
         const randomVelocity = Math.floor(Math.random() * 128);
 
         output.send({
-            channel: 0,
             number: inOctave,
             type: 'noteon',
             velocity: randomVelocity,
@@ -35,7 +34,6 @@ springboard.registerModule('RandomNote', {}, async (moduleAPI): Promise<RandomNo
 
         setTimeout(() => {
             output.send({
-                channel: 0,
                 number: inOctave,
                 type: 'noteoff',
                 velocity: 0,
