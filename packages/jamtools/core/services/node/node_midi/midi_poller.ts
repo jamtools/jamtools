@@ -25,12 +25,13 @@ export class NodeMidiDevicePollerService {
     private poller!: NodeMidiDevicePoller;
 
     public initialize = async () => {
-        const amidiSupported = await AMidiDevicePoller.isSupported();
-        this.poller = amidiSupported ? new AMidiDevicePoller() : new EasyMidiDevicePoller();
+        // const amidiSupported = await AMidiDevicePoller.isSupported();
+        // this.poller = amidiSupported ? new AMidiDevicePoller() : new EasyMidiDevicePoller();
+        this.poller = new EasyMidiDevicePoller();
     };
 
     public pollForDevices = async (knownDevices: string[]): Promise<MidiPollResponse> => {
-        const polledDevices = await this.poller.poll();
+        const polledDevices = (await this.poller.poll()).filter(d => !d.humanReadableName.startsWith('Midi Through') && !d.humanReadableName.includes('RtMidi'));
         const newlyConnectedDevices: DeviceMetadata[] = [];
         const newlyDisconnectedDevices: DeviceMetadata[] = [];
 
