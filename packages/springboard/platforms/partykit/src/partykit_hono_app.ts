@@ -61,7 +61,9 @@ export const initApp = (coreDeps: InitArgs): InitAppReturnValue => {
     let storedEngine: Springboard | undefined;
 
     const nodeAppDependencies: NodeAppDependencies = {
-        rpc,
+        rpc: {
+            remote: rpc,
+        },
         storage: {
             remote: kvStore,
             userAgent: mockDeps.storage.userAgent,

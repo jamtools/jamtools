@@ -11,6 +11,8 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
     rpcClient?: JSONRPCClient<ClientParams>;
     rpcServer?: JSONRPCServer;
 
+    public role = 'client' as const;
+
     constructor (private url: string) {}
 
     private clientId = '';
@@ -67,7 +69,8 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
             return false;
         }
 
-        const fullUrl = `${this.url}?clientId=${this.getClientId()}`;
+        const queryParamSeparator = this.url.includes('?') ? '&' : '?';
+        const fullUrl = `${this.url}${queryParamSeparator}clientId=${this.getClientId()}`;
         // const ws = new WebSocket(fullUrl);
         const ws = new ReconnectingWebSocket(fullUrl, undefined, {WebSocket});
 

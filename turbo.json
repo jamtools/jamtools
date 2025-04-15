@@ -23,7 +23,8 @@
         "dependsOn": ["^fix"]
       },
       "test": {
-        "dependsOn": ["^test"]
+        "dependsOn": ["^test"],
+        "cache": false
       },
       "test:watch": {
         "dependsOn": ["^test:watch"]

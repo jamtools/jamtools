@@ -2,7 +2,7 @@ import fs from 'fs';
 
 import type {Plugin} from 'esbuild';
 
-export const esbuildPluginPlatformInject = (platform: 'node' | 'browser' | 'fetch'): Plugin => {
+export const esbuildPluginPlatformInject = (platform: 'node' | 'browser' | 'fetch' | 'react-native'): Plugin => {
   return {
     name: 'platform-macro',
     setup(build) {

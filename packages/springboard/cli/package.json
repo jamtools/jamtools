@@ -1,6 +1,6 @@
 {
   "name": "springboard-cli",
-  "version": "0.15.0-rc8",
+  "version": "0.15.0-rc14",
   "main": "index.js",
   "bin": {
     "sb": "dist/cli.js"
@@ -22,10 +22,12 @@
     "build-empty-jamtools-app-all": "npx tsx src/cli.ts build ../../../apps/empty_jamtools_app/index.ts --platforms all",
     "build-partykit": "ESBUILD_OUT_DIR=../platforms/partykit/dist npx tsx src/cli.ts build ../../../apps/games/tic_tac_toe/tic_tac_toe.tsx --platforms partykit",
     "dev": "npm run build -- --watch",
+    "dev-dev": "npx tsx src/cli.ts dev ../../../apps/handraiser/index.ts",
     "prepublishOnly": "npm run clean && npm run build-cli && npm run add-header",
     "clean": "rm -rf dist",
     "build-cli": "tsc",
-    "add-header": "./scripts/add-node-executable-header.sh"
+    "add-header": "./scripts/add-node-executable-header.sh",
+    "cli-docs": "npx tsx scripts/make_cli_docs.ts"
   },
   "dependencies": {
     "commander": "^12.1.0",
@@ -34,10 +36,10 @@
     "typescript": "^5.4.5"
   },
   "peerDependencies": {
-    "@springboardjs/platforms-browser": "0.15.0-rc8",
-    "@springboardjs/platforms-node": "0.15.0-rc8",
-    "springboard": "0.15.0-rc8",
-    "springboard-server": "0.15.0-rc8"
+    "@springboardjs/platforms-browser": "0.15.0-rc14",
+    "@springboardjs/platforms-node": "0.15.0-rc14",
+    "springboard": "0.15.0-rc14",
+    "springboard-server": "0.15.0-rc14"
   },
   "keywords": [],
   "author": "",

@@ -1,3 +1,5 @@
+(globalThis as {useHashRouter?: boolean}).useHashRouter = true;
+
 import {BrowserKVStoreService} from '@springboardjs/platforms-browser/services/browser_kvstore_service';
 import {TrpcKVStoreService} from 'springboard/services/trpc_kv_store_client';
 import {startAndRenderBrowserApp} from '@springboardjs/platforms-browser/entrypoints/react_entrypoint';
@@ -21,7 +23,9 @@ setTimeout(() => {
     const userAgentKVStore = new BrowserKVStoreService(localStorage);
 
     startAndRenderBrowserApp({
-        rpc,
+        rpc: {
+            remote: rpc,
+        },
         storage: {
             userAgent: userAgentKVStore,
             remote: remoteKvStore,

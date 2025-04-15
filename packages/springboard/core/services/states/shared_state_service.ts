@@ -16,22 +16,31 @@ type SubscribeCallback<Value> = (value: Value) => void;
 
 enum SharedStateRpcMethods {
     SET_SHARED_STATE = 'shared_state.set_shared_state',
-    GET_ALL_SHARED_STATE = 'shared_state.get_all_shared_state',
+    // GET_ALL_SHARED_STATE = 'shared_state.get_all_shared_state',
+}
+
+type SharedStateServiceDependencies = {
+    rpc?: Rpc;
+    kv: KVStore;
+    log: (message: string) => void;
+    isMaestro: () => boolean;
 }
 
 export class SharedStateService {
     private globalState: GlobalState = {};
-    private rpc: Rpc;
+    private rpc?: Rpc;
     private subscriptions: Record<string, Array<SubscribeCallback<any>>> = {};
 
-    constructor(private coreDeps: CoreDependencies) {
-        this.rpc = this.coreDeps.rpc;
-        this.rpc.registerRpc(SharedStateRpcMethods.SET_SHARED_STATE, this.receiveRpcSetSharedState);
-        this.rpc.registerRpc(SharedStateRpcMethods.GET_ALL_SHARED_STATE, this.receiveRpcGetAllSharedState);
+    constructor(private props: SharedStateServiceDependencies) {
+        this.rpc = this.props.rpc;
+        if (this.rpc && !this.props.isMaestro()) {
+            this.rpc.registerRpc(SharedStateRpcMethods.SET_SHARED_STATE, this.receiveRpcSetSharedState);
+            // this.rpc.registerRpc(SharedStateRpcMethods.GET_ALL_SHARED_STATE, this.receiveRpcGetAllSharedState);
+        }
     }
 
     initialize = async () => {
-        const allValues = await this.coreDeps.storage.remote.getAll();
+        const allValues = await this.props.kv.getAll();
         if (allValues) {
             for (const key of Object.keys(allValues)) {
                 this.setCachedValue(key, allValues[key]);
@@ -52,27 +61,36 @@ export class SharedStateService {
         this.globalState[key] = value;
     };
 
-    sendRpcGetAllSharedState = async (): Promise<boolean> => {
-        try {
-            const response = await this.rpc.callRpc<object, GlobalState>(SharedStateRpcMethods.GET_ALL_SHARED_STATE, {});
-            if (typeof response === 'string') {
-                this.coreDeps.log('Error calling RPC get_all_shared_state: ' + response);
-                return false;
-            }
+    // TODO: this function isn't called anywhere, so it should probably be removed
+    // sendRpcGetAllSharedState = async (): Promise<boolean> => {
+    //     if (!this.rpc) {
+    //         return true;
+    //     }
 
-            this.globalState = response;
-            return true;
-        } catch (e) {
-            this.coreDeps.log('Error calling RPC get_all_shared_state: ' + (e as Error).toString());
-            return false;
-        }
-    };
+    //     try {
+    //         const response = await this.rpc.callRpc<object, GlobalState>(SharedStateRpcMethods.GET_ALL_SHARED_STATE, {});
+    //         if (typeof response === 'string') {
+    //             this.props.log('Error calling RPC get_all_shared_state: ' + response);
+    //             return false;
+    //         }
 
-    private receiveRpcGetAllSharedState = async () => {
-        return this.globalState;
-    };
+    //         this.globalState = response;
+    //         return true;
+    //     } catch (e) {
+    //         this.props.log('Error calling RPC get_all_shared_state: ' + (e as Error).toString());
+    //         return false;
+    //     }
+    // };
+
+    // private receiveRpcGetAllSharedState = async () => {
+    //     return this.globalState;
+    // };
 
     sendRpcSetSharedState = async <State>(key: string, data: State) => {
+        if (!this.rpc) {
+            return undefined;
+        }
+
         this.globalState[key] = data;
 
         const message: SharedStateMessage = {
@@ -86,6 +104,7 @@ export class SharedStateService {
 
     private receiveRpcSetSharedState = async (args: SharedStateMessage) => {
         // console.log('received shared state', JSON.stringify(args));
+        this.setCachedValue(args.key, args.data);
 
         const subscriptions = this.subscriptions[args.key];
         if (!subscriptions) {

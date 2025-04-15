@@ -110,5 +110,5 @@
       // "~/*": ["./packages/jamtools/*"],
     }
   },
-  "exclude": ["./packages/springboard/platforms/react-native"]
+  "exclude": []
 }

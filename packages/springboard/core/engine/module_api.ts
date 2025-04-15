@@ -119,25 +119,35 @@ export class ModuleAPI {
     createAction = <Options extends ActionConfigOptions, Args extends object, ReturnValue extends undefined | void | null | object | number>(actionName: string, options: Options, cb: ActionCallback<Args, ReturnValue>): ((args: Args, options?: ActionCallOptions) => Promise<ReturnValue>) => {
         const fullActionName = `${this.fullPrefix}|action|${actionName}`;
 
-        // if (options.broadcast) {
-        //  // TODO: do conditional non-maestro broadcasting or something
-        // }
+        if (this.coreDeps.rpc.remote.role === 'server') {
+            this.coreDeps.rpc.remote.registerRpc(fullActionName, cb);
+        }
 
-        this.coreDeps.rpc.registerRpc(fullActionName, cb);
+        if (this.coreDeps.rpc.local?.role === 'server') {
+            this.coreDeps.rpc.local.registerRpc(fullActionName, cb);
+        }
 
         return async (args: Args, options?: ActionCallOptions) => {
             try {
-                if (this.coreDeps.isMaestro() || options?.mode === 'local') {
-                    return cb(args) as ReturnValue;
-                } else {
-                    const result = await this.coreDeps.rpc.callRpc<Args, ReturnValue>(fullActionName, args);
-                    if (typeof result === 'string') { // TODO: make this not think a string is an error
-                        this.coreDeps.showError(result);
-                        throw new Error(result);
+                let rpc = this.coreDeps.rpc.remote;
+
+                // if (options?.mode === 'local' || rpc.role === 'server') { // TODO: get rid of isMaestro and do something like this instead
+
+                if (this.coreDeps.isMaestro() || options?.mode === 'local' ) {// || rpc.role === 'server') {
+                    if (!this.coreDeps.rpc.local || this.coreDeps.rpc.local.role !== 'client') {
+                        return cb(args) as ReturnValue;
                     }
 
-                    return result;
+                    rpc = this.coreDeps.rpc.local!;
                 }
+
+                const result = await rpc.callRpc<Args, ReturnValue>(fullActionName, args);
+                if (typeof result === 'string') { // TODO: make this not think a string is an error
+                    this.coreDeps.showError(result);
+                    throw new Error(result);
+                }
+
+                return result;
             } catch (e) {
                 const errorMessage = `Error running action '${fullActionName}': ${new String(e)}`;
                 this.coreDeps.showError(errorMessage);
@@ -177,7 +187,7 @@ export class StatesAPI {
     */
     public createSharedState = async <State>(stateName: string, initialValue: State): Promise<StateSupervisor<State>> => {
         const fullKey = `${this.prefix}|state.shared|${stateName}`;
-        const supervisor = new SharedStateSupervisor(fullKey, initialValue, this.modDeps.services.sharedStateService);
+        const supervisor = new SharedStateSupervisor(fullKey, initialValue, this.modDeps.services.remoteSharedStateService);
         return supervisor;
     };
 
@@ -187,7 +197,7 @@ export class StatesAPI {
     public createPersistentState = async <State>(stateName: string, initialValue: State): Promise<StateSupervisor<State>> => {
         const fullKey = `${this.prefix}|state.persistent|${stateName}`;
 
-        const cachedValue = this.modDeps.services.sharedStateService.getCachedValue(fullKey) as State | undefined;
+        const cachedValue = this.modDeps.services.remoteSharedStateService.getCachedValue(fullKey) as State | undefined;
         if (cachedValue !== undefined) {
             initialValue = cachedValue;
         } else {
@@ -199,7 +209,7 @@ export class StatesAPI {
             }
         }
 
-        const supervisor = new SharedStateSupervisor(fullKey, initialValue, this.modDeps.services.sharedStateService);
+        const supervisor = new SharedStateSupervisor(fullKey, initialValue, this.modDeps.services.remoteSharedStateService);
 
         // TODO: unsubscribe through onDestroy lifecycle of StatesAPI
         // this createPersistentState function is not Maestro friendly
@@ -218,8 +228,25 @@ export class StatesAPI {
     */
     public createUserAgentState = async <State>(stateName: string, initialValue: State): Promise<StateSupervisor<State>> => {
         const fullKey = `${this.prefix}|state.useragent|${stateName}`;
-        const value = await this.coreDeps.storage.userAgent.get<State>(fullKey);
-        const supervisor = new UserAgentStateSupervisor(fullKey, value || initialValue, this.coreDeps.storage.userAgent);
+        if (this.modDeps.services.localSharedStateService) {
+            const cachedValue = this.modDeps.services.localSharedStateService.getCachedValue(fullKey) as State | undefined;
+            if (cachedValue !== undefined) {
+                initialValue = cachedValue;
+            } else {
+                const storedValue = await this.coreDeps.storage.userAgent.get<State>(fullKey);
+                if (storedValue !== null && storedValue !== undefined) { // this should really only use undefined for a signal
+                    initialValue = storedValue;
+                }
+            }
+        }
+
+        const supervisor = new SharedStateSupervisor(fullKey, initialValue, this.modDeps.services.localSharedStateService);
+
+        const sub = supervisor.subjectForKVStorePublish.subscribe(async value => {
+            await this.coreDeps.storage.userAgent.set(fullKey, value);
+        });
+        this.onDestroy(sub.unsubscribe);
+
         return supervisor;
     };
 }

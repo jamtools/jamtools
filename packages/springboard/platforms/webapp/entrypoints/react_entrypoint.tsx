@@ -26,7 +26,7 @@ type BrowserDependencies = Pick<CoreDependencies, 'rpc' | 'storage'> & {
 export const startAndRenderBrowserApp = async (browserDeps: BrowserDependencies): Promise<Springboard> => {
     const isLocal = browserDeps.isLocal || localStorage.getItem('isLocal') === 'true';
 
-    if (browserDeps.dev?.reloadCss || browserDeps.dev?.reloadJs) {
+    if ((browserDeps.dev?.reloadCss || browserDeps.dev?.reloadJs) && location.hostname === 'localhost') {
         watchForChanges(browserDeps.dev?.reloadCss, browserDeps.dev?.reloadJs);
     }
 

@@ -47,11 +47,11 @@ export const esbuildPluginHtmlGenerate = (outDir: string, htmlFilePath: string, 
                     }
                 }
 
-                let fullDestFilePath = `${outDir}/index.html`;
+                const fullDestFilePath = `${outDir}/index.html`;
                 await fs.promises.writeFile(fullDestFilePath, htmlFileContent);
 
-                fullDestFilePath = path.resolve(`${outDir}/../index.html`);
-                await fs.promises.writeFile(fullDestFilePath, htmlFileContent);
+                // fullDestFilePath = path.resolve(`${outDir}/../index.html`);
+                // await fs.promises.writeFile(fullDestFilePath, htmlFileContent);
             });
         }
     };

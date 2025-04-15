@@ -18,7 +18,10 @@ export type CoreDependencies = {
         remote: KVStore;
         userAgent: KVStore;
     };
-    rpc: Rpc;
+    rpc: {
+        remote: Rpc;
+        local?: Rpc;
+    };
     isMaestro: () => boolean;
 }
 
@@ -37,6 +40,7 @@ export type Rpc = {
     broadcastRpc: <Args>(name: string, args: Args, rpcArgs?: RpcArgs) => Promise<void>;
     registerRpc: <Args, Return>(name: string, cb: (args: Args) => Promise<Return>) => void;
     initialize: () => Promise<boolean>;
+    role: 'server' | 'client';
 }
 
 type ToastOptions = {
@@ -51,8 +55,12 @@ type ToastOptions = {
 export type ModuleDependencies = {
     moduleRegistry: ModuleRegistry;
     toast: (toastOptions: ToastOptions) => void;
-    rpc: Rpc;
+    rpc: {
+        remote: Rpc;
+        local?: Rpc;
+    };
     services: {
-        sharedStateService: SharedStateService;
+        remoteSharedStateService: SharedStateService;
+        localSharedStateService : SharedStateService;
     };
 }

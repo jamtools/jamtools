@@ -132,7 +132,10 @@ export const initApp = (coreDeps: WebsocketServerCoreDependencies): InitAppRetur
     let storedEngine: Springboard | undefined;
 
     const nodeAppDependencies: NodeAppDependencies = {
-        rpc,
+        rpc: {
+            remote: rpc,
+            local: undefined,
+        },
         storage: {
             remote: remoteKV,
             userAgent: userAgentStore,
