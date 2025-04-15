@@ -47,11 +47,26 @@ export default class Server implements Party.Server {
         this.springboardApp = await startSpringboardApp(this.nodeAppDependencies);
     }
 
+    static onFetch(req: Party.Request, lobby: Party.FetchLobby, ctx: Party.ExecutionContext) {
+        return lobby.assets.fetch('/dist/index.html');
+    }
+
     async onRequest(req: Party.Request) {
         // this.room.context.assets.fetch('/dist/parties/tic-tac-toe/index.html'); // TODO: this should have js pointers in it, fingerprinted and ready to go to be served by partykit
 
-        const prefixToRemove = '/parties/main/myroom';
+        const urlParts = new URL(req.url).pathname.split('/');
+        const partyName = urlParts[2];
+        const roomName = urlParts[3];
+
+        const prefixToRemove = `/parties/${partyName}/${roomName}`;
         const newUrl = req.url.replace(prefixToRemove, '');
+
+        const pathname = new URL(newUrl).pathname;
+
+        if (pathname === '' || pathname === '/') {
+            return (await this.room.context.assets.fetch('/dist/index.html'))!;
+        }
+
         const newReq = new Request(newUrl, req as any);
         return this.app.fetch(newReq);
     }

@@ -11,6 +11,8 @@ export class PartyKitRpcClient implements Rpc {
     rpcClient?: JSONRPCClient<ClientParams>;
     rpcServer?: JSONRPCServer;
 
+    public role = 'client' as const;
+
     private conn!: PartySocket;
 
     constructor(private host: string, private room: string) {
