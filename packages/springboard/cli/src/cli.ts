@@ -1,6 +1,7 @@
 import path from 'path';
+import fs from 'node:fs';
 
-import {program} from 'commander';
+import {Option, program} from 'commander';
 import concurrently from 'concurrently';
 
 import packageJSON from '../package.json';
@@ -16,7 +17,7 @@ program
 program
     .command('dev')
     .description('Run the Springboard development server')
-    .usage('sb dev src/index.tsx')
+    .usage('src/index.tsx')
     .argument('entrypoint')
     .action(async (entrypoint: string) => {
         let applicationEntrypoint = entrypoint;
@@ -64,7 +65,7 @@ program
 program
     .command('build')
     .description('Build the application bundles')
-    .usage('sb build src/index.tsx')
+    .usage('src/index.tsx')
     .argument('entrypoint')
     .option('-w, --watch', 'Watch for file changes')
     .option('-p, --platforms <PLATFORM>,<PLATFORM>', 'Platforms to build for')
@@ -185,13 +186,13 @@ program
 
 program
     .command('start')
-    .description('Start the application server and node Maestro process')
-    .usage('sb start')
+    .description('Start the application server')
+    .usage('')
     .action(async () => {
         concurrently(
             [
                 {command: 'node dist/server/dist/local-server.cjs', name: 'Server', prefixColor: 'blue'},
-                {command: 'node dist/node/dist/index.js', name: 'Node Maestro', prefixColor: 'green'},
+                // {command: 'node dist/node/dist/index.js', name: 'Node Maestro', prefixColor: 'green'},
             ],
             {
                 prefix: 'name',
@@ -200,4 +201,56 @@ program
         );
     });
 
-program.parse();
+    // import { readJsonSync, writeJsonSync } from 'fs-extra';
+    import { resolve } from 'path';
+
+program
+    .command('upgrade')
+    .description('Upgrade package versions with a specified prefix in package.json files.')
+    .usage('')
+    .argument('<newVersion>', 'The new version number to set for matching packages.')
+    .option('--packages <files...>', 'package.json files to update', ['package.json'])
+    .option('--prefixes <prefixes...>', 'Package name prefixes to match (can be comma-separated or repeated)', ['springboard', '@springboardjs/', '@jamtools/'])
+    .addOption(new Option('--publish <tag>').hideHelp())
+    .action(async (newVersion, options) => {
+    const { packages, prefixes, publish } = options;
+
+    console.log('publishing to ' + publish);
+    // return;
+
+    const normalizedPrefixes = (prefixes as string[]).flatMap((p) => p.split(',')).map((p) => p.trim());
+
+    for (const packageFile of packages) {
+      const packagePath = resolve(process.cwd(), packageFile);
+      try {
+        const packageJson = JSON.parse(fs.readFileSync(packagePath).toString());
+        let modified = false;
+
+        for (const depType of ['dependencies', 'devDependencies', 'peerDependencies']) {
+          if (!packageJson[depType]) continue;
+
+          for (const [dep, currentVersion] of Object.entries<string>(packageJson[depType])) {
+            console.log(normalizedPrefixes, dep)
+            if (normalizedPrefixes.some((prefix) => dep.startsWith(prefix))) {
+              packageJson[depType][dep] = newVersion;
+              console.log(`✅ Updated ${dep} to ${newVersion} in ${packageFile}`);
+              modified = true;
+            }
+          }
+        }
+
+        if (modified) {
+            fs.writeFileSync(packagePath, JSON.stringify(packageJson, null, 2));
+        } else {
+          console.log(`ℹ️ No matching packages found in ${packageFile}`);
+        }
+      } catch (err) {
+        console.error(`❌ Error processing ${packageFile}:`, err);
+      }
+    }
+});
+
+
+if (!(globalThis as any).AVOID_PROGRAM_PARSE) {
+    program.parse();
+}

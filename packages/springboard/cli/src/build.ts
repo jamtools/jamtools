@@ -237,6 +237,8 @@ export default initApp;
             'process.env.DATA_HOST': `"${process.env.DATA_HOST || ''}"`,
             'process.env.NODE_ENV': `"${process.env.NODE_ENV || ''}"`,
             'process.env.DISABLE_IO': `"${process.env.DISABLE_IO || ''}"`,
+            'process.env.IS_SERVER': `"${process.env.IS_SERVER || ''}"`,
+            'process.env.DEBUG_LOG_PERFORMANCE': `"${process.env.DEBUG_LOG_PERFORMANCE || ''}"`,
             'process.env.RELOAD_CSS': `"${options?.dev?.reloadCss || ''}"`,
             'process.env.RELOAD_JS': `"${options?.dev?.reloadJs || ''}"`,
         },
