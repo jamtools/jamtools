@@ -33,7 +33,7 @@ export class SharedStateService {
 
     constructor(private props: SharedStateServiceDependencies) {
         this.rpc = this.props.rpc;
-        if (this.rpc && !this.props.isMaestro()) {
+        if (this.rpc && !this.props.isMaestro() && this.rpc.role === 'client') {
             this.rpc.registerRpc(SharedStateRpcMethods.SET_SHARED_STATE, this.receiveRpcSetSharedState);
             // this.rpc.registerRpc(SharedStateRpcMethods.GET_ALL_SHARED_STATE, this.receiveRpcGetAllSharedState);
         }
@@ -187,6 +187,7 @@ export class SharedStateSupervisor<State> implements StateSupervisor<State> {
             return this.setState(result);
         }
 
+        this.sharedStateService.setCachedValue<State>(this.key, state);
         this.subject.next(state);
         this.subjectForKVStorePublish.next(state);
         this.sharedStateService.sendRpcSetSharedState(this.key, state);

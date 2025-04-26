@@ -23,6 +23,10 @@ type ActionCallback<Args extends object, ReturnValue = any> = (args: Args, optio
 
 // }
 
+type ModuleOptions = {
+    rpcMode?: 'remote' | 'local';
+}
+
 /**
  * The API provided in the callback when calling `registerModule`. The ModuleAPI is the entrypoint in the framework for everything pertaining to creating a module.
 */
@@ -47,7 +51,7 @@ export class ModuleAPI {
 
     public readonly deps: {core: CoreDependencies; module: ModuleDependencies, extra: ExtraModuleDependencies};
 
-    constructor(private module: Module, private prefix: string, private coreDeps: CoreDependencies, private modDeps: ModuleDependencies, extraDeps: ExtraModuleDependencies) {
+    constructor(private module: Module, private prefix: string, private coreDeps: CoreDependencies, private modDeps: ModuleDependencies, extraDeps: ExtraModuleDependencies, private options: ModuleOptions) {
         this.deps = {core: coreDeps, module: modDeps, extra: extraDeps};
     }
 
@@ -113,6 +117,10 @@ export class ModuleAPI {
         return actions;
     };
 
+    setRpcMode = (mode: 'remote' | 'local') => {
+        this.options.rpcMode = mode;
+    };
+
     /**
      * Create an action to be run on the Maestro device. If the produced action is called from the Maestro device, the framework just calls the provided callback. If it is called from another device, the framework calls the action via RPC to the Maestro device. In most cases, any main logic or calls to shared state changes should be done in an action.
     */
@@ -133,7 +141,7 @@ export class ModuleAPI {
 
                 // if (options?.mode === 'local' || rpc.role === 'server') { // TODO: get rid of isMaestro and do something like this instead
 
-                if (this.coreDeps.isMaestro() || options?.mode === 'local' ) {// || rpc.role === 'server') {
+                if (this.coreDeps.isMaestro() || this.options.rpcMode === 'local' || options?.mode === 'local') {
                     if (!this.coreDeps.rpc.local || this.coreDeps.rpc.local.role !== 'client') {
                         return cb(args) as ReturnValue;
                     }
