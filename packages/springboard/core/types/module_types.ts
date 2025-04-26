@@ -41,6 +41,7 @@ export type Rpc = {
     registerRpc: <Args, Return>(name: string, cb: (args: Args) => Promise<Return>) => void;
     initialize: () => Promise<boolean>;
     role: 'server' | 'client';
+    reconnect?: (queryParams?: Record<string, string>) => Promise<boolean>;
 }
 
 type ToastOptions = {

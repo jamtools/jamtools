@@ -33,24 +33,16 @@ import {CoreDependencies, KVStore, Rpc} from 'springboard/types/module_types';
 import {Main} from '@springboardjs/platforms-browser/entrypoints/main';
 import {Springboard} from 'springboard/engine/engine';
 
-import {makeMockCoreDependencies} from 'springboard/test/mock_core_dependencies';
 import {RpcWebviewToRN} from '../services/rpc/rpc_webview_to_rn';
 import {WebviewToReactNativeKVService} from '../services/kv/kv_rn_and_webview';
 import {BrowserJsonRpcClientAndServer} from '@springboardjs/platforms-browser/services/browser_json_rpc';
 import {TrpcKVStoreService} from 'springboard/services/trpc_kv_store_client';
-// import {getApiHost} from '@/store/utils/get_api_host';
 import {ReactNativeWebviewLocalTokenService} from '../services/rn_webview_local_token_service';
 
-const waitForPageLoad = () => new Promise<void>(resolve => {
-    window.addEventListener('DOMContentLoaded', () => {
-        resolve();
-    });
-});
+export const startJamToolsAndRenderApp = async (args: {remoteUrl: string}): Promise<Springboard> => {
+    const DATA_HOST = args.remoteUrl;
+    const WS_HOST = DATA_HOST.replace('http', 'ws');
 
-const DATA_HOST = ''; //getApiHost();
-const WS_HOST = DATA_HOST.replace('http', 'ws');
-
-export const startJamToolsAndRenderApp = async (): Promise<Springboard> => {
     let WS_FULL_URL = WS_HOST + '/ws';
     const tokenService = new ReactNativeWebviewLocalTokenService();
     const queryParams = tokenService.makeQueryParams();
@@ -59,9 +51,9 @@ export const startJamToolsAndRenderApp = async (): Promise<Springboard> => {
     }
 
     const remoteRpc = new BrowserJsonRpcClientAndServer(WS_FULL_URL);
-    const postMessage = (message: string) => (window as any).ReactNativeWebView.postMessage(message);
+    const remoteKv = new TrpcKVStoreService(DATA_HOST);
 
-    const remoteKv = makeMockCoreDependencies({store: {}}).storage.remote;
+    const postMessage = (message: string) => (window as any).ReactNativeWebView.postMessage(message);
 
     const engine = createRNWebviewEngine({remoteRpc, remoteKv, onMessageFromWebview: postMessage});
 
