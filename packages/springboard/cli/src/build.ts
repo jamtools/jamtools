@@ -158,17 +158,12 @@ export const platformTauriMaestroBuildConfig: BuildConfig = {
 const shouldOutputMetaFile = process.argv.includes('--meta');
 
 export const buildApplication = async (buildConfig: BuildConfig, options?: ApplicationBuildOptions) => {
-    const coreFile = buildConfig.platformEntrypoint();
+    let coreFile = buildConfig.platformEntrypoint();
 
-    const applicationEntrypoint = process.env.APPLICATION_ENTRYPOINT || options?.applicationEntrypoint;
+    let applicationEntrypoint = process.env.APPLICATION_ENTRYPOINT || options?.applicationEntrypoint;
     if (!applicationEntrypoint) {
         throw new Error('No application entrypoint provided');
     }
-
-    const allImports = `import initApp from '${coreFile}';
-import '${applicationEntrypoint}';
-export default initApp;
-`
 
     // const allImports = [coreFile, applicationEntrypoint].map(file => `import '${file}';`).join('\n');
 
@@ -187,6 +182,20 @@ export default initApp;
     }
 
     const dynamicEntryPath = path.join(fullOutDir, 'dynamic-entry.js');
+
+    if (path.isAbsolute(coreFile)) {
+        coreFile = path.relative(fullOutDir, coreFile).replaceAll('\\', '/');
+    }
+
+    if (path.isAbsolute(applicationEntrypoint)) {
+        applicationEntrypoint = path.relative(fullOutDir, applicationEntrypoint).replaceAll('\\', '/');
+    }
+
+    const allImports = `import initApp from '${coreFile}';
+import '${applicationEntrypoint}';
+export default initApp;
+`
+
     fs.writeFileSync(dynamicEntryPath, allImports);
 
     const outFile = path.join(fullOutDir, 'index.js');
@@ -302,10 +311,23 @@ export const buildServer = async (options?: ServerBuildOptions) => {
 
     const outFile = path.join(fullOutDir, 'local-server.cjs');
 
-    const coreFile = options?.coreFile || 'springboard-server/src/entrypoints/local-server.entrypoint.ts';
-    const applicationDistPath = options?.applicationDistPath || '../../node/dist/dynamic-entry.js';
+
+    let coreFile = options?.coreFile || 'springboard-server/src/entrypoints/local-server.entrypoint.ts';
+    let applicationDistPath = options?.applicationDistPath || '../../node/dist/dynamic-entry.js';
     // const applicationDistPath = options?.applicationDistPath || '../../node/dist/index.js';
-    const serverEntrypoint = process.env.SERVER_ENTRYPOINT || options?.serverEntrypoint;
+    let serverEntrypoint = process.env.SERVER_ENTRYPOINT || options?.serverEntrypoint;
+
+    if (path.isAbsolute(coreFile)) {
+        coreFile = path.relative(fullOutDir, coreFile).replaceAll('\\', '/');
+    }
+
+    if (path.isAbsolute(applicationDistPath)) {
+        applicationDistPath = path.relative(fullOutDir, applicationDistPath).replaceAll('\\', '/');
+    }
+
+    if (serverEntrypoint && path.isAbsolute(serverEntrypoint)) {
+        serverEntrypoint = path.relative(fullOutDir, serverEntrypoint).replaceAll('\\', '/');
+    }
 
     let allImports = `import createDeps from '${coreFile}';`;
     if (serverEntrypoint) {
