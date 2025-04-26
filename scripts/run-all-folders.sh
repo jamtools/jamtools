@@ -61,6 +61,12 @@ publish_package "$root_dir/packages/springboard/platforms/node"
 
 sleep 1
 
+bump_version "$root_dir/packages/springboard/platforms/react-native"
+bump_peer_dep "$root_dir/packages/springboard/platforms/react-native" "springboard"
+publish_package "$root_dir/packages/springboard/platforms/react-native"
+
+sleep 1
+
 bump_version "$root_dir/packages/springboard/data_storage"
 publish_package "$root_dir/packages/springboard/data_storage"
 

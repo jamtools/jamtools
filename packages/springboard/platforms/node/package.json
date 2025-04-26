@@ -1,6 +1,6 @@
 {
   "name": "@springboardjs/platforms-node",
-  "version": "0.15.0-rc14",
+  "version": "0.15.0-rc23",
   "scripts": {
     "check-types": "tsc --noEmit",
     "lint": "eslint --ext ts --ext tsx .",
@@ -8,7 +8,7 @@
   },
   "peerDependencies": {
     "isomorphic-ws": "^4.0.1",
-    "springboard": "0.15.0-rc14",
+    "springboard": "0.15.0-rc23",
     "ws": "^8.18.0"
   },
   "config": {

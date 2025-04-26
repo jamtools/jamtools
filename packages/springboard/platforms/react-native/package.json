@@ -1,6 +1,6 @@
 {
   "name": "@springboardjs/platforms-react-native",
-  "version": "1.0.0",
+  "version": "0.15.0-rc23",
   "type": "module",
   "scripts": {
     "test": "vitest --run",
@@ -12,26 +12,14 @@
   "main": "./src/index.ts",
   "module": "./src/index.ts",
   "files": [
-    "components",
-    "constants",
-    "engine",
-    "hooks",
-    "module_registry",
-    "modules",
-    "peripherals",
-    "services",
-    "src",
-    "test",
-    "types",
-    "utils"
+    "entrypoints",
+    "services"
   ],
   "peerDependencies": {
-    "springboard": "0.15.0-rc14"
+    "springboard": "0.15.0-rc23"
   },
-  "dependencies": {
-  },
-  "devDependencies": {
-  },
+  "dependencies": {},
+  "devDependencies": {},
   "config": {
     "dir": "../../../../configs"
   }
