@@ -25,9 +25,8 @@ export class NodeMidiDevicePollerService {
     private poller!: NodeMidiDevicePoller;
 
     public initialize = async () => {
-        // const amidiSupported = await AMidiDevicePoller.isSupported();
-        // this.poller = amidiSupported ? new AMidiDevicePoller() : new EasyMidiDevicePoller();
-        this.poller = new EasyMidiDevicePoller();
+        const amidiSupported = await AMidiDevicePoller.isSupported();
+        this.poller = amidiSupported ? new AMidiDevicePoller() : new EasyMidiDevicePoller();
     };
 
     public pollForDevices = async (knownDevices: string[]): Promise<MidiPollResponse> => {
