@@ -1,6 +1,6 @@
 {
   "name": "@springboardjs/platforms-react-native",
-  "version": "0.15.0-rc23",
+  "version": "0.15.0-rc24",
   "type": "module",
   "scripts": {
     "test": "vitest --run",
@@ -16,7 +16,7 @@
     "services"
   ],
   "peerDependencies": {
-    "springboard": "0.15.0-rc23"
+    "springboard": "0.15.0-rc24"
   },
   "dependencies": {},
   "devDependencies": {},

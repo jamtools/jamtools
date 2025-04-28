@@ -1,6 +1,6 @@
 {
   "name": "@jamtools/core",
-  "version": "0.15.0-rc23",
+  "version": "0.15.0-rc24",
   "type": "module",
   "scripts": {
     "test": "vitest --run",
@@ -13,7 +13,7 @@
   "module": "./src/index.ts",
   "peerDependencies": {
     "@tonejs/midi": "^2.0.0",
-    "springboard": "0.15.0-rc23"
+    "springboard": "0.15.0-rc24"
   },
   "dependencies": {
     "easymidi": "^3.0.1",

@@ -184,11 +184,11 @@ export const buildApplication = async (buildConfig: BuildConfig, options?: Appli
     const dynamicEntryPath = path.join(fullOutDir, 'dynamic-entry.js');
 
     if (path.isAbsolute(coreFile)) {
-        coreFile = path.relative(fullOutDir, coreFile).replaceAll('\\', '/');
+        coreFile = path.relative(fullOutDir, coreFile).replace(/\\/g, '/');
     }
 
     if (path.isAbsolute(applicationEntrypoint)) {
-        applicationEntrypoint = path.relative(fullOutDir, applicationEntrypoint).replaceAll('\\', '/');
+        applicationEntrypoint = path.relative(fullOutDir, applicationEntrypoint).replace(/\\/g, '/');
     }
 
     const allImports = `import initApp from '${coreFile}';
@@ -318,15 +318,15 @@ export const buildServer = async (options?: ServerBuildOptions) => {
     let serverEntrypoint = process.env.SERVER_ENTRYPOINT || options?.serverEntrypoint;
 
     if (path.isAbsolute(coreFile)) {
-        coreFile = path.relative(fullOutDir, coreFile).replaceAll('\\', '/');
+        coreFile = path.relative(fullOutDir, coreFile).replace(/\\/g, '/');
     }
 
     if (path.isAbsolute(applicationDistPath)) {
-        applicationDistPath = path.relative(fullOutDir, applicationDistPath).replaceAll('\\', '/');
+        applicationDistPath = path.relative(fullOutDir, applicationDistPath).replace(/\\/g, '/');
     }
 
     if (serverEntrypoint && path.isAbsolute(serverEntrypoint)) {
-        serverEntrypoint = path.relative(fullOutDir, serverEntrypoint).replaceAll('\\', '/');
+        serverEntrypoint = path.relative(fullOutDir, serverEntrypoint).replace(/\\/g, '/');
     }
 
     let allImports = `import createDeps from '${coreFile}';`;
