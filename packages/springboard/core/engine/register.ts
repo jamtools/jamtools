@@ -17,7 +17,7 @@ export type SpringboardRegistry = {
         moduleId: string,
         options: ModuleOptions,
         cb: ModuleCallback<ModuleReturnValue>,
-    ) => void;
+    ) => {options: typeof options; cb: typeof cb};
     registerClassModule: <T extends object>(cb: ClassModuleCallback<T>) => void;
     reset: () => void;
 };

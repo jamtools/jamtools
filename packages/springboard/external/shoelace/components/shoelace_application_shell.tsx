@@ -81,7 +81,7 @@ const Tabs = (props: TabsProps) => {
         navigate(`/modules/${modId}/${route}`);
     };
 
-    const modulesWithRoutes = props.modules.filter(m => m.routes).map(m => (
+    const modulesWithRoutes = props.modules.filter(m => m.legacyRoutes).map(m => (
         <React.Fragment key={m.moduleId}>
             <SlTab
                 slot="nav"
@@ -89,9 +89,9 @@ const Tabs = (props: TabsProps) => {
                 panel={m.moduleId}
                 active={m.moduleId === moduleId}
                 onClick={() => {
-                    if (m.routes && '/' in m.routes) {
+                    if (m.legacyRoutes && '/' in m.legacyRoutes) {
                         showRoute(m.moduleId, '/');
-                    } else if (m.routes && '' in m.routes) {
+                    } else if (m.legacyRoutes && '' in m.legacyRoutes) {
                         showRoute(m.moduleId, '');
                     }
                 }}
@@ -101,7 +101,7 @@ const Tabs = (props: TabsProps) => {
 
             <SlTabPanel name={m.moduleId}>
                 <SlTabGroup>
-                    {Object.keys((m.routes || {})).map(route => (
+                    {Object.keys((m.legacyRoutes || {})).map(route => (
                         <React.Fragment key={route}>
                             <SlTab
                                 slot={'nav'}

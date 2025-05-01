@@ -43,7 +43,7 @@ export class MacroModule implements Module<MacroConfigState> {
 
     constructor(private coreDeps: CoreDependencies, private moduleDeps: ModuleDependencies) { }
 
-    routes = {
+    legacyRoutes = {
         '': {
             component: () => {
                 const mod = MacroModule.use();

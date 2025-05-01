@@ -36,11 +36,11 @@ export const FrontendRoutes = () => {
     const rootRouteObjects: RouteObject[] = [];
 
     for (const mod of mods) {
-        if (!mod.routes) {
+        if (!mod.legacyRoutes) {
             continue;
         }
 
-        const routes = mod.routes;
+        const routes = mod.legacyRoutes;
 
         const thisModRoutes: RouteObject[] = [];
 
@@ -126,7 +126,7 @@ const RenderModuleRoutes = ({mod}: {mod: Module}) => {
         <li>
             {mod.moduleId}
             <ul>
-                {mod.routes && Object.keys(mod.routes).map(path => {
+                {mod.legacyRoutes && Object.keys(mod.legacyRoutes).map(path => {
                     let suffix = '';
                     if (path && path !== '/') {
                         if (!path.startsWith('/')) {

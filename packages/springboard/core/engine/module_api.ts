@@ -1,3 +1,5 @@
+import {RootRoute} from '@tanstack/react-router'
+
 import {SharedStateSupervisor, StateSupervisor, UserAgentStateSupervisor} from '../services/states/shared_state_service';
 import {ExtraModuleDependencies, Module, NavigationItemConfig, RegisteredRoute} from 'springboard/module_registry/module_registry';
 import {CoreDependencies, ModuleDependencies} from '../types/module_types';
@@ -56,19 +58,23 @@ export class ModuleAPI {
     */
     public readonly statesAPI = new StatesAPI(this.fullPrefix, this.coreDeps, this.modDeps);
 
+    public readonly ui = {
+        getRootRoute: (): RootRoute => ({} as unknown as RootRoute),
+    }
+
     getModule = this.modDeps.moduleRegistry.getModule.bind(this.modDeps.moduleRegistry);
 
     /**
      * Register a route with the application's React router. The route will be accessible from the browser at [myserver.com/modules/(module_id)/(route)](). The route will also be registered to the application's navigation bar.
     */
     registerRoute = (routePath: string, options: RegisterRouteOptions, component: RegisteredRoute['component']) => {
-        const routes = this.module.routes || {};
+        const routes = this.module.legacyRoutes || {};
         routes[routePath] = {
             options,
             component,
         };
 
-        this.module.routes = {...routes};
+        this.module.legacyRoutes = {...routes};
         if (this.modDeps.moduleRegistry.getCustomModule(this.module.moduleId)) {
             this.modDeps.moduleRegistry.refreshModules();
         }

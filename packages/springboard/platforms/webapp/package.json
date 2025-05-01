@@ -7,10 +7,13 @@
     "fix": "npm run lint -- --fix"
   },
   "peerDependencies": {
-    "springboard": "0.15.0-rc8",
-    "react-router-dom": "^6"
+    "react-router-dom": "^6",
+    "springboard": "0.15.0-rc8"
   },
   "config": {
     "dir": "../../../../configs"
+  },
+  "dependencies": {
+    "@tanstack/react-router": "^1.119.0"
   }
 }

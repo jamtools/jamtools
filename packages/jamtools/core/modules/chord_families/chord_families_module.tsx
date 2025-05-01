@@ -1,5 +1,7 @@
 import React from 'react';
 
+import {createRootRoute, createRoute, createRouter, Outlet, Route, useRouter} from '@tanstack/react-router'
+
 import {ScaleDegreeInfo, cycle, getScaleDegreeFromScaleAndNote, ionianScaleDegreeQualities} from './root_mode_snack/root_mode_types';
 
 import {RootModeComponent} from './root_mode_snack/root_mode_component';
@@ -95,7 +97,7 @@ type ChordFamiliesModuleReturnValue = {
 
 declare module 'springboard/module_registry/module_registry' {
     interface AllModules {
-        chord_families: ChordFamiliesModuleReturnValue;
+        chord_families: ReturnType<typeof chordFamiliesModule['cb']>;
     }
 }
 
@@ -105,7 +107,7 @@ declare module 'springboard/module_registry/module_registry' {
 //     const data = chordFamiliesModule.getChordFamilyHandler('mykey');
 // });
 
-springboard.registerModule('chord_families', {}, async (moduleAPI) => {
+const chordFamiliesModule = springboard.registerModule('chord_families', {}, async (moduleAPI) => {
     const savedData = await moduleAPI.statesAPI.createPersistentState<ChordFamilyData[]>('all_chord_families', []);
 
     const getChordFamilyHandler = (key: string): ChordFamilyHandler => {
@@ -115,6 +117,16 @@ springboard.registerModule('chord_families', {}, async (moduleAPI) => {
 
     const moduleReturnValue = {
         getChordFamilyHandler,
+        routes: [
+            createRoute({
+                path: '/modules/chord_families',
+                getParentRoute: moduleAPI.ui.getRootRoute,
+                component: () => {
+                    const router = useRouter();
+                    router.navigate({to: '/modules/chord_families'})
+                },
+            })
+        ]
     };
 
 
@@ -214,3 +226,5 @@ const getChordFromRootNote = (scale: number, rootNote: number): number[] => {
 
     return [];
 };
+
+export default chordFamiliesModule;

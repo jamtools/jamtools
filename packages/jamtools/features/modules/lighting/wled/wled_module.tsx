@@ -47,7 +47,7 @@ export class WledModule implements Module<WledState> {
 
     cleanup: (() => void)[] = [];
 
-    routes = {
+    legacyRoutes = {
         '': {
             component: () => {
                 const mod = WledModule.use();
