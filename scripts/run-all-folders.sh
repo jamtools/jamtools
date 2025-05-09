@@ -1,9 +1,10 @@
 #!/bin/bash
 
 if [ -n "$1" ]; then
-  full_version="$1"
+  version="$1"
+  full_version="${version#v}"
 else
-  full_version="0.15.0-rc8"
+  full_version="0.15.0-rc9"
 fi
 
 set e
@@ -31,17 +32,36 @@ publish_package() {
   cd "$target_dir" || exit 1
   echo "Publishing package in $target_dir"
 
-  # RC publish to npm
-  npm publish --access public --tag rc
+  # Determine if we're in CI environment
+  local is_ci="${CI:-false}"
+  local registry=""
+  local environment="local Verdaccio"
 
-  # Production publish to npm
-  # npm publish --access public --tag latest
+  # Set registry based on environment
+  if [ "$is_ci" = "true" ]; then
+    registry=""
+    environment="npm"
+  else
+    registry="--registry http://localhost:4873"
+    environment="local Verdaccio"
+  fi
 
-  # RC publish to verdaccio
-  # npm publish --registry http://localhost:4873 --access public --tag rc
+  # Determine tag based on version format
+  local tag="latest"
+  if [[ "$full_version" == *"-"* ]]; then
+    if [[ "$full_version" == *"-rc"* ]]; then
+      tag="rc"
+    elif [[ "$full_version" == *"-dev"* ]]; then
+      tag="dev"
+    else
+      tag="dev"
+    fi
+    echo "Publishing pre-release version to $environment with tag: $tag"
+  else
+    echo "Publishing production version to $environment"
+  fi
 
-  # Production publish to verdaccio
-  # npm publish --registry http://localhost:4873 --access public --tag latest
+  npm publish --access public $registry --tag "$tag"
 }
 
 bump_version "$root_dir/packages/springboard/core"
@@ -110,5 +130,10 @@ bump_peer_dep "$root_dir/packages/springboard/cli" "@springboardjs/platforms-nod
 bump_peer_dep "$root_dir/packages/springboard/cli" "@springboardjs/platforms-browser"
 bump_peer_dep "$root_dir/packages/springboard/cli" "springboard-server"
 publish_package "$root_dir/packages/springboard/cli"
+
+sleep 1
+
+bump_version "$root_dir/packages/springboard/create-springboard-app"
+publish_package "$root_dir/packages/springboard/create-springboard-app"
 
 # # npm i

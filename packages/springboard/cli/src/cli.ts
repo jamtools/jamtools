@@ -201,8 +201,9 @@ program
         );
     });
 
-    // import { readJsonSync, writeJsonSync } from 'fs-extra';
-    import { resolve } from 'path';
+// import { readJsonSync, writeJsonSync } from 'fs-extra';
+import { resolve } from 'path';
+import {generateReactNativeProject} from './generators/mobile/react_native_project_generator';
 
 program
     .command('upgrade')
@@ -249,6 +250,14 @@ program
       }
     }
 });
+
+const generateCommand = program.command('generate');
+
+generateCommand.command('mobile')
+    .description('Generate a mobile app')
+    .action(async () => {
+        generateReactNativeProject();
+    });
 
 
 if (!(globalThis as any).AVOID_PROGRAM_PARSE) {

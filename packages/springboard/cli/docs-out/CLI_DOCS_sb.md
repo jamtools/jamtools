@@ -5,7 +5,9 @@ Commands:
   dev <entrypoint>                Run the Springboard development server
   build [options] <entrypoint>    Build the application bundles
   start                           Start the application server
-  upgrade [options] <newVersion>  Upgrade package versions with a specified prefix in package.json files.
+  upgrade [options] <newVersion>  Upgrade package versions with a specified prefix in package.json
+                                  files.
+  generate
   help [command]                  display help for command
 ```
 
@@ -67,6 +69,23 @@ Arguments:
 
 Options:
   --packages <files...>     package.json files to update (default: ["package.json"])
-  --prefixes <prefixes...>  Package name prefixes to match (can be comma-separated or repeated) (default: ["springboard","jamtools"])
+  --prefixes <prefixes...>  Package name prefixes to match (can be comma-separated or repeated)
+                            (default: ["springboard","@springboardjs/","@jamtools/"])
   -h, --help                display help for command
+```
+
+
+----------
+
+## sb generate
+
+```shell
+Usage: sb generate [options] [command]
+
+Options:
+  -h, --help      display help for command
+
+Commands:
+  mobile          Generate a mobile app
+  help [command]  display help for command
 ```

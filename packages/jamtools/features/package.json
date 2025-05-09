@@ -1,6 +1,6 @@
 {
   "name": "@jamtools/features",
-  "version": "0.15.0-rc24",
+  "version": "0.15.0-dev1",
   "scripts": {
     "check-types": "tsc --noEmit",
     "lint": "eslint --ext ts --ext tsx .",
@@ -20,7 +20,7 @@
     "dir": "../../../configs"
   },
   "peerDependencies": {
-    "@jamtools/core": "0.15.0-rc24",
-    "@springboardjs/shoelace": "0.15.0-rc24"
+    "@jamtools/core": "0.15.0-dev1",
+    "@springboardjs/shoelace": "0.15.0-dev1"
   }
 }

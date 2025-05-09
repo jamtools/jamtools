@@ -1,6 +1,6 @@
 {
   "name": "springboard-cli",
-  "version": "0.15.0-rc24",
+  "version": "0.15.0-dev1",
   "main": "index.js",
   "bin": {
     "sb": "dist/cli.js"
@@ -23,9 +23,9 @@
     "build-partykit": "ESBUILD_OUT_DIR=../platforms/partykit/dist npx tsx src/cli.ts build ../../../apps/games/tic_tac_toe/tic_tac_toe.tsx --platforms partykit",
     "dev": "npm run build -- --watch",
     "dev-dev": "npx tsx src/cli.ts dev ../../../apps/handraiser/index.ts",
-    "prepublishOnly": "npm run clean && npm run build-cli && npm run add-header",
+    "prepublishOnly": "npm run clean && npm run build-cli",
     "clean": "rm -rf dist",
-    "build-cli": "tsc",
+    "build-cli": "tsc && npm run add-header",
     "add-header": "./scripts/add-node-executable-header.sh",
     "cli-docs": "npx tsx scripts/make_cli_docs.ts"
   },
@@ -36,19 +36,19 @@
     "typescript": "^5.4.5"
   },
   "peerDependencies": {
-    "@springboardjs/platforms-browser": "0.15.0-rc24",
-    "@springboardjs/platforms-node": "0.15.0-rc24",
-    "springboard": "0.15.0-rc24",
-    "springboard-server": "0.15.0-rc24"
+    "@springboardjs/platforms-browser": "0.15.0-dev1",
+    "@springboardjs/platforms-node": "0.15.0-dev1",
+    "springboard": "0.15.0-dev1",
+    "springboard-server": "0.15.0-dev1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
   "devDependencies": {
     "npm-run-all": "^4.1.5",
     "tsup": "^8.3.5",
     "tsx": "^4.19.2",
     "wrangler": "^3.107.3"
-  }
+  },
+  "description": ""
 }

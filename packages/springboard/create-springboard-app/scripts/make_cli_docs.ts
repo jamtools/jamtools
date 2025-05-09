@@ -12,15 +12,15 @@ const main = async () => {
     lines.push('');
 
     const helpText = program.helpInformation();
-    const commandsStart = helpText.indexOf('Commands:');
-    const helpTextTrimmed = helpText.slice(commandsStart);
-    lines.push('```shell\n' + helpTextTrimmed + '```');
+    // const commandsStart = helpText.indexOf('Commands:');
+    // const helpTextTrimmed = helpText.slice(commandsStart);
+    lines.push('```shell\n' + helpText + '```');
 
-    for (const command of program.commands) {
-        lines.push('\n----------\n');
-        lines.push(`## ${cliName} ${command.name()}\n`);
-        lines.push('```shell\n' + command.helpInformation() + '```\n');
-    }
+    // for (const command of program.commands) {
+    //     lines.push('\n----------\n');
+    //     lines.push(`## ${cliName} ${command.name()}\n`);
+    //     lines.push('```shell\n' + command.helpInformation() + '```\n');
+    // }
 
     const fs = await import('node:fs/promises');
     await fs.mkdir('./docs-out', {recursive: true});
