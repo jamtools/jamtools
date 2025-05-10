@@ -7,7 +7,7 @@ else
   full_version="0.15.0-rc9"
 fi
 
-set e
+set -e
 root_dir=$(pwd)
 
 bump_version() {
