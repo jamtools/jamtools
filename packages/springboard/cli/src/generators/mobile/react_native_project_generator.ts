@@ -1,5 +1,4 @@
-import packageJSON from '../../../../platform-examples/react-native/package.json';
-
-export const generateReactNativeProject = () => {
+export const generateReactNativeProject = async () => {
+    const packageJSON = await import('../../../../platform-examples/react-native/package.json');
     console.log(packageJSON);
 };

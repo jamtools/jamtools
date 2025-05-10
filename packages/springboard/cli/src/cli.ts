@@ -203,7 +203,7 @@ program
 
 // import { readJsonSync, writeJsonSync } from 'fs-extra';
 import { resolve } from 'path';
-import {generateReactNativeProject} from './generators/mobile/react_native_project_generator';
+// import {generateReactNativeProject} from './generators/mobile/react_native_project_generator';
 
 program
     .command('upgrade')
@@ -253,11 +253,11 @@ program
 
 const generateCommand = program.command('generate');
 
-generateCommand.command('mobile')
-    .description('Generate a mobile app')
-    .action(async () => {
-        generateReactNativeProject();
-    });
+// generateCommand.command('mobile')
+//     .description('Generate a mobile app')
+//     .action(async () => {
+//         await generateReactNativeProject();
+//     });
 
 
 if (!(globalThis as any).AVOID_PROGRAM_PARSE) {
