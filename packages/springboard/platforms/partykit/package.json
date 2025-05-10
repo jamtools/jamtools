@@ -1,6 +1,6 @@
 {
   "name": "@springboardjs/platforms-partykit",
-  "version": "1.0.0",
+  "version": "0.15.0-dev1",
   "main": "index.js",
   "scripts": {
     "dev": "partykit dev",
@@ -12,10 +12,12 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "partysocket": "^1.0.3",
-    "springboard": "0.15.0-rc8"
+    "partysocket": "^1.0.3"
   },
   "devDependencies": {
     "partykit": "^0.0.111"
+  },
+  "peerDependencies": {
+    "springboard": "0.15.0-dev1"
   }
 }

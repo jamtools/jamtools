@@ -87,6 +87,12 @@ publish_package "$root_dir/packages/springboard/platforms/react-native"
 
 sleep 1
 
+bump_version "$root_dir/packages/springboard/platforms/partykit"
+bump_peer_dep "$root_dir/packages/springboard/platforms/partykit" "springboard"
+publish_package "$root_dir/packages/springboard/platforms/partykit"
+
+sleep 1
+
 bump_version "$root_dir/packages/springboard/data_storage"
 publish_package "$root_dir/packages/springboard/data_storage"
 
