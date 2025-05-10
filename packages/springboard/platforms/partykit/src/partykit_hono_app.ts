@@ -68,7 +68,7 @@ export const initApp = (coreDeps: InitArgs): InitAppReturnValue => {
             remote: kvStore,
             userAgent: mockDeps.storage.userAgent,
         },
-        injectEngine: (engine: Springboard) => {
+        injectEngine: (engine) => {
             if (storedEngine) {
                 throw new Error('Engine already injected');
             }
