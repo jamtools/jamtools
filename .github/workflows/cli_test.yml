@@ -23,7 +23,7 @@ jobs:
               run: npm install -g verdaccio
             - name: Start Verdaccio
               run: |
-                verdaccio --config ./verdaccio/config/config.yaml & echo $! > verdaccio.pid
+                verdaccio --config ./verdaccio/config/config.yaml > verdaccio.log 2>&1 & echo $! > verdaccio.pid
                 for i in {1..10}; do
                   if curl -s http://localhost:4873/-/ping > /dev/null; then
                     echo "Verdaccio is up"
@@ -56,5 +56,13 @@ jobs:
             - name: Build App
               run: npm run build
               working-directory: ./test-app
+
+            - name: Display Verdaccio logs on failure
+              if: failure()
+              run: |
+                echo "Verdaccio logs:"
+                cat verdaccio.log
+
             - name: Stop Verdaccio
-              run: kill $(cat verdaccio.pid)
+              if: always()
+              run: kill $(cat verdaccio.pid) || true
