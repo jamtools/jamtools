@@ -121,6 +121,9 @@ export const createRNWebviewEngine = (props: {remoteRpc: Rpc, remoteKv: KVStore,
 
     const localStorageService = new KvDrivenLocalStorage(userAgentKVStore, 'localStorage');
     localStorageService.initialize();
+    window.localStorage.setItem = localStorageService.setItem;
+    window.localStorage.getItem = localStorageService.getItem;
+    window.localStorage.removeItem = localStorageService.removeItem;
 
     const coreDeps: CoreDependencies = {
         log: console.log,
