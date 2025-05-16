@@ -53,6 +53,20 @@ export const initApp = (coreDeps: WebsocketServerCoreDependencies): InitAppRetur
 
     app.get('/ws', upgradeWebSocket(c => service.handleConnection(c)));
 
+    app.post('/rpc/*', async (c) => {
+        const body = await c.req.text();
+        c.header('Content-Type', 'application/json');
+
+        const rpcResponse = await service.processRequestWithMiddleware(c, body);
+        if (rpcResponse) {
+            return c.text(rpcResponse);
+        }
+
+        return c.text(JSON.stringify({
+            error: 'No response',
+        }), 500);
+    });
+
     // this is necessary because https://github.com/honojs/hono/issues/3483
     // node-server serveStatic is missing absolute path support
     const serveFile = async (path: string, contentType: string, c: Context) => {

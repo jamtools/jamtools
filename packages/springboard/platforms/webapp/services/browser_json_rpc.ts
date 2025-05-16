@@ -13,7 +13,7 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
 
     public role = 'client' as const;
 
-    constructor (private url: string) {}
+    constructor (private url: string, private rpcProtocol: 'http' | 'websocket' = 'http') {}
 
     private clientId = '';
     private ws?: ReconnectingWebSocket;
@@ -99,15 +99,18 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
             ws.onopen = () => {
                 connected = true;
                 console.log('websocket connected');
-                this.rpcClient = new JSONRPCClient((request) => {
-                    request.clientId = this.getClientId();
-                    if (ws.readyState === WebSocket.OPEN) {
-                        ws.send(JSON.stringify(request));
-                        return Promise.resolve();
-                    } else {
-                        return Promise.reject(new Error('WebSocket is not open'));
-                    }
-                });
+
+                if (this.rpcProtocol === 'websocket') {
+                    this.rpcClient = new JSONRPCClient((request) => {
+                        request.clientId = this.getClientId();
+                        if (ws.readyState === WebSocket.OPEN) {
+                            ws.send(JSON.stringify(request));
+                            return Promise.resolve();
+                        } else {
+                            return Promise.reject(new Error('WebSocket is not open'));
+                        }
+                    });
+                }
                 resolve(true);
             };
 
@@ -127,6 +130,13 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
 
     initialize = async (): Promise<boolean> => {
         this.rpcServer = new JSONRPCServer();
+
+        if (this.rpcProtocol === 'http') {
+            this.rpcClient = new JSONRPCClient(async (request) => {
+                return this.sendRpcRequest(request);
+            });
+        }
+
         try {
             return this.initializeWebsocket();
         } catch (e) {
@@ -136,6 +146,7 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
     };
 
     reconnect = async (queryParams?: Record<string, string>): Promise<boolean> => {
+        // TODO: maybe we should store the query params, and use them in http
         this.ws?.close();
 
         const u = new URL(this.url);
@@ -149,5 +160,44 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
         this.url = u.toString();
 
         return this.initializeWebsocket();
+    };
+
+    private sendRpcRequest = async (req: object & {method?: string}) => {
+        const needToReconnectWebsocket = false;
+        if (needToReconnectWebsocket) {
+            this.ws?.reconnect();
+        }
+
+        const wsUrl = this.url;
+        const base = wsUrl.substring(0, wsUrl.lastIndexOf('/')).replace('ws', 'http');
+
+        let method = '';
+        const originalMethod = req.method;
+        if (originalMethod) {
+            method = originalMethod.split('|').pop()!;
+        }
+
+        const rpcUrl = `${base}/rpc${method ? `/${method}` : ''}`;
+        try {
+
+            const res = await fetch(rpcUrl, {
+                method: 'POST',
+                body: JSON.stringify(req),
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!res.ok) {
+                try {
+                    const text = await res.text();
+                    console.error('Error response for rpc request: ' + text);
+                } catch (e) {
+                    console.error('Error response for rpc request');
+                }
+            }
+        } catch (e) {
+            console.error('Error with rpc request ' + e);
+        }
     };
 }
