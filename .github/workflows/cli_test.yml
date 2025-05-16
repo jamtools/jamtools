@@ -23,7 +23,7 @@ jobs:
               run: npm install -g verdaccio
             - name: Start Verdaccio
               run: |
-                verdaccio & echo $! > verdaccio.pid
+                verdaccio --config ./verdaccio/config/config.yaml & echo $! > verdaccio.pid
                 for i in {1..10}; do
                   if curl -s http://localhost:4873/-/ping > /dev/null; then
                     echo "Verdaccio is up"
