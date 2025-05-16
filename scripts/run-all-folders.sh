@@ -7,6 +7,28 @@ else
   full_version="0.15.0-rc9"
 fi
 
+PUBLISH_MODE="verdaccio"
+
+shift # Skip the first argument (version)
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --mode)
+      PUBLISH_MODE="$2"
+      shift 2
+      ;;
+    *)
+      echo "Unknown option: $1"
+      exit 1
+      ;;
+  esac
+done
+
+# Validate mode
+if [[ "$PUBLISH_MODE" != "npm" && "$PUBLISH_MODE" != "verdaccio" ]]; then
+  echo "Error: --mode must be either 'npm' or 'verdaccio'"
+  exit 1
+fi
+
 set -e
 root_dir=$(pwd)
 
@@ -32,13 +54,11 @@ publish_package() {
   cd "$target_dir" || exit 1
   echo "Publishing package in $target_dir"
 
-  # Determine if we're in CI environment
-  local is_ci="${CI:-false}"
+  # Set registry based on mode
   local registry=""
-  local environment="local Verdaccio"
+  local environment=""
 
-  # Set registry based on environment
-  if [ "$is_ci" = "true" ]; then
+  if [ "$PUBLISH_MODE" = "npm" ]; then
     registry=""
     environment="npm"
   else
@@ -61,6 +81,7 @@ publish_package() {
     echo "Publishing production version to $environment"
   fi
 
+  # Execute the publish command
   npm publish --access public $registry --tag "$tag"
 }
 
