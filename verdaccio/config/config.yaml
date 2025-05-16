@@ -14,9 +14,9 @@
 # https://verdaccio.org/docs/best
 
 # path to a directory with all packages
-storage: /verdaccio/storage/data
+storage: ./storage/data
 # path to a directory with plugins to include
-plugins: /verdaccio/plugins
+plugins: ./plugins
 
 # https://verdaccio.org/docs/webui
 web:
@@ -55,7 +55,7 @@ web:
 # https://verdaccio.org/docs/configuration#authentication
 auth:
   htpasswd:
-    file: /verdaccio/storage/htpasswd
+    file: ./storage/htpasswd
     # Maximum amount of users allowed to register, defaults to "+infinity".
     # You can set this to -1 to disable registration.
     # max_users: 1000
