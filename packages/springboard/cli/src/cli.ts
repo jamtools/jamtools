@@ -209,7 +209,7 @@ program
     .command('upgrade')
     .description('Upgrade package versions with a specified prefix in package.json files.')
     .usage('')
-    .argument('<newVersion>', 'The new version number to set for matching packages.')
+    .argument('<new-version>', 'The new version number to set for matching packages.')
     .option('--packages <files...>', 'package.json files to update', ['package.json'])
     .option('--prefixes <prefixes...>', 'Package name prefixes to match (can be comma-separated or repeated)', ['springboard', '@springboardjs/', '@jamtools/'])
     .addOption(new Option('--publish <tag>').hideHelp())
@@ -251,7 +251,7 @@ program
     }
 });
 
-const generateCommand = program.command('generate');
+// const generateCommand = program.command('generate');
 
 // generateCommand.command('mobile')
 //     .description('Generate a mobile app')
