@@ -69,6 +69,46 @@ export const startJamToolsAndRenderApp = async (args: {remoteUrl: string}): Prom
     return engine;
 };
 
+interface Storage {
+    getItem(key: string): string | null;
+    setItem(key: string, value: string): void;
+    removeItem(key: string): void;
+}
+
+class KvDrivenLocalStorage implements Storage {
+    private kvItems: Record<string, string> = {};
+
+    constructor(private kv: KVStore, private prefix: string) {}
+
+    public initialize = async () => {
+        const kvItems = await this.kv.getAll();
+        if (!kvItems) {
+            return;
+        }
+
+        for (const [key, value] of Object.entries(kvItems)) {
+            if (key.startsWith(this.prefix)) {
+                this.kvItems[key] = value;
+            }
+        }
+    };
+
+    getItem(key: string): string | null {
+        return this.kvItems[key] || null;
+    }
+
+    setItem(key: string, value: string): void {
+        this.kvItems[key] = value;
+        this.kv.set(key, value);
+    }
+
+    removeItem(key: string): void {
+        delete this.kvItems[key];
+        this.kv.set(key, null);
+        // await this.kv.remove(key);
+    }
+}
+
 export const createRNWebviewEngine = (props: {remoteRpc: Rpc, remoteKv: KVStore, onMessageFromWebview: (message: string) => void}) => {
     const remoteRpc = props.remoteRpc;
     const localRpc = new RpcWebviewToRN({postMessage: props.onMessageFromWebview});
@@ -76,7 +116,11 @@ export const createRNWebviewEngine = (props: {remoteRpc: Rpc, remoteKv: KVStore,
     const remoteKVStore = props.remoteKv;
     const userAgentKVStore = new WebviewToReactNativeKVService({rpc: localRpc, prefix: 'userAgent'});
 
-    const isLocal = localStorage.getItem('isLocal') === 'true';
+    const isLocal = false;
+    // const isLocal = localStorage.getItem('isLocal') === 'true';
+
+    const localStorageService = new KvDrivenLocalStorage(userAgentKVStore, 'localStorage');
+    localStorageService.initialize();
 
     const coreDeps: CoreDependencies = {
         log: console.log,
