@@ -27,13 +27,13 @@ jobs:
             pkg_target: 'node20-windows-x64'
 
     uses: ./.github/workflows/desktop_build.yml
+    secrets: inherit
     with:
       platform: ${{ matrix.platform }}
       tauri_args: ${{ matrix.args }}
       tauri_target: ${{ matrix.tauri_target }}
       pkg_target: ${{ matrix.pkg_target }}
       sign_app: true
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
       APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
       APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
