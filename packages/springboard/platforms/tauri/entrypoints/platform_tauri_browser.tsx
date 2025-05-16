@@ -59,7 +59,10 @@ export const startAndRenderBrowserApp = async (): Promise<Springboard> => {
         files: {
             saveFile: async () => {},
         },
-        rpc,
+        rpc: {
+            remote: rpc,
+            local: rpc,
+        },
         isMaestro: () => isLocal,
     };
 

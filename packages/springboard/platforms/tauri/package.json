@@ -5,7 +5,11 @@
   "directories": {
     "example": "example"
   },
-  "scripts": {},
+  "scripts": {
+    "check-types": "tsc --noEmit",
+    "lint": "eslint --ext ts --ext tsx  ./",
+    "fix": "npm run lint -- --fix"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
