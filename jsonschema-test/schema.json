@@ -1,0 +1,300 @@
+{
+    "allOf": [
+        {
+            "type": "object",
+            "properties": {
+                "$schema": {
+                    "type": "string"
+                },
+                "apps": {
+                    "type": "array",
+                    "items": {
+                        "allOf": [
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "platform": {
+                                        "type": "string",
+                                        "enum": [
+                                            "browser",
+                                            "server",
+                                            "mobile",
+                                            "desktop",
+                                            "partykit_browser",
+                                            "partykit_server"
+                                        ]
+                                    },
+                                    "platformEntrypoint": {
+                                        "type": "string"
+                                    },
+                                    "applicationEntrypoint": {
+                                        "anyOf": [
+                                            {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            {
+                                                "type": "string"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "required": [
+                                    "platform",
+                                    "applicationEntrypoint"
+                                ]
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "description": {
+                                        "type": "string"
+                                    },
+                                    "documentMeta": {
+                                        "type": "object",
+                                        "properties": {
+                                            "Content-Security-Policy": {
+                                                "type": "string"
+                                            },
+                                            "keywords": {
+                                                "type": "string"
+                                            },
+                                            "author": {
+                                                "type": "string"
+                                            },
+                                            "robots": {
+                                                "type": "string"
+                                            },
+                                            "og:title": {
+                                                "type": "string"
+                                            },
+                                            "og:description": {
+                                                "type": "string"
+                                            },
+                                            "og:image": {
+                                                "type": "string"
+                                            },
+                                            "og:url": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "additionalProperties": false
+                                    },
+                                    "esbuildPlugins": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "path": {
+                                                    "type": "string"
+                                                },
+                                                "args": {},
+                                                "export": {
+                                                    "type": "string",
+                                                    "default": "default"
+                                                }
+                                            },
+                                            "required": [
+                                                "path"
+                                            ],
+                                            "additionalProperties": false
+                                        }
+                                    },
+                                    "externals": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "additionalFiles": {
+                                        "type": "object",
+                                        "additionalProperties": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "fingerprint": {
+                                        "type": "boolean"
+                                    },
+                                    "outDir": {
+                                        "type": "string"
+                                    },
+                                    "nodeModulesParentFolder": {
+                                        "type": "string"
+                                    },
+                                    "watch": {
+                                        "type": "boolean"
+                                    },
+                                    "dev": {
+                                        "type": "object",
+                                        "properties": {
+                                            "reloadJs": {
+                                                "type": "boolean"
+                                            },
+                                            "reloadCss": {
+                                                "type": "boolean"
+                                            }
+                                        },
+                                        "additionalProperties": false
+                                    }
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "platform": {
+                                        "type": "string",
+                                        "enum": [
+                                            "server",
+                                            "browser"
+                                        ]
+                                    },
+                                    "config": {
+                                        "type": "object",
+                                        "additionalProperties": {}
+                                    }
+                                },
+                                "required": [
+                                    "platform",
+                                    "config"
+                                ]
+                            }
+                        ]
+                    }
+                },
+                "ids": {
+                    "type": "object",
+                    "properties": {
+                        "kebab": {
+                            "type": "string"
+                        },
+                        "dot": {
+                            "type": "string"
+                        },
+                        "flat": {
+                            "type": "string"
+                        },
+                        "pascal": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "kebab",
+                        "dot",
+                        "flat"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "apps",
+                "ids"
+            ]
+        },
+        {
+            "type": "object",
+            "properties": {
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "documentMeta": {
+                    "type": "object",
+                    "properties": {
+                        "Content-Security-Policy": {
+                            "type": "string"
+                        },
+                        "keywords": {
+                            "type": "string"
+                        },
+                        "author": {
+                            "type": "string"
+                        },
+                        "robots": {
+                            "type": "string"
+                        },
+                        "og:title": {
+                            "type": "string"
+                        },
+                        "og:description": {
+                            "type": "string"
+                        },
+                        "og:image": {
+                            "type": "string"
+                        },
+                        "og:url": {
+                            "type": "string"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "esbuildPlugins": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "path": {
+                                "type": "string"
+                            },
+                            "args": {},
+                            "export": {
+                                "type": "string",
+                                "default": "default"
+                            }
+                        },
+                        "required": [
+                            "path"
+                        ],
+                        "additionalProperties": false
+                    }
+                },
+                "externals": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "additionalFiles": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "fingerprint": {
+                    "type": "boolean"
+                },
+                "outDir": {
+                    "type": "string"
+                },
+                "nodeModulesParentFolder": {
+                    "type": "string"
+                },
+                "watch": {
+                    "type": "boolean"
+                },
+                "dev": {
+                    "type": "object",
+                    "properties": {
+                        "reloadJs": {
+                            "type": "boolean"
+                        },
+                        "reloadCss": {
+                            "type": "boolean"
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            }
+        }
+    ],
+    "$schema": "http://json-schema.org/draft-07/schema#"
+}

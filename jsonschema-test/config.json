@@ -1,0 +1,40 @@
+{
+    "$schema": "./schema.json",
+    "title": "My App",
+    "description": "My beautiful app",
+    "ids": {
+        "kebab": "my-app",
+        "dot": "com.myorg.myapp",
+        "flat": "myapp",
+        "pascal": "MyApp"
+    },
+    "apps": [
+        {
+            "platform": "browser",
+            "applicationEntrypoint": ["./src/index.tsx"],
+            "config": {}
+        },
+        {
+            "platform": "server",
+            "applicationEntrypoint": [],
+            "config": {},
+            "esbuildPlugins": [
+                {
+                    "path": "./node_modules/@tanstack/router-plugin/esbuild",
+                    "export": "TanStackRouterEsbuild",
+                    "args": {
+                        "target": "react",
+                        "autoCodeSplitting": false,
+                        "virtualRouteConfig": {
+
+                        },
+                        "routesDirectory": "./src/routes",
+                        "generatedRouteTree": "./src/routeTree.gen.ts",
+                        "routeFileIgnorePrefix": "-",
+                        "quoteStyle": "single"
+                    }
+                }
+            ]
+        }
+    ]
+}
