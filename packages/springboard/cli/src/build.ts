@@ -136,6 +136,7 @@ const copyDesktopFiles = async (desktopPlatform: string) => {
 
 export const platformTauriWebviewBuildConfig: BuildConfig = {
     ...platformBrowserBuildConfig,
+    fingerprint: false,
     platformEntrypoint: () => '@springboardjs/platforms-tauri/entrypoints/platform_tauri_browser.tsx',
     esbuildPlugins: (args) => [
         ...platformBrowserBuildConfig.esbuildPlugins!(args),
