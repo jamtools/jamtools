@@ -258,7 +258,15 @@ export const SpringboardProvider = (props: SpringboardProviderProps) => {
 
 export const SpringboardProviderPure = (props: SpringboardProviderProps) => {
     const {engine} = props;
+
+    return (
+        <engineContext.Provider value={engine}>
+            {props.children}
+        </engineContext.Provider>
+    );
+
     const mods = engine.moduleRegistry.getModules();
+
 
     let stackedProviders: React.ReactNode = props.children;
     for (const mod of mods) {
