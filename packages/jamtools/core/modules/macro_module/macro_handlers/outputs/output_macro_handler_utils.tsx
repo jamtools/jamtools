@@ -3,7 +3,7 @@ import React from 'react';
 import {StateSupervisor} from 'springboard/services/states/shared_state_service';
 import {AddingOutputDeviceState, Edit, SavedOutputDeviceState} from './components/output_macro_edit';
 import {SoundfontPeripheral} from '../../../../peripherals/outputs/soundfont_peripheral';
-import {MidiEvent} from '@jamtools/core/modules/macro_module/macro_module_types';
+import {BaseMidiEventPayload} from '@jamtools/core/modules/macro_module/macro_module_types';
 import {MacroAPI} from '@jamtools/core/modules/macro_module/registered_macro_types';
 
 export type OutputMacroStateHolders = {
@@ -12,11 +12,11 @@ export type OutputMacroStateHolders = {
     savedMidiOutputs: StateSupervisor<SavedOutputDeviceState[]>;
 };
 
-export type MidiOutputMacroPayload = {
+export type MidiOutputMacroPayload<MidiEventPayload extends BaseMidiEventPayload = BaseMidiEventPayload> = {
     components: {
         edit: React.ElementType;
     };
-    send: (midiEvent: MidiEvent) => void;
+    send: (midiEvent: MidiEventPayload) => void;
     states: OutputMacroStateHolders;
 }
 
@@ -172,7 +172,7 @@ export const useOutputMacroWaiterAndSaver = async (macroAPI: MacroAPI, states: O
         },
     };
 
-    const send = (midiEvent: MidiEvent) => {
+    const send = (midiEvent: BaseMidiEventPayload) => {
         const saved = savedOutputDevices.getState();
         for (const device of saved) {
             if (device.device === 'soundfont') {

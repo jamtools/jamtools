@@ -10,6 +10,8 @@ export class NodeLocalJsonRpcClientAndServer implements Rpc {
     rpcClient: JSONRPCClient;
     rpcServer: JSONRPCServer;
 
+    public role = 'server' as const;
+
     constructor(private initArgs: NodeLocalJsonRpcClientAndServerInitArgs) {
         this.rpcServer = new JSONRPCServer();
         this.rpcClient = new JSONRPCClient(async (request) => {

@@ -13,17 +13,26 @@ if (location.protocol === 'https:') {
 const WS_HOST = process.env.WS_HOST || `${wsProtocol}://${location.host}`;
 const DATA_HOST = process.env.DATA_HOST || `${httpProtocol}://${location.host}`;
 
+const reloadCss = process.env.NODE_ENV === 'development' && process.env.RELOAD_CSS === 'true';
+const reloadJs = process.env.NODE_ENV === 'development' && process.env.RELOAD_JS === 'true';
+
 setTimeout(() => {
     const rpc = new BrowserJsonRpcClientAndServer(`${WS_HOST}/ws`);
     const remoteKvStore = new TrpcKVStoreService(DATA_HOST);
     const userAgentKVStore = new BrowserKVStoreService(localStorage);
 
-
     startAndRenderBrowserApp({
-        rpc,
+        rpc: {
+            remote: rpc,
+            local: undefined,
+        },
         storage: {
             userAgent: userAgentKVStore,
             remote: remoteKvStore,
+        },
+        dev: {
+            reloadCss,
+            reloadJs,
         },
     });
 });

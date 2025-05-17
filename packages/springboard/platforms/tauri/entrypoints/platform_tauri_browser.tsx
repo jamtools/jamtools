@@ -14,13 +14,6 @@ import {BrowserKVStoreService} from '@springboardjs/platforms-browser/services/b
 import {BrowserJsonRpcClientAndServer} from '@springboardjs/platforms-browser/services/browser_json_rpc';
 import {Springboard} from 'springboard/engine/engine';
 import {ExtraModuleDependencies} from 'springboard/module_registry/module_registry';
-import {makeMockCoreDependencies} from 'springboard/test/mock_core_dependencies';
-
-const waitForPageLoad = () => new Promise<void>(resolve => {
-    window.addEventListener('DOMContentLoaded', () => {
-        resolve();
-    });
-});
 
 const RUN_SIDECAR_FROM_WEBVIEW = Boolean(process.env.RUN_SIDECAR_FROM_WEBVIEW);
 
@@ -59,7 +52,10 @@ export const startAndRenderBrowserApp = async (): Promise<Springboard> => {
         files: {
             saveFile: async () => {},
         },
-        rpc,
+        rpc: {
+            remote: rpc,
+            local: rpc,
+        },
         isMaestro: () => isLocal,
     };
 
@@ -89,11 +85,11 @@ const startSidecar = async () => {
 
     try {
         await pingServer();
-        console.log('sidecar already started')
+        console.log('sidecar already started');
         return;
-    } catch (e) {}
-
-    console.log('starting sidecar');
+    } catch (e) {
+        console.log('starting sidecar');
+    }
 
     return new Promise<void>(async (resolve, reject) => {
         try {
@@ -110,7 +106,8 @@ const startSidecar = async () => {
                 env: envVars,
                 cwd: dataDir, // I wish this would solve the issue with making data dir, and not require the env vars above. but it seems it doesn't solve it
             });
-            const proc = await command.spawn();
+
+            const _proc = await command.spawn();
             // proc.write();
 
             command.stdout.on('data', (arg) => {
@@ -146,7 +143,7 @@ const startSidecar = async () => {
 
 if (RUN_SIDECAR_FROM_WEBVIEW) {
     startSidecar().then(() => {
-        console.log('sidecar started. starting webview app')
+        console.log('sidecar started. starting webview app');
         startAndRenderBrowserApp();
     });
 } else {

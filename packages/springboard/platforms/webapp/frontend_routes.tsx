@@ -2,8 +2,6 @@ import React from 'react';
 
 import {
     createBrowserRouter,
-
-    // use hash router for electron
     createHashRouter,
     Link,
     RouteObject,

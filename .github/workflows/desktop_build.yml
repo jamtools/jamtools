@@ -18,9 +18,6 @@ on:
       sign_app:
         required: true
         type: boolean
-      GITHUB_TOKEN:
-        required: false
-        type: string
       APPLE_CERTIFICATE:
         required: false
         type: string
@@ -127,7 +124,7 @@ jobs:
 
     - uses: tauri-apps/tauri-action@v0
       env:
-        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         projectPath: 'apps/desktop_tauri'
         includeDebug: true

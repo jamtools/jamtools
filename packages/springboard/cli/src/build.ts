@@ -6,26 +6,34 @@ import esbuild from 'esbuild';
 import {esbuildPluginLogBuildTime} from './esbuild_plugins/esbuild_plugin_log_build_time';
 import {esbuildPluginPlatformInject} from './esbuild_plugins/esbuild_plugin_platform_inject.js';
 import {esbuildPluginHtmlGenerate} from './esbuild_plugins/esbuild_plugin_html_generate';
+import {esbuildPluginPartykitConfig} from './esbuild_plugins/esbuild_plugin_partykit_config';
 
-export type SpringboardPlatform = 'all' | 'main' | 'mobile' | 'desktop' | 'browser_offline';
+export type SpringboardPlatform = 'all' | 'main' | 'mobile' | 'desktop' | 'browser_offline' | 'partykit';
 
 type EsbuildOptions = Parameters<typeof esbuild.build>[0];
 
 type BuildConfig = {
     platform: NonNullable<EsbuildOptions['platform']>;
+    name?: string;
     platformEntrypoint: () => string;
     esbuildPlugins?: (args: {outDir: string; nodeModulesParentDir: string, documentMeta?: DocumentMeta}) => any[];
     externals?: () => string[];
     additionalFiles?: Record<string, string>;
+    fingerprint?: boolean;
 }
 
 export type ApplicationBuildOptions = {
+    name?: string;
     documentMeta?: DocumentMeta;
     editBuildOptions?: (options: EsbuildOptions) => void;
     esbuildOutDir?: string;
     applicationEntrypoint?: string;
     nodeModulesParentFolder?: string;
     watch?: boolean;
+    dev?: {
+        reloadCss?: boolean;
+        reloadJs?: boolean;
+    };
 };
 
 export type DocumentMeta = {
@@ -43,6 +51,7 @@ export type DocumentMeta = {
 
 export const platformBrowserBuildConfig: BuildConfig = {
     platform: 'browser',
+    fingerprint: true,
     platformEntrypoint: () => '@springboardjs/platforms-browser/entrypoints/online_entrypoint.ts',
     esbuildPlugins: (args) => [
         esbuildPluginPlatformInject('browser'),
@@ -83,24 +92,25 @@ export const platformNodeBuildConfig: BuildConfig = {
     },
 };
 
-export const platformFetchBuildConfig: BuildConfig = {
-    platform: 'node',
+export const platformPartykitServerBuildConfig: BuildConfig = {
+    platform: 'neutral',
     platformEntrypoint: () => {
-        const entrypoint = '@springboardjs/platforms-node/entrypoints/node_flexible_entrypoint.ts';
-
+        const entrypoint = '@springboardjs/platforms-partykit/src/entrypoints/partykit_server_entrypoint.ts';
         return entrypoint;
     },
-    esbuildPlugins: () => [
-        esbuildPluginPlatformInject('node'),
+    esbuildPlugins: (args) => [
+        esbuildPluginPlatformInject('fetch'),
+        esbuildPluginPartykitConfig(args.outDir),
     ],
     externals: () => {
-        let externals = ['@julusian/midi', 'easymidi', 'jsdom'];
-        if (process.env.DISABLE_IO === 'true') {
-            externals = ['jsdom'];
-        }
-
+        const externals = ['@julusian/midi', 'easymidi', 'jsdom', 'node:async_hooks'];
         return externals;
     },
+};
+
+export const platformPartykitBrowserBuildConfig: BuildConfig = {
+    ...platformBrowserBuildConfig,
+    platformEntrypoint: () => '@springboardjs/platforms-partykit/src/entrypoints/partykit_browser_entrypoint.tsx',
 };
 
 const copyDesktopFiles = async (desktopPlatform: string) => {
@@ -126,6 +136,7 @@ const copyDesktopFiles = async (desktopPlatform: string) => {
 
 export const platformTauriWebviewBuildConfig: BuildConfig = {
     ...platformBrowserBuildConfig,
+    fingerprint: false,
     platformEntrypoint: () => '@springboardjs/platforms-tauri/entrypoints/platform_tauri_browser.tsx',
     esbuildPlugins: (args) => [
         ...platformBrowserBuildConfig.esbuildPlugins!(args),
@@ -148,17 +159,12 @@ export const platformTauriMaestroBuildConfig: BuildConfig = {
 const shouldOutputMetaFile = process.argv.includes('--meta');
 
 export const buildApplication = async (buildConfig: BuildConfig, options?: ApplicationBuildOptions) => {
-    const coreFile = buildConfig.platformEntrypoint();
+    let coreFile = buildConfig.platformEntrypoint();
 
-    const applicationEntrypoint = process.env.APPLICATION_ENTRYPOINT || options?.applicationEntrypoint;
+    let applicationEntrypoint = process.env.APPLICATION_ENTRYPOINT || options?.applicationEntrypoint;
     if (!applicationEntrypoint) {
         throw new Error('No application entrypoint provided');
     }
-
-    const allImports = `import initApp from '${coreFile}';
-import '${applicationEntrypoint}';
-export default initApp;
-`
 
     // const allImports = [coreFile, applicationEntrypoint].map(file => `import '${file}';`).join('\n');
 
@@ -177,6 +183,20 @@ export default initApp;
     }
 
     const dynamicEntryPath = path.join(fullOutDir, 'dynamic-entry.js');
+
+    if (path.isAbsolute(coreFile)) {
+        coreFile = path.relative(fullOutDir, coreFile).replace(/\\/g, '/');
+    }
+
+    if (path.isAbsolute(applicationEntrypoint)) {
+        applicationEntrypoint = path.relative(fullOutDir, applicationEntrypoint).replace(/\\/g, '/');
+    }
+
+    const allImports = `import initApp from '${coreFile}';
+import '${applicationEntrypoint}';
+export default initApp;
+`
+
     fs.writeFileSync(dynamicEntryPath, allImports);
 
     const outFile = path.join(fullOutDir, 'index.js');
@@ -192,20 +212,27 @@ export default initApp;
         throw new Error('Failed to find node_modules folder in current directory and parent directories')
     }
 
+    const platformName = buildConfig.name || buildConfig.platform;
+    const appName = options?.name;
+    const fullName = appName ? appName + '-' + platformName : platformName;
+
     const esbuildOptions: EsbuildOptions = {
         entryPoints: [dynamicEntryPath],
         metafile: true,
-        assetNames: '[dir]/[name]-[hash]',
-        chunkNames: '[dir]/[name]-[hash]',
-        entryNames: '[dir]/[name]-[hash]',
+        ...(buildConfig.fingerprint ? {
+            assetNames: '[dir]/[name]-[hash]',
+            chunkNames: '[dir]/[name]-[hash]',
+            entryNames: '[dir]/[name]-[hash]',
+        } : {}),
         bundle: true,
         sourcemap: true,
         outfile: outFile,
         platform: buildConfig.platform,
+        mainFields: buildConfig.platform === 'neutral' ? ['module', 'main'] : undefined,
         minify: process.env.NODE_ENV === 'production',
         target: 'es2020',
         plugins: [
-            esbuildPluginLogBuildTime(buildConfig.platform),
+            esbuildPluginLogBuildTime(fullName),
             ...(buildConfig.esbuildPlugins?.({
                 outDir: fullOutDir,
                 nodeModulesParentDir: nodeModulesParentFolder,
@@ -220,6 +247,10 @@ export default initApp;
             'process.env.DATA_HOST': `"${process.env.DATA_HOST || ''}"`,
             'process.env.NODE_ENV': `"${process.env.NODE_ENV || ''}"`,
             'process.env.DISABLE_IO': `"${process.env.DISABLE_IO || ''}"`,
+            'process.env.IS_SERVER': `"${process.env.IS_SERVER || ''}"`,
+            'process.env.DEBUG_LOG_PERFORMANCE': `"${process.env.DEBUG_LOG_PERFORMANCE || ''}"`,
+            'process.env.RELOAD_CSS': `"${options?.dev?.reloadCss || ''}"`,
+            'process.env.RELOAD_JS': `"${options?.dev?.reloadJs || ''}"`,
         },
     };
 
@@ -239,6 +270,11 @@ export default initApp;
         const ctx = await esbuild.context(esbuildOptions);
         await ctx.watch();
         console.log(`Watching for changes for ${buildConfig.platform} application build...`);
+
+        if (options?.dev?.reloadCss || options?.dev?.reloadJs) {
+            await ctx.serve();
+        }
+
         return;
     }
 
@@ -276,10 +312,23 @@ export const buildServer = async (options?: ServerBuildOptions) => {
 
     const outFile = path.join(fullOutDir, 'local-server.cjs');
 
-    const coreFile = options?.coreFile || 'springboard-server/src/entrypoints/local-server.entrypoint.ts';
-    const applicationDistPath = options?.applicationDistPath || '../../node/dist/dynamic-entry.js';
+
+    let coreFile = options?.coreFile || 'springboard-server/src/entrypoints/local-server.entrypoint.ts';
+    let applicationDistPath = options?.applicationDistPath || '../../node/dist/dynamic-entry.js';
     // const applicationDistPath = options?.applicationDistPath || '../../node/dist/index.js';
-    const serverEntrypoint = process.env.SERVER_ENTRYPOINT || options?.serverEntrypoint;
+    let serverEntrypoint = process.env.SERVER_ENTRYPOINT || options?.serverEntrypoint;
+
+    if (path.isAbsolute(coreFile)) {
+        coreFile = path.relative(fullOutDir, coreFile).replace(/\\/g, '/');
+    }
+
+    if (path.isAbsolute(applicationDistPath)) {
+        applicationDistPath = path.relative(fullOutDir, applicationDistPath).replace(/\\/g, '/');
+    }
+
+    if (serverEntrypoint && path.isAbsolute(serverEntrypoint)) {
+        serverEntrypoint = path.relative(fullOutDir, serverEntrypoint).replace(/\\/g, '/');
+    }
 
     let allImports = `import createDeps from '${coreFile}';`;
     if (serverEntrypoint) {

@@ -1,0 +1,26 @@
+{
+  "name": "@springboardjs/platforms-react-native",
+  "version": "0.15.0-dev1",
+  "type": "module",
+  "scripts": {
+    "test": "vitest --run",
+    "test:watch": "vitest",
+    "check-types": "tsc --noEmit",
+    "lint": "eslint --ext ts --ext tsx  ./",
+    "fix": "npm run lint -- --fix"
+  },
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "files": [
+    "entrypoints",
+    "services"
+  ],
+  "peerDependencies": {
+    "springboard": "0.15.0-dev1"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "config": {
+    "dir": "../../../../configs"
+  }
+}

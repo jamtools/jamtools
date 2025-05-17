@@ -225,6 +225,6 @@ export class NodeMidiService implements MidiService {
 
         this.initialized = true;
 
-        setTimeout(this.pollForConnectedDevices, 2000);
+        setTimeout(this.pollForConnectedDevices, 10000);
     };
 }

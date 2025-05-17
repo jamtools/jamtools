@@ -1,6 +1,7 @@
 import {produce} from 'immer';
-import {useEffect, useState} from 'react';
 import {Subject} from 'rxjs';
+
+import {useSubject} from 'springboard/module_registry/module_registry';
 
 import {CoreDependencies, KVStore, Rpc} from 'springboard/types/module_types';
 
@@ -15,22 +16,31 @@ type SubscribeCallback<Value> = (value: Value) => void;
 
 enum SharedStateRpcMethods {
     SET_SHARED_STATE = 'shared_state.set_shared_state',
-    GET_ALL_SHARED_STATE = 'shared_state.get_all_shared_state',
+    // GET_ALL_SHARED_STATE = 'shared_state.get_all_shared_state',
+}
+
+type SharedStateServiceDependencies = {
+    rpc?: Rpc;
+    kv: KVStore;
+    log: (message: string) => void;
+    isMaestro: () => boolean;
 }
 
 export class SharedStateService {
     private globalState: GlobalState = {};
-    private rpc: Rpc;
+    private rpc?: Rpc;
     private subscriptions: Record<string, Array<SubscribeCallback<any>>> = {};
 
-    constructor(private coreDeps: CoreDependencies) {
-        this.rpc = this.coreDeps.rpc;
-        this.rpc.registerRpc(SharedStateRpcMethods.SET_SHARED_STATE, this.receiveRpcSetSharedState);
-        this.rpc.registerRpc(SharedStateRpcMethods.GET_ALL_SHARED_STATE, this.receiveRpcGetAllSharedState);
+    constructor(private props: SharedStateServiceDependencies) {
+        this.rpc = this.props.rpc;
+        if (this.rpc && !this.props.isMaestro() && this.rpc.role === 'client') {
+            this.rpc.registerRpc(SharedStateRpcMethods.SET_SHARED_STATE, this.receiveRpcSetSharedState);
+            // this.rpc.registerRpc(SharedStateRpcMethods.GET_ALL_SHARED_STATE, this.receiveRpcGetAllSharedState);
+        }
     }
 
     initialize = async () => {
-        const allValues = await this.coreDeps.storage.remote.getAll();
+        const allValues = await this.props.kv.getAll();
         if (allValues) {
             for (const key of Object.keys(allValues)) {
                 this.setCachedValue(key, allValues[key]);
@@ -51,27 +61,36 @@ export class SharedStateService {
         this.globalState[key] = value;
     };
 
-    sendRpcGetAllSharedState = async (): Promise<boolean> => {
-        try {
-            const response = await this.rpc.callRpc<object, GlobalState>(SharedStateRpcMethods.GET_ALL_SHARED_STATE, {});
-            if (typeof response === 'string') {
-                this.coreDeps.log('Error calling RPC get_all_shared_state: ' + response);
-                return false;
-            }
+    // TODO: this function isn't called anywhere, so it should probably be removed
+    // sendRpcGetAllSharedState = async (): Promise<boolean> => {
+    //     if (!this.rpc) {
+    //         return true;
+    //     }
 
-            this.globalState = response;
-            return true;
-        } catch (e) {
-            this.coreDeps.log('Error calling RPC get_all_shared_state: ' + (e as Error).toString());
-            return false;
-        }
-    };
+    //     try {
+    //         const response = await this.rpc.callRpc<object, GlobalState>(SharedStateRpcMethods.GET_ALL_SHARED_STATE, {});
+    //         if (typeof response === 'string') {
+    //             this.props.log('Error calling RPC get_all_shared_state: ' + response);
+    //             return false;
+    //         }
 
-    private receiveRpcGetAllSharedState = async () => {
-        return this.globalState;
-    };
+    //         this.globalState = response;
+    //         return true;
+    //     } catch (e) {
+    //         this.props.log('Error calling RPC get_all_shared_state: ' + (e as Error).toString());
+    //         return false;
+    //     }
+    // };
+
+    // private receiveRpcGetAllSharedState = async () => {
+    //     return this.globalState;
+    // };
 
     sendRpcSetSharedState = async <State>(key: string, data: State) => {
+        if (!this.rpc) {
+            return undefined;
+        }
+
         this.globalState[key] = data;
 
         const message: SharedStateMessage = {
@@ -85,6 +104,7 @@ export class SharedStateService {
 
     private receiveRpcSetSharedState = async (args: SharedStateMessage) => {
         // console.log('received shared state', JSON.stringify(args));
+        this.setCachedValue(args.key, args.data);
 
         const subscriptions = this.subscriptions[args.key];
         if (!subscriptions) {
@@ -101,8 +121,8 @@ export class SharedStateService {
 export type StateSupervisor<State> = {
     subject: Subject<State>;
     getState(): State;
-    setState(stateOrCallback: State | StateCallback<State>): Promise<unknown>;
-    setStateImmer(immerCallback: StateCallbackImmer<State>): Promise<unknown>;
+    setState(stateOrCallback: State | StateCallback<State>): State;
+    setStateImmer(immerCallback: StateCallbackImmer<State>): State;
     useState(): State;
 }
 
@@ -121,22 +141,22 @@ export class UserAgentStateSupervisor<State> implements StateSupervisor<State> {
         return this.currentValue;
     };
 
-    public setState = async (stateOrCallback: State | StateCallback<State>): Promise<unknown> => {
-        if (typeof stateOrCallback === 'function') {
-            const cb = stateOrCallback as StateCallback<State>;
+    public setState = (state: State | StateCallback<State>): State => {
+        if (typeof state === 'function') {
+            const cb = state as StateCallback<State>;
             const result = cb(this.getState());
-            this.setState(result);
-            return;
+            return this.setState(result);
         }
 
-        this.currentValue = stateOrCallback;
+        this.currentValue = state;
         this.subject.next(this.currentValue);
-        return this.userAgentStore.set(this.key, stateOrCallback);
+        this.userAgentStore.set(this.key, state);
+        return state;
     };
 
-    public setStateImmer = async (immerCallback: StateCallbackImmer<State>): Promise<void> => {
+    public setStateImmer = (immerCallback: StateCallbackImmer<State>): State => {
         const result = produce(this.getState(), immerCallback);
-        await this.setState(result);
+        return this.setState(result);
     };
 
     public useState = (): State => {
@@ -160,39 +180,26 @@ export class SharedStateSupervisor<State> implements StateSupervisor<State> {
         return this.sharedStateService.getCachedValue(this.key)!;
     };
 
-    public setState = async (state: State | StateCallback<State>): Promise<unknown> => {
+    public setState = (state: State | StateCallback<State>): State => {
         if (typeof state === 'function') {
             const cb = state as StateCallback<State>;
             const result = cb(this.getState());
-            this.setState(result);
-            return;
+            return this.setState(result);
         }
 
+        this.sharedStateService.setCachedValue<State>(this.key, state);
         this.subject.next(state);
         this.subjectForKVStorePublish.next(state);
-        return this.sharedStateService.sendRpcSetSharedState(this.key, state);
+        this.sharedStateService.sendRpcSetSharedState(this.key, state);
+        return state;
     };
 
-    public setStateImmer = async (immerCallback: StateCallbackImmer<State>): Promise<void> => {
+    public setStateImmer = (immerCallback: StateCallbackImmer<State>): State => {
         const result = produce(this.getState(), immerCallback);
-        await this.setState(result);
+        return this.setState(result);
     };
 
     public useState = (): State => {
         return useSubject<State>(this.getState(), this.subject)!;
     };
 }
-
-export const useSubject = <T,>(initialData: T, subject: Subject<T>): T => {
-    const [data, setData] = useState(initialData);
-
-    useEffect(() => {
-        const subscription = subject.subscribe((newData) => {
-            setData(newData);
-        });
-
-        return () => subscription.unsubscribe();
-    }, []);
-
-    return data;
-};

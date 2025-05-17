@@ -11,9 +11,12 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
     rpcClient?: JSONRPCClient<ClientParams>;
     rpcServer?: JSONRPCServer;
 
+    public role = 'client' as const;
+
     constructor (private url: string) {}
 
     private clientId = '';
+    private ws?: ReconnectingWebSocket;
 
     getClientId = () => {
         if (this.clientId) {
@@ -67,9 +70,11 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
             return false;
         }
 
-        const fullUrl = `${this.url}?clientId=${this.getClientId()}`;
+        const queryParamSeparator = this.url.includes('?') ? '&' : '?';
+        const fullUrl = `${this.url}${queryParamSeparator}clientId=${this.getClientId()}`;
         // const ws = new WebSocket(fullUrl);
         const ws = new ReconnectingWebSocket(fullUrl, undefined, {WebSocket});
+        this.ws = ws;
 
         ws.onmessage = async (event) => {
             const jsonMessage = JSON.parse(event.data);
@@ -128,5 +133,21 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
             // console.error(`failed to connect to websocket server`, e);
             return false;
         }
+    };
+
+    reconnect = async (queryParams?: Record<string, string>): Promise<boolean> => {
+        this.ws?.close();
+
+        const u = new URL(this.url);
+
+        if (queryParams) {
+            for (const [key, value] of Object.entries(queryParams)) {
+                u.searchParams.set(key, value);
+            }
+        }
+
+        this.url = u.toString();
+
+        return this.initializeWebsocket();
     };
 }

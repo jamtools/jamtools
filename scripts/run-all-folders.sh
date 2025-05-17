@@ -1,12 +1,35 @@
 #!/bin/bash
 
 if [ -n "$1" ]; then
-  full_version="$1"
+  version="$1"
+  full_version="${version#v}"
 else
-  full_version="0.15.0-rc8"
+  full_version="0.15.0-rc9"
 fi
 
-set e
+PUBLISH_MODE="verdaccio"
+
+shift # Skip the first argument (version)
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --mode)
+      PUBLISH_MODE="$2"
+      shift 2
+      ;;
+    *)
+      echo "Unknown option: $1"
+      exit 1
+      ;;
+  esac
+done
+
+# Validate mode
+if [[ "$PUBLISH_MODE" != "npm" && "$PUBLISH_MODE" != "verdaccio" ]]; then
+  echo "Error: --mode must be either 'npm' or 'verdaccio'"
+  exit 1
+fi
+
+set -e
 root_dir=$(pwd)
 
 bump_version() {
@@ -31,17 +54,35 @@ publish_package() {
   cd "$target_dir" || exit 1
   echo "Publishing package in $target_dir"
 
-  # RC publish to npm
-  npm publish --access public --tag rc
+  # Set registry based on mode
+  local registry=""
+  local environment=""
 
-  # Production publish to npm
-  # npm publish --access public --tag latest
+  if [ "$PUBLISH_MODE" = "npm" ]; then
+    registry=""
+    environment="npm"
+  else
+    registry="--registry http://localhost:4873"
+    environment="local Verdaccio"
+  fi
 
-  # RC publish to verdaccio
-  # npm publish --registry http://localhost:4873 --access public --tag rc
+  # Determine tag based on version format
+  local tag="latest"
+  if [[ "$full_version" == *"-"* ]]; then
+    if [[ "$full_version" == *"-rc"* ]]; then
+      tag="rc"
+    elif [[ "$full_version" == *"-dev"* ]]; then
+      tag="dev"
+    else
+      tag="dev"
+    fi
+    echo "Publishing pre-release version to $environment with tag: $tag"
+  else
+    echo "Publishing production version to $environment"
+  fi
 
-  # Production publish to verdaccio
-  # npm publish --registry http://localhost:4873 --access public --tag latest
+  # Execute the publish command
+  npm publish --access public $registry --tag "$tag"
 }
 
 bump_version "$root_dir/packages/springboard/core"
@@ -58,6 +99,18 @@ sleep 1
 bump_version "$root_dir/packages/springboard/platforms/node"
 bump_peer_dep "$root_dir/packages/springboard/platforms/node" "springboard"
 publish_package "$root_dir/packages/springboard/platforms/node"
+
+sleep 1
+
+bump_version "$root_dir/packages/springboard/platforms/react-native"
+bump_peer_dep "$root_dir/packages/springboard/platforms/react-native" "springboard"
+publish_package "$root_dir/packages/springboard/platforms/react-native"
+
+sleep 1
+
+bump_version "$root_dir/packages/springboard/platforms/partykit"
+bump_peer_dep "$root_dir/packages/springboard/platforms/partykit" "springboard"
+publish_package "$root_dir/packages/springboard/platforms/partykit"
 
 sleep 1
 
@@ -104,5 +157,10 @@ bump_peer_dep "$root_dir/packages/springboard/cli" "@springboardjs/platforms-nod
 bump_peer_dep "$root_dir/packages/springboard/cli" "@springboardjs/platforms-browser"
 bump_peer_dep "$root_dir/packages/springboard/cli" "springboard-server"
 publish_package "$root_dir/packages/springboard/cli"
+
+sleep 1
+
+bump_version "$root_dir/packages/springboard/create-springboard-app"
+publish_package "$root_dir/packages/springboard/create-springboard-app"
 
 # # npm i

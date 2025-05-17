@@ -16,6 +16,8 @@ export class NodeJsonRpcClientAndServer implements Rpc {
 
     private clientId = '';
 
+    public role = 'client' as const;
+
     initialize = async (): Promise<boolean> => {
         this.clientId = await this.getClientId();
 

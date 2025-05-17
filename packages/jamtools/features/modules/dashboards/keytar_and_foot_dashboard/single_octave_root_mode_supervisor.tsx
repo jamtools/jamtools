@@ -18,7 +18,6 @@ const muteKeyboard = (midiOutput: OutputMidiDevice) => {
     for (let i = 0; i < 84; i++) {
         midiOutput.send({
             number: i,
-            channel: 1,
             type: 'noteoff',
         });
     }
@@ -98,10 +97,10 @@ export class SingleOctaveRootModeSupervisor {
         }
 
         if (this.midiState.currentChordRoot) {
-            this.macros.monoBassOutput.send({type: 'noteoff', number: this.midiState.currentChordRoot, channel: 1});
+            this.macros.monoBassOutput.send({type: 'noteoff', number: this.midiState.currentChordRoot});
         }
 
-        this.macros.monoBassOutput.send({type: 'noteon', number: event.number, channel: 1});
+        this.macros.monoBassOutput.send({type: 'noteon', number: event.number});
 
         this.midiState = {
             ...this.midiState,

@@ -31,6 +31,8 @@ class MockKVStore implements KVStore {
 }
 
 export class MockRpcService implements Rpc {
+    public role = 'client' as const;
+
     callRpc = async <Args, Return>(name: string, args: Args, rpcArgs?: RpcArgs | undefined) => {
         return {} as Return;
     };
@@ -64,7 +66,10 @@ export const makeMockCoreDependencies = ({store}: MakeMockCoreDependenciesOption
         files: {
             saveFile: async () => {},
         },
-        rpc: new MockRpcService(),
+        rpc: {
+            remote: new MockRpcService(),
+            local: undefined,
+        },
     } satisfies CoreDependencies;
 };
 

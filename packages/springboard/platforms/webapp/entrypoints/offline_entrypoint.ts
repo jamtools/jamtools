@@ -13,7 +13,10 @@ setTimeout(() => {
     const userAgentKVStore = new BrowserKVStoreService(localStorage);
 
     startAndRenderBrowserApp({
-        rpc,
+        rpc: {
+            remote: rpc,
+            local: undefined,
+        },
         isLocal: true,
         storage: {
             userAgent: userAgentKVStore,

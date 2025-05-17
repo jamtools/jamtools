@@ -1,0 +1,33 @@
+{
+  "name": "create-springboard-app",
+  "version": "0.15.0-dev1",
+  "main": "index.js",
+  "bin": {
+    "create-springboard-app": "dist/cli.js"
+  },
+  "types": "./types",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "dependencies": {
+    "commander": "^12.1.0",
+    "tslib": "^2.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "prebuild": "./scripts/generate-example-string.sh",
+    "prepublishOnly": "npm run clean && npm run prebuild && npm run build-cli",
+    "build-cli": "tsc && npm run add-header",
+    "add-header": "./scripts/add-node-executable-header.sh",
+    "clean": "rm -rf dist",
+    "cli-docs": "npx tsx scripts/make_cli_docs.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}

@@ -1,7 +1,8 @@
 import fs from 'fs';
+import path from 'path';
 
 import type {Plugin} from 'esbuild';
-import type {DocumentMeta} from 'src/build';
+import type {DocumentMeta} from '../build';
 
 export const esbuildPluginHtmlGenerate = (outDir: string, htmlFilePath: string, documentMeta?: DocumentMeta): Plugin => {
     return {
@@ -48,6 +49,9 @@ export const esbuildPluginHtmlGenerate = (outDir: string, htmlFilePath: string, 
 
                 const fullDestFilePath = `${outDir}/index.html`;
                 await fs.promises.writeFile(fullDestFilePath, htmlFileContent);
+
+                // fullDestFilePath = path.resolve(`${outDir}/../index.html`);
+                // await fs.promises.writeFile(fullDestFilePath, htmlFileContent);
             });
         }
     };

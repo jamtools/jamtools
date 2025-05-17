@@ -1,0 +1,60 @@
+.hand-raiser-main {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 20px;
+}
+
+.hand-raiser-center {
+  display: flex;
+  gap: 10;
+  justify-content: center;
+  height: 100%;
+}
+
+
+.hand-slider-container {
+  width: 200px;
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 20px;
+}
+
+.hand-raiser-main .slider-container {
+  display: flex;
+  flex-direction: row;
+  gap: 10;
+  align-items: center;
+  z-index: 1;
+  margin-bottom: 20px;
+}
+
+
+.hand {
+  pointer-events: none;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.hand img {
+  width: 200px;
+}
+
+.hand-raiser-main .slider {
+  display: inline-block;
+  width: 60px;
+}
+
+.hand-raiser-main .slider input {
+  writing-mode: vertical-rl;
+  direction: rtl;
+}
+
+.hand-raiser-main .slider pre {
+  display: inline;
+}

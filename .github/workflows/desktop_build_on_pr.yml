@@ -33,4 +33,4 @@ jobs:
       tauri_target: ${{ matrix.tauri_target }}
       pkg_target: ${{ matrix.pkg_target }}
       sign_app: false
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    secrets: inherit

@@ -5,7 +5,11 @@
   "directories": {
     "example": "example"
   },
-  "scripts": {},
+  "scripts": {
+    "check-types": "tsc --noEmit",
+    "lint": "eslint --ext ts --ext tsx  ./",
+    "fix": "npm run lint -- --fix"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -13,5 +17,8 @@
   "dependencies": {
     "@tauri-apps/api": "^2.2.0",
     "@tauri-apps/plugin-shell": "^2.2.0"
+  },
+  "config": {
+    "dir": "../../../../configs"
   }
 }

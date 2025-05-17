@@ -30,7 +30,7 @@ export const initApp = (coreDeps: WebsocketServerCoreDependencies): InitAppRetur
 
     app.use('*', cors());
 
-    const service = new NodeJsonRpcServer({
+    const service: NodeJsonRpcServer = new NodeJsonRpcServer({
         processRequest: async (message) => {
             return rpc!.processRequest(message);
         },
@@ -60,7 +60,6 @@ export const initApp = (coreDeps: WebsocketServerCoreDependencies): InitAppRetur
             const fullPath = `${webappDistFolder}/${path}`;
             const fs = await import('node:fs');
             const data = await fs.promises.readFile(fullPath, 'utf-8');
-            c.header('Content-Type', contentType);
             c.status(200);
             return data;
         } catch (error) {
@@ -74,11 +73,15 @@ export const initApp = (coreDeps: WebsocketServerCoreDependencies): InitAppRetur
         root: webappDistFolder,
         path: 'index.html',
         getContent: async (path, c) => {
-            c.res.headers.append('Cache-Control', 'no-store, no-cache, must-revalidate');
-            c.res.headers.append('Pragma', 'no-cache');
-            c.res.headers.append('Expires', '0');
             return serveFile('index.html', 'text/html', c);
-        }
+        },
+        onFound: (path, c) => {
+            // c.header('Cross-Origin-Embedder-Policy',  'require-corp');
+            // c.header('Cross-Origin-Opener-Policy',  'same-origin');
+            c.header('Cache-Control', 'no-store, no-cache, must-revalidate');
+            c.header('Pragma', 'no-cache');
+            c.header('Expires', '0');
+        },
     }));
 
     app.use('/dist/:file', async (c, next) => {
@@ -88,23 +91,27 @@ export const initApp = (coreDeps: WebsocketServerCoreDependencies): InitAppRetur
             return c.text('Source map disabled', 404);
         }
 
+        const contentType = requestedFile.endsWith('.js') ? 'text/javascript' : 'text/css';
         return serveStatic({
             root: webappDistFolder,
             path: `/${requestedFile}`,
             getContent: async (path, c) => {
-                const contentType = requestedFile.endsWith('.js') ? 'text/javascript' : 'text/css';
                 return serveFile(requestedFile, contentType, c);
-            }
+            },
+            onFound: (path, c) => {
+                c.header('Content-Type', contentType);
+                c.header('Cache-Control', 'public, max-age=31536000, immutable');
+            },
         })(c, next);
     });
 
-    app.use('/dist/manifest.json', serveStatic({
-        root: webappDistFolder,
-        path: '/manifest.json',
-        getContent: async (path, c) => {
-            return serveFile('manifest.json', 'application/json', c);
-        }
-    }));
+    // app.use('/dist/manifest.json', serveStatic({
+    //     root: webappDistFolder,
+    //     path: '/manifest.json',
+    //     getContent: async (path, c) => {
+    //         return serveFile('manifest.json', 'application/json', c);
+    //     }
+    // }));
 
     // OTEL traces route
     app.post('/v1/traces', async (c) => {
@@ -132,7 +139,10 @@ export const initApp = (coreDeps: WebsocketServerCoreDependencies): InitAppRetur
     let storedEngine: Springboard | undefined;
 
     const nodeAppDependencies: NodeAppDependencies = {
-        rpc,
+        rpc: {
+            remote: rpc,
+            local: undefined,
+        },
         storage: {
             remote: remoteKV,
             userAgent: userAgentStore,
@@ -174,11 +184,15 @@ export const initApp = (coreDeps: WebsocketServerCoreDependencies): InitAppRetur
         root: webappDistFolder,
         path: 'index.html',
         getContent: async (path, c) => {
-            c.res.headers.append('Cache-Control', 'no-store, no-cache, must-revalidate');
-            c.res.headers.append('Pragma', 'no-cache');
-            c.res.headers.append('Expires', '0');
             return serveFile('index.html', 'text/html', c);
-        }
+        },
+        onFound: (path, c) => {
+            // c.header('Cross-Origin-Embedder-Policy',  'require-corp');
+            // c.header('Cross-Origin-Opener-Policy',  'same-origin');
+            c.header('Cache-Control', 'no-store, no-cache, must-revalidate');
+            c.header('Pragma', 'no-cache');
+            c.header('Expires', '0');
+        },
     }));
 
     return {app, injectWebSocket, nodeAppDependencies};

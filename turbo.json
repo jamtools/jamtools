@@ -5,25 +5,30 @@
         "dependsOn": ["^build"],
         "outputs": ["dist"],
         "cache": false,
-        "env": ["WS_HOST", "DATA_HOST", "NODE_ENV"]
+        "env": ["WS_HOST", "DATA_HOST", "NODE_ENV", "NODE_MODULES_PARENT_FOLDER"]
       },
       "build-saas": {
         "dependsOn": ["^build-saas"],
         "outputs": ["dist"],
         "cache": false,
-        "env": ["WS_HOST", "DATA_HOST", "NODE_ENV"]
+        "env": ["WS_HOST", "DATA_HOST", "NODE_ENV", "NODE_MODULES_PARENT_FOLDER"]
       },
       "check-types": {
-        "dependsOn": ["^check-types"]
+        "dependsOn": ["^check-types"],
+        "cache": false
       },
       "lint": {
-        "dependsOn": ["^lint"]
+        "dependsOn": ["^lint"],
+        "cache": false
       },
       "fix": {
-        "dependsOn": ["^fix"]
+        "dependsOn": ["^fix"],
+        "cache": false
+
       },
       "test": {
-        "dependsOn": ["^test"]
+        "dependsOn": ["^test"],
+        "cache": false
       },
       "test:watch": {
         "dependsOn": ["^test:watch"]
