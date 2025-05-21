@@ -4,8 +4,7 @@ import {Subject} from 'rxjs';
 import {MidiEventFull} from '@jamtools/core/modules/macro_module/macro_module_types';
 import {StateSupervisor} from 'springboard/services/states/shared_state_service';
 
-import Edit from '../../../../../../mitosis/jamtools-components/library/packages/react/src/macro-components/components/edit_macro';
-// import {Edit} from './components/edit_macro';
+import {Edit} from './components/edit_macro';
 import {MacroAPI} from '@jamtools/core/modules/macro_module/registered_macro_types';
 
 export type MidiInputMacroPayload = {
@@ -111,7 +110,6 @@ export const useInputMacroWaiterAndSaver = async (
     const subject = new Subject<MidiEventFull>();
 
     const onEdit = createAction('begin_edit', () => {
-        console.log('begin edit')
         editingState.setState(true);
     });
 
