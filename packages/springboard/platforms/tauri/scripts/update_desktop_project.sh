@@ -1,5 +1,11 @@
 #!/bin/bash
 
+USE_PNPM=$(pnpm --version > /dev/null 2>&1)
+PKG_MANAGER="npm"
+if [ -n "$USE_PNPM" ]; then
+  PKG_MANAGER="pnpm"
+fi
+
 # Load configuration
 DESKTOP_CONFIG_FILE=${DESKTOP_CONFIG_FILE:-"../../node_modules/@springboardjs/platforms-tauri/desktop_config.json"}
 CONFIG=$(cat "$DESKTOP_CONFIG_FILE")
@@ -19,8 +25,7 @@ fi
 
 npm_deps=$(echo "$CONFIG" | jq -r '.dependencies.npm | to_entries[] | "\(.key)@\(.value)"')
 if [ -n "$npm_deps" ]; then
-  npm i $npm_deps
-  # pnpm i $npm_deps
+  $PKG_MANAGER i $npm_deps --no-frozen-lockfile
 fi
 
 # Install Tauri plugins with specified versions
@@ -55,8 +60,7 @@ if [ -n "$pkg_changes" ]; then
     echo "$pkg_changes" > pkg.json
 fi
 
-cd ../../ && npm i && cd -
-# cd ../../ && pnpm i --no-frozen-lockfile && cd -
+cd ../../ && $PKG_MANAGER i --no-frozen-lockfile && cd -
 
 
 # # this doesn't work because there's no tomlq
