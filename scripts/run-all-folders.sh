@@ -82,7 +82,7 @@ publish_package() {
   fi
 
   # Execute the publish command
-  pnpm publish --access public $registry --tag "$tag"
+  pnpm publish --access public $registry --tag "$tag" --no-git-checks
 }
 
 bump_version "$root_dir/packages/springboard/core"
