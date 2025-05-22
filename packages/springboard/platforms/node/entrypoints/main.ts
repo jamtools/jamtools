@@ -1,6 +1,6 @@
 import {CoreDependencies} from 'springboard/types/module_types';
 
-import {NodeFileStorageService} from '@springboardjs/platforms-node/services/node_file_storage_service';
+import {NodeFileStorageService} from '../services/node_file_storage_service';
 import {Springboard} from 'springboard/engine/engine';
 import {ExtraModuleDependencies} from 'springboard/module_registry/module_registry';
 

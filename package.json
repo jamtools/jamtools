@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "packageManager": "npm@10.2.4",
+  "packageManager": "pnpm@9.13.2",
   "scripts": {
     "start": "turbo run start",
     "prestart": "bash -c \"./configs/scripts/check-dependencies.sh\"",
@@ -17,32 +17,47 @@
     "test:watch": "turbo run test:watch",
     "lint": "TURBO_NO_UPDATE_NOTIFIER=true turbo run lint",
     "fix": "TURBO_NO_UPDATE_NOTIFIER=true turbo run fix",
-    "ci": "NODE_MODULES_PARENT_FOLDER=$PWD TURBO_NO_UPDATE_NOTIFIER=true turbo run lint check-types build test --output-logs errors-only",
+    "ci": "NODE_MODULES_PARENT_FOLDER=$PWD TURBO_NO_UPDATE_NOTIFIER=true turbo run lint check-types build test",
     "heroku-postbuild": "NODE_ENV=production npm run build-saas",
-    "build-desktop": "RUN_SIDECAR_FROM_WEBVIEW=true npx tsx packages/springboard/cli/src/cli.ts build ./apps/empty_jamtools_app/index.ts --platforms desktop",
-    "build-all": "RUN_SIDECAR_FROM_WEBVIEW=true npx tsx packages/springboard/cli/src/cli.ts build ./apps/empty_jamtools_app/index.ts --platforms all"
+    "build-desktop": "RUN_SIDECAR_FROM_WEBVIEW=true npx tsx packages/springboard/cli/src/cli.ts build ./apps/small_apps/empty_jamtools_app/index.ts --platforms desktop",
+    "build-all": "RUN_SIDECAR_FROM_WEBVIEW=true npx tsx packages/springboard/cli/src/cli.ts build ./apps/small_apps/empty_jamtools_app/index.ts --platforms all"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "nodemon": "^3.1.4"
+    "@jamtools/core": "workspace:*",
+    "@springboardjs/platforms-browser": "workspace:*",
+    "@springboardjs/platforms-node": "workspace:*",
+    "@springboardjs/platforms-partykit": "workspace:*",
+    "@springboardjs/platforms-tauri": "workspace:*",
+    "@testing-library/jest-dom": "^6.4.6",
+    "@testing-library/react": "^16.0.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/jest": "^29.5.13",
+    "@typescript-eslint/eslint-plugin": "^5.59.0",
+    "@typescript-eslint/parser": "^5.59.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "eslint": "^8.39.0",
+    "eslint-plugin-react": "^7.32.2",
+    "identity-obj-proxy": "^3.0.0",
+    "shadow-dom-testing-library": "^1.11.3",
+    "springboard": "workspace:*",
+    "springboard-server": "workspace:*",
+    "tsx": "^4.19.2",
+    "tsup": "^8.3.5",
+    "typescript": "^5.4.5",
+    "vite": "^5.4.6",
+    "vite-tsconfig-paths": "^5.0.1",
+    "vitest": "^2.1.1"
   },
   "dependencies": {
     "turbo": "^2.0.6"
   },
-  "workspaces": [
-    "apps/jamtools",
-    "packages/jamtools/core",
-    "packages/jamtools/features",
-    "packages/springboard/platforms/node",
-    "packages/springboard/platforms/tauri",
-    "packages/springboard/platforms/webapp",
-    "packages/springboard/platforms/partykit",
-    "packages/springboard/platforms/react-native",
-    "packages/springboard/*",
-    "packages/springboard/external/*",
-    "packages/*",
-    "configs"
-  ]
+  "pnpm": {
+    "overrides": {
+      "react": "catalog:",
+      "esbuild": "catalog:"
+    }
+  }
 }

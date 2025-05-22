@@ -1,10 +1,10 @@
 import React from 'react';
 import {Subject} from 'rxjs';
 
-import {MidiEventFull} from '@jamtools/core/modules/macro_module/macro_module_types';
+import {MidiEventFull} from '../../macro_module_types';
 import {getKeyForMacro, InputMacroStateHolders, useInputMacroWaiterAndSaver, savedMidiEventsAreEqual, getKeyForMidiEvent, MidiInputMacroPayload} from './input_macro_handler_utils';
 import {qwertyEventToMidiEvent, savedMidiInputsAreEqual} from './musical_keyboard_input_macro_handler';
-import {macroTypeRegistry} from '@jamtools/core/modules/macro_module/registered_macro_types';
+import {macroTypeRegistry} from '../../registered_macro_types';
 
 type MacroConfigItemMidiButtonInput = {
     onTrigger?(midiEvent: MidiEventFull): void;
@@ -22,7 +22,7 @@ export type MidiButtonInputResult = Base & {
     };
 };
 
-declare module '@jamtools/core/modules/macro_module/macro_module_types' {
+declare module '../../macro_module_types' {
     interface MacroTypeConfigs {
         midi_button_input: {
             input: MacroConfigItemMidiButtonInput;
