@@ -12,7 +12,15 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "partysocket": "^1.0.3"
+    "@hono/trpc-server": "catalog:",
+    "@springboardjs/platforms-browser": "workspace:*",
+    "@springboardjs/platforms-node": "workspace:*",
+    "@trpc/server": "catalog:",
+    "hono": "catalog:",
+    "json-rpc-2.0": "catalog:",
+    "partysocket": "^1.0.3",
+    "springboard-server": "workspace:*",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "partykit": "^0.0.111"

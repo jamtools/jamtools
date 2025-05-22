@@ -10,6 +10,16 @@
     "springboard": "workspace:*",
     "react-router-dom": "^6"
   },
+  "dependencies": {
+    "json-rpc-2.0": "catalog:",
+    "reconnecting-websocket": "catalog:"
+  },
+  "devDependencies": {
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
   "config": {
     "dir": "../../../../configs"
   }

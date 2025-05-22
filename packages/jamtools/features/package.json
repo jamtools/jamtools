@@ -10,11 +10,19 @@
     "jsdom": "^25.0.0",
     "qrcode": "^1.5.4",
     "react-guitar": "^1.1.2",
+    "rxjs": "catalog:",
     "tonal": "^6.2.0",
     "wled-client": "^0.22.1"
   },
   "devDependencies": {
-    "@types/qrcode": "^1.5.5"
+    "@jamtools/core": "workspace:*",
+    "@springboardjs/shoelace": "workspace:*",
+    "@types/qrcode": "^1.5.5",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "react-router-dom": "catalog:"
   },
   "config": {
     "dir": "../../../configs"

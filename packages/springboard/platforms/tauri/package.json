@@ -15,8 +15,17 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@springboardjs/platforms-node": "workspace:*",
+    "@springboardjs/platforms-browser": "workspace:*",
     "@tauri-apps/api": "^2.2.0",
     "@tauri-apps/plugin-shell": "^2.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:"
   },
   "config": {
     "dir": "../../../../configs"

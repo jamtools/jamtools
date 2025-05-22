@@ -11,6 +11,10 @@
     "springboard": "workspace:*",
     "ws": "^8.18.0"
   },
+  "dependencies": {
+    "json-rpc-2.0": "catalog:",
+    "reconnecting-websocket": "catalog:"
+  },
   "config": {
     "dir": "../../../../configs"
   }
