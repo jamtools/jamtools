@@ -25,8 +25,7 @@ fi
 
 npm_deps=$(echo "$CONFIG" | jq -r '.dependencies.npm | to_entries | map("\(.key)@\(.value)") | join(" ")')
 if [ -n "$npm_deps" ]; then
-  echo "$PKG_MANAGER i $npm_deps --no-frozen-lockfile"
-  $PKG_MANAGER i $npm_deps --no-frozen-lockfile
+  $PKG_MANAGER i $npm_deps --frozen-lockfile=false
 fi
 
 # Install Tauri plugins with specified versions
@@ -61,7 +60,7 @@ if [ -n "$pkg_changes" ]; then
     echo "$pkg_changes" > pkg.json
 fi
 
-cd ../../ && $PKG_MANAGER i --no-frozen-lockfile && cd -
+cd ../../ && $PKG_MANAGER i --frozen-lockfile=false && cd -
 
 
 # # this doesn't work because there's no tomlq
