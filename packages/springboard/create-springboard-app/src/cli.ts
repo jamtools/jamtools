@@ -16,7 +16,7 @@ import exampleString from './example/index-as-string';
 
 program
 .option('--template <bare | jamtools>', 'Template to use for the app', 'bare')
-.action((options: {template?: string, registry?: string}) => {
+.action((options: {template?: string}) => {
     const DEFAULT_APPLICATION_TEMPLATE = 'bare';
 
     if (options.template && options.template !== 'bare' && options.template !== 'jamtools') {
@@ -40,8 +40,8 @@ program
         'node-linker=hoisted',
     ];
 
-    if (options.registry) {
-        npmRcContent.push(`registry=${options.registry}`);
+    if (process.env.NPM_CONFIG_REGISTRY) {
+        npmRcContent.push(`registry=${process.env.NPM_CONFIG_REGISTRY}`);
     }
 
     execSync('npm init -y', {cwd: process.cwd()});

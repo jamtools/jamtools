@@ -52,7 +52,9 @@ jobs:
             - name: Publish create-springboard-app CLI
               run: ./scripts/run-all-folders.sh 0.2.0 --mode verdaccio
             - name: Install create-springboard-app CLI
-              run: npm install -g create-springboard-app --registry http://localhost:4873
+              run: npm install -g (create-springboard-app
+              env:
+                NPM_CONFIG_REGISTRY: http://localhost:4873
             - name: Verify version is 0.2.0
               run: |
                 if [ "$(create-springboard-app --version)" != "0.2.0" ]; then
