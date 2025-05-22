@@ -25,6 +25,7 @@ fi
 
 npm_deps=$(echo "$CONFIG" | jq -r '.dependencies.npm | to_entries | map("\(.key)@\(.value)") | join(" ")')
 if [ -n "$npm_deps" ]; then
+  pnpm i --help
   $PKG_MANAGER i $npm_deps --frozen-lockfile=false
 fi
 
