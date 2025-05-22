@@ -23,7 +23,7 @@ if [ -n "$tauri_conf_changes" ]; then
   jq -s '.[0] * .[1]' src-tauri/tauri.conf.json <(echo "$tauri_conf_changes") > src-tauri/tauri.conf.json.tmp && mv src-tauri/tauri.conf.json.tmp src-tauri/tauri.conf.json
 fi
 
-npm_deps=$(echo "$CONFIG" | jq -r '.dependencies.npm | to_entries[] | "\(.key)@\(.value)"')
+npm_deps=$(echo "$CONFIG" | jq -r '.dependencies.npm | to_entries | map("\(.key)@\(.value)") | join(" ")')
 if [ -n "$npm_deps" ]; then
   echo "$PKG_MANAGER i $npm_deps --no-frozen-lockfile"
   $PKG_MANAGER i $npm_deps --no-frozen-lockfile
