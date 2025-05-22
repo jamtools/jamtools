@@ -11,6 +11,11 @@
   "license": "ISC",
   "description": "",
   "peerDependencies": {
+    "@springboardjs/platforms-browser": "workspace:*",
     "springboard": "workspace:*"
+  },
+  "devDependencies": {
+    "react": "catalog:",
+    "react-router-dom": "catalog:"
   }
 }
