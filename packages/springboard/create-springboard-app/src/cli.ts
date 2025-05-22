@@ -46,11 +46,11 @@ program
 
     const installDepsCommand = `${packageManager} install springboard@${version} springboard-cli@${version} ${jamToolsPackage} react react-dom react-router@6`;
     console.log(installDepsCommand);
-    execSync(installDepsCommand, {cwd: process.cwd()});
+    execSync(installDepsCommand, {cwd: process.cwd(), stdio: 'inherit'});
 
     const installDevDepsCommand = `${packageManager} install -D typescript @types/node @types/react @types/react-dom`;
     console.log(installDevDepsCommand);
-    execSync(installDevDepsCommand, {cwd: process.cwd()});
+    execSync(installDevDepsCommand, {cwd: process.cwd(), stdio: 'inherit'});
 
     execSync(`mkdir -p src`, {cwd: process.cwd()});
     writeFileSync(`${process.cwd()}/src/index.tsx`, exampleString);
