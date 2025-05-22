@@ -25,6 +25,7 @@ fi
 
 npm_deps=$(echo "$CONFIG" | jq -r '.dependencies.npm | to_entries[] | "\(.key)@\(.value)"')
 if [ -n "$npm_deps" ]; then
+  echo "$PKG_MANAGER i $npm_deps --no-frozen-lockfile"
   $PKG_MANAGER i $npm_deps --no-frozen-lockfile
 fi
 
