@@ -41,6 +41,7 @@
     "packages/springboard/platforms/partykit",
     "packages/springboard/platforms/react-native",
     "packages/springboard/*",
+    "packages/springboard/plugins/*",
     "packages/springboard/external/*",
     "packages/*",
     "configs"

@@ -6,7 +6,7 @@ import concurrently from 'concurrently';
 
 import packageJSON from '../package.json';
 
-import {buildApplication, buildServer, platformBrowserBuildConfig, platformNodeBuildConfig, platformOfflineBrowserBuildConfig, platformPartykitBrowserBuildConfig, platformPartykitServerBuildConfig, platformTauriMaestroBuildConfig, platformTauriWebviewBuildConfig, SpringboardPlatform} from './build';
+import {buildApplication, buildServer, platformBrowserBuildConfig, platformNodeBuildConfig, platformOfflineBrowserBuildConfig, platformPartykitBrowserBuildConfig, platformPartykitServerBuildConfig, platformTauriMaestroBuildConfig, platformTauriWebviewBuildConfig, Plugin, SpringboardPlatform} from './build';
 import {esbuildPluginTransformAwaitImportToRequire} from './esbuild_plugins/esbuild_plugin_transform_await_import';
 
 program
@@ -69,10 +69,20 @@ program
     .argument('entrypoint')
     .option('-w, --watch', 'Watch for file changes')
     .option('-p, --platforms <PLATFORM>,<PLATFORM>', 'Platforms to build for')
-    .action(async (entrypoint: string, options: {watch?: boolean, offline?: boolean, platforms?: string}) => {
+    .option('-g, --plugins <PLUGIN>,<PLUGIN>', 'Plugins to build with')
+    .action(async (entrypoint: string, options: {watch?: boolean, offline?: boolean, platforms?: string, plugins?: string}) => {
         let platformToBuild = process.env.SPRINGBOARD_PLATFORM_VARIANT || options.platforms as SpringboardPlatform;
         if (!platformToBuild) {
             platformToBuild = 'main';
+        }
+
+        const plugins: Plugin[] = [];
+        if (options.plugins) {
+            const pluginPaths = options.plugins.split(',');
+            for (const pluginPath of pluginPaths) {
+                const mod = await import(pathToFileURL(resolve(pluginPath)).href) as {default: Plugin};
+                plugins.push(mod.default);
+            }
         }
 
         let applicationEntrypoint = entrypoint;
@@ -95,15 +105,18 @@ program
             await buildApplication(platformBrowserBuildConfig, {
                 applicationEntrypoint,
                 watch: options.watch,
+                plugins,
             });
 
             await buildApplication(platformNodeBuildConfig, {
                 applicationEntrypoint,
                 watch: options.watch,
+                plugins,
             });
 
             await buildServer({
                 watch: options.watch,
+                plugins,
             });
         }
 
@@ -115,6 +128,7 @@ program
                 applicationEntrypoint,
                 watch: options.watch,
                 esbuildOutDir: 'browser_offline',
+                plugins,
             });
         }
 
@@ -126,6 +140,7 @@ program
                 applicationEntrypoint,
                 watch: options.watch,
                 esbuildOutDir: './tauri',
+                plugins,
                 editBuildOptions: (buildOptions) => {
                     buildOptions.define = {
                         ...buildOptions.define,
@@ -140,12 +155,14 @@ program
                 applicationEntrypoint,
                 watch: options.watch,
                 esbuildOutDir: './tauri',
+                plugins,
             });
 
             await buildServer({
                 watch: options.watch,
                 applicationDistPath: `${cwd}/dist/tauri/node/dist/dynamic-entry.js`,
                 esbuildOutDir: './tauri',
+                plugins,
                 editBuildOptions: (buildOptions) => {
                     buildOptions.plugins!.push(esbuildPluginTransformAwaitImportToRequire);
                 }
@@ -159,12 +176,14 @@ program
             await buildApplication(platformPartykitBrowserBuildConfig, {
                 applicationEntrypoint,
                 watch: options.watch,
+                plugins,
                 esbuildOutDir: 'partykit',
             });
 
             await buildApplication(platformPartykitServerBuildConfig, {
                 applicationEntrypoint,
                 watch: options.watch,
+                plugins,
                 esbuildOutDir: 'partykit',
             });
         }
@@ -203,6 +222,8 @@ program
 
 // import { readJsonSync, writeJsonSync } from 'fs-extra';
 import { resolve } from 'path';
+import {build} from 'esbuild';
+import {pathToFileURL} from 'node:url';
 // import {generateReactNativeProject} from './generators/mobile/react_native_project_generator';
 
 program
