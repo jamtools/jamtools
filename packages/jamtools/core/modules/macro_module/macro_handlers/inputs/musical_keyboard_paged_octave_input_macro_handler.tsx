@@ -6,10 +6,9 @@ import {Subject} from 'rxjs';
 import {getKeyForMacro} from './input_macro_handler_utils';
 import {savedMidiInputsAreEqual} from './musical_keyboard_input_macro_handler';
 
-import '@jamtools/core/modules/macro_module/macro_module';
+import {macroTypeRegistry} from '../../registered_macro_types';
 
 import {MidiEventFull} from '../../macro_module_types';
-import {macroTypeRegistry} from '@jamtools/core/modules/macro_module/registered_macro_types';
 
 type MusicalKeyboardPagedOctaveInputResult = {
     subject: Subject<MidiEventFull>;
@@ -24,7 +23,7 @@ type MacroConfigItemMusicalKeyboardPagedOctaveInput = {
     enableQwerty?: boolean;
 }
 
-declare module '@jamtools/core/modules/macro_module/macro_module_types' {
+declare module '../../macro_module_types' {
     interface MacroTypeConfigs {
         musical_keyboard_paged_octave_input: {
             input: MacroConfigItemMusicalKeyboardPagedOctaveInput;
