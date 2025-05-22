@@ -70,6 +70,12 @@ importers:
       '@jamtools/core':
         specifier: workspace:*
         version: link:packages/jamtools/core
+      '@springboardjs/platforms-browser':
+        specifier: workspace:*
+        version: link:packages/springboard/platforms/webapp
+      '@springboardjs/platforms-node':
+        specifier: workspace:*
+        version: link:packages/springboard/platforms/node
       '@springboardjs/platforms-tauri':
         specifier: workspace:*
         version: link:packages/springboard/platforms/tauri
