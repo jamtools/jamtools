@@ -115,6 +115,9 @@ importers:
       springboard:
         specifier: workspace:*
         version: link:packages/springboard/core
+      springboard-server:
+        specifier: workspace:*
+        version: link:packages/springboard/server
       tsup:
         specifier: ^8.3.5
         version: 8.5.0(postcss@8.5.3)(tsx@4.19.4)(typescript@5.8.3)
