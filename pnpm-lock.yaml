@@ -70,6 +70,9 @@ importers:
       '@jamtools/core':
         specifier: workspace:*
         version: link:packages/jamtools/core
+      '@springboardjs/platforms-tauri':
+        specifier: workspace:*
+        version: link:packages/springboard/platforms/tauri
       '@testing-library/jest-dom':
         specifier: ^6.4.6
         version: 6.6.3
