@@ -499,9 +499,19 @@ importers:
       '@shoelace-style/shoelace':
         specifier: ^2.16.0
         version: 2.20.1(@floating-ui/utils@0.2.9)(@types/react@19.1.4)
+      '@springboardjs/platforms-browser':
+        specifier: workspace:*
+        version: link:../../platforms/webapp
       springboard:
         specifier: workspace:*
         version: link:../../core
+    devDependencies:
+      react:
+        specifier: ^19.1.0
+        version: 19.1.0
+      react-router-dom:
+        specifier: 'catalog:'
+        version: 6.30.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
 
   packages/springboard/platforms/node:
     dependencies:
