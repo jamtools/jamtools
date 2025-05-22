@@ -14,8 +14,17 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
+            - name: Install pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                version: 9.13.2
+            - name: Install Node.js
+              uses: actions/setup-node@v4
+              with:
+                node-version: 20
+                cache: 'pnpm'
             - name: Install modules
-              run: npm i
+              run: pnpm i
             - name: Build create-springboard-app CLI
               run: npm run prepublishOnly
               working-directory: ./packages/springboard/create-springboard-app
