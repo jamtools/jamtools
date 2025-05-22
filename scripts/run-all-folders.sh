@@ -54,15 +54,13 @@ publish_package() {
   cd "$target_dir" || exit 1
   echo "Publishing package in $target_dir"
 
-  # Set registry based on mode
-  local registry=""
   local environment=""
 
+  # Set registry based on mode
   if [ "$PUBLISH_MODE" = "npm" ]; then
-    registry=""
     environment="npm"
   else
-    registry="--registry http://localhost:4873"
+    echo "registry=http://localhost:4873" >> ./npmrc
     environment="local Verdaccio"
   fi
 
@@ -82,7 +80,7 @@ publish_package() {
   fi
 
   # Execute the publish command
-  pnpm publish --access public $registry --tag "$tag" --no-git-checks
+  pnpm publish --access public --tag "$tag" --no-git-checks
 }
 
 bump_version "$root_dir/packages/springboard/core"
