@@ -76,6 +76,9 @@ importers:
       '@springboardjs/platforms-node':
         specifier: workspace:*
         version: link:packages/springboard/platforms/node
+      '@springboardjs/platforms-partykit':
+        specifier: workspace:*
+        version: link:packages/springboard/platforms/partykit
       '@springboardjs/platforms-tauri':
         specifier: workspace:*
         version: link:packages/springboard/platforms/tauri

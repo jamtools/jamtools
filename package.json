@@ -29,6 +29,7 @@
     "@jamtools/core": "workspace:*",
     "@springboardjs/platforms-browser": "workspace:*",
     "@springboardjs/platforms-node": "workspace:*",
+    "@springboardjs/platforms-partykit": "workspace:*",
     "@springboardjs/platforms-tauri": "workspace:*",
     "@testing-library/jest-dom": "^6.4.6",
     "@testing-library/react": "^16.0.0",
