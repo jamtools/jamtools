@@ -1,9 +1,9 @@
 #!/bin/bash
 
-USE_PNPM=$(pnpm --version > /dev/null 2>&1)
-PKG_MANAGER="npm"
-if [ -n "$USE_PNPM" ]; then
+if command -v pnpm &> /dev/null; then
   PKG_MANAGER="pnpm"
+else
+  PKG_MANAGER="npm"
 fi
 
 # Load configuration
