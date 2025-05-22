@@ -82,11 +82,6 @@ jobs:
               run: pnpm i
             - name: Run eslint
               run: npx turbo run lint
-            #   run: npm config set registry https://npmjs.cf/
-            - name: Install modules
-              run: npm i
-            - name: Run eslint
-              run: npx turbo run lint
     test:
         runs-on: ubuntu-latest
         steps:
@@ -102,10 +97,5 @@ jobs:
                 cache: 'pnpm'
             - name: Install modules
               run: pnpm i
-            - name: Run tests
-              run: npx turbo run test
-            #   run: npm config set registry https://npmjs.cf/
-            - name: Install modules
-              run: npm i
             - name: Run tests
               run: npx turbo run test
