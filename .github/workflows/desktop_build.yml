@@ -42,15 +42,15 @@ jobs:
     runs-on: ${{ inputs.platform }}
     steps:
     - uses: actions/checkout@v3
-    # - name: Install pnpm
-    #   uses: pnpm/action-setup@v4
-    #   with:
-    #     version: 9.13.2
+    - name: Install pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 9.13.2
     - name: Install Node.js
       uses: actions/setup-node@v4
       with:
         node-version: 20
-        # cache: 'pnpm'
+        cache: 'pnpm'
 
     - name: Install Rust stable
       uses: dtolnay/rust-toolchain@stable
@@ -79,8 +79,7 @@ jobs:
       shell: bash
 
     - name: Install project node modules
-      run: npm i
-      # run: pnpm i
+      run: pnpm i
 
     # TODO: install @springboardjs/platforms-tauri if not already installed
 
@@ -105,7 +104,9 @@ jobs:
         rustup target add ${{ inputs.tauri_target }}
 
     - name: Build node sidecar with pkg
-      run: node ../../node_modules/@springboardjs/platforms-tauri/scripts/build-tauri-sidecar.mjs
+      run: |
+        pnpm install -g @yao-pkg/pkg
+        node ../../node_modules/@springboardjs/platforms-tauri/scripts/build-tauri-sidecar.mjs
       working-directory: ./apps/desktop_tauri
       env:
         PKG_TARGET: ${{ inputs.pkg_target }}

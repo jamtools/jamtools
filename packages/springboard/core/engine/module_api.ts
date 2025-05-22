@@ -12,7 +12,7 @@ export type ActionCallOptions = {
 /**
  * The Action callback
 */
-type ActionCallback<Args extends object, ReturnValue = any> = (args: Args, options?: ActionCallOptions) => Promise<ReturnValue>;
+type ActionCallback<Args extends undefined | object, ReturnValue extends Promise<any> = Promise<any>> = (args: Args, options?: ActionCallOptions) => ReturnValue;
 
 // this would make it so modules/plugins can extend the module API dynamically through interface merging
 // export interface ModuleAPI {
@@ -107,7 +107,7 @@ export class ModuleAPI {
 
     createActions = <Actions extends Record<string, ActionCallback<any, any>>>(
         actions: Actions
-    ): { [K in keyof Actions]: (payload: Parameters<Actions[K]>[0], options?: ActionCallOptions) => Promise<ReturnType<Actions[K]>> } => {
+    ): { [K in keyof Actions]: undefined extends Parameters<Actions[K]>[0] ? ((payload?: Parameters<Actions[K]>[0], options?: ActionCallOptions) => Promise<ReturnType<Actions[K]>>) : ((payload: Parameters<Actions[K]>[0], options?: ActionCallOptions) => Promise<ReturnType<Actions[K]>>) } => {
         const keys = Object.keys(actions);
 
         for (const key of keys) {
@@ -122,9 +122,17 @@ export class ModuleAPI {
     };
 
     /**
-     * Create an action to be run on the Maestro device. If the produced action is called from the Maestro device, the framework just calls the provided callback. If it is called from another device, the framework calls the action via RPC to the Maestro device. In most cases, any main logic or calls to shared state changes should be done in an action.
+     * Create an action to be run on either the same device or remote device. If the produced action is called from the same device, the framework just calls the provided callback. If it is called from another device, the framework calls the action via RPC to the remote device. In most cases, any main logic or calls to shared state changes should be done in an action.
     */
-    createAction = <Options extends ActionConfigOptions, Args extends object, ReturnValue extends undefined | void | null | object | number>(actionName: string, options: Options, cb: ActionCallback<Args, ReturnValue>): ((args: Args, options?: ActionCallOptions) => Promise<ReturnValue>) => {
+    createAction = <
+        Options extends ActionConfigOptions,
+        Args extends undefined | object,
+        ReturnValue extends Promise<undefined | void | null | object | number>
+    >(
+        actionName: string,
+        options: Options,
+        cb: undefined extends Args ? ActionCallback<Args, ReturnValue> : ActionCallback<Args, ReturnValue>
+    ): undefined extends Args ? ((args?: Args, options?: ActionCallOptions) => ReturnValue) : ((args: Args, options?: ActionCallOptions) => ReturnValue) => {
         const fullActionName = `${this.fullPrefix}|action|${actionName}`;
 
         if (this.coreDeps.rpc.remote.role === 'server') {
@@ -135,7 +143,7 @@ export class ModuleAPI {
             this.coreDeps.rpc.local.registerRpc(fullActionName, cb);
         }
 
-        return async (args: Args, options?: ActionCallOptions) => {
+        return (async (args: Args, options?: ActionCallOptions): Promise<Awaited<ReturnValue>> => {
             try {
                 let rpc = this.coreDeps.rpc.remote;
 
@@ -143,7 +151,7 @@ export class ModuleAPI {
 
                 if (this.coreDeps.isMaestro() || this.options.rpcMode === 'local' || options?.mode === 'local') {
                     if (!this.coreDeps.rpc.local || this.coreDeps.rpc.local.role !== 'client') {
-                        return cb(args) as ReturnValue;
+                        return await cb(args);
                     }
 
                     rpc = this.coreDeps.rpc.local!;
@@ -162,7 +170,7 @@ export class ModuleAPI {
 
                 throw e;
             }
-        };
+        }) as unknown as undefined extends Args ? (args?: Args, options?: ActionCallOptions) => ReturnValue : (args: Args, options?: ActionCallOptions) => ReturnValue;
     };
 }
 

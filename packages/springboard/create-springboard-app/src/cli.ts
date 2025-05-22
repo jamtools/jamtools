@@ -36,8 +36,16 @@ program
     } catch (error) {
     }
 
+    const npmRcContent = [
+        'node-linker=hoisted',
+    ];
+
+    if (process.env.NPM_CONFIG_REGISTRY) {
+        npmRcContent.push(`registry=${process.env.NPM_CONFIG_REGISTRY}`);
+    }
+
     execSync('npm init -y', {cwd: process.cwd()});
-    writeFileSync('./.npmrc', 'node-linker=hoisted', {flag: 'w'});
+    writeFileSync('./.npmrc', npmRcContent.join('\n'), {flag: 'w'});
     writeFileSync('./.gitignore', 'node_modules\ndist', {flag: 'a'});
 
     const jamToolsPackage = template === 'jamtools' ? `@jamtools/core@${version}` : '';
@@ -46,11 +54,11 @@ program
 
     const installDepsCommand = `${packageManager} install springboard@${version} springboard-cli@${version} ${jamToolsPackage} react react-dom react-router@6`;
     console.log(installDepsCommand);
-    execSync(installDepsCommand, {cwd: process.cwd()});
+    execSync(installDepsCommand, {cwd: process.cwd(), stdio: 'inherit'});
 
     const installDevDepsCommand = `${packageManager} install -D typescript @types/node @types/react @types/react-dom`;
     console.log(installDevDepsCommand);
-    execSync(installDevDepsCommand, {cwd: process.cwd()});
+    execSync(installDevDepsCommand, {cwd: process.cwd(), stdio: 'inherit'});
 
     execSync(`mkdir -p src`, {cwd: process.cwd()});
     writeFileSync(`${process.cwd()}/src/index.tsx`, exampleString);
