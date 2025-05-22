@@ -61,7 +61,7 @@ jobs:
                 fi
 
             - name: Create a new app
-              run: mkdir test-app && cd test-app && create-springboard-app test-app
+              run: mkdir test-app && cd test-app && create-springboard-app --registry http://localhost:4873
             - name: Build App
               run: npm run build
               working-directory: ./test-app

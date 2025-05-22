@@ -16,7 +16,7 @@ import exampleString from './example/index-as-string';
 
 program
 .option('--template <bare | jamtools>', 'Template to use for the app', 'bare')
-.action((options: {template?: string}) => {
+.action((options: {template?: string, registry?: string}) => {
     const DEFAULT_APPLICATION_TEMPLATE = 'bare';
 
     if (options.template && options.template !== 'bare' && options.template !== 'jamtools') {
@@ -36,8 +36,16 @@ program
     } catch (error) {
     }
 
+    const npmRcContent = [
+        'node-linker=hoisted',
+    ];
+
+    if (options.registry) {
+        npmRcContent.push(`registry=${options.registry}`);
+    }
+
     execSync('npm init -y', {cwd: process.cwd()});
-    writeFileSync('./.npmrc', 'node-linker=hoisted', {flag: 'w'});
+    writeFileSync('./.npmrc', npmRcContent.join('\n'), {flag: 'w'});
     writeFileSync('./.gitignore', 'node_modules\ndist', {flag: 'a'});
 
     const jamToolsPackage = template === 'jamtools' ? `@jamtools/core@${version}` : '';

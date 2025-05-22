@@ -60,7 +60,7 @@ publish_package() {
   if [ "$PUBLISH_MODE" = "npm" ]; then
     environment="npm"
   else
-    echo "registry=http://localhost:4873" >> ./npmrc
+    export NPM_CONFIG_REGISTRY="http://localhost:4873"
     environment="local Verdaccio"
   fi
 
@@ -82,6 +82,11 @@ publish_package() {
   # Execute the publish command
   pnpm publish --access public --tag "$tag" --no-git-checks
 }
+
+bump_version "$root_dir/packages/springboard/data_storage"
+publish_package "$root_dir/packages/springboard/data_storage"
+
+sleep 1
 
 bump_version "$root_dir/packages/springboard/core"
 publish_package "$root_dir/packages/springboard/core"
@@ -109,11 +114,6 @@ sleep 1
 bump_version "$root_dir/packages/springboard/platforms/partykit"
 # bump_peer_dep "$root_dir/packages/springboard/platforms/partykit" "springboard"
 publish_package "$root_dir/packages/springboard/platforms/partykit"
-
-sleep 1
-
-bump_version "$root_dir/packages/springboard/data_storage"
-publish_package "$root_dir/packages/springboard/data_storage"
 
 sleep 1
 
