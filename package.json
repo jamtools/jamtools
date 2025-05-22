@@ -50,7 +50,8 @@
   },
   "pnpm": {
     "overrides": {
-      "react": "catalog:"
+      "react": "catalog:",
+      "esbuild": "catalog:"
     }
   }
 }

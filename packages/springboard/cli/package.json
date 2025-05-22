@@ -33,7 +33,7 @@
   "dependencies": {
     "commander": "catalog:",
     "concurrently": "^9.1.0",
-    "esbuild": "^0.23.0",
+    "esbuild": "catalog:",
     "tslib": "catalog:",
     "typescript": "^5.4.5"
   },
