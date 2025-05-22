@@ -1,0 +1,23 @@
+{
+  "name": "@springboardjs/plugin-svelte",
+  "version": "0.15.0-dev1",
+  "main": "index.js",
+  "scripts": {
+    "build-example": "tsx example/build/build_with_svelte_plugin.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "peerDependencies": {
+    "springboard": "^0.15.0-dev1",
+    "svelte": ">= 5"
+  },
+  "devDependencies": {
+    "svelte": "^5.22.0"
+  },
+  "dependencies": {
+    "esbuild-svelte": "^0.9.2",
+    "svelte-preprocess": "^6.0.3"
+  }
+}
