@@ -1,22 +1,21 @@
 import React from 'react';
 
-export interface MidiControlChangeOutputMacroOutput {
-    send(value: number): void;
-    initialize?: () => Promise<void>;
-    components: {
-        edit: React.ElementType;
-    };
-}
-
 import {getKeyForMacro} from '../inputs/input_macro_handler_utils';
 import {AddingOutputDeviceState, Edit, SavedOutputDeviceState} from './components/output_macro_edit';
-import {OutputMacroStateHolders, checkSavedMidiOutputsAreEqual, useOutputMacroWaiterAndSaver} from './output_macro_handler_utils';
-import {macroTypeRegistry} from '@jamtools/core/modules/macro_module/registered_macro_types';
+import {MidiOutputMacroPayload, OutputMacroStateHolders, checkSavedMidiOutputsAreEqual, useOutputMacroWaiterAndSaver} from './output_macro_handler_utils';
+import {macroTypeRegistry} from '../../registered_macro_types';
+
+type Base = Omit<MidiOutputMacroPayload, 'send'>;
+
+export type MidiControlChangeOutputMacroOutput = Base & {
+    send(value: number): void;
+};
+
 
 type MidiControlChangeOutputMacroConfig = {
 };
 
-declare module '@jamtools/core/modules/macro_module/macro_module_types' {
+declare module '../../macro_module_types' {
     interface MacroTypeConfigs {
         midi_control_change_output: {
             input: MidiControlChangeOutputMacroConfig;
@@ -58,6 +57,7 @@ macroTypeRegistry.registerMacroType(
         return {
             send,
             components: macroReturnValue.components,
+            states,
         };
     }),
 );

@@ -22,11 +22,11 @@ export const playChord = (scaleRoot: number, notePlayed: number, previousChord: 
     }
 
     notesToStop.forEach(note => {
-        output.send({type: 'noteoff', number: note + 12, channel: 1});
+        output.send({type: 'noteoff', number: note + 12});
     });
 
     notesToPlay.forEach(note => {
-        output.send({type: 'noteon', number: note + 12, channel: 1});
+        output.send({type: 'noteon', number: note + 12});
     });
 
     return chord;

@@ -1,98 +1,174 @@
+import {MidiControlChangeInputResult} from '@jamtools/core/modules/macro_module/macro_handlers/inputs/midi_control_change_input_macro_handler';
 import React from 'react';
 
 import springboard from 'springboard';
 
-// import {GuitarComponent} from './song_structures/components/guitar';
+import './hand_raiser.css';
 
-springboard.registerModule('hand_raiser', {}, async (moduleAPI) => {
-    const sliderPositionState1 = await moduleAPI.statesAPI.createSharedState('slider_position_1', 0);
-    const sliderPositionState2 = await moduleAPI.statesAPI.createSharedState('slider_position_2', 0);
+// how to handle local midi device stuff in remote context
+// eventually I think this will be done through spawnables
 
-    moduleAPI.deps.module.moduleRegistry.getModule('macro').createMacro(moduleAPI, 'test_cc_1', 'midi_control_change_input', {
-        allowLocal: true,
-        onTrigger: (event => {
-            if (event.event.value) {
-                sliderPositionState1.setState(event.event.value);
+// for now, the macro module will need to manually pivot and make its own concept of spawnables
+// the user chooses to use a local midi device, and the macro module takes care of the complexity
+// instead of `moduleAPI.createActions`, the module uses `moduleAPI.actions.createHybridAction`
+// idk about that actually. it can probably use createActions still, with {client: true} in the call
+// but based on user choice, the macro will use remote actions&state, or local actions&state
+// so it will use a user agent state supervisor for local
+
+springboard.registerModule('HandRaiser', {}, async (m) => {
+    const states = await m.createStates({
+        handPositions: [0, 0],
+    });
+
+    const actions = m.createActions({
+        changeHandPosition: async (args: {index: number, value: number}) => {
+            states.handPositions.setStateImmer((positions) => {
+                positions[args.index] = args.value;
+            });
+        },
+    });
+
+    const macroModule = m.getModule('macro');
+    const macros = await macroModule.createMacros(m, {
+        slider0: {
+            type: 'midi_control_change_input',
+            config: {
+                onTrigger: (midiEvent => {
+                    if (midiEvent.event.value) {
+                        actions.changeHandPosition({index: 0, value: midiEvent.event.value});
+                    }
+                }),
             }
-        }),
-    });
-
-    moduleAPI.deps.module.moduleRegistry.getModule('macro').createMacro(moduleAPI, 'test_cc_2', 'midi_control_change_input', {
-        allowLocal: true,
-        onTrigger: (event => {
-            if (event.event.value) {
-                sliderPositionState2.setState(event.event.value);
+        },
+        slider1: {
+            type: 'midi_control_change_input',
+            config: {
+                onTrigger: (midiEvent => {
+                    if (midiEvent.event.value) {
+                        actions.changeHandPosition({index: 1, value: midiEvent.event.value});
+                    }
+                }),
             }
-        }),
+        },
     });
 
-    const handleSliderDrag = moduleAPI.createAction('slider_drag', {}, async (args: {index: number, value: number}) => {
-        const state = [sliderPositionState1, sliderPositionState2][args.index];
-        state.setState(args.value);
-    });
-
-    moduleAPI.registerRoute('', {}, () => {
-        const sliderPosition1 = sliderPositionState1.useState();
-        const sliderPosition2 = sliderPositionState2.useState();
+    m.registerRoute('/', {}, () => {
+        const positions = states.handPositions.useState();
 
         return (
-            <DataSyncRootRoute
-                sliderPosition1={sliderPosition1}
-                sliderPosition2={sliderPosition2}
-                handleSliderDrag={(index, value) => handleSliderDrag({index, value})}
-            />
+            <div className='hand-raiser-main'>
+                <div className='hand-raiser-center'>
+                    {positions.map((position, index) => (
+                        <HandSliderContainer
+                            key={index}
+                            position={position}
+                            handlePositionChange={value => actions.changeHandPosition({index, value})}
+                            macro={index === 0 ? macros.slider0 : macros.slider1}
+                        />
+                    ))}
+                </div>
+            </div>
         );
     });
 });
 
-type DataSyncRootRouteProps = {
-    sliderPosition1: number;
-    sliderPosition2: number;
-    handleSliderDrag: (index: 0 | 1, value: number) => void;
+type HandRaiserModuleProps = {
+    position: number;
+    handlePositionChange: (position: number) => void;
+    macro: MidiControlChangeInputResult;
+};
+
+const HandSliderContainer = (props: HandRaiserModuleProps) => {
+    return (
+        <div className='hand-slider-container'>
+            <Hand
+                position={props.position}
+            />
+            <div className='slider-container'>
+                <Slider
+                    value={props.position}
+                    onChange={props.handlePositionChange}
+                />
+                <details style={{cursor: 'pointer'}}>
+                    <summary>Configure MIDI</summary>
+                    <props.macro.components.edit />
+                </details>
+            </div>
+        </div>
+    );
+};
+
+type HandProps = {
+    position: number;
 }
 
-const DataSyncRootRoute = ({sliderPosition1, sliderPosition2, handleSliderDrag}: DataSyncRootRouteProps) => {
-    const sliders = ([sliderPosition1, sliderPosition2] as const).map((position, i) => (
+const Hand = (props: HandProps) => {
+    const bottomSpace = (props.position / 127) * (100 - 40) + 20;
+
+    return (
         <div
-            key={i}
+            className='hand'
             style={{
-                display: 'inline-block',
-                width: '50px',
+                position: 'absolute',
+                bottom: 'calc(' + bottomSpace + 'vh)',
             }}
         >
+            <img src='https://static.vecteezy.com/system/resources/previews/046/829/646/original/raised-hand-isolated-on-transparent-background-free-png.png'
+            />
+        </div>
+    );
+};
+
+type SliderProps = {
+    value: number;
+    onChange: (value: number) => void;
+}
+
+const Slider = (props: SliderProps) => {
+    return (
+        <div className='slider'>
             <input
                 type='range'
-                value={position}
-                onChange={(e) => handleSliderDrag(i as 0 | 1, parseInt(e.target.value))}
-                style={{writingMode: 'vertical-rl', direction: 'rtl'}}
+                value={props.value}
+                onChange={(e) => props.onChange(parseInt(e.target.value))}
+                max={127}
             />
-            <pre style={{display: 'inline'}}>{position}</pre>
+            <pre>{props.value}</pre>
         </div>
+    );
+};
+
+type DataSyncRootRouteProps = {
+    sliderPositions: number[];
+    handleSliderDrag: (index: number, value: number) => void;
+}
+
+type HandRaiserPageProps = {
+    sliderPositions: number[];
+    handleSliderDrag: (index: number, value: number) => void;
+}
+
+const HandRaiserPage = (props: HandRaiserPageProps) => {
+    const {sliderPositions, handleSliderDrag} = props;
+
+    const sliders = sliderPositions.map((position, i) => (
+        <Slider
+            key={i}
+            value={position}
+            onChange={newValue => handleSliderDrag(i, newValue)}
+        />
     ));
 
-    const sliderHands = [sliderPosition1, sliderPosition2].map((position, i) => (
-        <div
+    const sliderHands = sliderPositions.map((position, i) => (
+        <Hand
             key={i}
-            style={{
-                display: 'inline-block',
-                width: '400px',
-                maxWidth: '50%'
-            }}
-        >
-            <img
-                style={{
-                    width: '200px',
-                    position: 'absolute',
-                    bottom: position * 4,
-                    // background: 'transparent',
-                }}
-                src='https://static.vecteezy.com/system/resources/previews/046/829/646/original/raised-hand-isolated-on-transparent-background-free-png.png'
-            />
-        </div>
+            position={position}
+        />
     ));
 
     return (
         <div>
+            <h1>hey</h1>
             <div>
                 {sliders}
             </div>
@@ -100,16 +176,6 @@ const DataSyncRootRoute = ({sliderPosition1, sliderPosition2, handleSliderDrag}:
             <div>
                 {sliderHands}
             </div>
-
-            {/* <GuitarComponent
-                numberOfStrings={4}
-                chosenFrets={[
-                    // '4-0',
-                    // '4-2',
-                    // '3-0',
-                    // '3-2',
-                ]}
-            /> */}
         </div>
     );
 };

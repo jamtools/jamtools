@@ -27,7 +27,6 @@ springbord.registerModule('Eventide', {}, async (moduleAPI) => {
         eventideMacro.send({
             type: 'program',
             number: programNumber,
-            channel: 1,
         });
     });
 

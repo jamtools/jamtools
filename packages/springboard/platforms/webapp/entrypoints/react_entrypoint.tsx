@@ -3,13 +3,11 @@ import ReactDOM from 'react-dom/client';
 
 import {CoreDependencies} from 'springboard/types/module_types';
 
-import {TrpcKVStoreService} from 'springboard/services/trpc_kv_store_client';
-
 import {Main} from './main';
-import {BrowserKVStoreService} from '@springboardjs/platforms-browser/services/browser_kvstore_service';
-import {BrowserJsonRpcClientAndServer} from '@springboardjs/platforms-browser/services/browser_json_rpc';
 import {Springboard} from 'springboard/engine/engine';
 import {ExtraModuleDependencies} from 'springboard/module_registry/module_registry';
+
+import {watchForChanges} from './esbuild_watch_for_changes';
 
 const waitForPageLoad = () => new Promise<void>(resolve => {
     window.addEventListener('DOMContentLoaded', () => {
@@ -17,37 +15,29 @@ const waitForPageLoad = () => new Promise<void>(resolve => {
     });
 });
 
-let wsProtocol = 'ws';
-let httpProtocol = 'http';
-if (location.protocol === 'https:') {
-    wsProtocol = 'wss';
-    httpProtocol = 'https';
-}
+type BrowserDependencies = Pick<CoreDependencies, 'rpc' | 'storage'> & {
+    isLocal?: boolean;
+    dev?: {
+        reloadCss?: boolean;
+        reloadJs?: boolean;
+    };
+};
 
-const WS_HOST = process.env.WS_HOST || `${wsProtocol}://${location.host}`;
-const DATA_HOST = process.env.DATA_HOST || `${httpProtocol}://${location.host}`;
+export const startAndRenderBrowserApp = async (browserDeps: BrowserDependencies): Promise<Springboard> => {
+    const isLocal = browserDeps.isLocal || localStorage.getItem('isLocal') === 'true';
 
-export const startAndRenderBrowserApp = async (): Promise<Springboard> => {
-    const rpc = new BrowserJsonRpcClientAndServer(`${WS_HOST}/ws`);
-
-    // const kvStore = new BrowserKVStoreService(localStorage);
-    const kvStore = new TrpcKVStoreService(DATA_HOST);
-
-    const userAgentKVStore = new BrowserKVStoreService(localStorage);
-
-    const isLocal = localStorage.getItem('isLocal') === 'true';
+    if ((browserDeps.dev?.reloadCss || browserDeps.dev?.reloadJs) && location.hostname === 'localhost') {
+        watchForChanges(browserDeps.dev?.reloadCss, browserDeps.dev?.reloadJs);
+    }
 
     const coreDeps: CoreDependencies = {
         log: console.log,
         showError: (error: string) => alert(error),
-        storage: {
-            remote: kvStore,
-            userAgent: userAgentKVStore,
-        },
+        storage: browserDeps.storage,
         files: {
-            saveFile: async () => {},
+            saveFile: async () => { },
         },
-        rpc,
+        rpc: browserDeps.rpc,
         isMaestro: () => isLocal,
     };
 
@@ -56,7 +46,7 @@ export const startAndRenderBrowserApp = async (): Promise<Springboard> => {
 
     const engine = new Springboard(coreDeps, extraDeps);
 
-    await waitForPageLoad();
+    // await waitForPageLoad();
 
     const rootElem = document.createElement('div');
     // rootElem.style.overflowY = 'scroll';

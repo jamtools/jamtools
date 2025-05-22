@@ -1,11 +1,13 @@
 import path from 'path';
+import fs from 'node:fs';
 
-import {program} from 'commander';
+import {Option, program} from 'commander';
 import concurrently from 'concurrently';
 
 import packageJSON from '../package.json';
 
-import {buildApplication, buildServer, platformBrowserBuildConfig, platformNodeBuildConfig} from './build';
+import {buildApplication, buildServer, platformBrowserBuildConfig, platformNodeBuildConfig, platformOfflineBrowserBuildConfig, platformPartykitBrowserBuildConfig, platformPartykitServerBuildConfig, platformTauriMaestroBuildConfig, platformTauriWebviewBuildConfig, SpringboardPlatform} from './build';
+import {esbuildPluginTransformAwaitImportToRequire} from './esbuild_plugins/esbuild_plugin_transform_await_import';
 
 program
     .name('sb')
@@ -15,7 +17,7 @@ program
 program
     .command('dev')
     .description('Run the Springboard development server')
-    .usage('sb dev src/index.tsx')
+    .usage('src/index.tsx')
     .argument('entrypoint')
     .action(async (entrypoint: string) => {
         let applicationEntrypoint = entrypoint;
@@ -30,6 +32,10 @@ program
         await buildApplication(platformBrowserBuildConfig, {
             applicationEntrypoint,
             watch: true,
+            dev: {
+                reloadCss: true,
+                reloadJs: true,
+            },
         });
 
         await buildApplication(platformNodeBuildConfig, {
@@ -48,7 +54,6 @@ program
         concurrently(
             [
                 {command: `node ${nodeArgs} dist/server/dist/local-server.cjs`, name: 'Server', prefixColor: 'blue'},
-                {command: `node ${nodeArgs} dist/node/dist/index.js`, name: 'Node Maestro', prefixColor: 'green'},
             ],
             {
                 prefix: 'name',
@@ -60,10 +65,16 @@ program
 program
     .command('build')
     .description('Build the application bundles')
-    .usage('sb build src/index.tsx')
+    .usage('src/index.tsx')
     .argument('entrypoint')
     .option('-w, --watch', 'Watch for file changes')
-    .action(async (entrypoint: string, options: {watch?: boolean}) => {
+    .option('-p, --platforms <PLATFORM>,<PLATFORM>', 'Platforms to build for')
+    .action(async (entrypoint: string, options: {watch?: boolean, offline?: boolean, platforms?: string}) => {
+        let platformToBuild = process.env.SPRINGBOARD_PLATFORM_VARIANT || options.platforms as SpringboardPlatform;
+        if (!platformToBuild) {
+            platformToBuild = 'main';
+        }
+
         let applicationEntrypoint = entrypoint;
 
         const cwd = process.cwd();
@@ -73,30 +84,115 @@ program
 
         applicationEntrypoint = path.resolve(applicationEntrypoint);
 
-        await buildApplication(platformBrowserBuildConfig, {
-            applicationEntrypoint,
-            watch: options.watch,
-        });
+        console.log(`Building application variants "${platformToBuild}"`);
 
-        await buildApplication(platformNodeBuildConfig, {
-            applicationEntrypoint,
-            watch: options.watch,
-        });
+        const platformsToBuild = new Set<SpringboardPlatform>(platformToBuild.split(',') as SpringboardPlatform[]);
 
-        await buildServer({
-            watch: options.watch,
-        });
+        if (
+            platformsToBuild.has('all') ||
+            platformsToBuild.has('main')
+        ) {
+            await buildApplication(platformBrowserBuildConfig, {
+                applicationEntrypoint,
+                watch: options.watch,
+            });
+
+            await buildApplication(platformNodeBuildConfig, {
+                applicationEntrypoint,
+                watch: options.watch,
+            });
+
+            await buildServer({
+                watch: options.watch,
+            });
+        }
+
+        if (
+            platformsToBuild.has('all') ||
+            platformsToBuild.has('browser_offline')
+        ) {
+            await buildApplication(platformOfflineBrowserBuildConfig, {
+                applicationEntrypoint,
+                watch: options.watch,
+                esbuildOutDir: 'browser_offline',
+            });
+        }
+
+        if (
+            platformsToBuild.has('all') ||
+            platformsToBuild.has('desktop')
+        ) {
+            await buildApplication(platformTauriWebviewBuildConfig, {
+                applicationEntrypoint,
+                watch: options.watch,
+                esbuildOutDir: './tauri',
+                editBuildOptions: (buildOptions) => {
+                    buildOptions.define = {
+                        ...buildOptions.define,
+                        'process.env.DATA_HOST': "'http://127.0.0.1:1337'",
+                        'process.env.WS_HOST': "'ws://127.0.0.1:1337'",
+                        'process.env.RUN_SIDECAR_FROM_WEBVIEW': `${process.env.RUN_SIDECAR_FROM_WEBVIEW && process.env.RUN_SIDECAR_FROM_WEBVIEW !== 'false'}`,
+                    };
+                },
+            });
+
+            await buildApplication(platformTauriMaestroBuildConfig, {
+                applicationEntrypoint,
+                watch: options.watch,
+                esbuildOutDir: './tauri',
+            });
+
+            await buildServer({
+                watch: options.watch,
+                applicationDistPath: `${cwd}/dist/tauri/node/dist/dynamic-entry.js`,
+                esbuildOutDir: './tauri',
+                editBuildOptions: (buildOptions) => {
+                    buildOptions.plugins!.push(esbuildPluginTransformAwaitImportToRequire);
+                }
+            });
+        }
+
+        if (
+            platformsToBuild.has('all') ||
+            platformsToBuild.has('partykit')
+        ) {
+            await buildApplication(platformPartykitBrowserBuildConfig, {
+                applicationEntrypoint,
+                watch: options.watch,
+                esbuildOutDir: 'partykit',
+            });
+
+            await buildApplication(platformPartykitServerBuildConfig, {
+                applicationEntrypoint,
+                watch: options.watch,
+                esbuildOutDir: 'partykit',
+            });
+        }
+
+        // if (
+        //     platformsToBuild.has('all') ||
+        //     platformsToBuild.has('mobile')
+        // ) {
+        //     await buildRNWebview();
+        // }
+
+        // if (
+        //     platformsToBuild.has('all') ||
+        //     platformsToBuild.has('browser_offline')
+        // ) {
+        //     await buildBrowserOffline();
+        // }
     });
 
 program
     .command('start')
-    .description('Start the application server and node Maestro process')
-    .usage('sb start')
+    .description('Start the application server')
+    .usage('')
     .action(async () => {
         concurrently(
             [
                 {command: 'node dist/server/dist/local-server.cjs', name: 'Server', prefixColor: 'blue'},
-                {command: 'node dist/node/dist/index.js', name: 'Node Maestro', prefixColor: 'green'},
+                // {command: 'node dist/node/dist/index.js', name: 'Node Maestro', prefixColor: 'green'},
             ],
             {
                 prefix: 'name',
@@ -105,4 +201,65 @@ program
         );
     });
 
-program.parse();
+// import { readJsonSync, writeJsonSync } from 'fs-extra';
+import { resolve } from 'path';
+// import {generateReactNativeProject} from './generators/mobile/react_native_project_generator';
+
+program
+    .command('upgrade')
+    .description('Upgrade package versions with a specified prefix in package.json files.')
+    .usage('')
+    .argument('<new-version>', 'The new version number to set for matching packages.')
+    .option('--packages <files...>', 'package.json files to update', ['package.json'])
+    .option('--prefixes <prefixes...>', 'Package name prefixes to match (can be comma-separated or repeated)', ['springboard', '@springboardjs/', '@jamtools/'])
+    .addOption(new Option('--publish <tag>').hideHelp())
+    .action(async (newVersion, options) => {
+    const { packages, prefixes, publish } = options;
+
+    console.log('publishing to ' + publish);
+    // return;
+
+    const normalizedPrefixes = (prefixes as string[]).flatMap((p) => p.split(',')).map((p) => p.trim());
+
+    for (const packageFile of packages) {
+      const packagePath = resolve(process.cwd(), packageFile);
+      try {
+        const packageJson = JSON.parse(fs.readFileSync(packagePath).toString());
+        let modified = false;
+
+        for (const depType of ['dependencies', 'devDependencies', 'peerDependencies']) {
+          if (!packageJson[depType]) continue;
+
+          for (const [dep, currentVersion] of Object.entries<string>(packageJson[depType])) {
+            console.log(normalizedPrefixes, dep)
+            if (normalizedPrefixes.some((prefix) => dep.startsWith(prefix))) {
+              packageJson[depType][dep] = newVersion;
+              console.log(`✅ Updated ${dep} to ${newVersion} in ${packageFile}`);
+              modified = true;
+            }
+          }
+        }
+
+        if (modified) {
+            fs.writeFileSync(packagePath, JSON.stringify(packageJson, null, 2));
+        } else {
+          console.log(`ℹ️ No matching packages found in ${packageFile}`);
+        }
+      } catch (err) {
+        console.error(`❌ Error processing ${packageFile}:`, err);
+      }
+    }
+});
+
+// const generateCommand = program.command('generate');
+
+// generateCommand.command('mobile')
+//     .description('Generate a mobile app')
+//     .action(async () => {
+//         await generateReactNativeProject();
+//     });
+
+
+if (!(globalThis as any).AVOID_PROGRAM_PARSE) {
+    program.parse();
+}
