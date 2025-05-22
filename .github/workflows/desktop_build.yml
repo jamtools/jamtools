@@ -105,7 +105,7 @@ jobs:
 
     - name: Build node sidecar with pkg
       run: |
-        pnpm install -g pkg@6.3.0
+        pnpm install -g @yao-pkg/pkg
         node ../../node_modules/@springboardjs/platforms-tauri/scripts/build-tauri-sidecar.mjs
       working-directory: ./apps/desktop_tauri
       env:
