@@ -27,8 +27,6 @@ Type safety of the Svelte component is preserved for usage in the browser. In th
 npm i @springboardjs/plugin-svelte
 ```
 
-## Usage
-
 Plugins can be included directly from the CLI or from a build script.
 
 ### CLI

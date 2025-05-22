@@ -25,7 +25,7 @@ Each application build for a given platform consists of two parts:
 - A platform entrypoint, also called a platform adapter
 - An application entrypoint for the given platform
 
-Combining these together results in a bundle to run for the given platform and application. You can use the same application entrypoint for multiple platforms (and by default the most turnkey usage of the CLI assumes this), and use [conditional compilation]() to pivot platform dependencies/behavior as needed. Or you can specify different application entrypoints that mostly share the same code, but need some platform-specific code for feature initializations.
+Combining these together results in a bundle to run for the given platform and application. You can use the same application entrypoint for multiple platforms (and by default the most turnkey usage of the [CLI](/docs/cli/sb) assumes this), and use [conditional compilation]() to pivot platform dependencies/behavior as needed. Or you can specify different application entrypoints that mostly share the same code, but need some platform-specific code for feature initializations.
 
 <!-- What is a full-stack multi-player MIDI application? An application where there is a client-server architecture involved, and one of the following:
 - there are MIDI instruments plugged into the desktop/server computer, and mobile/browser clients can interact via a user interface.

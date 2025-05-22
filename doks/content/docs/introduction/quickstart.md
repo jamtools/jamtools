@@ -16,7 +16,7 @@ seo:
 
 1. Install [Node.js](https://nodejs.org/en/download/), and optionally [pnpm](https://pnpm.io/installation)
 
-2. Use the npm package `create-springboard-app` to create a new app
+2. Use the npm package [`create-springboard-app`](https://www.npmjs.com/package/create-springboard-app) to create a new app. This will initialize a new Node.js project with the Springboard CLI installed.
 
 ```shell
 npx create-springboard-app@latest --template jamtools
@@ -53,8 +53,10 @@ The example file in `src/index.tsx` contains a simple midi thru module that pipe
 import React from 'react';
 import springboard from 'springboard';
 
+import '@jamtools/core/modules/midi_macro';
+
 springboard.registerModule('Main', {}, async (moduleAPI) => {
-    const macroModule = moduleAPI.getModule('macro');
+    const macroModule = moduleAPI.getModule('midi_macro');
 
     const {input, output} = await macroModule.createMacros(moduleAPI, {
         input: {
@@ -94,7 +96,7 @@ springboard.registerModule('Main', {}, async (moduleAPI) => {
 });
 ```
 
-6. If you'd like to involve your phone, you can visit your local server from your phone at `http://(HOSTNAME_OR_IP):1337`. Use the "Edit" buttons in the UI to configure the MIDI devices you want to use on your computer.
+6. If you'd like to involve your phone, you can visit your local server from your phone at `http://(HOSTNAME_OR_IP):1337`. Use the "Edit" buttons in the UI to configure the MIDI devices you want to use on your computer. That's right - you can use your phone to peer into the MIDI state of your computer and interact from the UI!
 
 7. Test out the current functionality by playing notes on your MIDI keyboard. The notes should be sent to the MIDI output device you configured.
 
@@ -105,4 +107,6 @@ springboard.registerModule('Main', {}, async (moduleAPI) => {
 
 9. If you'd like to discuss the UX around using macros, please comment on [this issue](https://github.com/jamtools/jamtools/issues/24). To report an issue or request support for other macro types, [submit an issue](https://github.com/jamtools/jamtools/issues/new).
 
-Nice job! You've built your first Jam Tools app. Now learn about [creating modules](/docs/springboard/module-development), [deploying your app as a desktop app](/docs/springboard/platforms/desktop-app), or [deploying to a remote server](/docs/springboard/platforms/node-server).
+Nice job! You've built your first Jam Tools app. Next you can learn about:
+- [Deploying as a desktop app](/docs/springboard/platforms/desktop-app)
+- [Creating your own modules](/docs/springboard/module-development)
