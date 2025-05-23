@@ -36,7 +36,7 @@ import {Springboard} from 'springboard/engine/engine';
 import {RpcWebviewToRN} from '../services/rpc/rpc_webview_to_rn';
 import {WebviewToReactNativeKVService} from '../services/kv/kv_rn_and_webview';
 import {BrowserJsonRpcClientAndServer} from '@springboardjs/platforms-browser/services/browser_json_rpc';
-import {TrpcKVStoreService} from 'springboard/services/trpc_kv_store_client';
+import {HttpKVStoreService} from 'springboard/services/http_kv_store_client';
 import {ReactNativeWebviewLocalTokenService} from '../services/rn_webview_local_token_service';
 
 export const startJamToolsAndRenderApp = async (args: {remoteUrl: string}): Promise<Springboard> => {
@@ -51,7 +51,7 @@ export const startJamToolsAndRenderApp = async (args: {remoteUrl: string}): Prom
     }
 
     const remoteRpc = new BrowserJsonRpcClientAndServer(WS_FULL_URL);
-    const remoteKv = new TrpcKVStoreService(DATA_HOST);
+    const remoteKv = new HttpKVStoreService(DATA_HOST);
 
     const postMessage = (message: string) => (window as any).ReactNativeWebView.postMessage(message);
 

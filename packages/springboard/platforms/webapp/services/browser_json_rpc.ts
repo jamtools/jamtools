@@ -14,7 +14,12 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
     public role = 'client' as const;
 
     constructor (private url: string, private rpcProtocol: 'http' | 'websocket' = 'http') {
-        this.latestQueryParams = Object.fromEntries(new URL(this.url).searchParams);
+        const params: Record<string, string> = {};
+        for (const [key, value] of new URL(this.url).searchParams) {
+            params[key] = value;
+        }
+
+        this.latestQueryParams = params;
     }
 
     private clientId = '';
@@ -159,8 +164,8 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
         const u = new URL(this.url);
 
         if (this.latestQueryParams) {
-            for (const [key, value] of Object.entries(this.latestQueryParams)) {
-                u.searchParams.set(key, value);
+            for (const key of Object.keys(this.latestQueryParams)) {
+                u.searchParams.set(key, this.latestQueryParams[key]);
             }
         }
 

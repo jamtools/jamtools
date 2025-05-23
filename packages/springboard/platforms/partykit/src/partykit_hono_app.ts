@@ -1,6 +1,5 @@
 import {Hono} from 'hono';
 import {cors} from 'hono/cors';
-import {trpcServer} from '@hono/trpc-server';
 
 import {NodeAppDependencies} from '@springboardjs/platforms-node/entrypoints/main';
 import {NodeLocalJsonRpcClientAndServer} from '@springboardjs/platforms-node/services/node_local_json_rpc';
@@ -10,9 +9,14 @@ import {makeMockCoreDependencies} from 'springboard/test/mock_core_dependencies'
 
 import {RpcMiddleware, ServerModuleAPI, serverRegistry} from 'springboard-server/src/register';
 import {PartykitJsonRpcServer} from './services/partykit_rpc_server';
-import {PartykitTrpcRouter} from './entrypoints/partykit_server_entrypoint';
 import {Room} from 'partykit/server';
 import {PartykitKVStore} from './services/partykit_kv_store';
+
+export type PartykitKvForHttp = {
+    get: (key: string) => Promise<unknown>;
+    getAll: () => Promise<Record<string, unknown>>;
+    set: (key: string, value: unknown) => Promise<void>;
+}
 
 type InitAppReturnValue = {
     app: Hono;
@@ -21,7 +25,7 @@ type InitAppReturnValue = {
 };
 
 type InitArgs = {
-    kvTrpcRouter: PartykitTrpcRouter;
+    kvForHttp: PartykitKvForHttp;
     room: Room;
 }
 
@@ -35,6 +39,27 @@ export const initApp = (coreDeps: InitArgs): InitAppReturnValue => {
     app.get('/', async c => {
         // TODO: implement per-party index.html here
         return new Response('Root route of the party! Welcome!');
+    });
+
+    app.get('/kv/get', async (c) => {
+        const key = c.req.param('key');
+
+        if (!key) {
+            return c.json({error: 'No key provided'}, 400);
+        }
+
+        const value = await coreDeps.kvForHttp.get(key);
+
+        return c.json(value || null);
+    });
+
+    app.post('/kv/set', async (c) => {
+        return c.text('kv set operation not supported on this platform', 400);
+    });
+
+    app.get('/kv/get-all', async (c) => {
+        const all = await coreDeps.kvForHttp.getAll();
+        return c.json(all);
     });
 
     app.post('/rpc/*', async (c) => {
@@ -51,10 +76,6 @@ export const initApp = (coreDeps: InitArgs): InitAppReturnValue => {
         }), 500);
     });
 
-    app.use('/trpc/*', trpcServer({
-        router: coreDeps.kvTrpcRouter,
-    }));
-
     const rpc = new NodeLocalJsonRpcClientAndServer({
         broadcastMessage: (message) => {
             return rpcService.broadcastMessage(message);
@@ -70,7 +91,7 @@ export const initApp = (coreDeps: InitArgs): InitAppReturnValue => {
 
     const mockDeps = makeMockCoreDependencies({store: {}});
 
-    const kvStore = new PartykitKVStore(coreDeps.room);
+    const kvStore = new PartykitKVStore(coreDeps.room, coreDeps.kvForHttp);
 
     let storedEngine: Springboard | undefined;
 
