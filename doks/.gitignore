@@ -1,0 +1,7 @@
+node_modules
+public
+resources/_gen
+logos-main
+content\ copy
+hugo_stats.json
+future_content
