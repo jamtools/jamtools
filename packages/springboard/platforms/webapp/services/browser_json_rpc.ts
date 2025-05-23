@@ -208,6 +208,8 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
                     console.error('Error response for rpc request');
                 }
             }
+
+            return res.json();
         } catch (e) {
             console.error('Error with rpc request ' + e);
         }
