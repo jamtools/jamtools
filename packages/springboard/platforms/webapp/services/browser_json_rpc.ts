@@ -15,8 +15,9 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
 
     constructor (private url: string, private rpcProtocol: 'http' | 'websocket' = 'http') {
         const params: Record<string, string> = {};
-        for (const [key, value] of new URL(this.url).searchParams) {
-            params[key] = value;
+        const keys = Array.from(new URL(this.url).searchParams.keys());
+        for (const key of keys) {
+            params[key] = new URL(this.url).searchParams.get(key)!;
         }
 
         this.latestQueryParams = params;
@@ -181,16 +182,23 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
             this.ws?.reconnect();
         }
 
-        const wsUrl = this.url;
-        const base = wsUrl.substring(0, wsUrl.lastIndexOf('/')).replace('ws', 'http');
-
         let method = '';
         const originalMethod = req.method;
         if (originalMethod) {
             method = originalMethod.split('|').pop()!;
         }
 
-        const rpcUrl = `${base}/rpc${method ? `/${method}` : ''}`;
+        const u = new URL(this.url);
+        u.pathname += '/rpc' + (method ? `/${method}` : '');
+
+        if (this.latestQueryParams) {
+            for (const key of Object.keys(this.latestQueryParams)) {
+                u.searchParams.set(key, this.latestQueryParams[key]);
+            }
+        }
+
+        const rpcUrl = u.toString().replace('ws', 'http');
+
         try {
 
             const res = await fetch(rpcUrl, {
@@ -210,7 +218,6 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
                 }
             }
 
-            debugger;
             const data = await res.json();
             return data;
         } catch (e) {

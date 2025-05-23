@@ -146,6 +146,12 @@ export class PartyKitRpcClient implements Rpc {
         const u = new URL(this.conn.url);
         u.pathname += '/rpc' + (method ? `/${method}` : '');
 
+        if (this.latestQueryParams) {
+            for (const key of Object.keys(this.latestQueryParams)) {
+                u.searchParams.set(key, this.latestQueryParams[key]);
+            }
+        }
+
         const rpcUrl = u.toString().replace('ws', 'http');
         try {
             const res = await fetch(rpcUrl, {
