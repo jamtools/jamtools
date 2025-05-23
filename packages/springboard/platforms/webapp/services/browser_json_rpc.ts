@@ -145,7 +145,8 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
         // conditionally use http if the rpc protocol is set to http
         if (this.rpcProtocol === 'http') {
             this.rpcClient = new JSONRPCClient(async (request) => {
-                return this.sendHttpRpcRequest(request);
+                const data = await this.sendHttpRpcRequest(request);
+                this.rpcClient?.receive(data);
             });
         }
 
@@ -209,7 +210,9 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
                 }
             }
 
-            return res.json();
+            debugger;
+            const data = await res.json();
+            return data;
         } catch (e) {
             console.error('Error with rpc request ' + e);
         }
