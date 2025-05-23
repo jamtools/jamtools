@@ -13,10 +13,13 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
 
     public role = 'client' as const;
 
-    constructor (private url: string, private rpcProtocol: 'http' | 'websocket' = 'http') {}
+    constructor (private url: string, private rpcProtocol: 'http' | 'websocket' = 'http') {
+        this.latestQueryParams = Object.fromEntries(new URL(this.url).searchParams);
+    }
 
     private clientId = '';
     private ws?: ReconnectingWebSocket;
+    private latestQueryParams?: Record<string, string>;
 
     getClientId = () => {
         if (this.clientId) {
@@ -100,6 +103,7 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
                 connected = true;
                 console.log('websocket connected');
 
+                // conditionally use websockets if the rpc protocol is set to websocket
                 if (this.rpcProtocol === 'websocket') {
                     this.rpcClient = new JSONRPCClient((request) => {
                         request.clientId = this.getClientId();
@@ -117,9 +121,11 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
             ws.onerror = async (e) => {
                 if (!connected) {
                     console.error('failed to connect to websocket');
-                    this.rpcClient = new JSONRPCClient(() => {
-                        return Promise.reject(new Error('WebSocket is not open'));
-                    });
+                    if (this.rpcProtocol === 'websocket') {
+                        this.rpcClient = new JSONRPCClient(() => {
+                            return Promise.reject(new Error('WebSocket is not open'));
+                        });
+                    }
                     resolve(false);
                 }
 
@@ -131,9 +137,10 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
     initialize = async (): Promise<boolean> => {
         this.rpcServer = new JSONRPCServer();
 
+        // conditionally use http if the rpc protocol is set to http
         if (this.rpcProtocol === 'http') {
             this.rpcClient = new JSONRPCClient(async (request) => {
-                return this.sendRpcRequest(request);
+                return this.sendHttpRpcRequest(request);
             });
         }
 
@@ -146,13 +153,13 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
     };
 
     reconnect = async (queryParams?: Record<string, string>): Promise<boolean> => {
-        // TODO: maybe we should store the query params, and use them in http
         this.ws?.close();
+        this.latestQueryParams = queryParams || this.latestQueryParams;
 
         const u = new URL(this.url);
 
-        if (queryParams) {
-            for (const [key, value] of Object.entries(queryParams)) {
+        if (this.latestQueryParams) {
+            for (const [key, value] of Object.entries(this.latestQueryParams)) {
                 u.searchParams.set(key, value);
             }
         }
@@ -162,7 +169,7 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
         return this.initializeWebsocket();
     };
 
-    private sendRpcRequest = async (req: object & {method?: string}) => {
+    private sendHttpRpcRequest = async (req: object & {method?: string}) => {
         const needToReconnectWebsocket = false;
         if (needToReconnectWebsocket) {
             this.ws?.reconnect();

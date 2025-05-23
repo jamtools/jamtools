@@ -13,12 +13,13 @@ export class PartyKitRpcClient implements Rpc {
 
     public role = 'client' as const;
 
-    private conn!: PartySocket;
-
-    constructor(private host: string, private room: string) {
-    }
-
     private clientId = '';
+    private conn!: PartySocket;
+    private latestQueryParams?: Record<string, string>;
+
+    constructor(private host: string, private room: string, queryParams?: Record<string, string>) {
+        this.latestQueryParams = queryParams;
+    }
 
     private getClientId = () => {
         if (this.clientId) {
@@ -68,6 +69,7 @@ export class PartyKitRpcClient implements Rpc {
         this.conn = new PartySocket({
             host: this.host,
             room: this.room,
+            query: this.latestQueryParams,
         });
 
         const ws = this.conn;
@@ -94,24 +96,12 @@ export class PartyKitRpcClient implements Rpc {
             ws.onopen = () => {
                 connected = true;
                 console.log('websocket connected');
-                this.rpcClient = new JSONRPCClient((request) => {
-                    request.clientId = this.getClientId();
-                    if (ws.readyState === WebSocket.OPEN) {
-                        ws.send(JSON.stringify(request));
-                        return Promise.resolve();
-                    } else {
-                        return Promise.reject(new Error('WebSocket is not open'));
-                    }
-                });
                 resolve(true);
             };
 
             ws.onerror = async (e) => {
                 if (!connected) {
                     console.error('failed to connect to websocket');
-                    this.rpcClient = new JSONRPCClient(() => {
-                        return Promise.reject(new Error('WebSocket is not open'));
-                    });
                     resolve(false);
                 }
 
@@ -120,12 +110,61 @@ export class PartyKitRpcClient implements Rpc {
         });
     };
 
+    reconnect = async (queryParams?: Record<string, string>): Promise<boolean> => {
+        this.conn.close();
+        this.latestQueryParams = queryParams || this.latestQueryParams;
+        return this.initializeWebsocket();
+    };
+
     public initialize = async (): Promise<boolean> => {
         this.rpcServer = new JSONRPCServer();
+
+        this.rpcClient = new JSONRPCClient(async (request) => {
+            return this.sendHttpRpcRequest(request);
+        });
+
         try {
             return this.initializeWebsocket();
         } catch (e) {
             return false;
+        }
+    };
+
+    private sendHttpRpcRequest = async (req: object & {method?: string}) => {
+        const needToReconnectWebsocket = false;
+        if (needToReconnectWebsocket) {
+            this.conn?.reconnect();
+        }
+
+        let method = '';
+        const originalMethod = req.method;
+        if (originalMethod) {
+            method = originalMethod.split('|').pop()!;
+        }
+
+        const u = new URL(this.conn.url);
+        u.pathname += '/rpc' + (method ? `/${method}` : '');
+
+        const rpcUrl = u.toString().replace('ws', 'http');
+        try {
+            const res = await fetch(rpcUrl, {
+                method: 'POST',
+                body: JSON.stringify(req),
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!res.ok) {
+                try {
+                    const text = await res.text();
+                    console.error('Error response for rpc request: ' + text);
+                } catch (e) {
+                    console.error('Error response for rpc request');
+                }
+            }
+        } catch (e) {
+            console.error('Error with rpc request ' + e);
         }
     };
 }

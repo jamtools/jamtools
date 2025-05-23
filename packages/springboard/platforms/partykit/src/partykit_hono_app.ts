@@ -37,6 +37,20 @@ export const initApp = (coreDeps: InitArgs): InitAppReturnValue => {
         return new Response('Root route of the party! Welcome!');
     });
 
+    app.post('/rpc/*', async (c) => {
+        const body = await c.req.text();
+        c.header('Content-Type', 'application/json');
+
+        const rpcResponse = await rpcService.processRequestWithMiddleware(body, c);
+        if (rpcResponse) {
+            return c.text(rpcResponse);
+        }
+
+        return c.text(JSON.stringify({
+            error: 'No response',
+        }), 500);
+    });
+
     app.use('/trpc/*', trpcServer({
         router: coreDeps.kvTrpcRouter,
     }));
@@ -51,7 +65,7 @@ export const initApp = (coreDeps: InitArgs): InitAppReturnValue => {
         processRequest: async (message) => {
             return rpc!.processRequest(message);
         },
-        rpcMiddlewares: [], // TODO: implement partykit middleware. maybe switch to using trpc for all actions and then that's not a problem
+        rpcMiddlewares,
     }, coreDeps.room);
 
     const mockDeps = makeMockCoreDependencies({store: {}});
