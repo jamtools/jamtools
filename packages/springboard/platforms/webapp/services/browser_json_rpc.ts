@@ -197,7 +197,7 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
             }
         }
 
-        const rpcUrl = u.toString().replace('ws', 'http');
+        const rpcUrl = u.toString().replace('ws', 'http').replace('/ws', '');
 
         try {
 
