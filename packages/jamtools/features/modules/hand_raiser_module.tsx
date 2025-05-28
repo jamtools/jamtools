@@ -25,6 +25,8 @@ springboard.registerModule('HandRaiser', {}, async (m) => {
             states.handPositions.setStateImmer((positions) => {
                 positions[args.index] = args.value;
             });
+
+            return {success: true};
         },
     });
 
@@ -62,7 +64,9 @@ springboard.registerModule('HandRaiser', {}, async (m) => {
                         <HandSliderContainer
                             key={index}
                             position={position}
-                            handlePositionChange={value => actions.changeHandPosition({index, value})}
+                            handlePositionChange={async (value) => {
+                                await actions.changeHandPosition({index, value});
+                            }}
                             macro={index === 0 ? macros.slider0 : macros.slider1}
                         />
                     ))}
