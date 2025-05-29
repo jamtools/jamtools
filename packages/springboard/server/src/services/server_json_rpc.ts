@@ -1,7 +1,7 @@
 import {JSONRPCClient, JSONRPCRequest} from 'json-rpc-2.0';
 import {Context} from 'hono';
 import {WSContext, WSEvents} from 'hono/ws';
-import {RpcMiddleware} from '@/register';
+import {RpcMiddleware} from '../register';
 
 import {nodeRpcAsyncLocalStorage} from '@springboardjs/platforms-node/services/node_rpc_async_local_storage';
 

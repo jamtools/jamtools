@@ -21,6 +21,7 @@ COPY turbo.json .
 RUN npm i
 
 ENV DISABLE_IO="true"
+ENV NODE_MODULES_PARENT_FOLDER="/app"
 
 RUN npm run build
 

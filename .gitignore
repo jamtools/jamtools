@@ -8,6 +8,8 @@ kv.db
 .env
 kv_data.json
 
-verdaccio
+verdaccio/storage
 esbuild_meta.json
 stats.html
+games
+platform-examples

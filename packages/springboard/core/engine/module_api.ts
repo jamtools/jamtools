@@ -67,8 +67,26 @@ export class ModuleAPI {
     getModule = this.modDeps.moduleRegistry.getModule.bind(this.modDeps.moduleRegistry);
 
     /**
-     * Register a route with the application's React router. The route will be accessible from the browser at [myserver.com/modules/(module_id)/(route)](). The route will also be registered to the application's navigation bar.
-    */
+     * Register a route with the application's React Router. More info in [registering UI routes](/springboard/registering-ui).
+     *
+     * ```jsx
+        // matches "" and "/"
+     *    moduleAPI.registerRoute('/', () => {
+     *        return (
+     *            <div/>
+     *        );
+     *    });
+     *
+     *    // matches "/modules/MyModule"
+     *    moduleAPI.registerRoute('', () => {
+     *        return (
+     *            <div/>
+     *        );
+     *    });
+     *
+     * ```
+     *
+     */
     registerRoute = (routePath: string, options: RegisterRouteOptions, component: RegisteredRoute['component']) => {
         const routes = this.module.routes || {};
         routes[routePath] = {
