@@ -28,7 +28,7 @@ The ModuleAPI allows modules to:
 Modules can play a few different types of roles:
 
 - Feature - A feature-level module implements certain features for your application. These modules typically register routes and interact with other modules to faciliate cohesion and "get stuff done".
-- Utility - A utility module exposes things for other modules to use, and likely does not register any routes. An example utility module is the [Macro Module](https://github.com/jamtools/jamtools/blob/main/packages/jamtools/core/modules/io/io_module.tsx), which exposes functions for other modules to declare MIDI entrypoints for a given feature.
+- Utility - A utility module exposes things for other modules to use, and likely does not register any routes. An example utility module is the [Macro Module](/docs/jamtools/midi-macros), which exposes functions for other modules to declare MIDI entrypoints for a given feature.
 - Initializer - An initializer module does some initial setup for an application. This kind of module is typically not needed for small applications, though these modules become useful when deployment use cases are complicated. You may want to have some specific initialization on a mobile app versus desktop app, for instance.
 
 ---
@@ -37,7 +37,7 @@ Modules can play a few different types of roles:
 
 When registering a module, the module provides a callback to run on app initialization. The callback the module provides essentially _is_ the module. The callback receives an instance of the `ModuleAPI`. The namespacing of states and actions for this particular module are automatically managed by the framework. Some useful methods/properties from the `ModuleAPI` are documented in the [ModuleAPI docs](../typedoc_docs/module_api/classes/ModuleAPI.md).
 
-(explain some methods briefly here, a link to individual api reference methods. probably good to have youtube videos walking through code too, though you can do the same in text form probably)
+Check out the [Tic-Tac-Toe example](https://github.com/jamtools/jamtools/blob/main/apps/small_apps/tic_tac_toe/tic_tac_toe.tsx) and [Song Structure example](https://github.com/jamtools/jamtools/blob/main/packages/jamtools/features/modules/song_structures_dashboards/song_structures_dashboards_module.tsx) for examples of feature modules.
 
 ## Writing a utility module
 
