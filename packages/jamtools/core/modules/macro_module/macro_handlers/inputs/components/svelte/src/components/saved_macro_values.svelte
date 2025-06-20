@@ -16,11 +16,11 @@
 </script>
 
 <ul>
-  {#each saved as event (getKeyForMidiEvent(event))}
+  {#each saved as midiEvent (getKeyForMidiEvent(midiEvent))}
     <li>
-      {getKeyForMidiEvent(event)}<button
+      {getKeyForMidiEvent(midiEvent)}<button
         on:click={(event) => {
-          onClickDelete(event);
+          onClickDelete(midiEvent);
         }}
       >
         Delete

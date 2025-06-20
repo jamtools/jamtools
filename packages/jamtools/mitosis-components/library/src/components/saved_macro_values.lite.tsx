@@ -11,11 +11,11 @@ export default function SavedMacroValues(props: SavedMacroValues) {
             <For
                 each={props.saved}
             >
-                {(event) => (
-                    <li key={getKeyForMidiEvent(event)}>
-                        {getKeyForMidiEvent(event)}
+                {(midiEvent) => (
+                    <li key={getKeyForMidiEvent(midiEvent)}>
+                        {getKeyForMidiEvent(midiEvent)}
                         <button
-                           onClick={() => props.onClickDelete(event)}
+                           onClick={() => props.onClickDelete(midiEvent)}
                         >
                             Delete
                         </button>

@@ -20,17 +20,6 @@
             name: "",
         });
 
-        const macros = await moduleAPI.getModule('macro').createMacros(moduleAPI, {
-            slider1: {
-                type: 'midi_control_change_input',
-                config: {},
-            },
-            slider2: {
-                type: 'midi_control_change_input',
-                config: {},
-            },
-        });
-
         const actions = moduleAPI.createActions({
             increment: async (args: object): Promise<void> => {
                 states.count.setState((value) => {
@@ -42,6 +31,21 @@
             },
         });
 
+        const macros = await moduleAPI.getModule('macro').createMacros(moduleAPI, {
+            slider1: {
+                type: 'midi_control_change_input',
+                config: {
+                    onTrigger: async (midiEvent) => {
+                        actions.increment({});
+                    },
+                },
+            },
+            slider2: {
+                type: 'midi_control_change_input',
+                config: {},
+            },
+        });
+
         return {
             states,
             actions,
@@ -50,9 +54,10 @@
     };
 
     springboard.registerModule('Main', {}, async (app) => {
+        const props = {app};
         app.registerRoute('/', {}, function () {
             const self = getSelf();
-            return createSvelteReactElement(self, { app });
+            return createSvelteReactElement(self, props);
         });
 
         return createResources(app);
@@ -60,7 +65,7 @@
 </script>
 
 <script lang="ts">
-    import { stateSupervisorToStore } from './svelte_helpers';
+    import { stateSupervisorToStore } from '@springboardjs/plugin-svelte/src/svelte_helpers';
 
     import Edit from '@springboardjs/plugin-svelte/src/svelte_jamtools_macro_component.svelte';
 
@@ -90,3 +95,7 @@
 <Form submit={actions.setName} />
 
 <p>{$name}</p>
+
+<Edit
+    payload={slider1}
+/>

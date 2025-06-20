@@ -299,6 +299,9 @@ importers:
       rxjs:
         specifier: 'catalog:'
         version: 7.8.2
+      svelte:
+        specifier: 5.34.7
+        version: 5.34.7
 
   packages/jamtools/features:
     dependencies:
@@ -694,8 +697,11 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3(@babel/core@7.27.1)(postcss-load-config@6.0.1(postcss@8.5.3)(tsx@4.19.4))(postcss@8.5.3)(svelte@5.34.7)(typescript@5.8.3)
     devDependencies:
+      react:
+        specifier: ^19.1.0
+        version: 19.1.0
       svelte:
-        specifier: ^5.22.0
+        specifier: 5.34.7
         version: 5.34.7
 
   packages/springboard/server:

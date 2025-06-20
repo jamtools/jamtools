@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { MidiInputMacroPayload } from "@jamtools/core/modules/macro_module/macro_handlers/inputs/input_macro_handler_utils.tsx";
-    import { stateSupervisorToStore } from "../example/src/svelte_helpers";
+    import { stateSupervisorToStore } from "./svelte_helpers";
     import Edit from "@jamtools/core/modules/macro_module/macro_handlers/inputs/components/svelte/src/components/edit_macro.svelte";
 
     let { payload }: { payload: MidiInputMacroPayload } = $props();

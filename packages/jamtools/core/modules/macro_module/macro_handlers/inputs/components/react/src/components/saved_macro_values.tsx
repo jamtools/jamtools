@@ -13,10 +13,10 @@ const getKeyForMidiEvent = (event: MidiEventFull) => {
 function SavedMacroValues(props: SavedMacroValues) {
   return (
     <ul>
-      {props.saved?.map((event) => (
-        <li key={getKeyForMidiEvent(event)}>
-          {getKeyForMidiEvent(event)}
-          <button onClick={(event) => props.onClickDelete(event)}>
+      {props.saved?.map((midiEvent) => (
+        <li key={getKeyForMidiEvent(midiEvent)}>
+          {getKeyForMidiEvent(midiEvent)}
+          <button onClick={(event) => props.onClickDelete(midiEvent)}>
             Delete
           </button>
         </li>

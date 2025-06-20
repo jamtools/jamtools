@@ -1,6 +1,12 @@
-// SvelteComponentWrapper.tsx
-import React, {useEffect, useRef} from 'react';
+import React from 'react';
+import type {createElement, useEffect, useRef} from 'react';
 import type {ComponentProps} from 'svelte';
+
+type ReactLib = {
+    createElement: typeof createElement;
+    useEffect: typeof useEffect;
+    useRef: typeof useRef;
+};
 
 interface SvelteComponentWrapperProps<T extends Component<any>> {
     component: T;
@@ -8,29 +14,28 @@ interface SvelteComponentWrapperProps<T extends Component<any>> {
 }
 
 export const createSvelteReactElement = <T extends Component<any>>(component: T, props: ComponentProps<T>) => {
-    return <SvelteComponentWrapper<T> component={component} props={props} />;
+    return React.createElement(SvelteComponentWrapper<T>, {component, props});
 };
 
 function SvelteComponentWrapper<T extends Component<any>>({
     component,
     props,
 }: SvelteComponentWrapperProps<T>): JSX.Element {
-    const containerRef = useRef<HTMLDivElement>(null);
-    const svelteInstanceRef = useRef<ReturnType<typeof mountSvelteComponent<T>> | null>(null);
+    const containerRef = React.useRef<HTMLDivElement>(null);
+    const svelteInstanceRef = React.useRef<ReturnType<typeof mountSvelteComponent<T>> | null>(null);
 
-    useEffect(() => {
-        if (containerRef.current) {
-            svelteInstanceRef.current = mountSvelteComponent(component, containerRef.current, props);
+    React.useEffect(() => {
+        if (containerRef.current && !svelteInstanceRef.current) {
+          svelteInstanceRef.current = mountSvelteComponent(component, containerRef.current, props);
         }
-
         return () => {
-            if (svelteInstanceRef.current) {
-                unmountSvelteComponent(svelteInstanceRef.current, {outro: true});
-            }
+          if (svelteInstanceRef.current) {
+            unmountSvelteComponent(svelteInstanceRef.current, { outro: true });
+          }
         };
-    }, [component, props]);
+      }, [component]);
 
-    return <div ref={containerRef} />;
+    return React.createElement('div', {ref: containerRef});
 }
 
 export default SvelteComponentWrapper;

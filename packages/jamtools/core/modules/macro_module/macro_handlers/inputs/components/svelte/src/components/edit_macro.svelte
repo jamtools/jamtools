@@ -16,6 +16,9 @@
   import type { MidiEventFull } from "@jamtools/core/modules/macro_module/macro_module_types";
   import SavedMacroValues from "./saved_macro_values.svelte";
   import CaptureForm from "./capture_form.svelte";
+  console.log(CaptureForm)
+  console.log(SavedMacroValues)
+
 
   export let editing: EditProps["editing"];
   export let onEdit: EditProps["onEdit"];
