@@ -54,15 +54,13 @@ publish_package() {
   cd "$target_dir" || exit 1
   echo "Publishing package in $target_dir"
 
-  # Set registry based on mode
-  local registry=""
   local environment=""
 
+  # Set registry based on mode
   if [ "$PUBLISH_MODE" = "npm" ]; then
-    registry=""
     environment="npm"
   else
-    registry="--registry http://localhost:4873"
+    export NPM_CONFIG_REGISTRY="http://localhost:4873"
     environment="local Verdaccio"
   fi
 
@@ -82,8 +80,13 @@ publish_package() {
   fi
 
   # Execute the publish command
-  npm publish --access public $registry --tag "$tag"
+  pnpm publish --access public --tag "$tag" --no-git-checks
 }
+
+bump_version "$root_dir/packages/springboard/data_storage"
+publish_package "$root_dir/packages/springboard/data_storage"
+
+sleep 1
 
 bump_version "$root_dir/packages/springboard/core"
 publish_package "$root_dir/packages/springboard/core"
@@ -91,71 +94,66 @@ publish_package "$root_dir/packages/springboard/core"
 sleep 1
 
 bump_version "$root_dir/packages/springboard/platforms/webapp"
-bump_peer_dep "$root_dir/packages/springboard/platforms/webapp" "springboard"
+# bump_peer_dep "$root_dir/packages/springboard/platforms/webapp" "springboard"
 publish_package "$root_dir/packages/springboard/platforms/webapp"
 
 sleep 1
 
 bump_version "$root_dir/packages/springboard/platforms/node"
-bump_peer_dep "$root_dir/packages/springboard/platforms/node" "springboard"
+# bump_peer_dep "$root_dir/packages/springboard/platforms/node" "springboard"
 publish_package "$root_dir/packages/springboard/platforms/node"
 
 sleep 1
 
 bump_version "$root_dir/packages/springboard/platforms/react-native"
-bump_peer_dep "$root_dir/packages/springboard/platforms/react-native" "springboard"
+# bump_peer_dep "$root_dir/packages/springboard/platforms/react-native" "springboard"
 publish_package "$root_dir/packages/springboard/platforms/react-native"
 
 sleep 1
 
 bump_version "$root_dir/packages/springboard/platforms/partykit"
-bump_peer_dep "$root_dir/packages/springboard/platforms/partykit" "springboard"
+# bump_peer_dep "$root_dir/packages/springboard/platforms/partykit" "springboard"
 publish_package "$root_dir/packages/springboard/platforms/partykit"
 
 sleep 1
 
-bump_version "$root_dir/packages/springboard/data_storage"
-publish_package "$root_dir/packages/springboard/data_storage"
-
-sleep 1
-
 bump_version "$root_dir/packages/springboard/server"
-bump_peer_dep "$root_dir/packages/springboard/server" "springboard"
-bump_peer_dep "$root_dir/packages/springboard/server" "@springboardjs/data-storage"
+# bump_peer_dep "$root_dir/packages/springboard/server" "springboard"
+# bump_peer_dep "$root_dir/packages/springboard/server" "@springboardjs/data-storage"
 publish_package "$root_dir/packages/springboard/server"
 
 sleep 1
 
 bump_version "$root_dir/packages/springboard/external/mantine"
-bump_peer_dep "$root_dir/packages/springboard/external/mantine" "springboard"
+# bump_peer_dep "$root_dir/packages/springboard/external/mantine" "springboard"
 publish_package "$root_dir/packages/springboard/external/mantine"
 
 sleep 1
 
 bump_version "$root_dir/packages/springboard/external/shoelace"
-bump_peer_dep "$root_dir/packages/springboard/external/shoelace" "springboard"
+# bump_peer_dep "$root_dir/packages/springboard/external/shoelace" "springboard"
 publish_package "$root_dir/packages/springboard/external/shoelace"
 
 sleep 1
 
 bump_version "$root_dir/packages/jamtools/core"
-bump_peer_dep "$root_dir/packages/jamtools/core" "springboard"
+# bump_peer_dep "$root_dir/packages/jamtools/core" "springboard"
 publish_package "$root_dir/packages/jamtools/core"
 
 sleep 1
 
 bump_version "$root_dir/packages/jamtools/features"
-bump_peer_dep "$root_dir/packages/jamtools/features" "@jamtools/core"
-bump_peer_dep "$root_dir/packages/jamtools/features" "@springboardjs/shoelace"
+# bump_peer_dep "$root_dir/packages/jamtools/features" "@jamtools/core"
+# bump_peer_dep "$root_dir/packages/jamtools/features" "@springboardjs/shoelace"
 publish_package "$root_dir/packages/jamtools/features"
 
 sleep 1
 
 bump_version "$root_dir/packages/springboard/cli"
-bump_peer_dep "$root_dir/packages/springboard/cli" "springboard"
-bump_peer_dep "$root_dir/packages/springboard/cli" "@springboardjs/platforms-node"
-bump_peer_dep "$root_dir/packages/springboard/cli" "@springboardjs/platforms-browser"
-bump_peer_dep "$root_dir/packages/springboard/cli" "springboard-server"
+# bump_peer_dep "$root_dir/packages/springboard/cli" "springboard"
+# bump_peer_dep "$root_dir/packages/springboard/cli" "@springboardjs/platforms-node"
+# bump_peer_dep "$root_dir/packages/springboard/cli" "@springboardjs/platforms-browser"
+# bump_peer_dep "$root_dir/packages/springboard/cli" "springboard-server"
 publish_package "$root_dir/packages/springboard/cli"
 
 sleep 1

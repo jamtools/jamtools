@@ -14,75 +14,88 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
-            # - name: Install Node.js
-            #   uses: actions/setup-node@v4
-            #   with:
-            #       node-version: 21
-            #       cache: 'npm'
-            # - name: Set npm mirror
-            #   run: npm config set registry https://npmjs.cf/
+
+            - name: Install pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                version: 9.13.2
+            - name: Install Node.js
+              uses: actions/setup-node@v4
+              with:
+                node-version: 20
+                cache: 'pnpm'
 
             - name: Install modules
-              run: npm i
+              run: pnpm i
             - name: Build app
               run: npx turbo run build
     build-saas:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
-            # - name: Install Node.js
-            #   uses: actions/setup-node@v4
-            #   with:
-            #       node-version: 21
-            #       cache: 'npm'
-            # - name: Set npm mirror
-            #   run: npm config set registry https://npmjs.cf/
+
+            - name: Install pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                version: 9.13.2
+            - name: Install Node.js
+              uses: actions/setup-node@v4
+              with:
+                node-version: 20
+                cache: 'pnpm'
+
             - name: Install modules
-              run: npm i
+              run: pnpm i
             - name: Build app
               run: npx turbo run build-saas
     types:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
-            # - name: Install Node.js
-            #   uses: actions/setup-node@v4
-            #   with:
-            #       node-version: 21
-            #       cache: 'npm'
-            # - name: Set npm mirror
-            #   run: npm config set registry https://npmjs.cf/
+            - name: Install pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                version: 9.13.2
+            - name: Install Node.js
+              uses: actions/setup-node@v4
+              with:
+                node-version: 20
+                cache: 'pnpm'
             - name: Install modules
-              run: npm i
+              run: pnpm i
             - name: Check Types
               run: npx turbo run check-types
     lint:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
-            # - name: Install Node.js
-            #   uses: actions/setup-node@v4
-            #   with:
-            #       node-version: 21
-            #       cache: 'npm'
-            # - name: Set npm mirror
-            #   run: npm config set registry https://npmjs.cf/
+            - name: Install pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                version: 9.13.2
+            - name: Install Node.js
+              uses: actions/setup-node@v4
+              with:
+                node-version: 20
+                cache: 'pnpm'
             - name: Install modules
-              run: npm i
+              run: pnpm i
             - name: Run eslint
               run: npx turbo run lint
     test:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
-            # - name: Install Node.js
-            #   uses: actions/setup-node@v4
-            #   with:
-            #       node-version: 21
-            #       cache: 'npm'
-            # - name: Set npm mirror
-            #   run: npm config set registry https://npmjs.cf/
+            - name: Install pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                version: 9.13.2
+            - name: Install Node.js
+              uses: actions/setup-node@v4
+              with:
+                node-version: 20
+                cache: 'pnpm'
             - name: Install modules
-              run: npm i
+              run: pnpm i
             - name: Run tests
               run: npx turbo run test

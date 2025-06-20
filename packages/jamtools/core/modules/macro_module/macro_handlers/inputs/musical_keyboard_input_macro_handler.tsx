@@ -1,11 +1,10 @@
 import React from 'react';
 
 import {MidiDeviceAndChannelMap, MidiEvent, MidiEventFull, makeHashedMidiDeviceAndChannel} from '../../macro_module_types';
-import {QwertyCallbackPayload} from '@jamtools/core/types/io_types';
-import {Subject} from 'rxjs';
-import {QWERTY_TO_MIDI_MAPPINGS} from '@jamtools/core/constants/qwerty_to_midi_mappings';
+import {QwertyCallbackPayload} from '../../../../types/io_types';
+import {QWERTY_TO_MIDI_MAPPINGS} from '../../../../constants/qwerty_to_midi_mappings';
 import {InputMacroStateHolders, MidiInputMacroPayload, getKeyForMacro, getKeyForMidiEvent, useInputMacroWaiterAndSaver} from './input_macro_handler_utils';
-import {macroTypeRegistry} from '@jamtools/core/modules/macro_module/registered_macro_types';
+import {macroTypeRegistry} from '../../registered_macro_types';
 
 type MusicalKeyboardInputResult = MidiInputMacroPayload;
 
@@ -15,7 +14,7 @@ type MacroConfigItemMusicalKeyboardInput = {
     eventTypes?: MidiEvent['type'][];
 }
 
-declare module '@jamtools/core/modules/macro_module/macro_module_types' {
+declare module '../../macro_module_types' {
     interface MacroTypeConfigs {
         musical_keyboard_input: {
             input: MacroConfigItemMusicalKeyboardInput;
