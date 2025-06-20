@@ -422,4 +422,6 @@ const findNodeModulesParentFolder = async () => {
     return undefined;
 };
 
+type NotUndefined<T> = T extends undefined ? never : T;
+
 const isNotUndefined = <T>(value: T): value is NotUndefined<T> => value !== undefined;
