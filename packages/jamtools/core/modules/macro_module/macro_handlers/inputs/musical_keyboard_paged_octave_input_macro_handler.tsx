@@ -6,10 +6,9 @@ import {Subject} from 'rxjs';
 import {getKeyForMacro} from './input_macro_handler_utils';
 import {savedMidiInputsAreEqual} from './musical_keyboard_input_macro_handler';
 
-import '@jamtools/core/modules/macro_module/macro_module';
+import {macroTypeRegistry} from '../../registered_macro_types';
 
 import {MidiEventFull} from '../../macro_module_types';
-import {macroTypeRegistry} from '@jamtools/core/modules/macro_module/registered_macro_types';
 
 type MusicalKeyboardPagedOctaveInputResult = {
     subject: Subject<MidiEventFull>;
@@ -24,7 +23,7 @@ type MacroConfigItemMusicalKeyboardPagedOctaveInput = {
     enableQwerty?: boolean;
 }
 
-declare module '@jamtools/core/modules/macro_module/macro_module_types' {
+declare module '../../macro_module_types' {
     interface MacroTypeConfigs {
         musical_keyboard_paged_octave_input: {
             input: MacroConfigItemMusicalKeyboardPagedOctaveInput;
@@ -54,9 +53,9 @@ macroTypeRegistry.registerMacroType(
             numberOfOctaves: conf.singleOctave ? 1 : initialUserDefinedConfig.numberOfOctaves,
         };
 
-        const pagedOctaveInputStoredConfig = await macroAPI.moduleAPI.statesAPI.createPersistentState<PagedOctaveInputStoredConfig>(getKeyForMacro('pagedOctaveInputStoredConfig', fieldName), initialUserConfig);
+        const pagedOctaveInputStoredConfig = await macroAPI.statesAPI.createPersistentState<PagedOctaveInputStoredConfig>(getKeyForMacro('pagedOctaveInputStoredConfig', fieldName), initialUserConfig);
 
-        const showConfigurationFormState = await macroAPI.moduleAPI.statesAPI.createSharedState<boolean>(getKeyForMacro('pagedOctaveInputShowForm', fieldName), false);
+        const showConfigurationFormState = await macroAPI.statesAPI.createSharedState<boolean>(getKeyForMacro('pagedOctaveInputShowForm', fieldName), false);
 
         const subject = new Subject<MidiEventFull>();
 
@@ -67,10 +66,9 @@ macroTypeRegistry.registerMacroType(
             macroAPI.onDestroy(subscription.unsubscribe);
         }
 
-        const keyboardMacro = await macroAPI.moduleAPI.deps.module.moduleRegistry.getModule('macro').createMacro(macroAPI.moduleAPI, fieldName + '|keyboard_input', 'musical_keyboard_input', {enableQwerty: conf.enableQwerty});
+        const keyboardMacro = await macroAPI.createMacro(macroAPI.moduleAPI, fieldName + '|keyboard_input', 'musical_keyboard_input', {enableQwerty: conf.enableQwerty});
 
-
-        const pageDownMacro = await macroAPI.moduleAPI.deps.module.moduleRegistry.getModule('macro').createMacro(macroAPI.moduleAPI, fieldName + '|page_down', 'midi_button_input', {
+        const pageDownMacro = await macroAPI.createMacro(macroAPI.moduleAPI, fieldName + '|page_down', 'midi_button_input', {
             includeRelease: false,
             onTrigger: () => {
                 const currentConfig = pagedOctaveInputStoredConfig.getState();
@@ -83,7 +81,7 @@ macroTypeRegistry.registerMacroType(
             },
         });
 
-        const pageUpMacro = await macroAPI.moduleAPI.deps.module.moduleRegistry.getModule('macro').createMacro(macroAPI.moduleAPI, fieldName + '|page_up', 'midi_button_input', {
+        const pageUpMacro = await macroAPI.createMacro(macroAPI.moduleAPI, fieldName + '|page_up', 'midi_button_input', {
             includeRelease: false,
             onTrigger: () => {
                 const currentConfig = pagedOctaveInputStoredConfig.getState();
@@ -96,7 +94,7 @@ macroTypeRegistry.registerMacroType(
             },
         });
 
-        const submitNumberOfOctaves = macroAPI.moduleAPI.createAction(getKeyForMacro('pagedInput|submitNumberOfOctaves', fieldName), {}, async (args: {numberOfOctaves: number}) => {
+        const submitNumberOfOctaves = macroAPI.createAction(getKeyForMacro('pagedInput|submitNumberOfOctaves', fieldName), {}, async (args: {numberOfOctaves: number}) => {
             const currentConfig = pagedOctaveInputStoredConfig.getState();
 
             const newState = produce(currentConfig, (draft => {
@@ -107,7 +105,7 @@ macroTypeRegistry.registerMacroType(
         });
 
         const keyboardSub = keyboardMacro.subject.subscribe(event => {
-            const savedEvents = keyboardMacro.getStoredEvents();
+            const savedEvents = keyboardMacro.states.savedMidiEvents.getState();
             const matchedEvent = savedEvents.find(e => savedMidiInputsAreEqual(e, event));
             if (!matchedEvent && event.deviceInfo.name !== 'qwerty') { // TODO: qwerty hack
                 return;

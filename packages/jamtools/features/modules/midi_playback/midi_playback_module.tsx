@@ -42,7 +42,6 @@ springboard.registerModule('MidiPlayback', {}, async (moduleAPI): Promise<MidiPl
         for (const note of clusterToSend.notes) {
             outputDevice.send({
                 type: 'noteon',
-                channel: 1,
                 number: note.midiNumber,
                 velocity: 100, // TODO: record velocity of midi notes from midi file
             });
@@ -52,7 +51,6 @@ springboard.registerModule('MidiPlayback', {}, async (moduleAPI): Promise<MidiPl
             for (const note of clusterToSend.notes) {
                 outputDevice.send({
                     type: 'noteoff',
-                    channel: 1,
                     number: note.midiNumber,
                     velocity: 0,
                 });

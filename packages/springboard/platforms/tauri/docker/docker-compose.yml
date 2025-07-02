@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  tauri-app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    command: npx http-server -y
+    ports:
+      - "8080:8080"

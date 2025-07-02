@@ -26,6 +26,10 @@ export const ShoelaceApplicationShell = (props: Props) => {
     );
 };
 
+if (typeof document !== 'undefined') {
+    document.documentElement.classList.add('sl-theme-light');
+}
+
 const ToggleThemeButton = () => {
     const onClick = () => {
         const classList = document.documentElement.classList;

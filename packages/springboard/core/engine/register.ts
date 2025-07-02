@@ -23,7 +23,7 @@ export type SpringboardRegistry = {
 };
 
 export type RegisterModuleOptions = {
-
+    rpcMode?: 'remote' | 'local';
 };
 
 type CapturedRegisterModuleCall = [string, RegisterModuleOptions, ModuleCallback<any>];

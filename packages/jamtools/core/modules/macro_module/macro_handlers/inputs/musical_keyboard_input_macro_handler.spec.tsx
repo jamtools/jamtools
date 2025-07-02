@@ -34,7 +34,7 @@ describe('MusicalKeyboardInputMacroHandler', () => {
         mockQwerty.onInputEvent = qwertySubject;
         const mockMidi = new MockMidiService();
 
-        setIoDependencyCreator(() => ({
+        setIoDependencyCreator(async () => ({
             qwerty: mockQwerty,
             midi: mockMidi,
         }));
