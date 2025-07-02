@@ -4,12 +4,11 @@ import {Subject} from 'rxjs';
 import {MidiEventFull} from '@jamtools/core/modules/macro_module/macro_module_types';
 import {StateSupervisor} from 'springboard/services/states/shared_state_service';
 
-import Edit from './components/react/src/components/edit_macro';
+import {Edit} from './components/edit_macro';
 import {MacroAPI} from '@jamtools/core/modules/macro_module/registered_macro_types';
 
 export type MidiInputMacroPayload = {
     states: InputMacroStateHolders;
-    actions: InputMacroActions;
     subject: Subject<MidiEventFull>;
     components: {
         edit: React.ElementType;
@@ -27,15 +26,6 @@ export const getKeyForMidiEvent = (event: MidiEventFull) => {
 };
 
 export const getKeyForMacro = (key: string, fieldName: string) => `macro|${fieldName}|${key}`;
-
-export type InputMacroActions = {
-    onEdit: () => void;
-    onCancelEdit: () => void;
-    confirmMacro: () => void;
-    toggleWaiting: () => void;
-    deleteSavedValue: (event: MidiEventFull) => void;
-    askDeleteSavedValue: (event: MidiEventFull) => void;
-};
 
 export type InputMacroStateHolders = {
     editing: StateSupervisor<boolean>;
@@ -63,11 +53,11 @@ export const useInputMacroWaiterAndSaver = async (
     const savedMidiEvents = states.savedMidiEvents;
 
     if (savedMidiEvents.getState().length) {
-        macroAPI.midiIO.ensureListening();
+        macroAPI.moduleAPI.getModule('io').ensureListening();
     }
 
     const createAction = <Args extends object>(actionName: string, cb: (args: Args) => void) => {
-        return macroAPI.createAction(`macro|${fieldName}|${actionName}`, {}, async (args: Args) => {
+        return macroAPI.moduleAPI.createAction(`macro|${fieldName}|${actionName}`, {}, async (args: Args) => {
             return cb(args);
         });
     };
@@ -75,7 +65,7 @@ export const useInputMacroWaiterAndSaver = async (
     const toggleWaiting = createAction('toggle_waiting_input', async () => {
         const currentlyWaiting = waitingForConfiguration.getState();
         if (!currentlyWaiting) {
-            macroAPI.midiIO.ensureListening();
+            macroAPI.moduleAPI.getModule('io').ensureListening();
         }
 
         waitingForConfiguration.setState(!currentlyWaiting);
@@ -120,7 +110,6 @@ export const useInputMacroWaiterAndSaver = async (
     const subject = new Subject<MidiEventFull>();
 
     const onEdit = createAction('begin_edit', () => {
-        console.log('onEdit in action');
         editingState.setState(true);
     });
 
@@ -133,17 +122,6 @@ export const useInputMacroWaiterAndSaver = async (
     const returnValue: MidiInputMacroPayload = {
         states,
         subject,
-        actions: {
-            onEdit: () => {
-                console.log('onEdit');
-                onEdit({});
-            },
-            onCancelEdit: () => onCancelEdit({}),
-            confirmMacro: () => confirmMacro({}),
-            toggleWaiting: () => toggleWaiting({}),
-            deleteSavedValue: (event: MidiEventFull) => deleteSavedValue(event),
-            askDeleteSavedValue: (event: MidiEventFull) => askDeleteSavedValue(event),
-        },
         components: {
             edit: () => {
                 const waiting = waitingForConfiguration.useState();
@@ -168,7 +146,7 @@ export const useInputMacroWaiterAndSaver = async (
         },
     };
 
-    if (!macroAPI.isMidiMaestro()) {
+    if (!macroAPI.moduleAPI.deps.core.isMaestro()) {
         return returnValue;
     }
 
