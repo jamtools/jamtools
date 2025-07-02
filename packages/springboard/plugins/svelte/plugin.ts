@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 
-import {Plugin} from '../../cli/src/build'
+import type {Plugin} from 'springboard-cli/src/build';
 
 import esbuildSvelte from 'esbuild-svelte';
 import {sveltePreprocess} from 'svelte-preprocess';
