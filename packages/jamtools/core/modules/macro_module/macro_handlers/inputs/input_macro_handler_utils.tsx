@@ -63,11 +63,11 @@ export const useInputMacroWaiterAndSaver = async (
     const savedMidiEvents = states.savedMidiEvents;
 
     if (savedMidiEvents.getState().length) {
-        macroAPI.moduleAPI.getModule('io').ensureListening();
+        macroAPI.midiIO.ensureListening();
     }
 
     const createAction = <Args extends object>(actionName: string, cb: (args: Args) => void) => {
-        return macroAPI.moduleAPI.createAction(`macro|${fieldName}|${actionName}`, {}, async (args: Args) => {
+        return macroAPI.createAction(`macro|${fieldName}|${actionName}`, {}, async (args: Args) => {
             return cb(args);
         });
     };
@@ -75,7 +75,7 @@ export const useInputMacroWaiterAndSaver = async (
     const toggleWaiting = createAction('toggle_waiting_input', async () => {
         const currentlyWaiting = waitingForConfiguration.getState();
         if (!currentlyWaiting) {
-            macroAPI.moduleAPI.getModule('io').ensureListening();
+            macroAPI.midiIO.ensureListening();
         }
 
         waitingForConfiguration.setState(!currentlyWaiting);
@@ -168,7 +168,7 @@ export const useInputMacroWaiterAndSaver = async (
         },
     };
 
-    if (!macroAPI.moduleAPI.deps.core.isMaestro()) {
+    if (!macroAPI.isMidiMaestro()) {
         return returnValue;
     }
 
