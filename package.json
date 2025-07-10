@@ -10,6 +10,7 @@
     "build": "turbo run build",
     "build-saas": "turbo run build-saas",
     "dev": "npm run dev-dev --prefix packages/springboard/cli",
+    "dev-hands": "npm run dev-dev --prefix packages/springboard/cli -- ./apps/small_apps/handraiser/index.ts",
     "docs": "cd docs && docker compose up",
     "dev-without-node": "turbo run dev --filter=\"!./apps/jamtools/node\"",
     "debug-node": "npm run debug --prefix apps/jamtools/node",

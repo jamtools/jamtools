@@ -21,6 +21,12 @@ export default class Server implements Party.Server {
     private springboardApp!: Springboard;
     private rpcService: PartykitJsonRpcServer;
 
+    connectedUsers: Record<string, Party.Connection> = {};
+
+    options: Party.ServerOptions = {
+        hibernate: true,
+    };
+
     private kv: Record<string, string> = {};
 
     constructor(readonly room: Party.Room) {
@@ -32,6 +38,16 @@ export default class Server implements Party.Server {
         this.app = app;
         this.nodeAppDependencies = nodeAppDependencies;
         this.rpcService = rpcService;
+    }
+
+    async onConnect(connection: Party.Connection, ctx: Party.ConnectionContext) {
+        this.connectedUsers[connection.id] = connection;
+        this.springboardApp.hookTriggers.handleUserConnect({id: connection.id}, Object.values(this.connectedUsers));
+    }
+
+    async onDisconnect(connection: Party.Connection, ctx: Party.ConnectionContext) {
+        delete this.connectedUsers[connection.id];
+        this.springboardApp.hookTriggers.handleUserDisconnect({id: connection.id}, Object.values(this.connectedUsers));
     }
 
     async onStart() {

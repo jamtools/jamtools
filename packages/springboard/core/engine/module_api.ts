@@ -2,6 +2,7 @@ import {SharedStateSupervisor, StateSupervisor, UserAgentStateSupervisor} from '
 import {ExtraModuleDependencies, Module, NavigationItemConfig, RegisteredRoute} from 'springboard/module_registry/module_registry';
 import {CoreDependencies, ModuleDependencies} from '../types/module_types';
 import {RegisterRouteOptions} from './register';
+import {Springboard} from './engine';
 
 type ActionConfigOptions = object;
 
@@ -9,10 +10,14 @@ export type ActionCallOptions = {
     mode?: 'local' | 'remote';
 }
 
+export type UserData = {
+    userId: string;
+}
+
 /**
  * The Action callback
 */
-type ActionCallback<Args extends undefined | object, ReturnValue extends Promise<any> = Promise<any>> = (args: Args, options?: ActionCallOptions) => ReturnValue;
+type ActionCallback<Args extends undefined | object, ReturnValue extends Promise<any> = Promise<any>> = (args: Args, options?: ActionCallOptions, userData?: UserData) => ReturnValue;
 
 // this would make it so modules/plugins can extend the module API dynamically through interface merging
 // export interface ModuleAPI {
@@ -51,7 +56,15 @@ export class ModuleAPI {
 
     public readonly deps: {core: CoreDependencies; module: ModuleDependencies, extra: ExtraModuleDependencies};
 
-    constructor(private module: Module, private prefix: string, private coreDeps: CoreDependencies, private modDeps: ModuleDependencies, extraDeps: ExtraModuleDependencies, private options: ModuleOptions) {
+    constructor(
+        private module: Module,
+        private prefix: string,
+        private coreDeps: CoreDependencies,
+        private modDeps: ModuleDependencies,
+        extraDeps: ExtraModuleDependencies,
+        private options: ModuleOptions,
+        public hooks: Springboard['hooks'],
+    ) {
         this.deps = {core: coreDeps, module: modDeps, extra: extraDeps};
     }
 
@@ -132,7 +145,7 @@ export class ModuleAPI {
         actionName: string,
         options: Options,
         cb: undefined extends Args ? ActionCallback<Args, ReturnValue> : ActionCallback<Args, ReturnValue>
-    ): undefined extends Args ? ((args?: Args, options?: ActionCallOptions) => ReturnValue) : ((args: Args, options?: ActionCallOptions) => ReturnValue) => {
+    ): undefined extends Args ? ((args?: Args, options?: ActionCallOptions, userData?: UserData) => ReturnValue) : ((args: Args, options?: ActionCallOptions, userData?: UserData) => ReturnValue) => {
         const fullActionName = `${this.fullPrefix}|action|${actionName}`;
 
         if (this.coreDeps.rpc.remote.role === 'server') {
@@ -143,7 +156,7 @@ export class ModuleAPI {
             this.coreDeps.rpc.local.registerRpc(fullActionName, cb);
         }
 
-        return (async (args: Args, options?: ActionCallOptions): Promise<Awaited<ReturnValue>> => {
+        return (async (args: Args, options?: ActionCallOptions, userData?: UserData): Promise<Awaited<ReturnValue>> => {
             try {
                 let rpc = this.coreDeps.rpc.remote;
 
@@ -151,7 +164,7 @@ export class ModuleAPI {
 
                 if (this.coreDeps.isMaestro() || this.options.rpcMode === 'local' || options?.mode === 'local') {
                     if (!this.coreDeps.rpc.local || this.coreDeps.rpc.local.role !== 'client') {
-                        return await cb(args);
+                        return await cb(args, options, userData);
                     }
 
                     rpc = this.coreDeps.rpc.local!;
