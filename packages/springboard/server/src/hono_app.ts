@@ -31,8 +31,8 @@ export const initApp = (coreDeps: WebsocketServerCoreDependencies): InitAppRetur
     app.use('*', cors());
 
     const service: NodeJsonRpcServer = new NodeJsonRpcServer({
-        processRequest: async (message) => {
-            return rpc!.processRequest(message);
+        processRequest: async (message, userData) => {
+            return rpc!.processRequest(message, userData);
         },
         rpcMiddlewares,
     });
@@ -153,6 +153,7 @@ export const initApp = (coreDeps: WebsocketServerCoreDependencies): InitAppRetur
             }
 
             storedEngine = engine;
+            service.setHookTriggers(engine.hookTriggers);
         },
     };
 

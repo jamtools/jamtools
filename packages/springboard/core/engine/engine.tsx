@@ -163,7 +163,7 @@ export class Springboard {
         api: ModuleReturnValue
     }> => {
         const mod: Module = {moduleId};
-        const moduleAPI = new ModuleAPI(mod, 'engine', this.coreDeps, this.makeDerivedDependencies(), this.extraModuleDependencies, options);
+        const moduleAPI = new ModuleAPI(mod, 'engine', this.coreDeps, this.makeDerivedDependencies(), this.extraModuleDependencies, options, this.hooks);
         const moduleReturnValue = await cb(moduleAPI);
 
         Object.assign(mod, moduleReturnValue);
@@ -186,12 +186,42 @@ export class Springboard {
         };
     };
 
+    private hookCallbacks = {
+        onUserConnect: [] as ((data: UserConnectData, users: UserConnectData[]) => void)[],
+        onUserDisconnect: [] as ((data: UserConnectData, users: UserConnectData[]) => void)[],
+    }
+
+    public hooks = {
+        onUserConnect: (callback: (data: UserConnectData, users: UserConnectData[]) => void) => {
+            this.hookCallbacks.onUserConnect.push(callback);
+        },
+        onUserDisconnect: (callback: (data: UserConnectData, users: UserConnectData[]) => void) => {
+            this.hookCallbacks.onUserDisconnect.push(callback);
+        },
+        // onReconnect: (callback: (data: UserConnectData) => void) => {
+        //     this.hookCallbacks.onReconnect.push(callback);
+        // },
+    };
+
+    public hookTriggers = {
+        handleUserConnect: (data: UserConnectData, users: UserConnectData[]) => {
+            for (const callback of this.hookCallbacks.onUserConnect) {
+                callback(data, users);
+            }
+        },
+        handleUserDisconnect: (data: UserConnectData, users: UserConnectData[]) => {
+            for (const callback of this.hookCallbacks.onUserDisconnect) {
+                callback(data, users);
+            }
+        },
+    }
+
     public registerClassModule = async <T extends object,>(cb: ClassModuleCallback<T>): Promise<Module | null> => {
         const modDependencies = this.makeDerivedDependencies();
 
         const mod = await Promise.resolve(cb(this.coreDeps, modDependencies));
 
-        const moduleAPI = new ModuleAPI(mod, 'engine', this.coreDeps, modDependencies, this.extraModuleDependencies, {});
+        const moduleAPI = new ModuleAPI(mod, 'engine', this.coreDeps, modDependencies, this.extraModuleDependencies, {}, this.hooks);
 
         if (!isModuleEnabled(mod)) {
             return null;
@@ -286,3 +316,7 @@ const Loader = () => {
         </div>
     );
 };
+
+type UserConnectData = {
+    id: string;
+}

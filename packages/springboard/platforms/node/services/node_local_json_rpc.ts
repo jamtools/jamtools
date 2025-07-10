@@ -1,4 +1,5 @@
 import {JSONRPCClient, JSONRPCServer} from 'json-rpc-2.0';
+import {ActionCallOptions, UserData} from 'springboard/engine/module_api';
 
 import {Rpc, RpcArgs} from 'springboard/types/module_types';
 
@@ -23,9 +24,9 @@ export class NodeLocalJsonRpcClientAndServer implements Rpc {
         return true;
     };
 
-    registerRpc = <Args, Return>(method: string, cb: (args: Args) => Promise<Return>) => {
-        this.rpcServer.addMethod(method, async (args) => {
-            const result = await cb(args);
+    registerRpc = <Args, Return>(method: string, cb: (args: Args, options: ActionCallOptions, userData?: UserData) => Promise<Return>) => {
+        this.rpcServer.addMethod(method, async (args: {params: Args} & {userData?: UserData}) => {
+            const result = await cb(args.params, {mode: 'remote'}, args.userData);
             return result;
         });
     };
@@ -39,8 +40,20 @@ export class NodeLocalJsonRpcClientAndServer implements Rpc {
         return this.rpcClient.notify(method, args);
     };
 
-    public processRequest = async (jsonMessageStr: string) => {
-        const jsonMessage = JSON.parse(jsonMessageStr);
+    public processRequest = async (jsonMessageStr: string, userData: UserData) => {
+        let jsonMessage = JSON.parse(jsonMessageStr) as {
+            jsonrpc: '2.0';
+            id: number;
+            method: string;
+            params?: any;
+            clientId: string;
+        };
+
+        const originalParams = jsonMessage.params;
+        jsonMessage.params = {
+            params: originalParams,
+            userData,
+        }
 
         const result = await this.rpcServer.receive(jsonMessage);
         if (result) {

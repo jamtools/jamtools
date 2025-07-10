@@ -4,21 +4,28 @@ import {WSContext, WSEvents} from 'hono/ws';
 import {RpcMiddleware} from '@/register';
 
 import {nodeRpcAsyncLocalStorage} from '@springboardjs/platforms-node/services/node_rpc_async_local_storage';
+import {Springboard} from 'springboard/engine/engine';
+import {UserData} from 'springboard/engine/module_api';
 
 type WebsocketInterface = {
     send: (s: string) => void;
 }
 
 type NodeJsonRpcServerInitArgs = {
-    processRequest: (message: string) => Promise<string>;
+    processRequest: (message: string, userData: UserData) => Promise<string>;
     rpcMiddlewares: RpcMiddleware[];
 }
 
 export class NodeJsonRpcServer {
     private incomingClients: {[clientId: string]: WebsocketInterface} = {};
     private outgoingClients: {[clientId: string]: JSONRPCClient} = {};
+    private hookTriggers?: Springboard['hookTriggers'];
 
     constructor(private initArgs: NodeJsonRpcServerInitArgs) { }
+
+    public setHookTriggers(hookTriggers: Springboard['hookTriggers']) {
+        this.hookTriggers = hookTriggers;
+    }
 
     // New function: this will be used for async things like toasts
     // public sendMessage = (message: string, clientId: string) => {
@@ -64,6 +71,7 @@ export class NodeJsonRpcServer {
             onOpen: (event, ws) => {
                 incomingClients[clientId] = ws;
                 wsStored = ws;
+                this.hookTriggers?.handleUserConnect({id: clientId}, Object.keys(incomingClients).map(id => ({id})));
             },
             onMessage: async (event, ws) => {
                 const message = event.data.toString();
@@ -105,7 +113,7 @@ export class NodeJsonRpcServer {
                     }
 
                     nodeRpcAsyncLocalStorage.run(rpcContext, async () => {
-                        const response = await this.initArgs.processRequest(message);
+                        const response = await this.initArgs.processRequest(message, {userId: clientId});
                         incomingClients[clientId]?.send(response);
                     });
                 })();
@@ -113,6 +121,9 @@ export class NodeJsonRpcServer {
             onClose: () => {
                 delete incomingClients[clientId];
                 delete outgoingClients[clientId];
+
+                const connectedUsers = Object.keys(incomingClients).map(id => ({id})).filter(id => id !== clientId);
+                this.hookTriggers?.handleUserDisconnect({id: clientId}, connectedUsers);
             },
         };
     };
