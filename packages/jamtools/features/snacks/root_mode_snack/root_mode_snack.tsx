@@ -7,22 +7,24 @@ import springboard from 'springboard';
 
 import '@jamtools/core/modules/macro_module/macro_module';
 
-type State = {
+type ChordState = {
     chord: ScaleDegreeInfo | null;
+    note: number | null;
     scale: number;
 }
 
-springboard.registerModule('root_mode_module', {}, async (moduleAPI) => {
-    // C major on page load
-    let scale = 0;
+springboard.registerModule('Main', {}, async (moduleAPI) => {
+    const states = await moduleAPI.createStates({
+        chords: {chord: null, note: null, scale: 0} as ChordState,
+    });
 
-    const rootModeState = await moduleAPI.statesAPI.createSharedState<State>('state', {chord: null, scale});
+    const rootModeState = states.chords;
 
     const setScale = (newScale: number) => {
-        scale = newScale;
         rootModeState.setState({
             chord: null,
-            scale,
+            note: null,
+            scale: newScale,
         });
     };
 
@@ -41,15 +43,15 @@ springboard.registerModule('root_mode_module', {}, async (moduleAPI) => {
         );
     });
 
-    const macroModule = moduleAPI.deps.module.moduleRegistry.getModule('macro');
-
-    const [input, output] = await Promise.all([
-        macroModule.createMacro(moduleAPI, 'MIDI Input', 'musical_keyboard_input', {}),
-        macroModule.createMacro(moduleAPI, 'MIDI Output', 'musical_keyboard_output', {}),
-    ]);
+    const {input, output} = await moduleAPI.getModule('macro').createMacros(moduleAPI, {
+        input: {type: 'musical_keyboard_input', config: {}},
+        output: {type: 'musical_keyboard_output', config: {}},
+    });
 
     input.subject.subscribe(evt => {
         const midiNumber = evt.event.number;
+        const scale = rootModeState.getState().scale;
+
         const scaleDegreeInfo = getScaleDegreeFromScaleAndNote(scale, midiNumber);
         if (!scaleDegreeInfo) {
             return;
@@ -68,16 +70,21 @@ springboard.registerModule('root_mode_module', {}, async (moduleAPI) => {
         if (evt.event.type === 'noteon') {
             rootModeState.setState({
                 chord: scaleDegreeInfo,
+                note: midiNumber,
                 scale,
             });
         } else if (evt.event.type === 'noteoff') {
-            // this naive logic is currently causing the second chord to disappear if the first one is released after pressing the second one
+            if (rootModeState.getState().note !== midiNumber) {
+                return;
+            }
+
             rootModeState.setState({
                 chord: null,
+                note: null,
                 scale,
             });
         }
-    }); // .cleanup()
+    });
 });
 
 const getChordFromRootNote = (scale: number, rootNote: number): number[] => {
@@ -87,6 +94,7 @@ const getChordFromRootNote = (scale: number, rootNote: number): number[] => {
         return [];
     }
 
+    // This function could be made more interesting by performing inversions to keep notes in range
     if (scaleDegreeInfo.quality === 'major') {
         return [
             rootNote,
