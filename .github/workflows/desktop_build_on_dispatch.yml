@@ -40,3 +40,5 @@ jobs:
       APPLE_ID: ${{ secrets.APPLE_ID }}
       APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
       APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      scaffold_tauri_project: true
+      scaffold_tauri_project_config_path: './configs/tauri_project_config.json'
