@@ -161,4 +161,9 @@ sleep 1
 bump_version "$root_dir/packages/springboard/create-springboard-app"
 publish_package "$root_dir/packages/springboard/create-springboard-app"
 
+sleep 1
+
+bump_version "$root_dir/packages/springboard/plugins/svelte"
+publish_package "$root_dir/packages/springboard/plugins/svelte"
+
 # # npm i
