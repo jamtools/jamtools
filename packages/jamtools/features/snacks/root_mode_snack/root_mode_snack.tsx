@@ -44,8 +44,8 @@ springboard.registerModule('Main', {}, async (moduleAPI) => {
     });
 
     const {input, output} = await moduleAPI.getModule('macro').createMacros(moduleAPI, {
-        input: {type: 'musical_keyboard_input'},
-        output: {type: 'musical_keyboard_output'},
+        input: {type: 'musical_keyboard_input', config: {}},
+        output: {type: 'musical_keyboard_output', config: {}},
     });
 
     input.subject.subscribe(evt => {
