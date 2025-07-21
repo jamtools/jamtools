@@ -246,6 +246,7 @@ export const SpringboardProvider = (props: SpringboardProviderProps) => {
         if (SplashScreenComponent) {
             return <SplashScreenComponent />;
         }
+
         return (
             <Loader />
         );
