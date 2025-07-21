@@ -18,7 +18,7 @@ export const getMacroInputTestHelpers = () => {
         const coreDeps = makeMockCoreDependencies({store: {}});
         const extraDeps = makeMockExtraDependences();
 
-        setIoDependencyCreator(() => {
+        setIoDependencyCreator(async () => {
             const midi = new MockMidiService();
             midi.onInputEvent = midiSubject;
 

@@ -30,7 +30,7 @@ export class NodeMidiDevicePollerService {
     };
 
     public pollForDevices = async (knownDevices: string[]): Promise<MidiPollResponse> => {
-        const polledDevices = await this.poller.poll();
+        const polledDevices = (await this.poller.poll()).filter(d => !d.humanReadableName.startsWith('Midi Through') && !d.humanReadableName.includes('RtMidi'));
         const newlyConnectedDevices: DeviceMetadata[] = [];
         const newlyDisconnectedDevices: DeviceMetadata[] = [];
 

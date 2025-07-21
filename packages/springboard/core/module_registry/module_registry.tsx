@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 
 import {Subject} from 'rxjs';
 
@@ -27,7 +27,6 @@ export type Module<State extends object = any> = {
     state?: State;
     subject?: Subject<State>;
     routes?: Record<string, RegisteredRoute>;
-    bottomNavigationTabs?: NavigationItemConfig[];
     applicationShell?: React.ElementType<React.PropsWithChildren<{modules: Module[]}>>;
 };
 
@@ -77,12 +76,15 @@ export class ModuleRegistry {
 export const useSubject = <T,>(initialData: T, subject: Subject<T>): T => {
     const [data, setData] = useState(initialData);
 
-    useEffect(() => {
-        const subscription = subject.subscribe((newData) => {
+    const subscription = useRef<ReturnType<typeof subject.subscribe> | null>(null);
+    if (!subscription.current) {
+        subscription.current = subject.subscribe((newData) => {
             setData(newData);
         });
+    }
 
-        return () => subscription.unsubscribe();
+    useEffect(() => {
+        return () => subscription.current!.unsubscribe();
     }, []);
 
     return data;

@@ -41,7 +41,16 @@ export class MacroModule implements Module<MacroConfigState> {
 
     registeredMacroTypes: CapturedRegisterMacroTypeCall[] = [];
 
-    constructor(private coreDeps: CoreDependencies, private moduleDeps: ModuleDependencies) {}
+    private localMode = false;
+
+    /**
+        This is used to determine if MIDI devices should be used client-side.
+    */
+    public setLocalMode = (mode: boolean) => {
+        this.localMode = mode;
+    };
+
+    constructor(private coreDeps: CoreDependencies, private moduleDeps: ModuleDependencies) { }
 
     routes = {
         '': {
@@ -75,6 +84,36 @@ export class MacroModule implements Module<MacroConfigState> {
         return result!;
     };
 
+    public createMacros = async <
+        MacroConfigs extends {
+            [K in string]: {
+                type: keyof MacroTypeConfigs;
+            } & (
+                {[T in keyof MacroTypeConfigs]: {type: T; config: MacroTypeConfigs[T]['input']}}[keyof MacroTypeConfigs]
+            )
+        }
+    >(moduleAPI: ModuleAPI, macros: MacroConfigs): Promise<{
+        [K in keyof MacroConfigs]: MacroTypeConfigs[MacroConfigs[K]['type']]['output'];
+    }> => {
+        const keys = Object.keys(macros);
+        const promises = keys.map(async key => {
+            const {type, config} = macros[key];
+            return {
+                macro: await this.createMacro(moduleAPI, key, type, config),
+                key,
+            };
+        });
+
+        const result = {} as {[K in keyof MacroConfigs]: MacroTypeConfigs[MacroConfigs[K]['type']]['output']};
+
+        const createdMacros = await Promise.all(promises);
+        for (const key of keys) {
+            (result[key] as any) = createdMacros.find(m => m.key === key)!.macro;
+        }
+
+        return result;
+    };
+
     public registerMacroType = <MacroTypeOptions extends object, MacroInputConf extends object, MacroReturnValue extends object>(
         macroName: string,
         options: MacroTypeOptions,
@@ -102,18 +141,29 @@ export class MacroModule implements Module<MacroConfigState> {
             return undefined;
         }
 
-        const savedCallbacks: (() => void)[] = [];
-
         const macroAPI: MacroAPI = {
+            midiIO: moduleAPI.getModule('io'),
+            createAction: (...args) => {
+                const action = moduleAPI.createAction(...args);
+                return (args: any) => action(args, this.localMode ? {mode: 'local'} : undefined);
+            },
+            statesAPI: {
+                createSharedState: (key: string, defaultValue: any) => {
+                    const func = this.localMode ? moduleAPI.statesAPI.createUserAgentState : moduleAPI.statesAPI.createSharedState;
+                    return func(key, defaultValue);
+                },
+                createPersistentState: (key: string, defaultValue: any) => {
+                    const func = this.localMode ? moduleAPI.statesAPI.createUserAgentState : moduleAPI.statesAPI.createPersistentState;
+                    return func(key, defaultValue);
+                },
+            },
+            createMacro: this.createMacro,
+            isMidiMaestro: () => this.coreDeps.isMaestro() || this.localMode,
             moduleAPI,
             onDestroy: (cb: () => void) => {
-                savedCallbacks.push(cb);
+                moduleAPI.onDestroy(cb);
             },
         };
-
-        // TODO: call all savedCallbacks on destroy
-        // we'll want to store these in the engine
-        // or make another class that maintains that state
 
         const result = await registeredMacroType[2](macroAPI, conf, fieldName);
         return result;

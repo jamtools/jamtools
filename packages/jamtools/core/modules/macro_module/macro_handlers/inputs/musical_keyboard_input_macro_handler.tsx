@@ -1,26 +1,20 @@
 import React from 'react';
 
-import {MidiDeviceAndChannelMap, MidiEventFull, makeHashedMidiDeviceAndChannel} from '../../macro_module_types';
-import {QwertyCallbackPayload} from '@jamtools/core/types/io_types';
-import {Subject} from 'rxjs';
-import {QWERTY_TO_MIDI_MAPPINGS} from '@jamtools/core/constants/qwerty_to_midi_mappings';
-import {InputMacroStateHolders, getKeyForMacro, getKeyForMidiEvent, useInputMacroWaiterAndSaver} from './input_macro_handler_utils';
-import {macroTypeRegistry} from '@jamtools/core/modules/macro_module/registered_macro_types';
+import {MidiDeviceAndChannelMap, MidiEvent, MidiEventFull, makeHashedMidiDeviceAndChannel} from '../../macro_module_types';
+import {QwertyCallbackPayload} from '../../../../types/io_types';
+import {QWERTY_TO_MIDI_MAPPINGS} from '../../../../constants/qwerty_to_midi_mappings';
+import {InputMacroStateHolders, MidiInputMacroPayload, getKeyForMacro, getKeyForMidiEvent, useInputMacroWaiterAndSaver} from './input_macro_handler_utils';
+import {macroTypeRegistry} from '../../registered_macro_types';
 
-type MusicalKeyboardInputResult = {
-    subject: Subject<MidiEventFull>;
-    getStoredEvents: () => MidiEventFull[];
-    components: {
-        edit: React.ElementType;
-    };
-};
+type MusicalKeyboardInputResult = MidiInputMacroPayload;
 
 type MacroConfigItemMusicalKeyboardInput = {
     onTrigger?(midiEvent: MidiEventFull): void;
     enableQwerty?: boolean;
+    eventTypes?: MidiEvent['type'][];
 }
 
-declare module '@jamtools/core/modules/macro_module/macro_module_types' {
+declare module '../../macro_module_types' {
     interface MacroTypeConfigs {
         musical_keyboard_input: {
             input: MacroConfigItemMusicalKeyboardInput;
@@ -41,10 +35,10 @@ macroTypeRegistry.registerMacroType(
     'musical_keyboard_input',
     {},
     async (macroAPI, conf, fieldName): Promise<MusicalKeyboardInputResult> => {
-        const editing = await macroAPI.moduleAPI.statesAPI.createSharedState(getKeyForMacro('editing', fieldName), false);
-        const waitingForConfiguration = await macroAPI.moduleAPI.statesAPI.createSharedState(getKeyForMacro('waiting_for_configuration', fieldName), false);
-        const capturedMidiEvent = await macroAPI.moduleAPI.statesAPI.createSharedState<MidiEventFull | null>(getKeyForMacro('captured_midi_event', fieldName), null);
-        const savedMidiEvents = await macroAPI.moduleAPI.statesAPI.createPersistentState<MidiEventFull[]>(getKeyForMacro('saved_midi_event', fieldName), []);
+        const editing = await macroAPI.statesAPI.createSharedState(getKeyForMacro('editing', fieldName), false);
+        const waitingForConfiguration = await macroAPI.statesAPI.createSharedState(getKeyForMacro('waiting_for_configuration', fieldName), false);
+        const capturedMidiEvent = await macroAPI.statesAPI.createSharedState<MidiEventFull | null>(getKeyForMacro('captured_midi_event', fieldName), null);
+        const savedMidiEvents = await macroAPI.statesAPI.createPersistentState<MidiEventFull[]>(getKeyForMacro('saved_midi_event', fieldName), []);
         const states: InputMacroStateHolders = {
             editing,
             waiting: waitingForConfiguration,
@@ -56,15 +50,18 @@ macroTypeRegistry.registerMacroType(
 
         const macroReturnValue = {
             ...macroReturnValueFromSaver,
-            getStoredEvents: () => savedMidiEvents.getState(),
         };
 
-        if (!macroAPI.moduleAPI.deps.core.isMaestro()) {
+        if (!macroAPI.isMidiMaestro()) {
             return macroReturnValue;
         }
 
+        const defaultEventTypes = ['noteon', 'noteoff'] as MidiEvent['type'][];
+
         const handleMidiEvent = (event: MidiEventFull) => {
-            if (event.event.type !== 'noteon' && event.event.type !== 'noteoff') {
+            const eventTypes = conf.eventTypes || defaultEventTypes;
+
+            if (!eventTypes.includes(event.event.type)) {
                 return;
             }
 
@@ -90,11 +87,11 @@ macroTypeRegistry.registerMacroType(
             }
         };
 
-        const midiSubscription = macroAPI.moduleAPI.deps.module.moduleRegistry.getModule('io').midiInputSubject.subscribe(handleMidiEvent);
+        const midiSubscription = macroAPI.midiIO.midiInputSubject.subscribe(handleMidiEvent);
         macroAPI.onDestroy(midiSubscription.unsubscribe);
 
         if (conf.enableQwerty) {
-            const qwertySubscription = macroAPI.moduleAPI.deps.module.moduleRegistry.getModule('io').qwertyInputSubject.subscribe((qwertyEvent => {
+            const qwertySubscription = macroAPI.midiIO.qwertyInputSubject.subscribe((qwertyEvent => {
                 const midiEvent = qwertyEventToMidiEvent(qwertyEvent, true);
                 if (!midiEvent) {
                     return;

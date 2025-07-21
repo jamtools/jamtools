@@ -1,0 +1,215 @@
+{{ define "main" }}
+<section class="section container-fluid mt-n3 pb-3">
+  <div class="row justify-content-center">
+    <div class="col-lg-12 text-center">
+      <h1>{{ .Title }}</h1>
+    </div>
+    <div class="col-lg-9 col-xl-8 text-center">
+      <p class="lead">{{ .Params.lead | safeHTML }}</p>
+      <a class="btn btn-primary btn-cta rounded-pill btn-lg my-3" href="/docs/{{ if site.Params.doks.docsVersioning }}{{ site.Params.doks.docsVersion }}/{{ end }}/introduction/overview" role="button">
+        Get Started
+      </a>
+      {{ .Content }}
+    </div>
+  </div>
+</section>
+
+<style>
+  .navbar-brand {
+    opacity: 0;
+  }
+</style>
+
+<script>
+  window.addEventListener('load', () => {
+
+    document.querySelectorAll('.marquee a').forEach(link => {
+      link.addEventListener('click', () => {
+        const marqueeEls = document.querySelectorAll('.marquee-content');
+
+          const paused = document.visibilityState !== 'visible';
+
+          marqueeEls.forEach(el => {
+            el.style.animationPlayState = 'paused';
+          });
+        });
+  });
+
+  const marqueeEls = document.querySelectorAll('.marquee-content');
+
+  function pauseMarquee() {
+    marqueeEls.forEach(el => {
+      el.style.animationPlayState = 'paused';
+    });
+  }
+
+  function resumeMarquee() {
+    marqueeEls.forEach(el => {
+      el.style.animationPlayState = '';
+    });
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    const paused = document.visibilityState !== 'visible';
+
+    setTimeout(() => {
+
+      marqueeEls.forEach(el => {
+        el.style.animationPlayState = paused ? 'paused' : 'running';
+      });
+    }, 600);
+  });
+
+  if (window.matchMedia('(min-width: 768px)').matches) {
+    window.addEventListener('blur', pauseMarquee);
+    window.addEventListener('focus', resumeMarquee);
+  }
+});
+
+</script>
+
+{{ end }}
+
+{{ define "sidebar-prefooter" }}
+  {{ if site.Params.doks.backgroundDots -}}
+  <div class="d-flex justify-content-start">
+    <div class="bg-dots"></div>
+  </div>
+  {{ end -}}
+  <section class="section section-md section-features">
+    <div class="container">
+      <div class="row justify-content-center text-center">
+        <div class="col-lg-5">
+          <h2 class="h4">Write once, run everywhere</h2>
+          <p>Run the application in a browser, mobile app, desktop app, and on a server, with zero-config managed GitHub Actions workflows for each platform.</p>
+        </div>
+        <div class="col-lg-5">
+          <h2 class="h4">Built for Multiplayer</h2>
+          <p>Real-time state synchronization is available out-of-the-box between clients in the same session. Focus on your feature-level code, rather than the complexity of managing state.</p>
+        </div>
+        <div class="col-lg-5">
+          <h2 class="h4">Built for Local-only/Local-first</h2>
+          <p>Applications can run entirely offline in the client, and pivot when it needs to interact with a remote server, or optionally rely entirely on the server for business logic.</p>
+          <p>
+            An isomorphic and flexible RPC layer allows actions to be run in the right context, determined by feature-level userland code, to fit the use case of the user's current action.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+
+  <section class="section section-md section-features">
+    <div class="container">
+      <div class="row justify-content-center text-center">
+        <div class="col-lg-1">
+
+
+        </div>
+        <div class="col-lg-10">
+          <h2 class="h2" style="margin-bottom: 50px; margin-top: -30px;">Powered by</h2>
+          <section class="marquee">
+            {{ range seq 1 2 }}
+            <ul class="marquee-content">
+
+              <!-- JSON RPC -->
+              <li class="marquee-item">
+                <a href="https://www.jsonrpc.org/specification" style="text-decoration: none; color: inherit;" target="_blank">
+                  <img height="24" width="24" alt="" class="w-[30px] rounded-full overflow-hidden border-2 border-black dark:border-none" src="https://www.json.org/img/json160.gif">
+                  <span class="marquee-text">JSON RPC</span>
+                </a>
+              </li>
+
+              <!-- React -->
+              <li class="marquee-item">
+                <a href="https://react.dev" style="text-decoration: none; color: inherit;" target="_blank">
+                  <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" id="React--Streamline-Simple-Icons" height="24" width="24"><desc>React Streamline Icon: https://streamlinehq.com</desc><title>React</title><path d="M14.23 12.004a2.236 2.236 0 0 1 -2.235 2.236 2.236 2.236 0 0 1 -2.236 -2.236 2.236 2.236 0 0 1 2.235 -2.236 2.236 2.236 0 0 1 2.236 2.236zm2.648 -10.69c-1.346 0 -3.107 0.96 -4.888 2.622 -1.78 -1.653 -3.542 -2.602 -4.887 -2.602 -0.41 0 -0.783 0.093 -1.106 0.278 -1.375 0.793 -1.683 3.264 -0.973 6.365C1.98 8.917 0 10.42 0 12.004c0 1.59 1.99 3.097 5.043 4.03 -0.704 3.113 -0.39 5.588 0.988 6.38 0.32 0.187 0.69 0.275 1.102 0.275 1.345 0 3.107 -0.96 4.888 -2.624 1.78 1.654 3.542 2.603 4.887 2.603 0.41 0 0.783 -0.09 1.106 -0.275 1.374 -0.792 1.683 -3.263 0.973 -6.365C22.02 15.096 24 13.59 24 12.004c0 -1.59 -1.99 -3.097 -5.043 -4.032 0.704 -3.11 0.39 -5.587 -0.988 -6.38 -0.318 -0.184 -0.688 -0.277 -1.092 -0.278zm-0.005 1.09v0.006c0.225 0 0.406 0.044 0.558 0.127 0.666 0.382 0.955 1.835 0.73 3.704 -0.054 0.46 -0.142 0.945 -0.25 1.44 -0.96 -0.236 -2.006 -0.417 -3.107 -0.534 -0.66 -0.905 -1.345 -1.727 -2.035 -2.447 1.592 -1.48 3.087 -2.292 4.105 -2.295zm-9.77 0.02c1.012 0 2.514 0.808 4.11 2.28 -0.686 0.72 -1.37 1.537 -2.02 2.442 -1.107 0.117 -2.154 0.298 -3.113 0.538 -0.112 -0.49 -0.195 -0.964 -0.254 -1.42 -0.23 -1.868 0.054 -3.32 0.714 -3.707 0.19 -0.09 0.4 -0.127 0.563 -0.132zm4.882 3.05c0.455 0.468 0.91 0.992 1.36 1.564 -0.44 -0.02 -0.89 -0.034 -1.345 -0.034 -0.46 0 -0.915 0.01 -1.36 0.034 0.44 -0.572 0.895 -1.096 1.345 -1.565zM12 8.1c0.74 0 1.477 0.034 2.202 0.093 0.406 0.582 0.802 1.203 1.183 1.86 0.372 0.64 0.71 1.29 1.018 1.946 -0.308 0.655 -0.646 1.31 -1.013 1.95 -0.38 0.66 -0.773 1.288 -1.18 1.87 -0.728 0.063 -1.466 0.098 -2.21 0.098 -0.74 0 -1.477 -0.035 -2.202 -0.093 -0.406 -0.582 -0.802 -1.204 -1.183 -1.86 -0.372 -0.64 -0.71 -1.29 -1.018 -1.946 0.303 -0.657 0.646 -1.313 1.013 -1.954 0.38 -0.66 0.773 -1.286 1.18 -1.868 0.728 -0.064 1.466 -0.098 2.21 -0.098zm-3.635 0.254c-0.24 0.377 -0.48 0.763 -0.704 1.16 -0.225 0.39 -0.435 0.782 -0.635 1.174 -0.265 -0.656 -0.49 -1.31 -0.676 -1.947 0.64 -0.15 1.315 -0.283 2.015 -0.386zm7.26 0c0.695 0.103 1.365 0.23 2.006 0.387 -0.18 0.632 -0.405 1.282 -0.66 1.933 -0.2 -0.39 -0.41 -0.783 -0.64 -1.174 -0.225 -0.392 -0.465 -0.774 -0.705 -1.146zm3.063 0.675c0.484 0.15 0.944 0.317 1.375 0.498 1.732 0.74 2.852 1.708 2.852 2.476 -0.005 0.768 -1.125 1.74 -2.857 2.475 -0.42 0.18 -0.88 0.342 -1.355 0.493 -0.28 -0.958 -0.646 -1.956 -1.1 -2.98 0.45 -1.017 0.81 -2.01 1.085 -2.964zm-13.395 0.004c0.278 0.96 0.645 1.957 1.1 2.98 -0.45 1.017 -0.812 2.01 -1.086 2.964 -0.484 -0.15 -0.944 -0.318 -1.37 -0.5 -1.732 -0.737 -2.852 -1.706 -2.852 -2.474 0 -0.768 1.12 -1.742 2.852 -2.476 0.42 -0.18 0.88 -0.342 1.356 -0.494zm11.678 4.28c0.265 0.657 0.49 1.312 0.676 1.948 -0.64 0.157 -1.316 0.29 -2.016 0.39 0.24 -0.375 0.48 -0.762 0.705 -1.158 0.225 -0.39 0.435 -0.788 0.636 -1.18zm-9.945 0.02c0.2 0.392 0.41 0.783 0.64 1.175 0.23 0.39 0.465 0.772 0.705 1.143 -0.695 -0.102 -1.365 -0.23 -2.006 -0.386 0.18 -0.63 0.406 -1.282 0.66 -1.933zM17.92 16.32c0.112 0.493 0.2 0.968 0.254 1.423 0.23 1.868 -0.054 3.32 -0.714 3.708 -0.147 0.09 -0.338 0.128 -0.563 0.128 -1.012 0 -2.514 -0.807 -4.11 -2.28 0.686 -0.72 1.37 -1.536 2.02 -2.44 1.107 -0.118 2.154 -0.3 3.113 -0.54zm-11.83 0.01c0.96 0.234 2.006 0.415 3.107 0.532 0.66 0.905 1.345 1.727 2.035 2.446 -1.595 1.483 -3.092 2.295 -4.11 2.295 -0.22 -0.005 -0.406 -0.05 -0.553 -0.132 -0.666 -0.38 -0.955 -1.834 -0.73 -3.703 0.054 -0.46 0.142 -0.944 0.25 -1.438zm4.56 0.64c0.44 0.02 0.89 0.034 1.345 0.034 0.46 0 0.915 -0.01 1.36 -0.034 -0.44 0.572 -0.895 1.095 -1.345 1.565 -0.455 -0.47 -0.91 -0.993 -1.36 -1.565z" fill="#0c6be4" stroke-width="1"></path></svg>
+                  <span class="marquee-text">React</span>
+                </a>
+              </li>
+
+              <!-- Hono -->
+              <li class="marquee-item">
+                <a href="https://hono.dev" style="text-decoration: none; color: inherit;" target="_blank">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" id="Hono--Streamline-Svg-Logos" height="24" width="24"><desc>Hono Streamline Icon: https://streamlinehq.com</desc><path fill="#ff5b11" d="M12.4365 0.2520325c0.062375 -0.0080215 0.11745 0.0077075 0.16515 0.0471875 1.755075 2.142025 3.40665 4.359855 4.954725 6.65348 1.14615 1.725625 2.121325 3.550175 2.92565 5.4738 1.2845 3.426025 0.616 6.40675 -2.005475 8.9421 -2.293725 1.938575 -4.936225 2.693575 -7.927575 2.265025 -3.57555 -0.729025 -6.00575 -2.7974 -7.290525 -6.205225 -0.33465 -1.109425 -0.44475 -2.241925 -0.3303 -3.397525 0.19055 -1.9891 0.662425 -3.9081 1.415625 -5.7569 0.31385 -0.75435 0.722825 -1.4464 1.2269 -2.076275 0.411225 0.4898 0.80445 0.993175 1.179675 1.510025 0.17375 0.181625 0.354625 0.35465 0.542675 0.51905C8.728325 5.378325 10.44285 2.7201 12.4365 0.2520325Z" opacity=".993" stroke-width="0.25"></path><path fill="#ff9758" d="M12.10625 4.07425c1.73145 2.008325 3.296525 4.1475 4.695175 6.41755 0.438525 0.75115 0.800275 1.537625 1.085325 2.3594 0.593825 2.336175 -0.043225 4.26305 -1.9111 5.7805 -1.80655 1.2712 -3.788425 1.6487 -5.945675 1.132525 -2.326325 -0.721875 -3.671175 -2.286975 -4.034575 -4.6952 -0.088175 -0.7593 -0.009525 -1.4986 0.23595 -2.217825 0.35005 -0.888875 0.774725 -1.73825 1.274075 -2.54815 0.471875 -0.6921 0.94375 -1.38415 1.415625 -2.07625 1.071925 -1.378375 2.13365 -2.762525 3.1852 -4.15255Z" stroke-width="0.25"></path></svg>
+                  <span class="marquee-text">Hono</span>
+                </a>
+              </li>
+
+              <!-- TanStack Router -->
+              <!-- <li class="marquee-item">
+                <a href="https://tanstack.com/router/latest" style="text-decoration: none; color: inherit;" target="_blank">
+                  <img height="24" width="24" alt="" class="w-[30px] rounded-full overflow-hidden border-2 border-black dark:border-none" src="https://tanstack.com/_build/assets/logo-color-100w-br5_Ikqp.png">
+                  <span class="marquee-text">TanStack Router</span>
+                </a>
+              </li> -->
+
+              <!-- React Native and Expo -->
+              <li class="marquee-item">
+                  <a href="https://reactnative.dev" style="text-decoration: none; color: inherit;" target="_blank">
+                    <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" id="React--Streamline-Simple-Icons" height="24" width="24"><desc>React Streamline Icon: https://streamlinehq.com</desc><title>React</title><path d="M14.23 12.004a2.236 2.236 0 0 1 -2.235 2.236 2.236 2.236 0 0 1 -2.236 -2.236 2.236 2.236 0 0 1 2.235 -2.236 2.236 2.236 0 0 1 2.236 2.236zm2.648 -10.69c-1.346 0 -3.107 0.96 -4.888 2.622 -1.78 -1.653 -3.542 -2.602 -4.887 -2.602 -0.41 0 -0.783 0.093 -1.106 0.278 -1.375 0.793 -1.683 3.264 -0.973 6.365C1.98 8.917 0 10.42 0 12.004c0 1.59 1.99 3.097 5.043 4.03 -0.704 3.113 -0.39 5.588 0.988 6.38 0.32 0.187 0.69 0.275 1.102 0.275 1.345 0 3.107 -0.96 4.888 -2.624 1.78 1.654 3.542 2.603 4.887 2.603 0.41 0 0.783 -0.09 1.106 -0.275 1.374 -0.792 1.683 -3.263 0.973 -6.365C22.02 15.096 24 13.59 24 12.004c0 -1.59 -1.99 -3.097 -5.043 -4.032 0.704 -3.11 0.39 -5.587 -0.988 -6.38 -0.318 -0.184 -0.688 -0.277 -1.092 -0.278zm-0.005 1.09v0.006c0.225 0 0.406 0.044 0.558 0.127 0.666 0.382 0.955 1.835 0.73 3.704 -0.054 0.46 -0.142 0.945 -0.25 1.44 -0.96 -0.236 -2.006 -0.417 -3.107 -0.534 -0.66 -0.905 -1.345 -1.727 -2.035 -2.447 1.592 -1.48 3.087 -2.292 4.105 -2.295zm-9.77 0.02c1.012 0 2.514 0.808 4.11 2.28 -0.686 0.72 -1.37 1.537 -2.02 2.442 -1.107 0.117 -2.154 0.298 -3.113 0.538 -0.112 -0.49 -0.195 -0.964 -0.254 -1.42 -0.23 -1.868 0.054 -3.32 0.714 -3.707 0.19 -0.09 0.4 -0.127 0.563 -0.132zm4.882 3.05c0.455 0.468 0.91 0.992 1.36 1.564 -0.44 -0.02 -0.89 -0.034 -1.345 -0.034 -0.46 0 -0.915 0.01 -1.36 0.034 0.44 -0.572 0.895 -1.096 1.345 -1.565zM12 8.1c0.74 0 1.477 0.034 2.202 0.093 0.406 0.582 0.802 1.203 1.183 1.86 0.372 0.64 0.71 1.29 1.018 1.946 -0.308 0.655 -0.646 1.31 -1.013 1.95 -0.38 0.66 -0.773 1.288 -1.18 1.87 -0.728 0.063 -1.466 0.098 -2.21 0.098 -0.74 0 -1.477 -0.035 -2.202 -0.093 -0.406 -0.582 -0.802 -1.204 -1.183 -1.86 -0.372 -0.64 -0.71 -1.29 -1.018 -1.946 0.303 -0.657 0.646 -1.313 1.013 -1.954 0.38 -0.66 0.773 -1.286 1.18 -1.868 0.728 -0.064 1.466 -0.098 2.21 -0.098zm-3.635 0.254c-0.24 0.377 -0.48 0.763 -0.704 1.16 -0.225 0.39 -0.435 0.782 -0.635 1.174 -0.265 -0.656 -0.49 -1.31 -0.676 -1.947 0.64 -0.15 1.315 -0.283 2.015 -0.386zm7.26 0c0.695 0.103 1.365 0.23 2.006 0.387 -0.18 0.632 -0.405 1.282 -0.66 1.933 -0.2 -0.39 -0.41 -0.783 -0.64 -1.174 -0.225 -0.392 -0.465 -0.774 -0.705 -1.146zm3.063 0.675c0.484 0.15 0.944 0.317 1.375 0.498 1.732 0.74 2.852 1.708 2.852 2.476 -0.005 0.768 -1.125 1.74 -2.857 2.475 -0.42 0.18 -0.88 0.342 -1.355 0.493 -0.28 -0.958 -0.646 -1.956 -1.1 -2.98 0.45 -1.017 0.81 -2.01 1.085 -2.964zm-13.395 0.004c0.278 0.96 0.645 1.957 1.1 2.98 -0.45 1.017 -0.812 2.01 -1.086 2.964 -0.484 -0.15 -0.944 -0.318 -1.37 -0.5 -1.732 -0.737 -2.852 -1.706 -2.852 -2.474 0 -0.768 1.12 -1.742 2.852 -2.476 0.42 -0.18 0.88 -0.342 1.356 -0.494zm11.678 4.28c0.265 0.657 0.49 1.312 0.676 1.948 -0.64 0.157 -1.316 0.29 -2.016 0.39 0.24 -0.375 0.48 -0.762 0.705 -1.158 0.225 -0.39 0.435 -0.788 0.636 -1.18zm-9.945 0.02c0.2 0.392 0.41 0.783 0.64 1.175 0.23 0.39 0.465 0.772 0.705 1.143 -0.695 -0.102 -1.365 -0.23 -2.006 -0.386 0.18 -0.63 0.406 -1.282 0.66 -1.933zM17.92 16.32c0.112 0.493 0.2 0.968 0.254 1.423 0.23 1.868 -0.054 3.32 -0.714 3.708 -0.147 0.09 -0.338 0.128 -0.563 0.128 -1.012 0 -2.514 -0.807 -4.11 -2.28 0.686 -0.72 1.37 -1.536 2.02 -2.44 1.107 -0.118 2.154 -0.3 3.113 -0.54zm-11.83 0.01c0.96 0.234 2.006 0.415 3.107 0.532 0.66 0.905 1.345 1.727 2.035 2.446 -1.595 1.483 -3.092 2.295 -4.11 2.295 -0.22 -0.005 -0.406 -0.05 -0.553 -0.132 -0.666 -0.38 -0.955 -1.834 -0.73 -3.703 0.054 -0.46 0.142 -0.944 0.25 -1.438zm4.56 0.64c0.44 0.02 0.89 0.034 1.345 0.034 0.46 0 0.915 -0.01 1.36 -0.034 -0.44 0.572 -0.895 1.095 -1.345 1.565 -0.455 -0.47 -0.91 -0.993 -1.36 -1.565z" fill="#0c6be4" stroke-width="1"></path></svg>
+                  </a>
+                  <a href="https://expo.dev" style="margin-left: 10px; text-decoration: none; color: inherit;" target="_blank">
+                    <svg width="24" height="26" viewBox="0 0 24 26" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22.069 10.075a2.273 2.273 0 00-.887-.74 2.296 2.296 0 00-2.237.16 2.265 2.265 0 00-.77.859 2.016 2.016 0 00.392 2.274 3.342 3.342 0 002.23-.63 3.289 3.289 0 001.271-1.923zM15.3 1.3l-1.45-.788-6.31 3.481.503.27.957.498 1.732-.954 4.569-2.523-.001.016zm.584-.24a.225.225 0 01.16.15l2.114 6.182a.205.205 0 01-.1.269 4.063 4.063 0 00-1.798 1.974 4.017 4.017 0 00-.175 2.655 4.283 4.283 0 001.755 2.332c.842.55 1.852.79 2.854.68a.269.269 0 01.262.16l2.184 6.345a.256.256 0 01-.101.278l-6.712 3.89a.253.253 0 01-.101.02.27.27 0 01-.181-.03L13.69 24.5a.234.234 0 01-.1-.1l-4.6-10.483-7.005 3.95a.327.327 0 01-.272.01l-1.592-.898a.23.23 0 01-.1-.299l6.805-12.8a.243.243 0 01.11-.099L13.721.03a.259.259 0 01.241 0l1.923 1.03zM7.47 4.499L7.14 4.33.58 16.71l1.197.668 5.657-7.335a.275.275 0 01.231-.1.282.282 0 01.201.149l6.16 14.066 1.646 1.007L9.06 6.005l-.281-.798-1.318-.718.01.01zm10.145 7.382a2.51 2.51 0 01.12-1.663 2.54 2.54 0 011.138-1.23 2.798 2.798 0 013.261.4 2.513 2.513 0 01.073 3.568l-.073.073a2.77 2.77 0 01-3.788.01 2.719 2.719 0 01-.731-1.158z" fill="#000"/></svg>
+                  </a>
+                <span class="marquee-text">
+                  <a href="https://reactnative.dev" style="text-decoration: none; color: inherit;" target="_blank">
+                    React Native
+                  </a>
+                   and
+                  <a href="https://expo.dev" style="text-decoration: none; color: inherit;" target="_blank">
+                    Expo
+                  </a>
+                </span>
+              </li>
+
+              <!-- Tauri -->
+              <li class="marquee-item">
+                <a href="https://v2.tauri.app" style="text-decoration: none; color: inherit;" target="_blank">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" id="Tauri--Streamline-Svg-Logos" height="24" width="24"><desc>Tauri Streamline Icon: https://streamlinehq.com</desc><path fill="#ffc131" d="M16.115475 8.80225c0 1.235075 -1.001225 2.236325 -2.236325 2.236325 -1.2351 0 -2.236325 -1.00125 -2.236325 -2.236325 0 -1.2351 1.001225 -2.236325 2.236325 -2.236325 1.2351 0 2.236325 1.001225 2.236325 2.236325Z" stroke-width="0.25"></path><path fill="#24c8db" d="M10.118175 12.969975c-1.2351 0 -2.236325 1.001225 -2.236325 2.236325 0 1.2351 1.001225 2.236325 2.236325 2.236325 1.235075 0 2.236325 -1.001225 2.236325 -2.236325 0 -1.2351 -1.00125 -2.236325 -2.236325 -2.236325Z" stroke-width="0.25"></path><path fill="#ffc131" d="M18.514625 15.96855c-0.898775 0.581025 -1.898775 0.987925 -2.9479 1.199475 0.30405 -0.866825 0.4049 -1.791925 0.2948 -2.703925 2.441275 -0.853425 4.06055 -3.17565 4.01745 -5.761425 -0.043125 -2.5858 -1.738925 -4.85275 -4.2073 -5.6243 -2.4684 -0.7715725 -5.15335 0.126025 -6.66145 2.22695 -1.13785 0.128025 -2.245125 0.451275 -3.273175 0.955525C6.853975 2.657225 10.20345 0.21372125 13.976025 0.2504075c3.772575 0.0366875 7.073925 2.5448675 8.12055 6.1695425 1.0466 3.624675 -0.4096 7.506575 -3.58195 9.5486ZM5.8387 7.816125l2.094025 0.254125c0.0475 -0.404375 0.13605 -0.802875 0.2643 -1.189325 -0.8283 0.19255 -1.623175 0.507775 -2.358325 0.9352Z" stroke-width="0.25"></path><path fill="#24c8db" d="M5.472675 8.039475c0.904175 -0.58695 1.911325 -0.9974 2.968225 -1.20965 -0.3197 0.8667 -0.434525 1.795625 -0.33545 2.7141 -2.43265 0.865425 -4.03835 3.19065 -3.985975 5.772125 0.05235 2.58145 1.751025 4.839675 4.21675 5.605725 2.465725 0.766075 5.145 -0.13195 6.651 -2.22925 1.13725 -0.124825 2.2445 -0.444625 3.273175 -0.94535 -1.11965 3.599725 -4.46745 6.0392 -8.2371 6.00225 -3.76965 -0.036975 -7.068975 -2.541625 -8.1178475 -6.1626C0.8565825 13.96585 2.3064075 10.085525 5.472675 8.039475Z" stroke-width="0.25"></path></svg>
+                  <span class="marquee-text">Tauri</span>
+                </a>
+              </li>
+
+
+              <!-- Partykit -->
+              <li class="marquee-item">
+                <a href="https://docs.partykit.io" style="text-decoration: none; color: inherit;" target="_blank">
+                  🎈
+                  <span class="marquee-text">Partykit</span>
+                </a>
+              </li>
+
+              <!-- esbuild -->
+              <li class="marquee-item">
+                <a href="https://esbuild.github.io" style="text-decoration: none; color: inherit;" target="_blank">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" id="Esbuild--Streamline-Svg-Logos" height="24" width="24"><desc>Esbuild Streamline Icon: https://streamlinehq.com</desc><path fill="#ffcf00" d="M12 23.75c6.48935 0 11.75 -5.26065 11.75 -11.75S18.48935 0.25 12 0.25 0.25 5.51065 0.25 12s5.26065 11.75 11.75 11.75Z" stroke-width="0.25"></path><path fill="#191919" d="M6.6101 5.6398 12.97025 11.999975 6.6101 18.36015l-1.55785 -1.55785 4.802275 -4.802325L5.05225 7.19765l1.55785 -1.55785Zm7.05 0 6.360175 6.360175 -6.360175 6.360175 -1.55785 -1.55785 4.802275 -4.802325L12.10225 7.19765l1.55785 -1.55785Z" stroke-width="0.25"></path></svg>
+                  <span class="marquee-text">esbuild</span>
+                </a>
+              </li>
+            </ul>
+            {{ end }}
+
+          </section>
+        </div>
+        <div class="col-lg-1">
+
+        </div>
+      </div>
+    </div>
+  </section>
+{{ end }}
+
+{{ define "sidebar-footer" }}
+{{ if site.Params.doks.sectionFooter -}}
+<section class="section section-md container-fluid bg-light">
+  <div class="row justify-content-center text-center">
+    <div class="col-lg-7">
+      <h2 class="mt-2">Start building with Doks today</h2>
+      <a class="btn btn-primary rounded-pill px-4 my-2" href="/docs/{{ if site.Params.doks.docsVersioning }}{{ site.Params.doks.docsVersion }}/{{ end }}prologue/introduction/" role="button">{{ i18n "get-started" }}</a>
+    </div>
+  </div>
+</section>
+{{ end -}}
+{{ end }}

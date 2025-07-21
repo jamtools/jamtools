@@ -2,12 +2,14 @@ import {serve} from '@hono/node-server';
 
 import {makeWebsocketServerCoreDependenciesWithSqlite} from '../ws_server_core_dependencies';
 
+import type {NodeAppDependencies} from '@springboardjs/platforms-node/entrypoints/main';
+
 import {initApp} from '../hono_app';
 
-setTimeout(async () => {
+export default async (): Promise<NodeAppDependencies> => {
     const coreDeps = await makeWebsocketServerCoreDependenciesWithSqlite();
 
-    const {app, injectWebSocket} = initApp(coreDeps);
+    const {app, injectWebSocket, nodeAppDependencies} = initApp(coreDeps);
 
     const port = process.env.PORT || '1337';
 
@@ -19,4 +21,6 @@ setTimeout(async () => {
     });
 
     injectWebSocket(server);
-});
+
+    return nodeAppDependencies;
+};
