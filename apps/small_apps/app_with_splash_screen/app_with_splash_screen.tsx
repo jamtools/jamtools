@@ -52,7 +52,7 @@ springboard.registerSplashScreen(CustomSplashScreen);
 springboard.registerModule('AppWithSplashScreen', {}, async (moduleAPI) => {
     const messageState = await moduleAPI.statesAPI.createPersistentState<string>('message', 'Hello from the app with custom splash screen!');
 
-    await new Promise(r => setTimeout(r, 5000));
+    await new Promise(r => setTimeout(r, 5000)); // fake waiting time
 
     const actions = moduleAPI.createActions({
         updateMessage: async (args: {newMessage: string}) => {
