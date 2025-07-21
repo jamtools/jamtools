@@ -87,6 +87,9 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
 
         ws.onmessage = async (event) => {
             const jsonMessage = JSON.parse(event.data);
+            if (!jsonMessage) {
+                return;
+            }
 
             if (jsonMessage.jsonrpc === '2.0' && jsonMessage.method) {
                 // Handle incoming RPC requests coming from the server to run in this client
