@@ -93,16 +93,16 @@ class KvDrivenLocalStorage implements Storage {
         }
     };
 
-    getItem(key: string): string | null {
+    getItem = (key: string): string | null => {
         return this.kvItems[key] || null;
     }
 
-    setItem(key: string, value: string): void {
+    setItem = (key: string, value: string): void => {
         this.kvItems[key] = value;
         this.kv.set(key, value);
     }
 
-    removeItem(key: string): void {
+    removeItem = (key: string): void => {
         delete this.kvItems[key];
         this.kv.set(key, null);
         // await this.kv.remove(key);
