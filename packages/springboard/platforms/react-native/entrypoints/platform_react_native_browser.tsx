@@ -86,8 +86,9 @@ class KvDrivenLocalStorage implements Storage {
             return;
         }
 
-        for (const [key, value] of Object.entries(kvItems)) {
-            if (key.startsWith(this.prefix)) {
+        for (const [keyWithPrefix, value] of Object.entries(kvItems)) {
+            if (keyWithPrefix.startsWith(this.prefix)) {
+                const key = keyWithPrefix.substring(this.prefix.length);
                 this.kvItems[key] = value;
             }
         }
@@ -99,7 +100,9 @@ class KvDrivenLocalStorage implements Storage {
 
     setItem = (key: string, value: string): void => {
         this.kvItems[key] = value;
-        this.kv.set(key, value);
+
+        const keyWithPrefix = this.prefix + key;
+        this.kv.set(keyWithPrefix, value);
     };
 
     removeItem = (key: string): void => {
