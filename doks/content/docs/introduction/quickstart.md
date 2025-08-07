@@ -85,7 +85,7 @@ springboard.registerModule('Main', {}, async (moduleAPI) => {
         // });
     });
 
-    moduleAPI.registerRoute('', {}, () => {
+    moduleAPI.registerRoute('', () => {
         return (
             <div>
                 <input.components.edit/>

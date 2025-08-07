@@ -28,7 +28,7 @@ springboard.registerModule('Main', {}, async (moduleAPI) => {
         });
     };
 
-    moduleAPI.registerRoute('', {}, () => {
+    moduleAPI.registerRoute('', () => {
         const state = rootModeState.useState();
 
         const onClick = () => {

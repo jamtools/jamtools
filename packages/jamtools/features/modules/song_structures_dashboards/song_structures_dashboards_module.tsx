@@ -137,7 +137,7 @@ springboard.registerModule('song_structures_dashboards', {}, async (moduleAPI): 
         }
     });
 
-    moduleAPI.registerRoute('', {}, () => {
+    moduleAPI.registerRoute('', () => {
         return (
             <div>
                 <Link to='/modules/song_structures_dashboards/bass_guitar'>
@@ -149,7 +149,7 @@ springboard.registerModule('song_structures_dashboards', {}, async (moduleAPI): 
         );
     });
 
-    moduleAPI.registerRoute('bass_guitar', {}, () => {
+    moduleAPI.registerRoute('bass_guitar', () => {
         const props: React.ComponentProps<typeof GuitarTabView> = {
             numberOfStrings: 4,
             chosenFrets: [

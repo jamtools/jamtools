@@ -7,7 +7,7 @@ import {
 
 import {useSpringboardEngine} from 'springboard/engine/engine';
 import {AllModules} from 'springboard/module_registry/module_registry';
-import {rootRoute} from './root_route';
+import {rootRoute} from 'springboard/src/root_route';
 
 // utilities for extracting and typing routes from modules
 type ExtractRoutes<T> = T extends {routes: infer R} ? R :
@@ -49,6 +49,11 @@ export const FrontendRoutes = () => {
     const typedRoutes = allModuleRoutes as unknown as AllRoutesFlat;
 
     const router = createAppRouter(typedRoutes);
+
+    // Expose router globally for testing
+    if (typeof window !== 'undefined') {
+        (window as any).tsRouter = router;
+    }
 
     return <RouterProvider router={router} />;
 };

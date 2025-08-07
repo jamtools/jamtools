@@ -1,8 +1,10 @@
 import React from 'react';
 import {createRoute, getRouteApi, useRouter} from '@tanstack/react-router';
 import springboard from 'springboard';
-import {rootRoute} from './root_route';
+import {rootRoute} from 'springboard/src/root_route';
 import {ModuleAPI} from 'springboard/engine/module_api';
+
+import '@jamtools/core/modules/macro_module/macro_module';
 
 const makeTestTanStackModule = async (moduleAPI: ModuleAPI) => {
     const messageState = await moduleAPI.statesAPI.createPersistentState<string>('testMessage', 'Hello from TanStack Router!');

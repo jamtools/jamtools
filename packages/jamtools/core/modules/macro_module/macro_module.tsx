@@ -16,7 +16,7 @@ import {createRoute} from '@tanstack/react-router';
 
 import './macro_handlers';
 import {macroTypeRegistry} from './registered_macro_types';
-import {rootRoute} from '@springboardjs/platforms-browser/root_route';
+import {rootRoute} from 'springboard/src/root_route';
 
 type ModuleId = string;
 
@@ -55,25 +55,16 @@ export class MacroModule implements Module<MacroConfigState> {
 
     constructor(private coreDeps: CoreDependencies, private moduleDeps: ModuleDependencies) { }
 
-    // routes = [
-    //     createRoute({
-    //         getParentRoute: () => rootRoute,
-    //         path: '/modules/macro',
-    //         component: () => {
-    //             const mod = MacroModule.use();
-    //             return <MacroPage state={mod.state || this.state} />;
-    //         },
-    //     }),
-    // ];
-
-    // routes = {
-    //     '': {
-    //         component: () => {
-    //             const mod = MacroModule.use();
-    //             return <MacroPage state={mod.state || this.state} />;
-    //         },
-    //     },
-    // };
+    routes = [
+        createRoute({
+            getParentRoute: () => rootRoute,
+            path: '/modules/macro',
+            component: () => {
+                const mod = MacroModule.use();
+                return <MacroPage state={mod.state || this.state} />;
+            },
+        }),
+    ];
 
     state: MacroConfigState = {
         configs: {},

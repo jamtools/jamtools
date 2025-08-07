@@ -2,6 +2,8 @@ import {SharedStateSupervisor, StateSupervisor, UserAgentStateSupervisor} from '
 import {ExtraModuleDependencies, Module, NavigationItemConfig, RegisteredRoute} from 'springboard/module_registry/module_registry';
 import {CoreDependencies, ModuleDependencies} from '../types/module_types';
 import {RegisterRouteOptions} from './register';
+import {createRoute, RouteComponent} from '@tanstack/react-router';
+import {rootRoute} from 'springboard/src/root_route';
 
 type ActionConfigOptions = object;
 
@@ -87,8 +89,13 @@ export class ModuleAPI {
      * ```
      *
      */
-    registerRoute = (routePath: string, options: RegisterRouteOptions, component: RegisteredRoute['component']) => {
-        console.error('registerRoute is not supported in tanstack router');
+    registerRoute = (routePath: string, component: RouteComponent) => {
+        this.module.routes ||= [];
+        this.module.routes.push(createRoute({
+            path: routePath,
+            getParentRoute: () => rootRoute,
+            component,
+        }));
     };
 
     registerApplicationShell = (component: React.ElementType<React.PropsWithChildren<{modules: Module[]}>>) => {

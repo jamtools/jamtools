@@ -10,6 +10,8 @@ import {BaseModule, ModuleHookValue} from 'springboard/modules/base_module/base_
 import {Module} from 'springboard/module_registry/module_registry';
 
 import springboard from 'springboard';
+import {createRoute} from '@tanstack/react-router';
+import {rootRoute} from 'springboard/src/root_route';
 
 type WledClientStatus = {
     url: string;
@@ -47,19 +49,19 @@ export class WledModule implements Module<WledState> {
 
     cleanup: (() => void)[] = [];
 
-    // routes = {
-    //     '': {
-    //         component: () => {
-    //             const mod = WledModule.use();
-
-    //             return (
-    //                 <pre>
-    //                     {JSON.stringify(mod.state)}
-    //                 </pre>
-    //             );
-    //         },
-    //     },
-    // };
+    routes = [
+        createRoute({
+            getParentRoute: () => rootRoute,
+            path: '/wled',
+            component: () => {
+                return (
+                    <pre>
+                        {JSON.stringify(this.state)}
+                    </pre>
+                );
+            },
+        }),
+    ];
 
     // wled controllers need to be stored as hostnames,
     // so they are readable and stay consistent for that controller

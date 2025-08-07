@@ -333,6 +333,9 @@ importers:
       '@springboardjs/shoelace':
         specifier: workspace:*
         version: link:../../springboard/external/shoelace
+      '@tanstack/react-router':
+        specifier: 'catalog:'
+        version: 1.130.12(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@types/qrcode':
         specifier: ^1.5.5
         version: 1.5.5

@@ -4,7 +4,7 @@ import {Subject} from 'rxjs';
 
 import type {ModuleAPI} from '../engine/module_api';
 import {RegisterRouteOptions} from '../engine/register';
-import type {Route} from '@tanstack/react-router';
+import type {AnyRoute} from '@tanstack/react-router';
 
 type RouteComponentProps = {
     navigate: (routeName: string) => void;
@@ -27,7 +27,7 @@ export type Module<State extends object = any> = {
     Provider?: React.ElementType;
     state?: State;
     subject?: Subject<State>;
-    routes?: Route[];
+    routes?: AnyRoute[];
     applicationShell?: React.ElementType<React.PropsWithChildren<{modules: Module[]}>>;
 };
 
