@@ -17,6 +17,7 @@
   "devDependencies": {
     "@jamtools/core": "workspace:*",
     "@springboardjs/shoelace": "workspace:*",
+    "@tanstack/react-router": "catalog:",
     "@types/qrcode": "^1.5.5",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
@@ -29,6 +30,7 @@
   },
   "peerDependencies": {
     "@jamtools/core": "workspace:*",
-    "@springboardjs/shoelace": "workspace:*"
+    "@springboardjs/shoelace": "workspace:*",
+    "@tanstack/react-router": "^1"
   }
 }

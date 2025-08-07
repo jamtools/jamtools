@@ -62,7 +62,7 @@ springboard.registerModule('MidiPlayback', {}, async (moduleAPI): Promise<MidiPl
         savedMidiFileData.setState(args.data);
     });
 
-    moduleAPI.registerRoute('', {hideApplicationShell: false}, () => {
+    moduleAPI.registerRoute('', () => {
         const savedState = savedMidiFileData.useState();
 
         return (

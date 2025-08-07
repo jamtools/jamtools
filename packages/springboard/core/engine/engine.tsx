@@ -114,7 +114,7 @@ export class Springboard {
             logPerformance(start, end, `${id} module initialized`);
         };
 
-        // TODO: this is not good that classes are unconditionally all registered first. Let's use performance.now() to determine the order of when things were called
+        // TODO: this is not good that classes are unconditionally all registered first before the non-class ones. Let's use performance.now() to determine the order of when things were called
         // or put them all in the same array instead of different arrays like they currently are
         for (const modClassCallback of registeredClassModuleCallbacks) {
             const start = now(); // would be great to use `using` here to time this

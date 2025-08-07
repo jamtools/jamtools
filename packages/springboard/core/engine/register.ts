@@ -14,6 +14,19 @@ export type ClassModuleCallback<T extends object> = (coreDeps: CoreDependencies,
 Promise<Module<T>> | Module<T>;
 
 export type SpringboardRegistry = {
+    /**
+     * Register a Springboard module
+     *
+     * After registering, you'll need to declare the module using interface merging:
+     *
+     * ```ts
+     * declare module 'springboard/module_registry/module_registry' {
+     *     interface AllModules {
+     *         MyModuleId: MyModule;
+     *     }
+     * }
+     * ```
+     */
     registerModule: <ModuleOptions extends RegisterModuleOptions, ModuleReturnValue extends object>(
         moduleId: string,
         options: ModuleOptions,
@@ -21,7 +34,7 @@ export type SpringboardRegistry = {
     ) => void;
     registerClassModule: <T extends object>(cb: ClassModuleCallback<T>) => void;
     registerSplashScreen: (component: React.ComponentType) => void;
-    reset: () => void;
+    reset: (options?: {keepCalls?: boolean}) => void;
 };
 
 export type RegisterModuleOptions = {
@@ -62,9 +75,17 @@ export const springboard: SpringboardRegistry = {
     registerModule,
     registerClassModule,
     registerSplashScreen,
-    reset: () => {
+    reset: (options?: {keepCalls?: boolean}) => {
         springboard.registerModule = registerModule;
+        if (!options?.keepCalls) {
+            (registerModule as any).calls = [];
+        }
+
         springboard.registerClassModule = registerClassModule;
-        springboard.registerSplashScreen = registerSplashScreen;
+        if (!options?.keepCalls) {
+            (registerClassModule as any).calls = [];
+        }
+
+        registeredSplashScreen = null;
     },
 };

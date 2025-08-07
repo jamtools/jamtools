@@ -91,7 +91,7 @@ springboard.registerModule('TicTacToe', {}, async (moduleAPI) => {
         },
     });
 
-    moduleAPI.registerRoute('/', {}, () => {
+    moduleAPI.registerRoute('/', () => {
         return (
             <TicTacToeBoard
                 board={boardState.useState()}

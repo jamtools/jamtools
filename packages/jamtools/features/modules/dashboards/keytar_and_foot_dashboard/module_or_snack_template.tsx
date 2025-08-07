@@ -56,7 +56,7 @@ type States = Awaited<ReturnType<typeof createStates>>;
 type Macros = Awaited<ReturnType<typeof createMacros>>;
 
 const registerRoutes = (moduleAPI: ModuleAPI, states: States, macros: Macros, actions: Actions) => {
-    moduleAPI.registerRoute('', {}, () => {
+    moduleAPI.registerRoute('', () => {
         const myState = states.myState.useState();
 
         return (

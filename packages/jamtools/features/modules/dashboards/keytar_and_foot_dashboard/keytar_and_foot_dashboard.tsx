@@ -21,11 +21,11 @@ const KeytarAndFootDashboard = async (moduleAPI: ModuleAPI, dashboardName: strin
         singleOctaveSupervisor.initialize(),
     ]);
 
-    moduleAPI.registerRoute('kiosk', {hideApplicationShell: true}, () => (
+    moduleAPI.registerRoute('kiosk', () => (
         <singleOctaveSupervisor.renderKiosk/>
     ));
 
-    moduleAPI.registerRoute(dashboardName, {}, () => (
+    moduleAPI.registerRoute(dashboardName, () => (
         <div>
             <h1>
                 Keytar and Foot Dashboard

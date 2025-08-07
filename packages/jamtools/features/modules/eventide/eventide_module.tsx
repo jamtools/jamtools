@@ -69,7 +69,7 @@ springbord.registerModule('Eventide', {}, async (moduleAPI) => {
     };
 
     // hideNavbar should really be "hideApplicationShell", and also be a global option
-    moduleAPI.registerRoute('', {hideApplicationShell: false}, () => {
+    moduleAPI.registerRoute('', () => {
         const currentPreset = currentPresetState.useState();
         const favoritedPresets = favoritedPresetsState.useState();
 

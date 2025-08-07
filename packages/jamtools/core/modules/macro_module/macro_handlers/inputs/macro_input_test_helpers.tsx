@@ -53,12 +53,17 @@ export const getMacroInputTestHelpers = () => {
     };
 
     const gotoMacroPage = async () => {
-        const macroPageLink = screen.getByTestId('link-to-/modules/macro');
-        // const macroPageLink = container.querySelector('a[href="/modules/macro/"]');
-        expect(macroPageLink).toBeInTheDocument();
+        const router = (window as any).tsRouter;
+        if (!router) {
+            throw new Error('Router not found on window.tsRouter');
+        }
 
         await act(async () => {
-            fireEvent.click(macroPageLink!);
+            await router.navigate({ to: '/modules/macro' });
+        });
+
+        await act(async () => {
+            await new Promise(r => setTimeout(r, 10));
         });
     };
 

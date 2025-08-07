@@ -41,7 +41,7 @@ springboard.registerModule('Ultimate_Guitar', {}, async (moduleAPI): Promise<Ult
 
     const actions = new Actions(moduleAPI, states);
 
-    moduleAPI.registerRoute('', {hideApplicationShell: true}, () => (
+    moduleAPI.registerRoute('', () => (
         <UltimateGuitarMainView
             currentSetlistStatus={states.currentSetlistStatus.useState()}
             savedSetlists={states.savedSetlists.useState()}
@@ -49,7 +49,7 @@ springboard.registerModule('Ultimate_Guitar', {}, async (moduleAPI): Promise<Ult
         />
     ));
 
-    moduleAPI.registerRoute('manage', {}, () => (
+    moduleAPI.registerRoute('manage', () => (
         <UltimateGuitarManageView
             currentSetlistStatus={states.currentSetlistStatus.useState()}
             savedSetlists={states.savedSetlists.useState()}
@@ -67,7 +67,7 @@ springboard.registerModule('Ultimate_Guitar', {}, async (moduleAPI): Promise<Ult
         />
     ));
 
-    moduleAPI.registerRoute('qrcode', {}, () => (
+    moduleAPI.registerRoute('qrcode', () => (
         <UltimateGuitarQRCode/>
     ));
 

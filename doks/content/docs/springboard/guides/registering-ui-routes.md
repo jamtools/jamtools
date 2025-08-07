@@ -48,7 +48,7 @@ springboard.registerModule('MyModule', async (moduleAPI) => {
     });
 
     // matches "/users/1"
-    moduleAPI.registerRoute('/users/:userId', {}, () => {
+    moduleAPI.registerRoute('/users/:userId', () => {
         const params = useParams();
         const userId = params.userId;
 

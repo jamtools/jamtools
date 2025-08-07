@@ -14,6 +14,8 @@ import {createRNWebviewEngine} from '../../entrypoints/platform_react_native_bro
 import {Main} from '@springboardjs/platforms-browser/entrypoints/main';
 import {createRNMainEngine} from '../../entrypoints/rn_app_springboard_entrypoint';
 
+window.scrollTo = vitest.fn();
+
 describe('KvRnWebview', () => {
     beforeEach(() => {
         springboard.reset();
@@ -37,7 +39,7 @@ describe('KvRnWebview', () => {
                     },
                 });
 
-                m.registerRoute('/', {}, () => {
+                m.registerRoute('/', () => {
                     const myState = myUserAgentState.useState();
 
                     const [localState, setLocalState] = useState('');

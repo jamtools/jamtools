@@ -39,7 +39,7 @@ springboard.registerModule('daw_interaction', {}, async (moduleAPI) => {
         state.setState(args.value);
     });
 
-    moduleAPI.registerRoute('', {}, () => {
+    moduleAPI.registerRoute('', () => {
         const sliderPosition1 = sliderPositionState1.useState();
         const sliderPosition2 = sliderPositionState2.useState();
 
