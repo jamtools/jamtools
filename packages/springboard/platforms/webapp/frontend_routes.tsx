@@ -11,14 +11,12 @@ import {rootRoute} from './root_route';
 
 // utilities for extracting and typing routes from modules
 type ExtractRoutes<T> = T extends {routes: infer R} ? R :
-                       T extends () => Promise<{routes: infer R}> ? R : never;
+    T extends () => Promise<{routes: infer R}> ? R : never;
 type Flatten<T> = T extends readonly (infer U)[] ? U : never;
 type AllRoutes = {
     [K in keyof AllModules]: ExtractRoutes<AllModules[K]>;
 }[keyof AllModules];
 type AllRoutesFlat = readonly Flatten<AllRoutes>[];
-
-type x = AllModules['testTanStackModule']['routes'];
 
 // router factory function that creates a strongly-typed router based on AllModules
 function createAppRouter(routes: AllRoutesFlat) {

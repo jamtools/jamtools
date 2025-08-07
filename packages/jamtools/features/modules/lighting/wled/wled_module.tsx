@@ -47,19 +47,19 @@ export class WledModule implements Module<WledState> {
 
     cleanup: (() => void)[] = [];
 
-    routes = {
-        '': {
-            component: () => {
-                const mod = WledModule.use();
+    // routes = {
+    //     '': {
+    //         component: () => {
+    //             const mod = WledModule.use();
 
-                return (
-                    <pre>
-                        {JSON.stringify(mod.state)}
-                    </pre>
-                );
-            },
-        },
-    };
+    //             return (
+    //                 <pre>
+    //                     {JSON.stringify(mod.state)}
+    //                 </pre>
+    //             );
+    //         },
+    //     },
+    // };
 
     // wled controllers need to be stored as hostnames,
     // so they are readable and stay consistent for that controller

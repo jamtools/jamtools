@@ -9,6 +9,9 @@ catalogs:
     '@hono/trpc-server':
       specifier: ^0.3.2
       version: 0.3.4
+    '@tanstack/react-router':
+      specifier: ^1.130.12
+      version: 1.130.12
     '@trpc/client':
       specifier: ^10.45.2
       version: 10.45.2
@@ -284,6 +287,9 @@ importers:
       '@springboardjs/platforms-browser':
         specifier: workspace:*
         version: link:../../springboard/platforms/webapp
+      '@tanstack/react-router':
+        specifier: 'catalog:'
+        version: 1.130.12(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@types/react':
         specifier: 'catalog:'
         version: 19.1.5
@@ -421,6 +427,9 @@ importers:
         specifier: ^8.18.0
         version: 8.18.2
     devDependencies:
+      '@tanstack/react-router':
+        specifier: 'catalog:'
+        version: 1.130.12(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@types/node':
         specifier: 'catalog:'
         version: 20.17.48
@@ -648,7 +657,7 @@ importers:
         version: link:../../core
     devDependencies:
       '@tanstack/react-router':
-        specifier: ^1.130.12
+        specifier: 'catalog:'
         version: 1.130.12(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@types/react':
         specifier: 'catalog:'
