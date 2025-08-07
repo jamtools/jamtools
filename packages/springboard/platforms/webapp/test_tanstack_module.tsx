@@ -82,12 +82,13 @@ const TestTanStackComponent = (props: TestTanStackComponentProps) => {
     const [inputValue, setInputValue] = React.useState('');
 
     const router = useRouter();
-    router.navigate({to: '/tanstack-test'});
 
     return (
         <div style={{padding: '20px'}}>
             <h1>TanStack Router Test Module</h1>
             <p>Current message: {props.message}</p>
+
+            <button onClick={() => router.navigate({to: '/tanstack-test'})}>Go to TanStack Test</button>
 
             <div style={{marginTop: '20px'}}>
                 <input
