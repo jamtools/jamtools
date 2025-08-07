@@ -17,6 +17,18 @@ const makeTestTanStackModule = async (moduleAPI: ModuleAPI) => {
         routes: [
             createRoute({
                 getParentRoute: () => rootRoute,
+                path: '/',
+                component: () => {
+                    return (
+                        <TestTanStackComponent
+                            message={messageState.useState()}
+                            updateMessage={actions.updateMessage}
+                        />
+                    );
+                },
+            }),
+            createRoute({
+                getParentRoute: () => rootRoute,
                 path: '/tanstack-test',
                 component: () => {
                     return (
