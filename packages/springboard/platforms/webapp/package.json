@@ -7,14 +7,16 @@
     "fix": "npm run lint -- --fix"
   },
   "peerDependencies": {
-    "springboard": "workspace:*",
-    "react-router-dom": "^6"
+    "@tanstack/react-router": "^1.130.12",
+    "react-router-dom": "^6",
+    "springboard": "workspace:*"
   },
   "dependencies": {
     "json-rpc-2.0": "catalog:",
     "reconnecting-websocket": "catalog:"
   },
   "devDependencies": {
+    "@tanstack/react-router": "^1.130.12",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "react": "catalog:",

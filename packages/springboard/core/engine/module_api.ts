@@ -88,16 +88,7 @@ export class ModuleAPI {
      *
      */
     registerRoute = (routePath: string, options: RegisterRouteOptions, component: RegisteredRoute['component']) => {
-        const routes = this.module.routes || {};
-        routes[routePath] = {
-            options,
-            component,
-        };
-
-        this.module.routes = {...routes};
-        if (this.modDeps.moduleRegistry.getCustomModule(this.module.moduleId)) {
-            this.modDeps.moduleRegistry.refreshModules();
-        }
+        console.error('registerRoute is not supported in tanstack router');
     };
 
     registerApplicationShell = (component: React.ElementType<React.PropsWithChildren<{modules: Module[]}>>) => {

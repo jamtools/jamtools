@@ -1,157 +1,62 @@
 import React from 'react';
 
 import {
-    createBrowserRouter,
-    createHashRouter,
-    Link,
-    RouteObject,
     RouterProvider,
-    useNavigate,
-} from 'react-router-dom';
+    createRouter,
+} from '@tanstack/react-router';
 
 import {useSpringboardEngine} from 'springboard/engine/engine';
-import {Module, RegisteredRoute} from 'springboard/module_registry/module_registry';
+import {AllModules} from 'springboard/module_registry/module_registry';
+import {rootRoute} from './root_route';
 
-import {Layout} from './layout';
+// utilities for extracting and typing routes from modules
+type ExtractRoutes<T> = T extends {routes: infer R} ? R :
+                       T extends () => Promise<{routes: infer R}> ? R : never;
+type Flatten<T> = T extends readonly (infer U)[] ? U : never;
+type AllRoutes = {
+    [K in keyof AllModules]: ExtractRoutes<AllModules[K]>;
+}[keyof AllModules];
+type AllRoutesFlat = readonly Flatten<AllRoutes>[];
 
-const CustomRoute = (props: {component: RegisteredRoute['component']}) => {
-    const navigate = useNavigate();
+type x = AllModules['testTanStackModule']['routes'];
 
-    return (
-        <props.component
-            navigate={navigate}
-        />
-    );
-};
+// router factory function that creates a strongly-typed router based on AllModules
+function createAppRouter(routes: AllRoutesFlat) {
+    const routeTree = rootRoute.addChildren(routes);
+
+    return createRouter({
+        routeTree,
+        context: {},
+        defaultPreload: 'intent',
+        scrollRestoration: true,
+        defaultStructuralSharing: true,
+        defaultPreloadStaleTime: 0,
+    });
+}
+
+type AppRouter = ReturnType<typeof createAppRouter>;
 
 export const FrontendRoutes = () => {
     const engine = useSpringboardEngine();
-
     const mods = engine.moduleRegistry.useModules();
 
-    const moduleRoutes: RouteObject[] = [];
-
-    const rootRouteObjects: RouteObject[] = [];
+    const allModuleRoutes: any[] = [];
 
     for (const mod of mods) {
-        if (!mod.routes) {
-            continue;
-        }
-
-        const routes = mod.routes;
-
-        const thisModRoutes: RouteObject[] = [];
-
-        Object.keys(routes).forEach(path => {
-            const Component = routes[path].component;
-            const routeObject: RouteObject = {
-                path,
-                element: (
-                    <Layout modules={mods}>
-                        <CustomRoute component={Component}/>
-                    </Layout>
-                ),
-            };
-
-            if (path.startsWith('/')) {
-                rootRouteObjects.push(routeObject);
-            } else {
-                thisModRoutes.push(routeObject);
-            }
-        });
-
-        if (thisModRoutes.length) {
-            moduleRoutes.push({
-                path: mod.moduleId,
-                children: thisModRoutes,
-            });
+        if (mod.routes && mod.routes.length > 0) {
+            allModuleRoutes.push(...mod.routes);
         }
     }
 
-    moduleRoutes.push({
-        path: '*',
-        element: <span/>,
-    });
+    const typedRoutes = allModuleRoutes as unknown as AllRoutesFlat;
 
-    const routerContructor = (globalThis as {useHashRouter?: boolean}).useHashRouter ? createHashRouter : createBrowserRouter;
+    const router = createAppRouter(typedRoutes);
 
-    const allRoutes: RouteObject[] = [
-        ...rootRouteObjects,
-        {
-            path: '/modules',
-            children: moduleRoutes,
-        },
-        {
-            path: '/routes',
-            element: <Layout modules={mods}><RootPath modules={mods}/></Layout>
-        },
-    ];
+    return <RouterProvider router={router} />;
+};
 
-    if (!rootRouteObjects.find(r => r.path === '/')) {
-        allRoutes.push({
-            path: '/',
-            element: <Layout modules={mods}><RootPath modules={mods}/></Layout>
-        });
+declare module '@tanstack/react-router' {
+    interface Register {
+        router: AppRouter;
     }
-
-    const router = routerContructor(allRoutes, {
-        future: {
-            v7_relativeSplatPath: true,
-            // v7_startTransition: true,
-        },
-    });
-
-    return (
-        <RouterProvider router={router}/>
-    );
-};
-
-const RootPath = (props: {modules: Module[]}) => {
-    return (
-        <ul>
-            {props.modules.map(mod => (
-                <RenderModuleRoutes
-                    key={mod.moduleId}
-                    mod={mod}
-                />
-            ))}
-        </ul>
-    );
-};
-
-const RenderModuleRoutes = ({mod}: {mod: Module}) => {
-    return (
-        <li>
-            {mod.moduleId}
-            <ul>
-                {mod.routes && Object.keys(mod.routes).map(path => {
-                    let suffix = '';
-                    if (path && path !== '/') {
-                        if (!path.startsWith('/')) {
-                            suffix += '/';
-                        }
-
-                        if (path.endsWith('/')) {
-                            suffix += path.substring(0, path.length - 1);
-                        } else {
-                            suffix += path;
-                        }
-                    }
-
-                    const href = path.startsWith('/') ? path : `/modules/${mod.moduleId}${suffix}`;
-
-                    return (
-                        <li key={path}>
-                            <Link
-                                data-testid={`link-to-${href}`}
-                                to={href}
-                            >
-                                {path || '/'}
-                            </Link>
-                        </li>
-                    );
-                })}
-            </ul>
-        </li>
-    );
-};
+}
