@@ -5,7 +5,6 @@ import {Context, Hono} from 'hono';
 import {serveStatic} from 'hono/serve-static';
 import {createNodeWebSocket} from '@hono/node-ws';
 import {cors} from 'hono/cors';
-import {trpcServer} from '@hono/trpc-server';
 
 import {NodeAppDependencies} from '@springboardjs/platforms-node/entrypoints/main';
 import {KVStoreFromKysely} from '@springboardjs/data-storage/kv_api_kysely';
@@ -23,7 +22,7 @@ type InitAppReturnValue = {
     nodeAppDependencies: NodeAppDependencies;
 };
 
-export const initApp = (coreDeps: WebsocketServerCoreDependencies): InitAppReturnValue => {
+export const initApp = (kvDeps: WebsocketServerCoreDependencies): InitAppReturnValue => {
     const rpcMiddlewares: RpcMiddleware[] = [];
 
     const app = new Hono();
@@ -37,7 +36,7 @@ export const initApp = (coreDeps: WebsocketServerCoreDependencies): InitAppRetur
         rpcMiddlewares,
     });
 
-    const remoteKV = new KVStoreFromKysely(coreDeps.kvDatabase);
+    const remoteKV = new KVStoreFromKysely(kvDeps.kvDatabase);
     const userAgentStore = new NodeKVStoreService('userAgent');
 
     const rpc = new NodeLocalJsonRpcClientAndServer({
@@ -52,6 +51,55 @@ export const initApp = (coreDeps: WebsocketServerCoreDependencies): InitAppRetur
     const {injectWebSocket, upgradeWebSocket} = createNodeWebSocket({app});
 
     app.get('/ws', upgradeWebSocket(c => service.handleConnection(c)));
+
+    app.get('/kv/get', async (c) => {
+        const key = c.req.param('key');
+
+        if (!key) {
+            return c.json({error: 'No key provided'}, 400);
+        }
+
+        const value = await remoteKV.get(key);
+
+        return c.json(value || null);
+    });
+
+    app.post('/kv/set', async (c) => {
+        const body = await c.req.text();
+        const {key, value} = JSON.parse(body);
+
+        c.header('Content-Type', 'application/json');
+
+        if (!key) {
+            return c.json({error: 'No key provided'}, 400);
+        }
+
+        if (!value) {
+            return c.json({error: 'No value provided'}, 400);
+        }
+
+        await remoteKV.set(key, value);
+        return c.json({success: true});
+    });
+
+    app.get('/kv/get-all', async (c) => {
+        const all = await remoteKV.getAll();
+        return c.json(all);
+    });
+
+    app.post('/rpc/*', async (c) => {
+        const body = await c.req.text();
+        c.header('Content-Type', 'application/json');
+
+        const rpcResponse = await service.processRequestWithMiddleware(c, body);
+        if (rpcResponse) {
+            return c.text(rpcResponse);
+        }
+
+        return c.text(JSON.stringify({
+            error: 'No response',
+        }), 500);
+    });
 
     // this is necessary because https://github.com/honojs/hono/issues/3483
     // node-server serveStatic is missing absolute path support
@@ -130,11 +178,6 @@ export const initApp = (coreDeps: WebsocketServerCoreDependencies): InitAppRetur
             return c.json({message: 'Failed to contact OTEL host'});
         }
     });
-
-    app.use('/trpc/*', trpcServer({
-        router: coreDeps.kvTrpcRouter,
-        createContext: ({req}) => ({ /* Add context if needed */}),
-    }));
 
     let storedEngine: Springboard | undefined;
 
