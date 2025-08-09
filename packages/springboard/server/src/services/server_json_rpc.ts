@@ -2,23 +2,23 @@ import {JSONRPCClient, JSONRPCRequest} from 'json-rpc-2.0';
 import {Context} from 'hono';
 import {WSContext, WSEvents} from 'hono/ws';
 import {RpcMiddleware} from '../register';
-
-import {nodeRpcAsyncLocalStorage} from '@springboardjs/platforms-node/services/node_rpc_async_local_storage';
+import {RpcAsyncLocalStorage} from '../types/rpc';
 
 type WebsocketInterface = {
     send: (s: string) => void;
 }
 
-type NodeJsonRpcServerInitArgs = {
+type GenericJsonRpcServerInitArgs = {
     processRequest: (message: string) => Promise<string>;
     rpcMiddlewares: RpcMiddleware[];
+    rpcAsyncLocalStorage: RpcAsyncLocalStorage;
 }
 
-export class NodeJsonRpcServer {
+export class GenericJsonRpcServer {
     private incomingClients: {[clientId: string]: WebsocketInterface} = {};
     private outgoingClients: {[clientId: string]: JSONRPCClient} = {};
 
-    constructor(private initArgs: NodeJsonRpcServerInitArgs) { }
+    constructor(private initArgs: GenericJsonRpcServerInitArgs) { }
 
     // New function: this will be used for async things like toasts
     // public sendMessage = (message: string, clientId: string) => {
@@ -116,7 +116,7 @@ export class NodeJsonRpcServer {
         }
 
         return new Promise<string>((resolve) => {
-            nodeRpcAsyncLocalStorage.run(rpcContext, async () => {
+            this.initArgs.rpcAsyncLocalStorage.run(rpcContext, async () => {
                 const response = await this.initArgs.processRequest(message);
                 resolve(response);
             });

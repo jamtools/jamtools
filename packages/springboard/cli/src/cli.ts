@@ -6,7 +6,7 @@ import concurrently from 'concurrently';
 
 import packageJSON from '../package.json';
 
-import {buildApplication, buildServer, platformBrowserBuildConfig, platformNodeBuildConfig, platformOfflineBrowserBuildConfig, platformPartykitBrowserBuildConfig, platformPartykitServerBuildConfig, platformTauriMaestroBuildConfig, platformTauriWebviewBuildConfig, SpringboardPlatform} from './build';
+import {buildApplication, platformBrowserBuildConfig, platformNodeBuildConfig, platformNodeServerBuildConfig, platformOfflineBrowserBuildConfig, platformPartykitBrowserBuildConfig, platformPartykitServerBuildConfig, platformTauriMaestroBuildConfig, platformTauriWebviewBuildConfig, SpringboardPlatform} from './build';
 import {esbuildPluginTransformAwaitImportToRequire} from './esbuild_plugins/esbuild_plugin_transform_await_import';
 
 program
@@ -43,8 +43,9 @@ program
             watch: true,
         });
 
-        await buildServer({
+        await buildApplication(platformNodeServerBuildConfig, {
             watch: true,
+            esbuildOutDir: 'server',
         });
 
         const nodeArgs = '--watch --watch-preserve-output';
@@ -102,8 +103,9 @@ program
                 watch: options.watch,
             });
 
-            await buildServer({
+            await buildApplication(platformNodeServerBuildConfig, {
                 watch: options.watch,
+                esbuildOutDir: 'server',
             });
         }
 
@@ -142,10 +144,9 @@ program
                 esbuildOutDir: './tauri',
             });
 
-            await buildServer({
+            await buildApplication(platformNodeServerBuildConfig, {
                 watch: options.watch,
-                applicationDistPath: `${cwd}/dist/tauri/node/dist/dynamic-entry.js`,
-                esbuildOutDir: './tauri',
+                esbuildOutDir: 'tauri/server',
                 editBuildOptions: (buildOptions) => {
                     buildOptions.plugins!.push(esbuildPluginTransformAwaitImportToRequire);
                 }

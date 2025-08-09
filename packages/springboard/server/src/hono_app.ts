@@ -1,43 +1,53 @@
-import path from 'path';
-
 import {Context, Hono} from 'hono';
-// import {serveStatic} from '@hono/node-server/serve-static';
 import {serveStatic} from 'hono/serve-static';
-import {createNodeWebSocket} from '@hono/node-ws';
 import {cors} from 'hono/cors';
 
-import {NodeAppDependencies} from '@springboardjs/platforms-node/entrypoints/main';
 import {KVStoreFromKysely} from '@springboardjs/data-storage/kv_api_kysely';
+// TODO: These should be made platform-agnostic
 import {NodeKVStoreService} from '@springboardjs/platforms-node/services/node_kvstore_service';
 import {NodeLocalJsonRpcClientAndServer} from '@springboardjs/platforms-node/services/node_local_json_rpc';
 
-import {NodeJsonRpcServer} from './services/server_json_rpc';
-import {WebsocketServerCoreDependencies} from './ws_server_core_dependencies';
+import {GenericJsonRpcServer} from './services/server_json_rpc';
 import {RpcMiddleware, ServerModuleAPI, serverRegistry} from './register';
 import {Springboard} from 'springboard/engine/engine';
+import {ServerConfig, DatabaseDependencies, SimpleRpcAsyncLocalStorage} from './types';
+
+// Platform-agnostic app dependencies
+export interface AppDependencies {
+    rpc: {
+        remote: NodeLocalJsonRpcClientAndServer; // TODO: Make platform-agnostic
+        local: NodeLocalJsonRpcClientAndServer | undefined;
+    };
+    storage: {
+        remote: KVStoreFromKysely;
+        userAgent: NodeKVStoreService; // TODO: Make platform-agnostic
+    };
+    injectEngine: (engine: Springboard) => void;
+}
 
 type InitAppReturnValue = {
     app: Hono;
-    injectWebSocket: ReturnType<typeof createNodeWebSocket>['injectWebSocket'];
-    nodeAppDependencies: NodeAppDependencies;
+    injectWebSocket?: (server: unknown) => void;
+    appDependencies: AppDependencies;
 };
 
-export const initApp = (kvDeps: WebsocketServerCoreDependencies): InitAppReturnValue => {
+export const initApp = (config: ServerConfig, dbDeps: DatabaseDependencies): InitAppReturnValue => {
     const rpcMiddlewares: RpcMiddleware[] = [];
 
     const app = new Hono();
 
     app.use('*', cors());
 
-    const service: NodeJsonRpcServer = new NodeJsonRpcServer({
+    const service: GenericJsonRpcServer = new GenericJsonRpcServer({
         processRequest: async (message) => {
             return rpc!.processRequest(message);
         },
         rpcMiddlewares,
+        rpcAsyncLocalStorage: config.platform.rpcAsyncLocalStorage || new SimpleRpcAsyncLocalStorage(),
     });
 
-    const remoteKV = new KVStoreFromKysely(kvDeps.kvDatabase);
-    const userAgentStore = new NodeKVStoreService('userAgent');
+    const remoteKV = new KVStoreFromKysely(dbDeps.kvDatabase as ConstructorParameters<typeof KVStoreFromKysely>[0]);
+    const userAgentStore = new NodeKVStoreService('userAgent'); // TODO: Make this platform-agnostic
 
     const rpc = new NodeLocalJsonRpcClientAndServer({
         broadcastMessage: (message) => {
@@ -45,10 +55,11 @@ export const initApp = (kvDeps: WebsocketServerCoreDependencies): InitAppReturnV
         },
     });
 
-    const webappFolder = process.env.WEBAPP_FOLDER || './dist/browser';
-    const webappDistFolder = path.join(webappFolder, './dist');
+    const webappFolder = config.platform.environment.get('WEBAPP_FOLDER') || './dist/browser';
+    const webappDistFolder = `${webappFolder}/dist`;
 
-    const {injectWebSocket, upgradeWebSocket} = createNodeWebSocket({app});
+    const wsHandler = config.platform.websocket.createWebSocketHandler(app);
+    const {upgradeWebSocket, injectWebSocket} = wsHandler;
 
     app.get('/ws', upgradeWebSocket(c => service.handleConnection(c)));
 
@@ -101,17 +112,19 @@ export const initApp = (kvDeps: WebsocketServerCoreDependencies): InitAppReturnV
         }), 500);
     });
 
-    // this is necessary because https://github.com/honojs/hono/issues/3483
-    // node-server serveStatic is missing absolute path support
+    // Platform-agnostic file serving
     const serveFile = async (path: string, contentType: string, c: Context) => {
         try {
-            const fullPath = `${webappDistFolder}/${path}`;
-            const fs = await import('node:fs');
-            const data = await fs.promises.readFile(fullPath, 'utf-8');
+            const content = await config.platform.assets.getContent(path);
+            if (content === null) {
+                c.status(404);
+                return '404 Not Found';
+            }
             c.status(200);
-            return data;
+            c.header('Content-Type', contentType);
+            return content;
         } catch (error) {
-            console.error('Error serving fallback file:', error);
+            console.error('Error serving file:', error);
             c.status(404);
             return '404 Not Found';
         }
@@ -120,10 +133,10 @@ export const initApp = (kvDeps: WebsocketServerCoreDependencies): InitAppReturnV
     app.use('/', serveStatic({
         root: webappDistFolder,
         path: 'index.html',
-        getContent: async (path, c) => {
+        getContent: async (_, c) => {
             return serveFile('index.html', 'text/html', c);
         },
-        onFound: (path, c) => {
+        onFound: (_, c) => {
             // c.header('Cross-Origin-Embedder-Policy',  'require-corp');
             // c.header('Cross-Origin-Opener-Policy',  'same-origin');
             c.header('Cache-Control', 'no-store, no-cache, must-revalidate');
@@ -135,7 +148,7 @@ export const initApp = (kvDeps: WebsocketServerCoreDependencies): InitAppReturnV
     app.use('/dist/:file', async (c, next) => {
         const requestedFile = c.req.param('file');
 
-        if (requestedFile.endsWith('.map') && process.env.NODE_ENV === 'production') {
+        if (requestedFile.endsWith('.map') && config.platform.environment.get('NODE_ENV') === 'production') {
             return c.text('Source map disabled', 404);
         }
 
@@ -143,10 +156,10 @@ export const initApp = (kvDeps: WebsocketServerCoreDependencies): InitAppReturnV
         return serveStatic({
             root: webappDistFolder,
             path: `/${requestedFile}`,
-            getContent: async (path, c) => {
+            getContent: async (_, c) => {
                 return serveFile(requestedFile, contentType, c);
             },
-            onFound: (path, c) => {
+            onFound: (_, c) => {
                 c.header('Content-Type', contentType);
                 c.header('Cache-Control', 'public, max-age=31536000, immutable');
             },
@@ -161,27 +174,29 @@ export const initApp = (kvDeps: WebsocketServerCoreDependencies): InitAppReturnV
     //     }
     // }));
 
-    // OTEL traces route
-    app.post('/v1/traces', async (c) => {
-        const otelHost = process.env.OTEL_HOST;
-        if (!otelHost) return c.json({message: 'No OTEL host set up via env var'});
+    // OTEL traces route (optional)
+    if (config.options?.otelEnabled !== false) {
+        app.post('/v1/traces', async (c) => {
+            const otelHost = config.platform.environment.get('OTEL_HOST');
+            if (!otelHost) return c.json({message: 'No OTEL host set up via env var'});
 
-        try {
-            const response = await fetch(`${otelHost}/v1/traces`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(await c.req.json()),
-                signal: AbortSignal.timeout(1000),
-            });
-            return c.text(await response.text());
-        } catch {
-            return c.json({message: 'Failed to contact OTEL host'});
-        }
-    });
+            try {
+                const response = await fetch(`${otelHost}/v1/traces`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(await c.req.json()),
+                    signal: AbortSignal.timeout(1000),
+                });
+                return c.text(await response.text());
+            } catch {
+                return c.json({message: 'Failed to contact OTEL host'});
+            }
+        });
+    }
 
     let storedEngine: Springboard | undefined;
 
-    const nodeAppDependencies: NodeAppDependencies = {
+    const appDependencies: AppDependencies = {
         rpc: {
             remote: rpc,
             local: undefined,
@@ -226,10 +241,10 @@ export const initApp = (kvDeps: WebsocketServerCoreDependencies): InitAppReturnV
     app.use('*', serveStatic({
         root: webappDistFolder,
         path: 'index.html',
-        getContent: async (path, c) => {
+        getContent: async (_, c) => {
             return serveFile('index.html', 'text/html', c);
         },
-        onFound: (path, c) => {
+        onFound: (_, c) => {
             // c.header('Cross-Origin-Embedder-Policy',  'require-corp');
             // c.header('Cross-Origin-Opener-Policy',  'same-origin');
             c.header('Cache-Control', 'no-store, no-cache, must-revalidate');
@@ -238,7 +253,7 @@ export const initApp = (kvDeps: WebsocketServerCoreDependencies): InitAppReturnV
         },
     }));
 
-    return {app, injectWebSocket, nodeAppDependencies};
+    return {app, injectWebSocket, appDependencies};
 };
 
 type ServerModuleCallback = (server: ServerModuleAPI) => void;

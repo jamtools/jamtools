@@ -1,0 +1,34 @@
+# Sample Cloudflare Workers configuration
+# Copy this file to your project root and customize as needed
+
+name = "springboard-worker"
+main = "dist/worker.js"
+compatibility_date = "2024-01-01"
+
+# KV namespace bindings
+[[kv_namespaces]]
+binding = "KV"
+id = "your-kv-namespace-id"
+preview_id = "your-preview-kv-namespace-id"
+
+# R2 bucket bindings (optional)
+# [[r2_buckets]]
+# binding = "BUCKET"
+# bucket_name = "your-bucket-name"
+
+# Environment variables
+[vars]
+NODE_ENV = "production"
+
+# Secrets (set using wrangler secret put)
+# WEBAPP_FOLDER = "set via wrangler secret"
+# OTEL_HOST = "set via wrangler secret"
+
+[build]
+command = "npm run build"
+
+[env.preview]
+vars = { NODE_ENV = "development" }
+
+[env.staging]
+vars = { NODE_ENV = "staging" }
