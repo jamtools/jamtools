@@ -163,18 +163,22 @@ export class PartyKitRpcClient implements Rpc {
             });
 
             if (!res.ok) {
+                let errorMessage = `HTTP ${res.status}: ${res.statusText}`;
                 try {
                     const text = await res.text();
-                    console.error('Error response for rpc request: ' + text);
+                    errorMessage += ` - ${text}`;
                 } catch (e) {
-                    console.error('Error response for rpc request');
+                    // Ignore error reading response body
                 }
+                console.error(`RPC request failed for method '${originalMethod}':`, errorMessage);
+                throw new Error(`RPC request failed: ${errorMessage}`);
             }
 
             const data = await res.json();
             return data;
         } catch (e) {
-            console.error('Error with rpc request ' + e);
+            console.error(`Error with RPC request for method '${originalMethod}':`, e);
+            throw e;
         }
     };
 }

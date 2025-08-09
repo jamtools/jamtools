@@ -15,9 +15,10 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
 
     constructor (private url: string, private rpcProtocol: 'http' | 'websocket' = 'http') {
         const params: Record<string, string> = {};
-        const keys = Array.from(new URL(this.url).searchParams.keys());
+        const parsedUrl = new URL(this.url);
+        const keys = Array.from(parsedUrl.searchParams.keys());
         for (const key of keys) {
-            params[key] = new URL(this.url).searchParams.get(key)!;
+            params[key] = parsedUrl.searchParams.get(key)!;
         }
 
         this.latestQueryParams = params;
@@ -213,18 +214,22 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
             });
 
             if (!res.ok) {
+                let errorMessage = `HTTP ${res.status}: ${res.statusText}`;
                 try {
                     const text = await res.text();
-                    console.error('Error response for rpc request: ' + text);
+                    errorMessage += ` - ${text}`;
                 } catch (e) {
-                    console.error('Error response for rpc request');
+                    // Ignore error reading response body
                 }
+                console.error(`RPC request failed for method '${originalMethod}':`, errorMessage);
+                throw new Error(`RPC request failed: ${errorMessage}`);
             }
 
             const data = await res.json();
             return data;
         } catch (e) {
-            console.error('Error with rpc request ' + e);
+            console.error(`Error with RPC request for method '${originalMethod}':`, e);
+            throw e;
         }
     };
 }

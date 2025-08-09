@@ -56,12 +56,12 @@ export const initApp = (kvDeps: WebsocketServerCoreDependencies): InitAppReturnV
         const key = c.req.param('key');
 
         if (!key) {
-            return c.text('No key provided', 400);
+            return c.json({error: 'No key provided'}, 400);
         }
 
         const value = await remoteKV.get(key);
 
-        return c.text(value);
+        return c.json(value || null);
     });
 
     app.post('/kv/set', async (c) => {
