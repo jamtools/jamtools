@@ -1,0 +1,75 @@
+// Put your custom SCSS code here
+
+svg[data-bs-theme-value="dark"], svg[data-bs-theme-value="light"] {
+  display: none !important;
+}
+
+#offcanvasNavMainLabel {
+  display: none !important;
+}
+
+.marquee {
+  --gap: .5rem;
+  display: flex;
+  overflow: hidden;
+  user-select: none;
+  gap: var(--gap);
+  padding-block: var(--space-m);
+  margin-block-start: var(--space-2xl)
+}
+
+@media(prefers-reduced-motion:reduce) {
+  .marquee-content {
+    animation-play-state: paused
+  }
+}
+
+@media (min-width: 768px) {
+  .marquee:hover .marquee-content {
+    animation-play-state: paused
+  }
+}
+
+.marquee-item {
+  display: flex;
+  align-items: center
+}
+
+.marquee-text {
+  margin-inline-start: 1rem;
+  text-wrap: nowrap
+}
+
+.marquee-content {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-around;
+  min-width: 100%;
+  gap: 3rem;
+
+  // transform: translateX(-50%);
+  // padding-left: 15vw;
+  animation: scroll 25s linear infinite;
+}
+
+@media(prefers-reduced-motion:no-preference) {
+  .marquee-content {
+    animation-name: scroll;
+    animation-duration: 2 5s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-play-state: running;
+    will-change: transform
+  }
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0)
+  }
+
+  100% {
+    transform: translateX(calc(-100% - var(--gap)))
+    // transform: translateX(calc(-100% - 15vw - var(--gap)))
+  }
+}

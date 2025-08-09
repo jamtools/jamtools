@@ -1,0 +1,42 @@
+name: Publish to NPM
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.13.2
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+            node-version: 21
+            cache: 'pnpm'
+            registry-url: https://registry.npmjs.org/
+
+      - name: Install dependencies
+        run: pnpm i
+
+      - name: Check types
+        run: npx turbo run check-types
+
+      - name: Test
+        run: npx turbo run test
+
+      - name: Build
+        run: npx turbo run build
+
+      - name: Run publish script with tag
+        run: ./scripts/run-all-folders.sh ${{ github.ref_name }} --mode npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}

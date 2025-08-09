@@ -1,7 +1,10 @@
-import {Hono} from 'hono';
+import type {Context, Hono} from 'hono';
+import type {Springboard} from 'springboard/engine/engine';
 
 export type ServerModuleAPI = {
     hono: Hono;
+    hooks: ServerHooks;
+    getEngine: () => Springboard;
 }
 
 export type ServerModuleCallback = (server: ServerModuleAPI) => void;
@@ -24,4 +27,10 @@ export type ServerModuleRegistry = {
 
 export const serverRegistry: ServerModuleRegistry = {
     registerServerModule,
+};
+
+export type RpcMiddleware = (c: Context) => Promise<object>;
+
+type ServerHooks = {
+    registerRpcMiddleware: (cb: RpcMiddleware) => void;
 };

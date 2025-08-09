@@ -1,0 +1,20 @@
+version: '3.1'
+
+services:
+  verdaccio:
+    image: verdaccio/verdaccio
+    container_name: 'verdaccio'
+    network_mode: 'host'
+#    networks:
+#      - verdaccio-network
+    environment:
+      - VERDACCIO_PORT=4873
+    ports:
+      - '4873:4873'
+    volumes:
+      - './storage:/verdaccio/storage'
+      - './config:/verdaccio/conf'
+      - './plugins:/verdaccio/plugins'
+# networks:
+#  verdaccio-network:
+#    external: true
