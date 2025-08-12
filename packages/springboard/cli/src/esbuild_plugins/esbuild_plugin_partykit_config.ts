@@ -3,7 +3,7 @@ import path from 'path';
 
 import type {Plugin} from 'esbuild';
 
-export const esbuildPluginPartykitConfig = (outDir: string): Plugin => {
+export const esbuildPluginPartykitConfig = (outDir: string, name: string): Plugin => {
     return {
         name: 'generate-partykit-config',
         setup(build) {
@@ -17,7 +17,7 @@ export const esbuildPluginPartykitConfig = (outDir: string): Plugin => {
 
                 const configContent = {
                     "$schema": "https://www.partykit.io/schema.json",
-                    "name": "partykit-test",
+                    "name": name || 'partykit-app',
                     "main": `./dist/partykit/neutral/dist/${jsFileName}`,
                     "compatibilityDate": "2025-02-26",
                     "serve": {

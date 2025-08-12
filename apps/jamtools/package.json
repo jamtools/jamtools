@@ -2,21 +2,28 @@
   "name": "jamtools",
   "version": "1.0.0",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "build-cf": "rm -rf dist && npx tsx ../../packages/springboard/cli/src/cli.ts build ./modules/index.ts --platforms cf-workers,main",
+    "deploy-cf": "npm run build-cf && npx wrangler deploy",
+    "build-pk": "rm -rf dist && npx tsx ../../packages/springboard/cli/src/cli.ts build ./modules/index.ts --platforms partykit,main --name jamtools-handraiser-app",
+    "deploy-pk": "npm run build-pk && partykit deploy --with-vars"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "react-router-dom": "catalog:",
-    "springboard": "workspace:*",
     "@jamtools/core": "workspace:*",
     "@jamtools/features": "workspace:*",
     "@springboardjs/platforms-browser": "workspace:*",
     "@springboardjs/platforms-node": "workspace:*",
-    "@springboardjs/shoelace": "workspace:*"
+    "@springboardjs/shoelace": "workspace:*",
+    "react-router-dom": "catalog:",
+    "springboard": "workspace:*"
   },
   "devDependencies": {
-    "springboard-cli": "workspace:*"
+    "partykit": "^0.0.115",
+    "springboard-cli": "workspace:*",
+    "wrangler": "4.10.0"
   }
 }

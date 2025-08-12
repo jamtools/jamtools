@@ -8,7 +8,7 @@ import {esbuildPluginPlatformInject} from './esbuild_plugins/esbuild_plugin_plat
 import {esbuildPluginHtmlGenerate} from './esbuild_plugins/esbuild_plugin_html_generate';
 import {esbuildPluginPartykitConfig} from './esbuild_plugins/esbuild_plugin_partykit_config';
 
-export type SpringboardPlatform = 'all' | 'main' | 'mobile' | 'desktop' | 'browser_offline' | 'partykit';
+export type SpringboardPlatform = 'all' | 'main' | 'mobile' | 'desktop' | 'browser_offline' | 'partykit' | 'cf-workers';
 
 type EsbuildOptions = Parameters<typeof esbuild.build>[0];
 
@@ -16,7 +16,7 @@ type BuildConfig = {
     platform: NonNullable<EsbuildOptions['platform']>;
     name?: string;
     platformEntrypoint: () => string;
-    esbuildPlugins?: (args: {outDir: string; nodeModulesParentDir: string, documentMeta?: DocumentMeta}) => any[];
+    esbuildPlugins?: (args: {outDir: string; nodeModulesParentDir: string, documentMeta?: DocumentMeta, name?: string}) => any[];
     externals?: () => string[];
     additionalFiles?: Record<string, string>;
     fingerprint?: boolean;
@@ -98,10 +98,25 @@ export const platformPartykitServerBuildConfig: BuildConfig = {
     },
     esbuildPlugins: (args) => [
         esbuildPluginPlatformInject('fetch'),
-        esbuildPluginPartykitConfig(args.outDir),
+        esbuildPluginPartykitConfig(args.outDir, args.name),
     ],
     externals: () => {
         const externals = ['@julusian/midi', 'easymidi', 'jsdom', 'node:async_hooks'];
+        return externals;
+    },
+};
+
+export const platformCfWorkersBuildConfig: BuildConfig = {
+    platform: 'neutral',
+    platformEntrypoint: () => {
+        const entrypoint = '@springboardjs/platforms-cf-workers/entrypoints/cf_worker_entrypoint.ts';
+        return entrypoint;
+    },
+    esbuildPlugins: (args) => [
+        esbuildPluginPlatformInject('fetch'),
+    ],
+    externals: () => {
+        const externals = ['@julusian/midi', 'easymidi', 'jsdom', 'node:async_hooks', 'cloudflare:workers'];
         return externals;
     },
 };
@@ -192,6 +207,7 @@ export const buildApplication = async (buildConfig: BuildConfig, options?: Appli
 
     const allImports = `import initApp from '${coreFile}';
 import '${applicationEntrypoint}';
+export * from '${coreFile}';
 export default initApp;
 `
 
@@ -235,6 +251,7 @@ export default initApp;
                 outDir: fullOutDir,
                 nodeModulesParentDir: nodeModulesParentFolder,
                 documentMeta: options?.documentMeta,
+                name: appName,
             }) || []),
         ],
         external: externals,

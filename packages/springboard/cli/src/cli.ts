@@ -6,7 +6,7 @@ import concurrently from 'concurrently';
 
 import packageJSON from '../package.json';
 
-import {buildApplication, buildServer, platformBrowserBuildConfig, platformNodeBuildConfig, platformOfflineBrowserBuildConfig, platformPartykitBrowserBuildConfig, platformPartykitServerBuildConfig, platformTauriMaestroBuildConfig, platformTauriWebviewBuildConfig, SpringboardPlatform} from './build';
+import {buildApplication, platformBrowserBuildConfig, platformCfWorkersBuildConfig, platformNodeBuildConfig, platformOfflineBrowserBuildConfig, platformPartykitBrowserBuildConfig, platformPartykitServerBuildConfig, platformTauriMaestroBuildConfig, platformTauriWebviewBuildConfig, SpringboardPlatform} from './build';
 import {esbuildPluginTransformAwaitImportToRequire} from './esbuild_plugins/esbuild_plugin_transform_await_import';
 
 program
@@ -69,7 +69,8 @@ program
     .argument('entrypoint')
     .option('-w, --watch', 'Watch for file changes')
     .option('-p, --platforms <PLATFORM>,<PLATFORM>', 'Platforms to build for')
-    .action(async (entrypoint: string, options: {watch?: boolean, offline?: boolean, platforms?: string}) => {
+    .option('-n, --name <NAME>', 'Name for the application')
+    .action(async (entrypoint: string, options: {watch?: boolean, offline?: boolean, platforms?: string, name?: string}) => {
         let platformToBuild = process.env.SPRINGBOARD_PLATFORM_VARIANT || options.platforms as SpringboardPlatform;
         if (!platformToBuild) {
             platformToBuild = 'main';
@@ -95,11 +96,13 @@ program
             await buildApplication(platformBrowserBuildConfig, {
                 applicationEntrypoint,
                 watch: options.watch,
+                name: options.name,
             });
 
             await buildApplication(platformNodeBuildConfig, {
                 applicationEntrypoint,
                 watch: options.watch,
+                name: options.name,
             });
 
             // await buildServer({
@@ -115,6 +118,7 @@ program
                 applicationEntrypoint,
                 watch: options.watch,
                 esbuildOutDir: 'browser_offline',
+                name: options.name,
             });
         }
 
@@ -134,21 +138,35 @@ program
                         'process.env.RUN_SIDECAR_FROM_WEBVIEW': `${process.env.RUN_SIDECAR_FROM_WEBVIEW && process.env.RUN_SIDECAR_FROM_WEBVIEW !== 'false'}`,
                     };
                 },
+                name: options.name,
             });
 
             await buildApplication(platformTauriMaestroBuildConfig, {
                 applicationEntrypoint,
                 watch: options.watch,
                 esbuildOutDir: './tauri',
+                name: options.name,
             });
 
-            await buildServer({
+            // await buildServer({
+            //     watch: options.watch,
+            //     applicationDistPath: `${cwd}/dist/tauri/node/dist/dynamic-entry.js`,
+            //     esbuildOutDir: './tauri',
+            //     editBuildOptions: (buildOptions) => {
+            //         buildOptions.plugins!.push(esbuildPluginTransformAwaitImportToRequire);
+            //     }
+            // });
+        }
+
+        if (
+            platformsToBuild.has('all') ||
+            platformsToBuild.has('cf-workers')
+        ) {
+            await buildApplication(platformCfWorkersBuildConfig, {
+                applicationEntrypoint,
                 watch: options.watch,
-                applicationDistPath: `${cwd}/dist/tauri/node/dist/dynamic-entry.js`,
-                esbuildOutDir: './tauri',
-                editBuildOptions: (buildOptions) => {
-                    buildOptions.plugins!.push(esbuildPluginTransformAwaitImportToRequire);
-                }
+                esbuildOutDir: 'cf-workers',
+                name: options.name,
             });
         }
 
@@ -160,12 +178,14 @@ program
                 applicationEntrypoint,
                 watch: options.watch,
                 esbuildOutDir: 'partykit',
+                name: options.name,
             });
 
             await buildApplication(platformPartykitServerBuildConfig, {
                 applicationEntrypoint,
                 watch: options.watch,
                 esbuildOutDir: 'partykit',
+                name: options.name,
             });
         }
 

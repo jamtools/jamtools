@@ -20,16 +20,16 @@ import {Data} from 'hono/dist/types/context';
 type InitAppReturnValue = {
     app: Hono;
     serverAppDependencies: ServerAppDependencies;
-    wsAdapterInstance: AdapterInstance;
+    // wsAdapterInstance: AdapterInstance;
     // websocketHooks: ReturnType<CrossWsJsonRpcServer['createWebSocketHooks']>;
 };
 
 type InitServerAppArgs = {
     remoteKV: KVStore;
     userAgentKV: KVStore;
-    crossWsAdapter: AdapterFactory;
     serveStaticFile: (c: Context, fileName: string, headers: Record<string, string>) => Promise<Response>;
     getEnvValue: (name: string) => string | undefined;
+    broadcastMessage: (message: string) => void;
 };
 
 type AdapterFactory = (hooks: Partial<Hooks>) => AdapterInstance;
@@ -48,24 +48,27 @@ export const initApp = (initArgs: InitServerAppArgs): InitAppReturnValue => {
     //     rpcMiddlewares,
     // });
 
-    const wsServer = initArgs.crossWsAdapter({
-        open: peer => {
-            peer.subscribe('event');
-        },
-        close: peer => {
-            peer.unsubscribe('event');
-        },
-    });
-    const broadcastMessage = (message: string) => {
-        wsServer.publish('event', message);
-    }
+    // const wsServer = initArgs.crossWsAdapter({
+    //     open: peer => {
+    //         console.log(`new peer ${peer.id}`)
+    //         peer.subscribe('event');
+    //     },
+    //     close: peer => {
+    //         console.log(`closed peer ${peer.id}`)
+    //         peer.unsubscribe('event');
+    //     },
+    // });
+    // const broadcastMessage = (message: string) => {
+    //     console.log(`sending message to ${wsServer.peers.size} peers`);
+    //     wsServer.publish('event', message);
+    // }
 
     const remoteKV = initArgs.remoteKV;
     const userAgentKV = initArgs.userAgentKV;
 
     const rpc = new ServerJsonRpcClientAndServer({
         broadcastMessage: (message) => {
-            return broadcastMessage(message);
+            return initArgs.broadcastMessage(message);
         },
     });
 
@@ -127,7 +130,7 @@ export const initApp = (initArgs: InitServerAppArgs): InitAppReturnValue => {
     });
 
     app.get('/kv/get', async (c) => {
-        const key = c.req.param('key');
+        const key = c.req.query('key');
 
         if (!key) {
             return c.json({error: 'No key provided'}, 400);
@@ -341,7 +344,7 @@ export const initApp = (initArgs: InitServerAppArgs): InitAppReturnValue => {
         return initArgs.serveStaticFile(c, 'index.html', headers);
     });
 
-    return {app, serverAppDependencies, wsAdapterInstance: wsServer};
+    return {app, serverAppDependencies};
 };
 
 type ServerModuleCallback = (server: ServerModuleAPI) => void;
