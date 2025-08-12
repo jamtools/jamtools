@@ -98,12 +98,10 @@ export default class Server implements Party.Server {
 }
 
 export const startSpringboardApp = async (deps: NodeAppDependencies): Promise<Springboard> => {
-    const mockDeps = makeMockCoreDependencies({store: {}});
     const coreDeps: CoreDependencies = {
         log: console.log,
         showError: console.error,
         storage: deps.storage,
-        files: mockDeps.files,
         isMaestro: () => true,
         rpc: deps.rpc,
     };

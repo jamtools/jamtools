@@ -20,6 +20,7 @@ import {Data} from 'hono/dist/types/context';
 type InitAppReturnValue = {
     app: Hono;
     serverAppDependencies: ServerAppDependencies;
+    injectResources: (args: InjectResourcesArgs) => void;
     // wsAdapterInstance: AdapterInstance;
     // websocketHooks: ReturnType<CrossWsJsonRpcServer['createWebSocketHooks']>;
 };
@@ -27,9 +28,13 @@ type InitAppReturnValue = {
 type InitServerAppArgs = {
     remoteKV: KVStore;
     userAgentKV: KVStore;
+    broadcastMessage: (message: string) => void;
+};
+
+type InjectResourcesArgs = {
+    engine: Springboard;
     serveStaticFile: (c: Context, fileName: string, headers: Record<string, string>) => Promise<Response>;
     getEnvValue: (name: string) => string | undefined;
-    broadcastMessage: (message: string) => void;
 };
 
 type AdapterFactory = (hooks: Partial<Hooks>) => AdapterInstance;
@@ -210,20 +215,31 @@ export const initApp = (initArgs: InitServerAppArgs): InitAppReturnValue => {
     //     },
     // }));
 
-    app.use('/', c => {
+    // Route handlers that require fetch context will be configured in injectResources
+    let serveStaticFileFn: ((c: Context, fileName: string, headers: Record<string, string>) => Promise<Response>) | undefined;
+    let getEnvValueFn: ((name: string) => string | undefined) | undefined;
+
+    app.use('/', async (c) => {
+        if (!serveStaticFileFn) {
+            return c.text('Server not fully initialized', 500);
+        }
         const headers = {
             'Cache-Control': 'no-store, no-cache, must-revalidate',
             'Pragma': 'no-cache',
             'Expires': '0',
             'Content-Type': 'text/html'
         };
-        return initArgs.serveStaticFile(c, 'index.html', headers);
+        return serveStaticFileFn(c, 'index.html', headers);
     });
 
     app.use('/dist/:file', async (c, next) => {
+        if (!serveStaticFileFn || !getEnvValueFn) {
+            return c.text('Server not fully initialized', 500);
+        }
+        
         const requestedFile = c.req.param('file');
 
-        if (requestedFile.endsWith('.map') && initArgs.getEnvValue('NODE_ENV') === 'production') {
+        if (requestedFile.endsWith('.map') && getEnvValueFn('NODE_ENV') === 'production') {
             return c.text('Source map disabled', 404);
         }
 
@@ -233,7 +249,7 @@ export const initApp = (initArgs: InitServerAppArgs): InitAppReturnValue => {
             'Cache-Control': 'public, max-age=31536000, immutable'
         };
 
-        return initArgs.serveStaticFile(c, requestedFile, headers);
+        return serveStaticFileFn(c, requestedFile, headers);
 
         // return serveStatic({
         //     root: webappDistFolder,
@@ -285,13 +301,6 @@ export const initApp = (initArgs: InitServerAppArgs): InitAppReturnValue => {
             remote: remoteKV,
             userAgent: userAgentKV,
         },
-        injectEngine: (engine: Springboard) => {
-            if (storedEngine) {
-                throw new Error('Engine already injected');
-            }
-
-            storedEngine = engine;
-        },
     };
 
     const makeServerModuleAPI = (): ServerModuleAPI => {
@@ -334,6 +343,9 @@ export const initApp = (initArgs: InitServerAppArgs): InitAppReturnValue => {
     // }));
 
     app.use('*', async (c) => {
+        if (!serveStaticFileFn) {
+            return c.text('Server not fully initialized', 500);
+        }
         const headers = {
             'Cache-Control': 'no-store, no-cache, must-revalidate',
             'Pragma': 'no-cache',
@@ -341,10 +353,20 @@ export const initApp = (initArgs: InitServerAppArgs): InitAppReturnValue => {
             'Content-Type': 'text/html'
         };
 
-        return initArgs.serveStaticFile(c, 'index.html', headers);
+        return serveStaticFileFn(c, 'index.html', headers);
     });
 
-    return {app, serverAppDependencies};
+    const injectResources = (args: InjectResourcesArgs) => {
+        if (storedEngine) {
+            throw new Error('Resources already injected');
+        }
+
+        storedEngine = args.engine;
+        serveStaticFileFn = args.serveStaticFile;
+        getEnvValueFn = args.getEnvValue;
+    };
+
+    return {app, serverAppDependencies, injectResources};
 };
 
 type ServerModuleCallback = (server: ServerModuleAPI) => void;

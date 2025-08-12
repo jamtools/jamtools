@@ -1,7 +1,6 @@
 import {Hono} from 'hono';
 import {cors} from 'hono/cors';
 
-import {ServerAppDependencies} from 'springboard-server/src/types/server_app_dependencies';
 import {ServerJsonRpcClientAndServer} from 'springboard-server/src/services/server_json_rpc';
 // import {NodeAppDependencies} from '@springboardjs/platforms-node/entrypoints/main';
 // import {NodeLocalJsonRpcClientAndServer} from '@springboardjs/platforms-node/services/node_local_json_rpc';
@@ -19,6 +18,12 @@ export type PartykitKvForHttp = {
     getAll: () => Promise<Record<string, unknown>>;
     set: (key: string, value: unknown) => Promise<void>;
 }
+
+import {CoreDependencies} from 'springboard/types/module_types';
+
+export type ServerAppDependencies = Pick<CoreDependencies, 'rpc' | 'storage'> & Partial<CoreDependencies> & {
+    injectEngine: (engine: Springboard) => void;
+};
 
 type InitAppReturnValue = {
     app: Hono;

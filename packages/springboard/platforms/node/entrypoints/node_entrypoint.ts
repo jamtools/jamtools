@@ -17,34 +17,24 @@ setTimeout(async () => {
 
     const nodeKvDeps = await makeWebsocketServerCoreDependenciesWithSqlite();
 
-    const {app, serverAppDependencies, wsAdapterInstance} = initApp({
-        crossWsAdapter: hooks => crosswsNode({hooks}),
-        remoteKV: nodeKvDeps.kvStoreFromKysely,
-        userAgentKV: new LocalJsonNodeKVStoreService('userAgent'),
-        serveStaticFile: async (c, fileName, headers) => {
-            try {
-                const fullPath = `${webappDistFolder}/${fileName}`;
-                const fs = await import('node:fs');
-                const data = await fs.promises.readFile(fullPath, 'utf-8');
-                c.status(200);
-
-                if (headers) {
-                    Object.entries(headers).forEach(([key, value]) => {
-                        c.header(key, value);
-                    });
-                }
-
-                return c.body(data);
-            } catch (error) {
-                console.error('Error serving file:', error);
-                c.status(404);
-                return c.text('404 Not found');
-            }
-        },
-        getEnvValue: name => process.env[name],
+    const wsNode = crosswsNode({
+        hooks: {
+            open: peer => {
+                peer.subscribe('event');
+            },
+            close: peer => {
+                peer.unsubscribe('event');
+            },
+        }
     });
 
-    const wsNode = wsAdapterInstance as NodeAdapter;
+    const {app, serverAppDependencies, injectResources} = initApp({
+        broadcastMessage: (message) => {
+            return wsNode.publish('event', message);
+        },
+        remoteKV: nodeKvDeps.kvStoreFromKysely,
+        userAgentKV: new LocalJsonNodeKVStoreService('userAgent'),
+    });
 
     const port = process.env.PORT || '1337';
 
@@ -78,9 +68,32 @@ setTimeout(async () => {
 
     const engine = new Springboard(coreDeps, extraDeps);
 
-    await engine.initialize();
+    injectResources({
+        engine,
+        serveStaticFile: async (c, fileName, headers) => {
+            try {
+                const fullPath = `${webappDistFolder}/${fileName}`;
+                const fs = await import('node:fs');
+                const data = await fs.promises.readFile(fullPath, 'utf-8');
+                c.status(200);
 
-    serverAppDependencies.injectEngine(engine);
+                if (headers) {
+                    Object.entries(headers).forEach(([key, value]) => {
+                        c.header(key, value);
+                    });
+                }
+
+                return c.body(data);
+            } catch (error) {
+                console.error('Error serving file:', error);
+                c.status(404);
+                return c.text('404 Not found');
+            }
+        },
+        getEnvValue: name => process.env[name],
+    });
+
+    await engine.initialize();
 
     return engine;
 });
