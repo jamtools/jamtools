@@ -1,8 +1,10 @@
 import {Hono} from 'hono';
 import {cors} from 'hono/cors';
 
-import {NodeAppDependencies} from '@springboardjs/platforms-node/entrypoints/main';
-import {NodeLocalJsonRpcClientAndServer} from '@springboardjs/platforms-node/services/node_local_json_rpc';
+import {ServerAppDependencies} from 'springboard-server/src/types/server_app_dependencies';
+import {ServerJsonRpcClientAndServer} from 'springboard-server/src/services/server_json_rpc';
+// import {NodeAppDependencies} from '@springboardjs/platforms-node/entrypoints/main';
+// import {NodeLocalJsonRpcClientAndServer} from '@springboardjs/platforms-node/services/node_local_json_rpc';
 
 import {Springboard} from 'springboard/engine/engine';
 import {makeMockCoreDependencies} from 'springboard/test/mock_core_dependencies';
@@ -20,7 +22,7 @@ export type PartykitKvForHttp = {
 
 type InitAppReturnValue = {
     app: Hono;
-    nodeAppDependencies: NodeAppDependencies;
+    nodeAppDependencies: ServerAppDependencies;
     rpcService: PartykitJsonRpcServer;
 };
 
@@ -76,15 +78,15 @@ export const initApp = (coreDeps: InitArgs): InitAppReturnValue => {
         }), 500);
     });
 
-    const rpc = new NodeLocalJsonRpcClientAndServer({
+    const rpc = new ServerJsonRpcClientAndServer({
         broadcastMessage: (message) => {
             return rpcService.broadcastMessage(message);
         },
     });
 
     const rpcService = new PartykitJsonRpcServer({
-        processRequest: async (message) => {
-            return rpc!.processRequest(message);
+        processRequest: async (message, middlewareResult: unknown) => {
+            return rpc!.processRequest(message, middlewareResult);
         },
         rpcMiddlewares,
     }, coreDeps.room);
@@ -95,7 +97,7 @@ export const initApp = (coreDeps: InitArgs): InitAppReturnValue => {
 
     let storedEngine: Springboard | undefined;
 
-    const nodeAppDependencies: NodeAppDependencies = {
+    const nodeAppDependencies: ServerAppDependencies = {
         rpc: {
             remote: rpc,
         },

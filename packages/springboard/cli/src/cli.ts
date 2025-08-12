@@ -43,9 +43,9 @@ program
             watch: true,
         });
 
-        await buildServer({
-            watch: true,
-        });
+        // await buildServer({
+        //     watch: true,
+        // });
 
         const nodeArgs = '--watch --watch-preserve-output';
 
@@ -53,7 +53,7 @@ program
 
         concurrently(
             [
-                {command: `node ${nodeArgs} dist/server/dist/local-server.cjs`, name: 'Server', prefixColor: 'blue'},
+                {command: `node ${nodeArgs} dist/node/dist/index.js`, name: 'Server', prefixColor: 'blue'},
             ],
             {
                 prefix: 'name',
@@ -102,9 +102,9 @@ program
                 watch: options.watch,
             });
 
-            await buildServer({
-                watch: options.watch,
-            });
+            // await buildServer({
+            //     watch: options.watch,
+            // });
         }
 
         if (

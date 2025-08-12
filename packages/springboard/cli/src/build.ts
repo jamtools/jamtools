@@ -74,9 +74,7 @@ export const platformOfflineBrowserBuildConfig: BuildConfig = {
 export const platformNodeBuildConfig: BuildConfig = {
     platform: 'node',
     platformEntrypoint: () => {
-        // const entrypoint = '@springboardjs/platforms-node/entrypoints/node_main_entrypoint.ts';
-        const entrypoint = '@springboardjs/platforms-node/entrypoints/node_flexible_entrypoint.ts';
-
+        const entrypoint = '@springboardjs/platforms-node/entrypoints/node_entrypoint.ts';
         return entrypoint;
     },
     esbuildPlugins: () => [
@@ -311,7 +309,6 @@ export const buildServer = async (options?: ServerBuildOptions) => {
     }
 
     const outFile = path.join(fullOutDir, 'local-server.cjs');
-
 
     let coreFile = options?.coreFile || 'springboard-server/src/entrypoints/local-server.entrypoint.ts';
     let applicationDistPath = options?.applicationDistPath || '../../node/dist/dynamic-entry.js';
