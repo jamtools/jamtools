@@ -8,7 +8,7 @@ import {ServerAppDependencies} from './types/server_app_dependencies';
 // import {LocalJsonNodeKVStoreService} from '@springboardjs/platforms-node/services/node_kvstore_service';
 // import {NodeLocalJsonRpcClientAndServer} from '@springboardjs/platforms-node/services/node_local_json_rpc';
 
-import {CrossWsJsonRpcServer} from './services/crossws_json_rpc';
+import {createCommonWebSocketHooks} from './services/crossws_json_rpc';
 import {WebsocketServerCoreDependencies} from '@springboardjs/platforms-node/services/ws_server_core_dependencies';
 import {RpcMiddleware, ServerModuleAPI, serverRegistry} from './register';
 import {Springboard} from 'springboard/engine/engine';
@@ -16,13 +16,13 @@ import {KVStore} from 'springboard/types/module_types';
 import {Adapter, AdapterInstance, Hooks} from 'crossws';
 import {ServerJsonRpcClientAndServer} from './services/server_json_rpc';
 import {Data} from 'hono/dist/types/context';
+import type {Peer} from 'crossws';
 
 type InitAppReturnValue = {
     app: Hono;
     serverAppDependencies: ServerAppDependencies;
     injectResources: (args: InjectResourcesArgs) => void;
-    // wsAdapterInstance: AdapterInstance;
-    // websocketHooks: ReturnType<CrossWsJsonRpcServer['createWebSocketHooks']>;
+    createWebSocketHooks: (enableRpc?: boolean) => ReturnType<typeof createCommonWebSocketHooks>;
 };
 
 type InitServerAppArgs = {
@@ -118,6 +118,16 @@ export const initApp = (initArgs: InitServerAppArgs): InitAppReturnValue => {
         //         resolve(response);
         //     });
         // });
+    };
+
+    const processWebSocketRpcMessage = async (message: string, peer: Peer) => {
+        // Create a minimal context object for middleware compatibility
+        const minimalContext = {
+            req: peer.request || { url: '/' },
+        } as unknown as Context;
+
+        const response = await processRequestWithMiddleware(rpcMiddlewares, minimalContext, message);
+        return response;
     };
 
     // const webappFolder = process.env.WEBAPP_FOLDER || './dist/browser';
@@ -366,7 +376,15 @@ export const initApp = (initArgs: InitServerAppArgs): InitAppReturnValue => {
         getEnvValueFn = args.getEnvValue;
     };
 
-    return {app, serverAppDependencies, injectResources};
+    const createWebSocketHooks = (enableRpc?: boolean) => {
+        if (enableRpc) {
+            return createCommonWebSocketHooks(processWebSocketRpcMessage);
+        } else {
+            return createCommonWebSocketHooks();
+        }
+    };
+
+    return {app, serverAppDependencies, injectResources, createWebSocketHooks};
 };
 
 type ServerModuleCallback = (server: ServerModuleAPI) => void;

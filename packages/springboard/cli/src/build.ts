@@ -266,6 +266,8 @@ export default initApp;
             'process.env.DEBUG_LOG_PERFORMANCE': `"${process.env.DEBUG_LOG_PERFORMANCE || ''}"`,
             'process.env.RELOAD_CSS': `"${options?.dev?.reloadCss || ''}"`,
             'process.env.RELOAD_JS': `"${options?.dev?.reloadJs || ''}"`,
+            ...getPublicEnvVarsDefine(),
+            'import.meta.env': '{}', // fallback to make missing `import.meta.env` vars at compile time to be individually be "undefined" at runtime
         },
     };
 
@@ -297,6 +299,18 @@ export default initApp;
     if (shouldOutputMetaFile) {
         await fs.promises.writeFile('esbuild_meta.json', JSON.stringify(result.metafile));
     }
+};
+
+const getPublicEnvVarsDefine = () => {
+    const publicEnvVars: Record<string, string> = {};
+
+    for (const [key, value] of Object.entries(process.env)) {
+        if (key.startsWith('PUBLIC_')) {
+            publicEnvVars[`import.meta.env.${key}`] = `"${value || ''}"`;
+        }
+    }
+
+    return publicEnvVars;
 };
 
 const findNodeModulesParentFolder = async () => {

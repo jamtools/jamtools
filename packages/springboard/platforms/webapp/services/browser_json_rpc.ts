@@ -14,6 +14,12 @@ export class BrowserJsonRpcClientAndServer implements Rpc {
     public role = 'client' as const;
 
     constructor (private url: string, private rpcProtocol: 'http' | 'websocket' = 'http') {
+        // @ts-ignore
+        const shouldChangeToWs  = import.meta.env.PUBLIC_USE_WEBSOCKETS_FOR_RPC === 'true';
+        if (shouldChangeToWs) {
+            this.rpcProtocol = 'websocket';
+        }
+
         const params: Record<string, string> = {};
         const parsedUrl = new URL(this.url);
         const keys = Array.from(parsedUrl.searchParams.keys());

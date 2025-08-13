@@ -17,23 +17,23 @@ setTimeout(async () => {
 
     const nodeKvDeps = await makeWebsocketServerCoreDependenciesWithSqlite();
 
-    const wsNode = crosswsNode({
-        hooks: {
-            open: peer => {
-                peer.subscribe('event');
-            },
-            close: peer => {
-                peer.unsubscribe('event');
-            },
-        }
-    });
+    // Check if WebSocket RPC is enabled
+    const useWebSocketsForRpc = process.env.USE_WEBSOCKETS_FOR_RPC === 'true';
 
-    const {app, serverAppDependencies, injectResources} = initApp({
+    // Create placeholder for ws
+    let wsNode: ReturnType<typeof crosswsNode>;
+
+    const {app, serverAppDependencies, injectResources, createWebSocketHooks} = initApp({
         broadcastMessage: (message) => {
             return wsNode.publish('event', message);
         },
         remoteKV: nodeKvDeps.kvStoreFromKysely,
         userAgentKV: new LocalJsonNodeKVStoreService('userAgent'),
+    });
+
+    // Now create the actual WebSocket instance with the hooks
+    wsNode = crosswsNode({
+        hooks: createWebSocketHooks(useWebSocketsForRpc)
     });
 
     const port = process.env.PORT || '1337';
