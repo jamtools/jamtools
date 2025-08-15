@@ -1,0 +1,13 @@
+{
+  "name": "jamtools-docs",
+  "version": "1.0.0",
+  "description": "Jam Tools documentation",
+  "scripts": {
+    "dev": "undocs dev",
+    "build": "undocs build",
+    "preview": "undocs preview"
+  },
+  "dependencies": {
+    "undocs": "^0.1.0"
+  }
+}
