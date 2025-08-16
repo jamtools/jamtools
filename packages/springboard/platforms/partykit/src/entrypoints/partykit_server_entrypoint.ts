@@ -3,31 +3,30 @@ import type * as Party from 'partykit/server';
 import {Hono} from 'hono';
 
 import springboard from 'springboard';
-import type {NodeAppDependencies} from '@springboardjs/platforms-node/entrypoints/main';
 import {makeMockCoreDependencies} from 'springboard/test/mock_core_dependencies';
 import {Springboard} from 'springboard/engine/engine';
 import {CoreDependencies, KVStore} from 'springboard/types/module_types';
 
-import {initApp, PartykitKvForHttp} from '../partykit_hono_app';
+import {initApp, PartykitKvForHttp, ServerAppDependencies} from '../partykit_hono_app';
 
 import {PartykitJsonRpcServer} from '../services/partykit_rpc_server';
 
 export default class Server implements Party.Server {
     private app: Hono;
-    private nodeAppDependencies: NodeAppDependencies;
+    private serverAppDependencies: ServerAppDependencies;
     private springboardApp!: Springboard;
     private rpcService: PartykitJsonRpcServer;
 
     private kv: Record<string, string> = {};
 
     constructor(readonly room: Party.Room) {
-        const {app, nodeAppDependencies, rpcService} = initApp({
+        const {app, serverAppDependencies, rpcService} = initApp({
             kvForHttp: this.makeKvStoreForHttp(),
             room,
         });
 
         this.app = app;
-        this.nodeAppDependencies = nodeAppDependencies;
+        this.serverAppDependencies = serverAppDependencies;
         this.rpcService = rpcService;
     }
 
@@ -41,11 +40,10 @@ export default class Server implements Party.Server {
             this.kv[key] = value as string;
         }
 
-        this.springboardApp = await startSpringboardApp(this.nodeAppDependencies);
+        this.springboardApp = await startSpringboardApp(this.serverAppDependencies);
     }
 
     static onFetch(req: Party.Request, lobby: Party.FetchLobby, ctx: Party.ExecutionContext) {
-        return lobby.assets.fetch('/dist/index.html');
     }
 
     async onRequest(req: Party.Request) {
@@ -97,7 +95,7 @@ export default class Server implements Party.Server {
     };
 }
 
-export const startSpringboardApp = async (deps: NodeAppDependencies): Promise<Springboard> => {
+export const startSpringboardApp = async (deps: ServerAppDependencies): Promise<Springboard> => {
     const coreDeps: CoreDependencies = {
         log: console.log,
         showError: console.error,

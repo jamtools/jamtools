@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build-cf": "rm -rf dist && npx tsx ../../packages/springboard/cli/src/cli.ts build ./modules/index.ts --platforms cf-workers,main",
-    "deploy-cf": "npm run build-cf && npx wrangler deploy --with-vars",
-    "build-pk": "rm -rf dist && npx tsx ../../packages/springboard/cli/src/cli.ts build ./modules/index.ts --platforms partykit,main --name jamtools-handraiser-app",
+    "build-cf": "rm -rf dist && PUBLIC_USE_WEBSOCKETS_FOR_RPC=true npx tsx ../../packages/springboard/cli/src/cli.ts build ./modules/index.ts --platforms cf-workers,main",
+    "deploy-cf": "npm run build-cf && npx wrangler deploy",
+    "build-pk": "rm -rf dist && PUBLIC_USE_WEBSOCKETS_FOR_RPC=true npx tsx ../../packages/springboard/cli/src/cli.ts build ./modules/index.ts --platforms partykit,main --name jamtools-handraiser-app",
     "deploy-pk": "npm run build-pk && partykit deploy --with-vars"
   },
   "keywords": [],

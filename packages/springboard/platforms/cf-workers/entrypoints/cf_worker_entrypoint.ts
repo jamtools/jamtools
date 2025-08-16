@@ -1,4 +1,4 @@
-import {DurableObject} from "cloudflare:workers";
+import {DurableObject} from 'cloudflare:workers';
 
 import {CoreDependencies} from 'springboard/types/module_types';
 import {initApp} from '../../../server/src/hono_app';
@@ -11,10 +11,10 @@ const mockDeps = makeMockCoreDependencies({store: {}});
 const remoteKV = mockDeps.storage.remote;
 const userAgentKV = mockDeps.storage.userAgent;
 
-// @ts-ignore
+// @ts-ignore import.meta.env usage
 const USE_WEBSOCKETS_FOR_RPC = import.meta.env.PUBLIC_USE_WEBSOCKETS_FOR_RPC === 'true';
 
-// We need to create a placeholder for ws first
+// eslint-disable-next-line prefer-const
 let ws: ReturnType<typeof crosswsCf>;
 
 const {app, serverAppDependencies, injectResources, createWebSocketHooks} = initApp({
@@ -79,7 +79,6 @@ const initializeWithResources = async (environment: Env) => {
         getEnvValue,
     });
 
-    // @ts-ignore
     await engine.initialize();
 };
 
@@ -92,10 +91,10 @@ export default {
             initialized = true;
         }
 
-        const {pathname} = new URL(request.url)
+        const {pathname} = new URL(request.url);
 
         if (request.headers.get('upgrade') === 'websocket' && pathname === '/ws') {
-            return ws.handleUpgrade(request, env, ctx)
+            return ws.handleUpgrade(request, env, ctx);
         }
 
         return app.fetch(request, env, ctx);
@@ -103,28 +102,28 @@ export default {
 } satisfies ExportedHandler<Env>;
 
 export class $DurableObject extends DurableObject {
-    // @ts-ignore
+    // @ts-ignore vendor-provided code. missing types
     constructor(state, env) {
         super(state, env);
         ws.handleDurableInit(this, state, env);
     }
 
-    // @ts-ignore
+    // @ts-ignore vendor-provided code. missing types
     fetch(request) {
         return ws.handleDurableUpgrade(this, request);
     }
 
-    // @ts-ignore
+    // @ts-ignore vendor-provided code. missing types
     webSocketMessage(client, message) {
         return ws.handleDurableMessage(this, client, message);
     }
 
-    // @ts-ignore
+    // @ts-ignore vendor-provided code. missing types
     webSocketPublish(topic, message, opts) {
         return ws.handleDurablePublish(this, topic, message, opts);
     }
 
-    // @ts-ignore
+    // @ts-ignore vendor-provided code. missing types
     webSocketClose(client, code, reason, wasClean) {
         return ws.handleDurableClose(this, client, code, reason, wasClean);
     }

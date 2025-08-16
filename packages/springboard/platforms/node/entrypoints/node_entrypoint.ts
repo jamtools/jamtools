@@ -17,10 +17,9 @@ setTimeout(async () => {
 
     const nodeKvDeps = await makeWebsocketServerCoreDependenciesWithSqlite();
 
-    // Check if WebSocket RPC is enabled
     const useWebSocketsForRpc = process.env.USE_WEBSOCKETS_FOR_RPC === 'true';
 
-    // Create placeholder for ws
+    // eslint-disable-next-line prefer-const
     let wsNode: ReturnType<typeof crosswsNode>;
 
     const {app, serverAppDependencies, injectResources, createWebSocketHooks} = initApp({
@@ -31,7 +30,6 @@ setTimeout(async () => {
         userAgentKV: new LocalJsonNodeKVStoreService('userAgent'),
     });
 
-    // Now create the actual WebSocket instance with the hooks
     wsNode = crosswsNode({
         hooks: createWebSocketHooks(useWebSocketsForRpc)
     });

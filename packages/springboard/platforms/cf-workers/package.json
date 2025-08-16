@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "check-types": "tsc --noEmit",
+    "lint": "eslint --ext ts --ext tsx ./",
+    "fix": "npm run lint -- --fix"
   },
   "keywords": [],
   "author": "",
@@ -15,5 +17,8 @@
   },
   "dependencies": {
     "crossws": "catalog:"
+  },
+  "config": {
+    "dir": "../../../../configs"
   }
 }

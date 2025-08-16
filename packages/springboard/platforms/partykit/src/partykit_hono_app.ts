@@ -2,7 +2,6 @@ import {Hono} from 'hono';
 import {cors} from 'hono/cors';
 
 import {ServerJsonRpcClientAndServer} from 'springboard-server/src/services/server_json_rpc';
-// import {NodeAppDependencies} from '@springboardjs/platforms-node/entrypoints/main';
 // import {NodeLocalJsonRpcClientAndServer} from '@springboardjs/platforms-node/services/node_local_json_rpc';
 
 import {Springboard} from 'springboard/engine/engine';
@@ -27,7 +26,7 @@ export type ServerAppDependencies = Pick<CoreDependencies, 'rpc' | 'storage'> & 
 
 type InitAppReturnValue = {
     app: Hono;
-    nodeAppDependencies: ServerAppDependencies;
+    serverAppDependencies: ServerAppDependencies;
     rpcService: PartykitJsonRpcServer;
 };
 
@@ -102,7 +101,7 @@ export const initApp = (coreDeps: InitArgs): InitAppReturnValue => {
 
     let storedEngine: Springboard | undefined;
 
-    const nodeAppDependencies: ServerAppDependencies = {
+    const serverAppDependencies: ServerAppDependencies = {
         rpc: {
             remote: rpc,
         },
@@ -142,7 +141,7 @@ export const initApp = (coreDeps: InitArgs): InitAppReturnValue => {
         call(makeServerModuleAPI());
     }
 
-    return {app, nodeAppDependencies, rpcService};
+    return {app, serverAppDependencies: serverAppDependencies, rpcService};
 };
 
 type ServerModuleCallback = (server: ServerModuleAPI) => void;

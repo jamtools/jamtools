@@ -98,7 +98,7 @@ export const platformPartykitServerBuildConfig: BuildConfig = {
     },
     esbuildPlugins: (args) => [
         esbuildPluginPlatformInject('fetch'),
-        esbuildPluginPartykitConfig(args.outDir, args.name),
+        esbuildPluginPartykitConfig(args.outDir, args.name || 'partykit-app'),
     ],
     externals: () => {
         const externals = ['@julusian/midi', 'easymidi', 'jsdom', 'node:async_hooks'];

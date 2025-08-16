@@ -1,0 +1,10 @@
+{
+  "extends": "../../../../tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "springboard/*": ["./*"],
+      "springboard": ["src/index.ts"],
+    },
+    "baseUrl": "."
+  }
+}
