@@ -23,6 +23,8 @@ seo:
     canonical: "" # custom canonical URL (optional)
     robots: "" # custom robot tags (optional)
 ---
+
+The Springboard CLI is installed in each project as a dev dependency [\`springboard-cli\`](https://www.npmjs.com/package/springboard-cli), and can be run with \`npx sb\` after installation.
 `);
 
     lines.push('');

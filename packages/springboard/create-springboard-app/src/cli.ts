@@ -50,13 +50,11 @@ program
 
     const jamToolsPackage = template === 'jamtools' ? `@jamtools/core@${version}` : '';
 
-    // TODO: we should print out which packages we are installing
-
-    const installDepsCommand = `${packageManager} install springboard@${version} springboard-cli@${version} ${jamToolsPackage} react react-dom react-router@6`;
+    const installDepsCommand = `${packageManager} install springboard@${version} springboard-server@${version} @springboardjs/platforms-node@${version} @springboardjs/platforms-browser@${version} ${jamToolsPackage} react react-dom react-router@6`;
     console.log(installDepsCommand);
     execSync(installDepsCommand, {cwd: process.cwd(), stdio: 'inherit'});
 
-    const installDevDepsCommand = `${packageManager} install -D typescript @types/node @types/react @types/react-dom`;
+    const installDevDepsCommand = `${packageManager} install -D springboard-cli@${version} typescript @types/node @types/react @types/react-dom`;
     console.log(installDevDepsCommand);
     execSync(installDevDepsCommand, {cwd: process.cwd(), stdio: 'inherit'});
 

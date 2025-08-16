@@ -11,6 +11,7 @@
     "build-saas": "turbo run build-saas",
     "dev": "npm run dev-dev --prefix packages/springboard/cli",
     "docs": "cd docs && docker compose up",
+    "build-docs-for-pages": "cd doks && npm i && npm run build",
     "dev-without-node": "turbo run dev --filter=\"!./apps/jamtools/node\"",
     "debug-node": "npm run debug --prefix apps/jamtools/node",
     "test": "turbo run test",
@@ -20,7 +21,8 @@
     "ci": "NODE_MODULES_PARENT_FOLDER=$PWD TURBO_NO_UPDATE_NOTIFIER=true turbo run lint check-types build test",
     "heroku-postbuild": "NODE_ENV=production npm run build-saas",
     "build-desktop": "RUN_SIDECAR_FROM_WEBVIEW=true npx tsx packages/springboard/cli/src/cli.ts build ./apps/jamtools/modules/index.ts --platforms desktop",
-    "build-all": "RUN_SIDECAR_FROM_WEBVIEW=true npx tsx packages/springboard/cli/src/cli.ts build ./apps/small_apps/empty_app/index.ts --platforms all"
+    "build-all": "RUN_SIDECAR_FROM_WEBVIEW=true npx tsx packages/springboard/cli/src/cli.ts build ./apps/small_apps/empty_app/index.ts --platforms all",
+    "splash-screen-app": "npx tsx packages/springboard/cli/src/cli.ts dev ./apps/small_apps/app_with_splash_screen/app_with_splash_screen.tsx"
   },
   "keywords": [],
   "author": "",
