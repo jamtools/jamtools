@@ -33,3 +33,4 @@ catalog:
   "@hono/trpc-server": "^0.3.2"
   "react-router-dom": "^6.28.1"
   esbuild: "^0.25.0"
+  estree-walker: "^2"

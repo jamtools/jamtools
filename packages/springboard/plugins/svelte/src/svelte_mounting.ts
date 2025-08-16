@@ -20,20 +20,20 @@ export const createSvelteReactElement = <T extends Component<any>>(component: T,
 function SvelteComponentWrapper<T extends Component<any>>({
     component,
     props,
-}: SvelteComponentWrapperProps<T>): JSX.Element {
+}: SvelteComponentWrapperProps<T>): React.ReactNode {
     const containerRef = React.useRef<HTMLDivElement>(null);
     const svelteInstanceRef = React.useRef<ReturnType<typeof mountSvelteComponent<T>> | null>(null);
 
     React.useEffect(() => {
         if (containerRef.current && !svelteInstanceRef.current) {
-          svelteInstanceRef.current = mountSvelteComponent(component, containerRef.current, props);
+            svelteInstanceRef.current = mountSvelteComponent(component, containerRef.current, props);
         }
         return () => {
-          if (svelteInstanceRef.current) {
-            unmountSvelteComponent(svelteInstanceRef.current, { outro: true });
-          }
+            if (svelteInstanceRef.current) {
+                unmountSvelteComponent(svelteInstanceRef.current, { outro: true });
+            }
         };
-      }, [component]);
+    }, [component]);
 
     return React.createElement('div', {ref: containerRef});
 }

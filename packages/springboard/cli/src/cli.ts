@@ -9,6 +9,134 @@ import packageJSON from '../package.json';
 import {buildApplication, buildServer, platformBrowserBuildConfig, platformNodeBuildConfig, platformOfflineBrowserBuildConfig, platformPartykitBrowserBuildConfig, platformPartykitServerBuildConfig, platformTauriMaestroBuildConfig, platformTauriWebviewBuildConfig, Plugin, SpringboardPlatform} from './build';
 import {esbuildPluginTransformAwaitImportToRequire} from './esbuild_plugins/esbuild_plugin_transform_await_import';
 
+function resolveEntrypoint(entrypoint: string): string {
+    let applicationEntrypoint = entrypoint;
+    const cwd = process.cwd();
+    if (!path.isAbsolute(applicationEntrypoint)) {
+        applicationEntrypoint = `${cwd}/${applicationEntrypoint}`;
+    }
+    return path.resolve(applicationEntrypoint);
+}
+
+async function loadPlugins(pluginPaths?: string): Promise<Plugin[]> {
+    const plugins: Plugin[] = [];
+    if (pluginPaths) {
+        const pluginPathsList = pluginPaths.split(',');
+        for (const pluginPath of pluginPathsList) {
+            const mod = await import(pathToFileURL(resolve(pluginPath)).href) as {default: () => Plugin};
+            plugins.push(mod.default());
+        }
+    }
+    return plugins;
+}
+
+interface BuildPlatformsOptions {
+    applicationEntrypoint: string;
+    watch?: boolean;
+    plugins: Plugin[];
+    platformsToBuild: Set<SpringboardPlatform>;
+    dev?: {
+        reloadCss: boolean;
+        reloadJs: boolean;
+    };
+}
+
+async function buildPlatforms(options: BuildPlatformsOptions): Promise<void> {
+    const { applicationEntrypoint, watch, plugins, platformsToBuild, dev } = options;
+    const cwd = process.cwd();
+
+    if (
+        platformsToBuild.has('all') ||
+        platformsToBuild.has('main')
+    ) {
+        await buildApplication(platformBrowserBuildConfig, {
+            applicationEntrypoint,
+            watch,
+            plugins,
+            dev,
+        });
+
+        await buildApplication(platformNodeBuildConfig, {
+            applicationEntrypoint,
+            watch,
+            plugins,
+        });
+
+        await buildServer({
+            watch,
+            plugins,
+        });
+    }
+
+    if (
+        platformsToBuild.has('all') ||
+        platformsToBuild.has('browser_offline')
+    ) {
+        await buildApplication(platformOfflineBrowserBuildConfig, {
+            applicationEntrypoint,
+            watch,
+            esbuildOutDir: 'browser_offline',
+            plugins,
+        });
+    }
+
+    if (
+        platformsToBuild.has('all') ||
+        platformsToBuild.has('desktop')
+    ) {
+        await buildApplication(platformTauriWebviewBuildConfig, {
+            applicationEntrypoint,
+            watch,
+            esbuildOutDir: './tauri',
+            plugins,
+            editBuildOptions: (buildOptions) => {
+                buildOptions.define = {
+                    ...buildOptions.define,
+                    'process.env.DATA_HOST': "'http://127.0.0.1:1337'",
+                    'process.env.WS_HOST': "'ws://127.0.0.1:1337'",
+                    'process.env.RUN_SIDECAR_FROM_WEBVIEW': `${process.env.RUN_SIDECAR_FROM_WEBVIEW && process.env.RUN_SIDECAR_FROM_WEBVIEW !== 'false'}`,
+                };
+            },
+        });
+
+        await buildApplication(platformTauriMaestroBuildConfig, {
+            applicationEntrypoint,
+            watch,
+            esbuildOutDir: './tauri',
+            plugins,
+        });
+
+        await buildServer({
+            watch,
+            applicationDistPath: `${cwd}/dist/tauri/node/dist/dynamic-entry.js`,
+            esbuildOutDir: './tauri',
+            plugins,
+            editBuildOptions: (buildOptions) => {
+                buildOptions.plugins!.push(esbuildPluginTransformAwaitImportToRequire);
+            }
+        });
+    }
+
+    if (
+        platformsToBuild.has('all') ||
+        platformsToBuild.has('partykit')
+    ) {
+        await buildApplication(platformPartykitBrowserBuildConfig, {
+            applicationEntrypoint,
+            watch,
+            plugins,
+            esbuildOutDir: 'partykit',
+        });
+
+        await buildApplication(platformPartykitServerBuildConfig, {
+            applicationEntrypoint,
+            watch,
+            plugins,
+            esbuildOutDir: 'partykit',
+        });
+    }
+}
+
 program
     .name('sb')
     .description('Springboard CLI')
@@ -19,32 +147,26 @@ program
     .description('Run the Springboard development server')
     .usage('src/index.tsx')
     .argument('entrypoint')
-    .action(async (entrypoint: string) => {
-        let applicationEntrypoint = entrypoint;
+    .option('-p, --platforms <PLATFORM>,<PLATFORM>', 'Platforms to build for', 'main')
+    .option('-g, --plugins <PLUGIN>,<PLUGIN>', 'Plugins to build with')
+    .action(async (entrypoint: string, options: {platforms?: string, plugins?: string}) => {
+        const applicationEntrypoint = resolveEntrypoint(entrypoint);
+        const plugins = await loadPlugins(options.plugins);
+        
+        let platformToBuild = options.platforms || 'main';
+        const platformsToBuild = new Set<SpringboardPlatform>(platformToBuild.split(',') as SpringboardPlatform[]);
 
-        const cwd = process.cwd();
-        if (!path.isAbsolute(applicationEntrypoint)) {
-            applicationEntrypoint = `${cwd}/${applicationEntrypoint}`;
-        }
+        console.log(`Building application variants "${platformToBuild}" in development mode`);
 
-        applicationEntrypoint = path.resolve(applicationEntrypoint);
-
-        await buildApplication(platformBrowserBuildConfig, {
+        await buildPlatforms({
             applicationEntrypoint,
             watch: true,
+            plugins,
+            platformsToBuild,
             dev: {
                 reloadCss: true,
                 reloadJs: true,
             },
-        });
-
-        await buildApplication(platformNodeBuildConfig, {
-            applicationEntrypoint,
-            watch: true,
-        });
-
-        await buildServer({
-            watch: true,
         });
 
         const nodeArgs = '--watch --watch-preserve-output';
@@ -76,117 +198,19 @@ program
             platformToBuild = 'main';
         }
 
-        const plugins: Plugin[] = [];
-        if (options.plugins) {
-            const pluginPaths = options.plugins.split(',');
-            for (const pluginPath of pluginPaths) {
-                const mod = await import(pathToFileURL(resolve(pluginPath)).href) as {default: Plugin};
-                plugins.push(mod.default);
-            }
-        }
-
-        let applicationEntrypoint = entrypoint;
-
-        const cwd = process.cwd();
-        if (!path.isAbsolute(applicationEntrypoint)) {
-            applicationEntrypoint = `${cwd}/${applicationEntrypoint}`;
-        }
-
-        applicationEntrypoint = path.resolve(applicationEntrypoint);
+        const applicationEntrypoint = resolveEntrypoint(entrypoint);
+        const plugins = await loadPlugins(options.plugins);
 
         console.log(`Building application variants "${platformToBuild}"`);
 
         const platformsToBuild = new Set<SpringboardPlatform>(platformToBuild.split(',') as SpringboardPlatform[]);
 
-        if (
-            platformsToBuild.has('all') ||
-            platformsToBuild.has('main')
-        ) {
-            await buildApplication(platformBrowserBuildConfig, {
-                applicationEntrypoint,
-                watch: options.watch,
-                plugins,
-            });
-
-            await buildApplication(platformNodeBuildConfig, {
-                applicationEntrypoint,
-                watch: options.watch,
-                plugins,
-            });
-
-            await buildServer({
-                watch: options.watch,
-                plugins,
-            });
-        }
-
-        if (
-            platformsToBuild.has('all') ||
-            platformsToBuild.has('browser_offline')
-        ) {
-            await buildApplication(platformOfflineBrowserBuildConfig, {
-                applicationEntrypoint,
-                watch: options.watch,
-                esbuildOutDir: 'browser_offline',
-                plugins,
-            });
-        }
-
-        if (
-            platformsToBuild.has('all') ||
-            platformsToBuild.has('desktop')
-        ) {
-            await buildApplication(platformTauriWebviewBuildConfig, {
-                applicationEntrypoint,
-                watch: options.watch,
-                esbuildOutDir: './tauri',
-                plugins,
-                editBuildOptions: (buildOptions) => {
-                    buildOptions.define = {
-                        ...buildOptions.define,
-                        'process.env.DATA_HOST': "'http://127.0.0.1:1337'",
-                        'process.env.WS_HOST': "'ws://127.0.0.1:1337'",
-                        'process.env.RUN_SIDECAR_FROM_WEBVIEW': `${process.env.RUN_SIDECAR_FROM_WEBVIEW && process.env.RUN_SIDECAR_FROM_WEBVIEW !== 'false'}`,
-                    };
-                },
-            });
-
-            await buildApplication(platformTauriMaestroBuildConfig, {
-                applicationEntrypoint,
-                watch: options.watch,
-                esbuildOutDir: './tauri',
-                plugins,
-            });
-
-            await buildServer({
-                watch: options.watch,
-                applicationDistPath: `${cwd}/dist/tauri/node/dist/dynamic-entry.js`,
-                esbuildOutDir: './tauri',
-                plugins,
-                editBuildOptions: (buildOptions) => {
-                    buildOptions.plugins!.push(esbuildPluginTransformAwaitImportToRequire);
-                }
-            });
-        }
-
-        if (
-            platformsToBuild.has('all') ||
-            platformsToBuild.has('partykit')
-        ) {
-            await buildApplication(platformPartykitBrowserBuildConfig, {
-                applicationEntrypoint,
-                watch: options.watch,
-                plugins,
-                esbuildOutDir: 'partykit',
-            });
-
-            await buildApplication(platformPartykitServerBuildConfig, {
-                applicationEntrypoint,
-                watch: options.watch,
-                plugins,
-                esbuildOutDir: 'partykit',
-            });
-        }
+        await buildPlatforms({
+            applicationEntrypoint,
+            watch: options.watch,
+            plugins,
+            platformsToBuild,
+        });
 
         // if (
         //     platformsToBuild.has('all') ||

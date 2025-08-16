@@ -1,3 +1,5 @@
+import process from 'node:process';
+
 import {buildApplication, platformBrowserBuildConfig, platformNodeBuildConfig, buildServer } from '../../../../cli/src/build';
 
 import sveltePlugin from '../../plugin';
@@ -10,7 +12,7 @@ setTimeout(async () => {
         nodeModulesParentFolder: `${process.cwd()}/../../../..`,
         watch,
         plugins: [
-            sveltePlugin,
+            sveltePlugin(),
         ],
     });
 
@@ -19,14 +21,14 @@ setTimeout(async () => {
         applicationEntrypoint: `${process.cwd()}/example/src/example.svelte`,
         nodeModulesParentFolder: `${process.cwd()}/../../../..`,
         plugins: [
-            sveltePlugin,
+            sveltePlugin(),
         ],
     });
 
     await buildServer({
         watch,
         plugins: [
-            sveltePlugin,
+            sveltePlugin(),
         ],
     });
 });

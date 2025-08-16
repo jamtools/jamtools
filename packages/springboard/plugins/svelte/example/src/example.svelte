@@ -67,35 +67,36 @@
 <script lang="ts">
     import { stateSupervisorToStore } from '@springboardjs/plugin-svelte/src/svelte_helpers';
 
-    import Edit from '@springboardjs/plugin-svelte/src/svelte_jamtools_macro_component.svelte';
+    // import {sveltify} from 'svelte-preprocess-react';
+    // import { s2 as sveltify } from '../../src/svelte_mounting';
+    // console.log(sveltify)
 
     let { app }: { app: ModuleAPI } = $props();
 
     const main = app.getModule('Main');
+
+    const slider1 = main.macros.slider1;
+
+    // const sliderComponents = sveltify({ slider1: slider1.components.edit, });
 
     const count = stateSupervisorToStore(main.states.count);
     const name = stateSupervisorToStore(main.states.name);
 
     const actions = main.actions;
 
-    import _Form from './form.svelte';
-    const Form = _Form;
+    // import _Form from './form.svelte';
+    // const Form = _Form;
 
     async function increment() {
         await actions.increment({});
     }
-
-    const slider1 = main.macros.slider1;
-    const slider2 = main.macros.slider2;
 </script>
 
 <h1>{$count}</h1>
 <button onclick={increment}>Increment</button>
 
-<Form submit={actions.setName} />
+<!-- <Form submit={actions.setName} /> -->
 
 <p>{$name}</p>
 
-<Edit
-    payload={slider1}
-/>
+<!-- <sliderComponents.slider1/> -->
