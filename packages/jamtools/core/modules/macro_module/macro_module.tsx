@@ -16,7 +16,7 @@ import {createRoute} from '@tanstack/react-router';
 
 import './macro_handlers';
 import {macroTypeRegistry} from './registered_macro_types';
-import {rootRoute} from 'springboard/src/root_route';
+import {rootRoute} from 'springboard/ui/root_route';
 
 type ModuleId = string;
 

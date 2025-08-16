@@ -1,9 +1,11 @@
+import React, {ComponentProps} from 'react';
+import {createRoute, ResolveParams} from '@tanstack/react-router';
+
 import {SharedStateSupervisor, StateSupervisor, UserAgentStateSupervisor} from '../services/states/shared_state_service';
 import {ExtraModuleDependencies, Module, NavigationItemConfig, RegisteredRoute} from 'springboard/module_registry/module_registry';
 import {CoreDependencies, ModuleDependencies} from '../types/module_types';
-import {RegisterRouteOptions} from './register';
-import {createRoute, RouteComponent} from '@tanstack/react-router';
-import {rootRoute} from 'springboard/src/root_route';
+
+import {rootRoute} from 'springboard/ui/root_route';
 
 type ActionConfigOptions = object;
 
@@ -89,18 +91,37 @@ export class ModuleAPI {
      * ```
      *
      */
-    registerRoute = (routePath: string, component: RouteComponent) => {
-        this.module.routes ||= [];
-        this.module.routes.push(createRoute({
+    registerRoute = <TRoutePath extends string>(routePath: TRoutePath, Component: React.ElementType<{
+        navigate: (route: string) => void;
+        pathParams: ResolveParams<TRoutePath>;
+        searchParams: Record<string, string | undefined>;
+    }>) => {
+        const route = createRoute({
             path: routePath,
             getParentRoute: () => rootRoute,
-            component,
-        }));
+            component: () => {
+                const navigate = route.useNavigate();
+                const pathParams = route.useParams() as ResolveParams<TRoutePath>;
+                const searchParams = route.useSearch() as Record<string, string | undefined>;
+
+                return React.createElement(Component, {
+                    navigate: route => navigate({to: route}),
+                    pathParams,
+                    searchParams,
+                } satisfies ComponentProps<typeof Component>);
+            },
+        });
+
+        this.module.routes ||= [];
+        this.module.routes.push(route);
     };
 
-    registerApplicationShell = (component: React.ElementType<React.PropsWithChildren<{modules: Module[]}>>) => {
-        this.module.applicationShell = component;
-    };
+    rootRoute = rootRoute;
+
+    // TODO: remove traces of this before merge
+    // registerApplicationShell = (component: React.ElementType<React.PropsWithChildren<{modules: Module[]}>>) => {
+    //     this.module.applicationShell = component;
+    // };
 
     createStates = async <States extends Record<string, any>>(states: States): Promise<{[K in keyof States]: StateSupervisor<States[K]>}> => {
         const keys = Object.keys(states);

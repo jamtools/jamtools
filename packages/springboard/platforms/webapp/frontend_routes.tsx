@@ -7,9 +7,9 @@ import {
 
 import {useSpringboardEngine} from 'springboard/engine/engine';
 import {AllModules} from 'springboard/module_registry/module_registry';
-import {rootRoute} from 'springboard/src/root_route';
+import {rootRoute} from 'springboard/ui/root_route';
 
-// utilities for extracting and typing routes from modules
+// utilities for extracting and typing routes from registered modules
 type ExtractRoutes<T> = T extends {routes: infer R} ? R :
     T extends () => Promise<{routes: infer R}> ? R : never;
 type Flatten<T> = T extends readonly (infer U)[] ? U : never;
@@ -18,7 +18,7 @@ type AllRoutes = {
 }[keyof AllModules];
 type AllRoutesFlat = readonly Flatten<AllRoutes>[];
 
-// router factory function that creates a strongly-typed router based on AllModules
+// creates a strongly-typed router based on all registered modules that return a `routes` property
 function createAppRouter(routes: AllRoutesFlat) {
     const routeTree = rootRoute.addChildren(routes);
 

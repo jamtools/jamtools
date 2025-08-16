@@ -1,7 +1,6 @@
 import React from 'react';
-import {createRoute, getRouteApi, useRouter} from '@tanstack/react-router';
+import {createRoute, getRouteApi, useParams, useRouter, useSearch} from '@tanstack/react-router';
 import springboard from 'springboard';
-import {rootRoute} from 'springboard/src/root_route';
 import {ModuleAPI} from 'springboard/engine/module_api';
 
 import '@jamtools/core/modules/macro_module/macro_module';
@@ -18,7 +17,7 @@ const makeTestTanStackModule = async (moduleAPI: ModuleAPI) => {
     return {
         routes: [
             createRoute({
-                getParentRoute: () => rootRoute,
+                getParentRoute: () => moduleAPI.rootRoute,
                 path: '/',
                 component: () => {
                     return (
@@ -30,9 +29,21 @@ const makeTestTanStackModule = async (moduleAPI: ModuleAPI) => {
                 },
             }),
             createRoute({
-                getParentRoute: () => rootRoute,
-                path: '/tanstack-test',
+                getParentRoute: () => moduleAPI.rootRoute,
+                path: '/tanstack-test/$id',
+                params: {
+                    parse: (params) => ({
+                        id: params.id,
+                    }),
+                },
+                validateSearch: (search) => {
+                    return {
+                        other_id: search.other_id as string | undefined,
+                    };
+                },
                 component: () => {
+                    const { id } = useParams({from: '/tanstack-test/$id'});
+                    const { other_id } = useSearch({from: '/tanstack-test/$id'});
                     return (
                         <TestTanStackComponent
                             message={messageState.useState()}
@@ -42,17 +53,18 @@ const makeTestTanStackModule = async (moduleAPI: ModuleAPI) => {
                 },
             }),
             createRoute({
-                getParentRoute: () => rootRoute,
+                getParentRoute: () => moduleAPI.rootRoute,
                 path: '/tanstack-test-with-search',
                 component: () => {
                     const route = getRouteApi('/tanstack-test-with-search');
                     const search = route.useSearch();
+                    const search2 = useSearch({from: '/tanstack-test-with-search'});
 
                     return (
                         <div>
                             <h1>TanStack Test with Search</h1>
                             <p>Query: {search.query || 'none'}</p>
-                            <p>Has Discount: {search.hasDiscount ? 'Yes' : 'No'}</p>
+                            <p>Has Discount: {search2.hasDiscount ? 'Yes' : 'No'}</p>
                         </div>
                     );
                 },
@@ -90,7 +102,8 @@ const TestTanStackComponent = (props: TestTanStackComponentProps) => {
             <h1>TanStack Router Test Module</h1>
             <p>Current message: {props.message}</p>
 
-            <button onClick={() => router.navigate({to: '/tanstack-test'})}>Go to TanStack Test</button>
+            <button onClick={() => router.navigate({to: '/tanstack-test/$id', params: {id: '123'}, search: {other_id: '456'}})}>Go to TanStack Test</button>
+            <button onClick={() => router.navigate({to: '/tanstack-test-with-search', search: {hasDiscount: true, query: 'my query'}})}>Go to TanStack Test with Search</button>
 
             <div style={{marginTop: '20px'}}>
                 <input

@@ -11,7 +11,7 @@ import {Module} from 'springboard/module_registry/module_registry';
 
 import springboard from 'springboard';
 import {createRoute} from '@tanstack/react-router';
-import {rootRoute} from 'springboard/src/root_route';
+import {rootRoute} from 'springboard/ui/root_route';
 
 type WledClientStatus = {
     url: string;
