@@ -9,6 +9,7 @@ import {MacroAPI} from '@jamtools/core/modules/macro_module/registered_macro_typ
 
 export type MidiInputMacroPayload = {
     states: InputMacroStateHolders;
+    actions: InputMacroActions;
     subject: Subject<MidiEventFull>;
     components: {
         edit: React.ElementType;
@@ -26,6 +27,15 @@ export const getKeyForMidiEvent = (event: MidiEventFull) => {
 };
 
 export const getKeyForMacro = (key: string, fieldName: string) => `macro|${fieldName}|${key}`;
+
+export type InputMacroActions = {
+    onEdit: () => void;
+    onCancelEdit: () => void;
+    confirmMacro: () => void;
+    toggleWaiting: () => void;
+    deleteSavedValue: (event: MidiEventFull) => void;
+    askDeleteSavedValue: (event: MidiEventFull) => void;
+};
 
 export type InputMacroStateHolders = {
     editing: StateSupervisor<boolean>;
@@ -110,6 +120,7 @@ export const useInputMacroWaiterAndSaver = async (
     const subject = new Subject<MidiEventFull>();
 
     const onEdit = createAction('begin_edit', () => {
+        console.log('onEdit in action');
         editingState.setState(true);
     });
 
@@ -122,6 +133,17 @@ export const useInputMacroWaiterAndSaver = async (
     const returnValue: MidiInputMacroPayload = {
         states,
         subject,
+        actions: {
+            onEdit: () => {
+                console.log('onEdit');
+                onEdit({});
+            },
+            onCancelEdit: () => onCancelEdit({}),
+            confirmMacro: () => confirmMacro({}),
+            toggleWaiting: () => toggleWaiting({}),
+            deleteSavedValue: (event: MidiEventFull) => deleteSavedValue(event),
+            askDeleteSavedValue: (event: MidiEventFull) => askDeleteSavedValue(event),
+        },
         components: {
             edit: () => {
                 const waiting = waitingForConfiguration.useState();
