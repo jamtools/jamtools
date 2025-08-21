@@ -246,7 +246,7 @@ export const initApp = (initArgs: InitServerAppArgs): InitAppReturnValue => {
         if (!serveStaticFileFn || !getEnvValueFn) {
             return c.text('Server not fully initialized', 500);
         }
-        
+
         const requestedFile = c.req.param('file');
 
         if (requestedFile.endsWith('.map') && getEnvValueFn('NODE_ENV') === 'production') {
@@ -325,17 +325,6 @@ export const initApp = (initArgs: InitServerAppArgs): InitAppReturnValue => {
         };
     };
 
-    const registerServerModule: typeof serverRegistry['registerServerModule'] = (cb) => {
-        cb(makeServerModuleAPI());
-    };
-
-    const registeredServerModuleCallbacks = (serverRegistry.registerServerModule as unknown as {calls: CapturedRegisterServerModuleCall[]}).calls || [];
-    serverRegistry.registerServerModule = registerServerModule;
-
-    for (const call of registeredServerModuleCallbacks) {
-        call(makeServerModuleAPI());
-    }
-
     // Catch-all route for SPA
     // app.use('*', serveStatic({
     //     root: webappDistFolder,
@@ -374,6 +363,17 @@ export const initApp = (initArgs: InitServerAppArgs): InitAppReturnValue => {
         storedEngine = args.engine;
         serveStaticFileFn = args.serveStaticFile;
         getEnvValueFn = args.getEnvValue;
+
+        const registerServerModule: typeof serverRegistry['registerServerModule'] = (cb) => {
+            cb(makeServerModuleAPI());
+        };
+
+        const registeredServerModuleCallbacks = (serverRegistry.registerServerModule as unknown as {calls: CapturedRegisterServerModuleCall[]}).calls || [];
+        serverRegistry.registerServerModule = registerServerModule;
+
+        for (const call of registeredServerModuleCallbacks) {
+            call(makeServerModuleAPI());
+        }
     };
 
     const createWebSocketHooks = (enableRpc?: boolean) => {
