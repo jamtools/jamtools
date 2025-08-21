@@ -25,6 +25,7 @@
     "partykit": "^0.0.111"
   },
   "peerDependencies": {
-    "springboard": "workspace:*"
+    "springboard": "workspace:*",
+    "springboard-server": "workspace:*"
   }
 }

@@ -5,7 +5,7 @@ import {Connection, Room} from 'partykit/server';
 import {RpcMiddleware} from 'springboard-server/src/register';
 
 type PartykitJsonRpcServerInitArgs = {
-    processRequest: (message: string) => Promise<string>;
+    processRequest: (message: string, middlewareResult: unknown) => Promise<string>;
     rpcMiddlewares: RpcMiddleware[];
 }
 
@@ -54,11 +54,13 @@ export class PartykitJsonRpcServer {
             }
         }
 
-        return new Promise<string>((resolve) => {
-            nodeRpcAsyncLocalStorage.run(rpcContext, async () => {
-                const response = await this.initArgs.processRequest(message);
-                resolve(response);
-            });
-        });
+        return this.initArgs.processRequest(message, rpcContext);
+
+        // return new Promise<string>((resolve) => {
+        //     nodeRpcAsyncLocalStorage.run(rpcContext, async () => {
+        //         const response = await this.initArgs.processRequest(message);
+        //         resolve(response);
+        //     });
+        // });
     };
 }
