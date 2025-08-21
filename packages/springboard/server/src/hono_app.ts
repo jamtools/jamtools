@@ -196,6 +196,17 @@ export const initApp = (kvDeps: WebsocketServerCoreDependencies): InitAppReturnV
             }
 
             storedEngine = engine;
+
+            const registerServerModule: typeof serverRegistry['registerServerModule'] = (cb) => {
+                cb(makeServerModuleAPI());
+            };
+
+            const registeredServerModuleCallbacks = (serverRegistry.registerServerModule as unknown as {calls: CapturedRegisterServerModuleCall[]}).calls || [];
+            serverRegistry.registerServerModule = registerServerModule;
+
+            for (const call of registeredServerModuleCallbacks) {
+                call(makeServerModuleAPI());
+            }
         },
     };
 
@@ -210,17 +221,6 @@ export const initApp = (kvDeps: WebsocketServerCoreDependencies): InitAppReturnV
             getEngine: () => storedEngine!,
         };
     };
-
-    const registerServerModule: typeof serverRegistry['registerServerModule'] = (cb) => {
-        cb(makeServerModuleAPI());
-    };
-
-    const registeredServerModuleCallbacks = (serverRegistry.registerServerModule as unknown as {calls: CapturedRegisterServerModuleCall[]}).calls || [];
-    serverRegistry.registerServerModule = registerServerModule;
-
-    for (const call of registeredServerModuleCallbacks) {
-        call(makeServerModuleAPI());
-    }
 
     // Catch-all route for SPA
     app.use('*', serveStatic({
