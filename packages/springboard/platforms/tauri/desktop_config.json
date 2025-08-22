@@ -66,7 +66,6 @@
                 "core:default",
                 "opener:default",
 
-                "dialog:allow-open",
                 "core:path:default",
                 "core:event:default",
                 "core:window:default",
@@ -95,7 +94,6 @@
                     ]
                 },
                 "shell:allow-open",
-                "dialog:default",
                 "fs:default",
                 "fs:read-all"
             ]
