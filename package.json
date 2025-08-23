@@ -7,6 +7,7 @@
   "scripts": {
     "start": "turbo run start",
     "prestart": "bash -c \"./configs/scripts/check-dependencies.sh\"",
+    "postinstall": "pnpm -r --filter springboard-cli run dev:setup",
     "build": "turbo run build",
     "build-saas": "turbo run build-saas",
     "dev": "npm run dev-dev --prefix packages/springboard/cli",
