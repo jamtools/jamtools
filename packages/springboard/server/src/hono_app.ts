@@ -196,6 +196,31 @@ export const initApp = (kvDeps: WebsocketServerCoreDependencies): InitAppReturnV
             }
 
             storedEngine = engine;
+
+            const registerServerModule: typeof serverRegistry['registerServerModule'] = (cb) => {
+                cb(makeServerModuleAPI());
+            };
+
+            const registeredServerModuleCallbacks = (serverRegistry.registerServerModule as unknown as {calls: CapturedRegisterServerModuleCall[]}).calls || [];
+            serverRegistry.registerServerModule = registerServerModule;
+
+            for (const call of registeredServerModuleCallbacks) {
+                call(makeServerModuleAPI());
+            }
+
+            // Catch-all route for SPA
+            app.use('*', serveStatic({
+                root: webappDistFolder,
+                path: 'index.html',
+                getContent: async (path, c) => {
+                    return serveFile('index.html', 'text/html', c);
+                },
+                onFound: (path, c) => {
+                    c.header('Cache-Control', 'no-store, no-cache, must-revalidate');
+                    c.header('Pragma', 'no-cache');
+                    c.header('Expires', '0');
+                },
+            }));
         },
     };
 
@@ -210,33 +235,6 @@ export const initApp = (kvDeps: WebsocketServerCoreDependencies): InitAppReturnV
             getEngine: () => storedEngine!,
         };
     };
-
-    const registerServerModule: typeof serverRegistry['registerServerModule'] = (cb) => {
-        cb(makeServerModuleAPI());
-    };
-
-    const registeredServerModuleCallbacks = (serverRegistry.registerServerModule as unknown as {calls: CapturedRegisterServerModuleCall[]}).calls || [];
-    serverRegistry.registerServerModule = registerServerModule;
-
-    for (const call of registeredServerModuleCallbacks) {
-        call(makeServerModuleAPI());
-    }
-
-    // Catch-all route for SPA
-    app.use('*', serveStatic({
-        root: webappDistFolder,
-        path: 'index.html',
-        getContent: async (path, c) => {
-            return serveFile('index.html', 'text/html', c);
-        },
-        onFound: (path, c) => {
-            // c.header('Cross-Origin-Embedder-Policy',  'require-corp');
-            // c.header('Cross-Origin-Opener-Policy',  'same-origin');
-            c.header('Cache-Control', 'no-store, no-cache, must-revalidate');
-            c.header('Pragma', 'no-cache');
-            c.header('Expires', '0');
-        },
-    }));
 
     return {app, injectWebSocket, nodeAppDependencies};
 };
