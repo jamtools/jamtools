@@ -67,6 +67,9 @@
 <script lang="ts">
     import { stateSupervisorToStore } from '@springboardjs/plugin-svelte/src/svelte_helpers';
 
+    import ReactInSvelte from '../../src/ReactInSvelte.svelte';
+    import ExampleReactComponent from './example_react_component';
+
     // import {sveltify} from 'svelte-preprocess-react';
     // import { s2 as sveltify } from '../../src/svelte_mounting';
     // console.log(sveltify)
@@ -100,3 +103,6 @@
 <p>{$name}</p>
 
 <!-- <sliderComponents.slider1/> -->
+
+<ReactInSvelte component={slider1.components.edit} props={{}} />
+<ReactInSvelte component={ExampleReactComponent} props={{someProp: 'test'}} />
