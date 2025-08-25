@@ -691,9 +691,6 @@ importers:
       svelte:
         specifier: 5.34.7
         version: 5.34.7
-      svelte-preprocess-react:
-        specifier: ^2.1.1
-        version: 2.1.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(svelte@5.34.7)
 
   packages/springboard/server:
     dependencies:
@@ -3860,13 +3857,6 @@ packages:
   supports-preserve-symlinks-flag@1.0.0:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
-
-  svelte-preprocess-react@2.1.1:
-    resolution: {integrity: sha512-tEqA7gYYh2pQaANq5I+dN2LCqpO9bn+qhUcQ52Qqn2K+E1kB9vc5T3DW2BASfLLi1Ppq8kUx6pg7x3/3olSwOw==}
-    peerDependencies:
-      react: ^19.1.0
-      react-dom: '>=16.8.0'
-      svelte: '>=5.0.0'
 
   svelte-preprocess@6.0.3:
     resolution: {integrity: sha512-PLG2k05qHdhmRG7zR/dyo5qKvakhm8IJ+hD2eFRQmMLHp7X3eJnjeupUtvuRpbNiF31RjVw45W+abDwHEmP5OA==}
@@ -7968,14 +7958,6 @@ snapshots:
       has-flag: 4.0.0
 
   supports-preserve-symlinks-flag@1.0.0: {}
-
-  svelte-preprocess-react@2.1.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(svelte@5.34.7):
-    dependencies:
-      estree-walker: 2.0.2
-      magic-string: 0.30.17
-      react: 19.1.0
-      react-dom: 19.1.0(react@19.1.0)
-      svelte: 5.34.7
 
   svelte-preprocess@6.0.3(@babel/core@7.27.1)(postcss-load-config@6.0.1(postcss@8.5.3)(tsx@4.19.4))(postcss@8.5.3)(svelte@5.34.7)(typescript@5.8.3):
     dependencies:

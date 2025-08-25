@@ -4,7 +4,6 @@ import type { Plugin as SpringboardPlugin } from 'springboard-cli/src/build';
 
 import esbuildSvelte from 'esbuild-svelte';
 import { sveltePreprocess } from 'svelte-preprocess';
-import preprocessReact from 'svelte-preprocess-react/preprocessReact';
 import { parse } from 'svelte/compiler';
 
 const sveltePlugin = (
@@ -12,47 +11,11 @@ const sveltePlugin = (
 ): SpringboardPlugin => (buildConfig) => {
     return {
         name: 'svelte',
-
-        // editBuildOptions: (buildOptions) => {
-        //     buildOptions.conditions = (buildOptions.conditions || []).concat(['svelte']);
-        //     buildOptions.mainFields = (buildOptions.mainFields || []).concat([
-        //         'svelte',
-        //         'browser',
-        //         'module',
-        //         'main',
-        //     ]);
-
-        //     // Avoid esbuild prematurely parsing .svelte.js as JS
-        //     buildOptions.loader = {
-        //         ...(buildOptions.loader || {}),
-        //         '.svelte.js': 'file',
-        //         '.svelte.ts': 'file',
-        //     };
-        // },
-
         esbuildPlugins: () =>
             buildConfig.platform === 'browser'
                 ? [
                     esbuildSvelte({
                         ...svelteOptions,
-
-                        // include: (filePath) => {
-                        //   if (filePath.endsWith('.svelte')) return true;
-
-                        //   if (
-                        //     (filePath.endsWith('.svelte.js') || filePath.endsWith('.svelte.ts')) &&
-                        //     // Skip broken files from svelte-preprocess-react
-                        //     !filePath.includes('svelte-preprocess-react/dist/sveltify.svelte.js') &&
-                        //     !filePath.includes('svelte-preprocess-react/dist/hooks.svelte.js')
-                        //   ) {
-                        //     return true;
-                        //   }
-
-                        //   return false;
-                        // },
-
-                        filterWarnings: () => true,
-
                         preprocess: [
                             sveltePreprocess({
                                 typescript: {
@@ -61,7 +24,6 @@ const sveltePlugin = (
                                     },
                                 },
                             }),
-                            // preprocessReact({ react: 19 }),
                             ...(
                                 Array.isArray(svelteOptions?.preprocess)
                                     ? svelteOptions.preprocess
