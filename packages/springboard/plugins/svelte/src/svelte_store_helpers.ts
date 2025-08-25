@@ -1,4 +1,3 @@
-// utils/observableToStore.ts
 import type {Observable} from 'rxjs';
 import {StateSupervisor} from 'springboard/services/states/shared_state_service';
 import {readable} from 'svelte/store';
