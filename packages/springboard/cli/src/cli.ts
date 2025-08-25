@@ -23,7 +23,8 @@ async function loadPlugins(pluginPaths?: string): Promise<Plugin[]> {
     if (pluginPaths) {
         const pluginPathsList = pluginPaths.split(',');
         for (const pluginPath of pluginPathsList) {
-            const mod = await import(pathToFileURL(resolve(pluginPath)).href) as {default: () => Plugin};
+            const resolvedPath = resolve(pluginPath);
+            const mod = require(resolvedPath) as {default: () => Plugin};
             plugins.push(mod.default());
         }
     }
@@ -152,7 +153,7 @@ program
     .action(async (entrypoint: string, options: {platforms?: string, plugins?: string}) => {
         const applicationEntrypoint = resolveEntrypoint(entrypoint);
         const plugins = await loadPlugins(options.plugins);
-        
+
         let platformToBuild = options.platforms || 'main';
         const platformsToBuild = new Set<SpringboardPlatform>(platformToBuild.split(',') as SpringboardPlatform[]);
 
