@@ -28,7 +28,8 @@
     "dev-dev": "npx tsx src/cli.ts dev ../../../apps/small_apps/handraiser/index.ts",
     "clean": "rm -rf dist",
     "add-header": "./scripts/add-node-executable-header.sh",
-    "cli-docs": "npx tsx scripts/make_cli_docs.ts"
+    "cli-docs": "npx tsx scripts/make_cli_docs.ts",
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "commander": "catalog:",
