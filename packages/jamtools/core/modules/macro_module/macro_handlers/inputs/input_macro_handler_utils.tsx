@@ -120,7 +120,6 @@ export const useInputMacroWaiterAndSaver = async (
     const subject = new Subject<MidiEventFull>();
 
     const onEdit = createAction('begin_edit', () => {
-        console.log('onEdit in action');
         editingState.setState(true);
     });
 
@@ -135,7 +134,6 @@ export const useInputMacroWaiterAndSaver = async (
         subject,
         actions: {
             onEdit: () => {
-                console.log('onEdit');
                 onEdit({});
             },
             onCancelEdit: () => onCancelEdit({}),

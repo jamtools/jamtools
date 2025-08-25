@@ -1,12 +1,5 @@
 import React from 'react';
-import type {createElement, useEffect, useRef} from 'react';
 import type {ComponentProps} from 'svelte';
-
-type ReactLib = {
-    createElement: typeof createElement;
-    useEffect: typeof useEffect;
-    useRef: typeof useRef;
-};
 
 interface SvelteComponentWrapperProps<T extends Component<any>> {
     component: T;
@@ -40,17 +33,8 @@ function SvelteComponentWrapper<T extends Component<any>>({
 
 export default SvelteComponentWrapper;
 
-
-// svelteMount.ts
 import {mount, unmount, type Component} from 'svelte';
 
-/**
- * Mounts a Svelte component to a specified DOM node.
- * @param Component - The Svelte component to mount.
- * @param target - The DOM node to mount the component into.
- * @param props - Props to pass to the Svelte component.
- * @returns The mounted Svelte component instance.
- */
 export function mountSvelteComponent<T extends Component<any>>(
     Component: T,
     target: HTMLElement,
@@ -62,11 +46,6 @@ export function mountSvelteComponent<T extends Component<any>>(
     });
 }
 
-/**
- * Unmounts a Svelte component instance.
- * @param instance - The Svelte component instance to unmount.
- * @param options - Options for unmounting (e.g., { outro: true }).
- */
 export function unmountSvelteComponent(
     instance: ReturnType<typeof mount>,
     options: {outro?: boolean} = {}

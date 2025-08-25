@@ -65,14 +65,10 @@
 </script>
 
 <script lang="ts">
-    import { stateSupervisorToStore } from '@springboardjs/plugin-svelte/src/svelte_helpers';
+    import { stateSupervisorToStore } from '../../src/svelte_store_helpers';
 
     import ReactInSvelte from '../../src/ReactInSvelte.svelte';
     import ExampleReactComponent from './example_react_component';
-
-    // import {sveltify} from 'svelte-preprocess-react';
-    // import { s2 as sveltify } from '../../src/svelte_mounting';
-    // console.log(sveltify)
 
     let { app }: { app: ModuleAPI } = $props();
 
@@ -80,15 +76,10 @@
 
     const slider1 = main.macros.slider1;
 
-    // const sliderComponents = sveltify({ slider1: slider1.components.edit, });
-
     const count = stateSupervisorToStore(main.states.count);
     const name = stateSupervisorToStore(main.states.name);
 
     const actions = main.actions;
-
-    // import _Form from './form.svelte';
-    // const Form = _Form;
 
     async function increment() {
         await actions.increment({});
@@ -98,11 +89,7 @@
 <h1>{$count}</h1>
 <button onclick={increment}>Increment</button>
 
-<!-- <Form submit={actions.setName} /> -->
-
 <p>{$name}</p>
-
-<!-- <sliderComponents.slider1/> -->
 
 <ReactInSvelte component={slider1.components.edit} props={{}} />
 <ReactInSvelte component={ExampleReactComponent} props={{someProp: 'test'}} />

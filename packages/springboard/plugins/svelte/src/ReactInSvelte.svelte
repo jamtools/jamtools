@@ -10,13 +10,13 @@
     let root: ReactDOM.Root;
 
     onMount(() => {
-      root = ReactDOM.createRoot(container);
-      root.render(React.createElement(component, props));
+        root = ReactDOM.createRoot(container);
+        root.render(React.createElement(component, props));
     });
 
     onDestroy(() => {
-      root?.unmount();
+        root?.unmount();
     });
-  </script>
+</script>
 
-  <div bind:this={container}></div>
+<div bind:this={container}></div>
