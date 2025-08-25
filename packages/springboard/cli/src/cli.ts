@@ -26,7 +26,7 @@ async function loadPlugins(pluginPaths?: string): Promise<Plugin[]> {
             let resolvedPath: string;
 
             if (!pluginPath.includes('/') && !pluginPath.includes('\\') && !pluginPath.includes('.')) {
-                const nodeModulesPath = `node_modules/@springboardjs/plugin-${pluginPath}/plugin.js`;
+                const nodeModulesPath = `@springboardjs/plugin-${pluginPath}/plugin.js`;
                 try {
                     resolvedPath = require.resolve(nodeModulesPath);
                 } catch {
