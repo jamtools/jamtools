@@ -6,4 +6,4 @@ type Props = {
 
 export default function ExampleReactComponent(props: Props) {
     return <div>Example React Component</div>;
-};
+}
