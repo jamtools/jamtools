@@ -1,2 +1,6 @@
 # Overrides for production environment
 baseurl = "/"
+
+[params]
+  rybbitSiteUrl = "{{ getenv \"RYBBIT_SITE_URL\" }}"
+  rybbitSiteId = "{{ getenv \"RYBBIT_SITE_ID\" }}"
