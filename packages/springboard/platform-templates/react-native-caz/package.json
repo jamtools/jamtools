@@ -1,0 +1,22 @@
+{
+  "name": "@springboardjs/template-react-native",
+  "version": "1.0.0",
+  "description": "CAZ template for React Native Springboard apps",
+  "main": "index.js",
+  "keywords": [
+    "caz-template",
+    "react-native",
+    "expo",
+    "springboard",
+    "mobile-app"
+  ],
+  "author": "Springboard Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git", 
+    "url": "https://github.com/springboardjs/springboard"
+  },
+  "engines": {
+    "node": ">=16"
+  }
+}
