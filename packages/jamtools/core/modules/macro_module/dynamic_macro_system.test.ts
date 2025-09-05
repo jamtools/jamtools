@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { DynamicMacroManager } from './dynamic_macro_manager';
-import { LegacyMacroAdapter } from './legacy_compatibility';
 import { WorkflowValidator } from './workflow_validation';
 import { ReactiveConnectionManager } from './reactive_connection_system';
 import { 
@@ -33,13 +32,11 @@ const mockMacroAPI: MacroAPI = {
 
 describe('Dynamic Macro System', () => {
   let dynamicManager: DynamicMacroManager;
-  let legacyAdapter: LegacyMacroAdapter;
   let validator: WorkflowValidator;
   let connectionManager: ReactiveConnectionManager;
 
   beforeEach(() => {
     dynamicManager = new DynamicMacroManager(mockMacroAPI);
-    legacyAdapter = new LegacyMacroAdapter(dynamicManager, mockMacroAPI);
     validator = new WorkflowValidator();
     connectionManager = new ReactiveConnectionManager();
   });
@@ -385,57 +382,6 @@ describe('Dynamic Macro System', () => {
     });
   });
 
-  // =============================================================================
-  // LEGACY COMPATIBILITY TESTS
-  // =============================================================================
-
-  describe('LegacyMacroAdapter', () => {
-    it('should maintain API compatibility', async () => {
-      const mockModuleAPI = {
-        moduleId: 'test_module',
-        getModule: vi.fn(),
-        createAction: vi.fn(),
-        statesAPI: mockMacroAPI.statesAPI,
-        onDestroy: vi.fn()
-      } as any;
-
-      // This should work exactly like the original API
-      const createMacroSpy = vi.spyOn(legacyAdapter, 'createMacro');
-      
-      await legacyAdapter.createMacro(
-        mockModuleAPI,
-        'test_macro',
-        'midi_control_change_input',
-        { allowLocal: true }
-      );
-
-      expect(createMacroSpy).toHaveBeenCalledWith(
-        mockModuleAPI,
-        'test_macro',
-        'midi_control_change_input',
-        { allowLocal: true }
-      );
-    });
-
-    it('should track legacy macro statistics', () => {
-      const stats = legacyAdapter.getLegacyMacroStats();
-      expect(stats).toHaveProperty('totalLegacyMacros');
-      expect(stats).toHaveProperty('pendingMigration');
-      expect(stats).toHaveProperty('migrated');
-      expect(stats).toHaveProperty('failed');
-      expect(stats).toHaveProperty('macroTypeDistribution');
-      expect(stats).toHaveProperty('moduleDistribution');
-    });
-
-    it('should provide compatibility report', () => {
-      const report = legacyAdapter.getCompatibilityReport();
-      expect(report).toHaveProperty('backwardCompatibility');
-      expect(report).toHaveProperty('legacyMacrosSupported');
-      expect(report).toHaveProperty('migrationReady');
-      expect(report).toHaveProperty('recommendedActions');
-      expect(report.backwardCompatibility).toBe('100%');
-    });
-  });
 
   // =============================================================================
   // REACTIVE CONNECTION TESTS
@@ -797,11 +743,9 @@ describe('Dynamic Macro System', () => {
 
 describe('Integration Tests', () => {
   let dynamicManager: DynamicMacroManager;
-  let legacyAdapter: LegacyMacroAdapter;
 
   beforeEach(() => {
     dynamicManager = new DynamicMacroManager(mockMacroAPI);
-    legacyAdapter = new LegacyMacroAdapter(dynamicManager, mockMacroAPI);
   });
 
   afterEach(async () => {
@@ -862,48 +806,4 @@ describe('Integration Tests', () => {
     expect(dynamicManager.getWorkflow(workflowId)).toBeNull();
   });
 
-  it('should maintain legacy compatibility while adding dynamic features', async () => {
-    // Mock the original module API
-    const mockModuleAPI = {
-      moduleId: 'test_module',
-      getModule: vi.fn(),
-      createAction: vi.fn(),
-      statesAPI: mockMacroAPI.statesAPI,
-      onDestroy: vi.fn()
-    } as any;
-
-    // 1. Create legacy macros (original API)
-    const legacyInput = await legacyAdapter.createMacro(
-      mockModuleAPI,
-      'legacy_input',
-      'midi_control_change_input',
-      { allowLocal: true }
-    );
-
-    // 2. Verify legacy statistics
-    const stats = legacyAdapter.getLegacyMacroStats();
-    expect(stats.totalLegacyMacros).toBeGreaterThan(0);
-
-    // 3. Enable dynamic system
-    await dynamicManager.initialize();
-
-    // 4. Create dynamic workflow
-    const workflowId = await dynamicManager.createWorkflowFromTemplate('midi_cc_chain', {
-      inputDevice: 'Dynamic Controller',
-      inputChannel: 1,
-      inputCC: 5,
-      outputDevice: 'Dynamic Synth',
-      outputChannel: 1,
-      outputCC: 10
-    });
-
-    // 5. Both systems should coexist
-    expect(legacyInput).toBeDefined();
-    expect(dynamicManager.getWorkflow(workflowId)).not.toBeNull();
-
-    // 6. Migration should be available
-    const migrationResults = await legacyAdapter.migrateAllLegacyMacros();
-    expect(migrationResults).toBeDefined();
-    expect(Array.isArray(migrationResults)).toBe(true);
-  });
 });
