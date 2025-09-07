@@ -280,9 +280,6 @@ export interface DynamicMacroAPI {
   validateWorkflow(config: MacroWorkflowConfig): Promise<ValidationResult>;
   testWorkflow(config: MacroWorkflowConfig): Promise<FlowTestResult>;
   
-  // Legacy compatibility
-  migrateLegacyMacro(legacyInfo: LegacyMacroInfo): Promise<MigrationResult>;
-  migrateAllLegacyMacros(): Promise<MigrationResult[]>;
   
   // Type definitions
   getMacroTypeDefinition(typeId: keyof MacroTypeConfigs): MacroTypeDefinition | undefined;

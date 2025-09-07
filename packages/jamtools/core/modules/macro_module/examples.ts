@@ -14,13 +14,16 @@ import {ModuleAPI} from 'springboard/engine/module_api';
 export const exampleLegacyMacroUsage = async (macroModule: DynamicMacroModule, moduleAPI: ModuleAPI) => {
   console.log('=== Legacy Macro API Examples ===');
 
-  // Example 1: Original createMacro call (works exactly the same)
-  const midiInput = await macroModule.createMacro(moduleAPI, 'controller_input', 'midi_control_change_input', {
-    allowLocal: true,
-    onTrigger: (event: any) => console.log('MIDI CC received:', event)
+  // Example 1: Use dynamic workflow system instead
+  const workflowId = await macroModule.createWorkflowFromTemplate('midi_cc_chain', {
+    inputDevice: 'Controller',
+    inputChannel: 1,
+    inputCC: 1,
+    outputDevice: 'Synth',
+    outputChannel: 1,
+    outputCC: 7
   });
-
-  const midiOutput = await macroModule.createMacro(moduleAPI, 'synth_output', 'midi_control_change_output', {});
+  console.log('Created workflow:', workflowId);
 
   // Example 2: Connect legacy macros manually (original pattern)
   midiInput.subject.subscribe((event: any) => {
@@ -29,36 +32,30 @@ export const exampleLegacyMacroUsage = async (macroModule: DynamicMacroModule, m
     }
   });
 
-  // Example 3: Bulk macro creation (original API)
-  const macros = await macroModule.createMacros(moduleAPI, {
-    keyboard_in: {
-      type: 'musical_keyboard_input',
-      config: { allowLocal: true }
-    },
-    keyboard_out: {
-      type: 'musical_keyboard_output', 
-      config: {}
-    }
+  // Example 3: Create MIDI thru workflow
+  const thruWorkflowId = await macroModule.createWorkflowFromTemplate('midi_thru', {
+    inputDevice: 'Keyboard',
+    outputDevice: 'Synth'
   });
+  console.log('Created MIDI thru workflow:', thruWorkflowId);
 
   // Connect keyboard macros
   macros.keyboard_in.subject.subscribe((event: any) => {
     macros.keyboard_out.send(event.event);
   });
 
-  console.log('Legacy macros created and connected successfully');
-  return { midiInput, midiOutput, macros };
+  console.log('Workflows created successfully');
+  return { workflowId, thruWorkflowId };
 };
 
 // =============================================================================
 // DYNAMIC WORKFLOW EXAMPLES (NEW FUNCTIONALITY)
 // =============================================================================
 
-export const exampleDynamicWorkflows = async (macroModule: EnhancedMacroModule) => {
+export const exampleDynamicWorkflows = async (macroModule: DynamicMacroModule) => {
   console.log('=== Dynamic Workflow API Examples ===');
 
-  // Enable dynamic system first
-  await macroModule.enableDynamicSystem();
+  // Dynamic system is enabled by default
 
   // Example 1: Template-based workflow creation (EXACTLY as requested in issue)
   console.log('Creating MIDI CC chain using template...');
@@ -155,7 +152,7 @@ export const exampleDynamicWorkflows = async (macroModule: EnhancedMacroModule) 
 // HOT RELOADING EXAMPLES
 // =============================================================================
 
-export const exampleHotReloading = async (macroModule: EnhancedMacroModule, workflowId: string) => {
+export const exampleHotReloading = async (macroModule: DynamicMacroModule, workflowId: string) => {
   console.log('=== Hot Reloading Examples ===');
 
   // Get current workflow
@@ -228,7 +225,7 @@ export const exampleHotReloading = async (macroModule: EnhancedMacroModule, work
 // VALIDATION EXAMPLES
 // =============================================================================
 
-export const exampleValidation = async (macroModule: EnhancedMacroModule) => {
+export const exampleValidation = async (macroModule: DynamicMacroModule) => {
   console.log('=== Workflow Validation Examples ===');
 
   // Example: Validate a workflow before deployment
@@ -291,7 +288,7 @@ export const exampleValidation = async (macroModule: EnhancedMacroModule) => {
 // MIGRATION EXAMPLES
 // =============================================================================
 
-export const exampleMigration = async (macroModule: EnhancedMacroModule, moduleAPI: ModuleAPI) => {
+export const exampleMigration = async (macroModule: DynamicMacroModule, moduleAPI: ModuleAPI) => {
   console.log('=== Legacy Migration Examples ===');
 
   // Create some legacy macros first
@@ -329,7 +326,7 @@ export const exampleMigration = async (macroModule: EnhancedMacroModule, moduleA
 // TEMPLATE SYSTEM EXAMPLES  
 // =============================================================================
 
-export const exampleTemplateSystem = async (macroModule: EnhancedMacroModule) => {
+export const exampleTemplateSystem = async (macroModule: DynamicMacroModule) => {
   console.log('=== Template System Examples ===');
 
   // List available templates
@@ -378,7 +375,7 @@ export const exampleTemplateSystem = async (macroModule: EnhancedMacroModule) =>
 // REAL-TIME PERFORMANCE EXAMPLES
 // =============================================================================
 
-export const exampleRealTimePerformance = async (macroModule: EnhancedMacroModule) => {
+export const exampleRealTimePerformance = async (macroModule: DynamicMacroModule) => {
   console.log('=== Real-Time Performance Examples ===');
 
   // Create a high-performance workflow for live performance
@@ -484,7 +481,7 @@ export const exampleRealTimePerformance = async (macroModule: EnhancedMacroModul
 // COMPREHENSIVE EXAMPLE RUNNER
 // =============================================================================
 
-export const runAllExamples = async (macroModule: EnhancedMacroModule, moduleAPI: ModuleAPI) => {
+export const runAllExamples = async (macroModule: DynamicMacroModule, moduleAPI: ModuleAPI) => {
   console.log('\n🎹 JamTools Enhanced Macro System - Comprehensive Examples\n');
   
   try {

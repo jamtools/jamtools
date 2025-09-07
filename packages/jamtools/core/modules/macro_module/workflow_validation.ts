@@ -264,15 +264,16 @@ export class WorkflowValidator {
           totalThroughput += nodeResult.outputsProduced;
 
         } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : String(error);
           nodeResults[node.id] = {
             nodeId: node.id,
             success: false,
             processingTimeMs: Date.now() - nodeStartTime,
             inputsReceived: 0,
             outputsProduced: 0,
-            errors: [error.toString()]
+            errors: [errorMessage]
           };
-          errors.push(`Node ${node.id} threw exception: ${error}`);
+          errors.push(`Node ${node.id} threw exception: ${errorMessage}`);
         }
       }
 

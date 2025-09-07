@@ -36,7 +36,7 @@ export class DynamicMacroManager implements DynamicMacroAPI, WorkflowEventEmitte
   private validator: WorkflowValidator;
   
   // Performance monitoring
-  private metricsUpdateInterval: NodeJS.Timer | null = null;
+  private metricsUpdateInterval: NodeJS.Timeout | null = null;
   private readonly METRICS_UPDATE_INTERVAL_MS = 1000;
   
   constructor(
@@ -235,21 +235,6 @@ export class DynamicMacroManager implements DynamicMacroAPI, WorkflowEventEmitte
   }
 
   // =============================================================================
-  // LEGACY COMPATIBILITY
-  // =============================================================================
-
-  async migrateLegacyMacro(legacyInfo: LegacyMacroInfo): Promise<MigrationResult> {
-    // Implementation for migrating individual legacy macros
-    // This would convert old createMacro() calls to workflow nodes
-    throw new Error('Not implemented yet - will be added in legacy compatibility layer');
-  }
-
-  async migrateAllLegacyMacros(): Promise<MigrationResult[]> {
-    // Implementation for bulk migration
-    throw new Error('Not implemented yet - will be added in legacy compatibility layer');
-  }
-
-  // =============================================================================
   // TYPE DEFINITIONS
   // =============================================================================
 
@@ -411,7 +396,7 @@ export class DynamicMacroManager implements DynamicMacroAPI, WorkflowEventEmitte
       name: 'MIDI CC Chain',
       description: 'Maps a MIDI CC input to a MIDI CC output with optional value transformation',
       category: 'MIDI Control',
-      generator: (config: WorkflowTemplateConfigs['midi_cc_chain']): MacroWorkflowConfig => ({
+      generator: (config: WorkflowTemplateConfigs[WorkflowTemplateType]): MacroWorkflowConfig => ({
         id: `cc_chain_${Date.now()}`,
         name: `CC${config.inputCC} → CC${config.outputCC}`,
         description: `Maps CC${config.inputCC} from ${config.inputDevice} to CC${config.outputCC} on ${config.outputDevice}`,
@@ -475,7 +460,7 @@ export class DynamicMacroManager implements DynamicMacroAPI, WorkflowEventEmitte
       name: 'MIDI Thru',
       description: 'Routes MIDI from input device to output device',
       category: 'MIDI Routing',
-      generator: (config: WorkflowTemplateConfigs['midi_thru']): MacroWorkflowConfig => ({
+      generator: (config: WorkflowTemplateConfigs[WorkflowTemplateType]): MacroWorkflowConfig => ({
         id: `midi_thru_${Date.now()}`,
         name: `${config.inputDevice} → ${config.outputDevice}`,
         description: `Routes MIDI from ${config.inputDevice} to ${config.outputDevice}`,
@@ -526,7 +511,7 @@ export class DynamicMacroManager implements DynamicMacroAPI, WorkflowEventEmitte
   private startMetricsMonitoring(): void {
     this.metricsUpdateInterval = setInterval(() => {
       this.updateInstanceMetrics();
-    }, this.METRICS_UPDATE_INTERVAL_MS);
+    }, this.METRICS_UPDATE_INTERVAL_MS) as NodeJS.Timeout;
   }
 
   private updateInstanceMetrics(): void {
@@ -568,7 +553,7 @@ export class DynamicMacroManager implements DynamicMacroAPI, WorkflowEventEmitte
   async destroy(): Promise<void> {
     // Stop metrics monitoring
     if (this.metricsUpdateInterval) {
-      clearInterval(this.metricsUpdateInterval);
+      clearInterval(this.metricsUpdateInterval as NodeJS.Timeout);
       this.metricsUpdateInterval = null;
     }
 
