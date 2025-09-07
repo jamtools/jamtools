@@ -18,11 +18,10 @@ import {
 } from './dynamic_macro_types';
 import {MacroAPI, macroTypeRegistry} from './registered_macro_types';
 import {MacroTypeConfigs} from './macro_module_types';
+// Import all macro handlers to ensure they are registered
+import './macro_handlers';
 import {ReactiveConnectionManager} from './reactive_connection_system';
 import {WorkflowValidator} from './workflow_validation';
-
-// Import macro handlers to ensure they are registered
-import './macro_handlers';
 
 /**
  * Core manager for dynamic macro workflows.
@@ -315,8 +314,8 @@ export class DynamicMacroManager implements DynamicMacroAPI, WorkflowEventEmitte
                 const connection = await this.connectionManager.createConnection(
                     instance.macroInstances.get(connectionConfig.sourceNodeId)!,
                     instance.macroInstances.get(connectionConfig.targetNodeId)!,
-                    connectionConfig.sourceOutput || 'default',
-                    connectionConfig.targetInput || 'default'
+                    connectionConfig.sourceOutput || 'value',
+                    connectionConfig.targetInput || 'value'
                 );
                 instance.connections.set(connectionConfig.id, connection);
             }
@@ -360,14 +359,62 @@ export class DynamicMacroManager implements DynamicMacroAPI, WorkflowEventEmitte
     }
 
     private async createMacroInstance(nodeConfig: any): Promise<any> {
-    // This would integrate with the existing macro creation system
-    // For now, return a mock instance
-        return {
+        // Create a proper macro instance with inputs and outputs Maps
+        const instance = {
             id: nodeConfig.id,
             type: nodeConfig.type,
             config: nodeConfig.config,
-            // Would contain actual macro handler instance
+            inputs: new Map(),
+            outputs: new Map(),
+            subject: new (await import('rxjs')).Subject(), // For data flow
+            send: (data: any) => {
+                instance.subject.next(data);
+            }
         };
+        
+        // Set up default ports based on macro type definition
+        const typeDefinition = this.macroTypeDefinitions.get(nodeConfig.type);
+        if (typeDefinition) {
+            // Add input ports
+            if (typeDefinition.inputs) {
+                for (const inputDef of typeDefinition.inputs) {
+                    instance.inputs.set(inputDef.id, {
+                        id: inputDef.id,
+                        name: inputDef.name,
+                        type: inputDef.type,
+                        subject: new (await import('rxjs')).Subject()
+                    });
+                }
+            }
+            
+            // Add output ports  
+            if (typeDefinition.outputs) {
+                for (const outputDef of typeDefinition.outputs) {
+                    instance.outputs.set(outputDef.id, {
+                        id: outputDef.id,
+                        name: outputDef.name,
+                        type: outputDef.type,
+                        subject: new (await import('rxjs')).Subject()
+                    });
+                }
+            }
+        } else {
+            // Fallback: add default ports using 'value' as expected by tests
+            instance.inputs.set('value', {
+                id: 'value',
+                name: 'Input',
+                type: 'data',
+                subject: new (await import('rxjs')).Subject()
+            });
+            instance.outputs.set('value', {
+                id: 'value', 
+                name: 'Output',
+                type: 'data',
+                subject: new (await import('rxjs')).Subject()
+            });
+        }
+
+        return instance;
     }
 
     private loadMacroTypeDefinitions(): void {
@@ -378,7 +425,7 @@ export class DynamicMacroManager implements DynamicMacroAPI, WorkflowEventEmitte
             // Convert registry entries to MacroTypeDefinition format
             const definition: MacroTypeDefinition = {
                 id: macroTypeId,
-                name: macroTypeId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+                displayName: macroTypeId.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
                 description: `${macroTypeId} macro`,
                 category: this.getCategoryFromType(macroTypeId),
                 // Basic schema - could be enhanced based on actual macro configs
@@ -387,8 +434,8 @@ export class DynamicMacroManager implements DynamicMacroAPI, WorkflowEventEmitte
                     properties: {},
                     additionalProperties: true
                 },
-                inputs: ['value'], // Most macro types have a value input
-                outputs: ['value'] // Most macro types have a value output
+                inputs: [{ id: 'value', name: 'Value', type: 'data', required: true }], // Proper port definition
+                outputs: [{ id: 'value', name: 'Value', type: 'data', required: true }] // Proper port definition
             };
             
             this.macroTypeDefinitions.set(macroTypeId as keyof MacroTypeConfigs, definition);
@@ -399,7 +446,7 @@ export class DynamicMacroManager implements DynamicMacroAPI, WorkflowEventEmitte
             Array.from(this.macroTypeDefinitions.keys()));
     }
 
-    private getCategoryFromType(macroTypeId: string): string {
+    private getCategoryFromType(macroTypeId: string): 'input' | 'output' | 'processor' | 'utility' {
         if (macroTypeId.includes('input')) return 'input';
         if (macroTypeId.includes('output')) return 'output';
         if (macroTypeId.includes('mapper') || macroTypeId.includes('processor')) return 'processor';

@@ -233,6 +233,8 @@ describe('Dynamic Macro System', () => {
 
     describe('WorkflowValidator', () => {
         it('should validate workflow schemas', async () => {
+            await dynamicManager.initialize();
+            
             const validWorkflow: MacroWorkflowConfig = {
                 id: 'valid_workflow',
                 name: 'Valid Workflow',
@@ -252,7 +254,7 @@ describe('Dynamic Macro System', () => {
                 connections: []
             };
 
-            const result = await validator.validateWorkflow(validWorkflow, new Map());
+            const result = await dynamicManager.validateWorkflow(validWorkflow);
             expect(result.valid).toBe(true);
             expect(result.errors).toHaveLength(0);
         });
@@ -343,6 +345,8 @@ describe('Dynamic Macro System', () => {
         });
 
         it('should test workflow flow simulation', async () => {
+            await dynamicManager.initialize();
+            
             const workflow: MacroWorkflowConfig = {
                 id: 'flow_test',
                 name: 'Flow Test',
@@ -374,7 +378,7 @@ describe('Dynamic Macro System', () => {
                 ]
             };
 
-            const result = await validator.testWorkflowFlow(workflow, new Map());
+            const result = await dynamicManager.testWorkflow(workflow);
             expect(result.success).toBe(true);
             expect(result.latencyMs).toBeGreaterThanOrEqual(0);
             expect(result.nodeResults).toHaveProperty('input');
@@ -666,8 +670,10 @@ describe('Dynamic Macro System', () => {
                 connections
             };
 
+            await dynamicManager.initialize();
+            
             const startTime = Date.now();
-            const result = await validator.validateWorkflow(largeWorkflow, new Map());
+            const result = await dynamicManager.validateWorkflow(largeWorkflow);
             const endTime = Date.now();
 
             // Validation should complete in reasonable time (less than 1 second)
