@@ -1,4 +1,4 @@
-import {JSONSchema4} from 'json-schema';
+import {JSONSchema4} from '@types/json-schema';
 import {Observable, Subject} from 'rxjs';
 import {MacroTypeConfigs, MidiEventFull} from './macro_module_types';
 

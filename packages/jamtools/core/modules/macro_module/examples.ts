@@ -3,7 +3,7 @@
  * Shows how to use both legacy APIs and new dynamic workflows.
  */
 
-import {EnhancedMacroModule} from './enhanced_macro_module';
+import {DynamicMacroModule} from './enhanced_macro_module';
 import {MacroWorkflowConfig} from './dynamic_macro_types';
 import {ModuleAPI} from 'springboard/engine/module_api';
 
@@ -11,19 +11,19 @@ import {ModuleAPI} from 'springboard/engine/module_api';
 // LEGACY API EXAMPLES (UNCHANGED - 100% COMPATIBLE)
 // =============================================================================
 
-export const exampleLegacyMacroUsage = async (macroModule: EnhancedMacroModule, moduleAPI: ModuleAPI) => {
+export const exampleLegacyMacroUsage = async (macroModule: DynamicMacroModule, moduleAPI: ModuleAPI) => {
   console.log('=== Legacy Macro API Examples ===');
 
   // Example 1: Original createMacro call (works exactly the same)
   const midiInput = await macroModule.createMacro(moduleAPI, 'controller_input', 'midi_control_change_input', {
     allowLocal: true,
-    onTrigger: (event) => console.log('MIDI CC received:', event)
+    onTrigger: (event: any) => console.log('MIDI CC received:', event)
   });
 
   const midiOutput = await macroModule.createMacro(moduleAPI, 'synth_output', 'midi_control_change_output', {});
 
   // Example 2: Connect legacy macros manually (original pattern)
-  midiInput.subject.subscribe(event => {
+  midiInput.subject.subscribe((event: any) => {
     if (event.event.type === 'cc') {
       midiOutput.send(event.event.value!);
     }
@@ -42,7 +42,7 @@ export const exampleLegacyMacroUsage = async (macroModule: EnhancedMacroModule, 
   });
 
   // Connect keyboard macros
-  macros.keyboard_in.subject.subscribe(event => {
+  macros.keyboard_in.subject.subscribe((event: any) => {
     macros.keyboard_out.send(event.event);
   });
 
@@ -172,7 +172,7 @@ export const exampleHotReloading = async (macroModule: EnhancedMacroModule, work
     ...workflow,
     modified: Date.now(),
     version: workflow.version + 1,
-    macros: workflow.macros.map(macro => {
+    macros: workflow.macros.map((macro: any) => {
       if (macro.id === 'controller_cc1' && macro.config.ccNumberFilter) {
         return {
           ...macro,
@@ -272,7 +272,7 @@ export const exampleValidation = async (macroModule: EnhancedMacroModule) => {
     console.log('✅ Workflow validation passed');
   } else {
     console.log('❌ Workflow validation failed:');
-    validationResult.errors.forEach(error => {
+    validationResult.errors.forEach((error: any) => {
       console.log(`  - ${error.message}`);
       if (error.suggestion) {
         console.log(`    💡 ${error.suggestion}`);
@@ -313,7 +313,7 @@ export const exampleMigration = async (macroModule: EnhancedMacroModule, moduleA
     const migrationResults = await macroModule.migrateAllLegacyMacros();
     console.log(`Migration completed: ${migrationResults.length} macros processed`);
     
-    migrationResults.forEach((result, index) => {
+    migrationResults.forEach((result: any, index: number) => {
       if (result.success) {
         console.log(`✅ Migration ${index + 1}: ${result.migratedMacrosCount} macros migrated`);
       } else {
@@ -335,7 +335,7 @@ export const exampleTemplateSystem = async (macroModule: EnhancedMacroModule) =>
   // List available templates
   const templates = macroModule.getAvailableTemplates();
   console.log('Available templates:');
-  templates.forEach(template => {
+  templates.forEach((template: any) => {
     console.log(`  - ${template.name}: ${template.description}`);
   });
 
@@ -456,7 +456,7 @@ export const exampleRealTimePerformance = async (macroModule: EnhancedMacroModul
   
   if (validation.warnings.length > 0) {
     console.log('Performance warnings:');
-    validation.warnings.forEach(warning => {
+    validation.warnings.forEach((warning: any) => {
       if (warning.type === 'performance') {
         console.log(`  ⚠️ ${warning.message}`);
       }

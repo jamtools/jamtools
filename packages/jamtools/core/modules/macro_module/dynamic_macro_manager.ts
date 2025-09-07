@@ -411,7 +411,7 @@ export class DynamicMacroManager implements DynamicMacroAPI, WorkflowEventEmitte
       name: 'MIDI CC Chain',
       description: 'Maps a MIDI CC input to a MIDI CC output with optional value transformation',
       category: 'MIDI Control',
-      generator: (config: WorkflowTemplateConfigs['midi_cc_chain']) => ({
+      generator: (config: WorkflowTemplateConfigs['midi_cc_chain']): MacroWorkflowConfig => ({
         id: `cc_chain_${Date.now()}`,
         name: `CC${config.inputCC} → CC${config.outputCC}`,
         description: `Maps CC${config.inputCC} from ${config.inputDevice} to CC${config.outputCC} on ${config.outputDevice}`,
@@ -475,7 +475,7 @@ export class DynamicMacroManager implements DynamicMacroAPI, WorkflowEventEmitte
       name: 'MIDI Thru',
       description: 'Routes MIDI from input device to output device',
       category: 'MIDI Routing',
-      generator: (config: WorkflowTemplateConfigs['midi_thru']) => ({
+      generator: (config: WorkflowTemplateConfigs['midi_thru']): MacroWorkflowConfig => ({
         id: `midi_thru_${Date.now()}`,
         name: `${config.inputDevice} → ${config.outputDevice}`,
         description: `Routes MIDI from ${config.inputDevice} to ${config.outputDevice}`,

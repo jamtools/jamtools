@@ -8,6 +8,23 @@ import {CoreDependencies, ModuleDependencies} from 'springboard/types/module_typ
 import {MacroConfigItem, MacroTypeConfigs} from './macro_module_types';
 import {BaseModule, ModuleHookValue} from 'springboard/modules/base_module/base_module';
 import {MacroPage} from './macro_page';
+
+// Simple component for dynamic macro system
+const DynamicMacroPage: React.FC<{state: MacroConfigState}> = ({state}) => {
+  return (
+    <div>
+      <h2>Dynamic Macro System</h2>
+      <p>Active Workflows: {Object.keys(state.workflows).length}</p>
+      {Object.entries(state.workflows).map(([id, workflow]) => (
+        <div key={id}>
+          <h3>{workflow.name}</h3>
+          <p>{workflow.description}</p>
+          <p>Status: {workflow.enabled ? 'Active' : 'Inactive'}</p>
+        </div>
+      ))}
+    </div>
+  );
+};
 import springboard from 'springboard';
 import {CapturedRegisterMacroTypeCall, MacroAPI, MacroCallback} from '@jamtools/core/modules/macro_module/registered_macro_types';
 import {ModuleAPI} from 'springboard/engine/module_api';
@@ -44,7 +61,7 @@ springboard.registerClassModule((coreDeps: CoreDependencies, modDependencies: Mo
 
 declare module 'springboard/module_registry/module_registry' {
   interface AllModules {
-    macro: DynamicMacroModule;
+    enhanced_macro: DynamicMacroModule;
   }
 }
 
@@ -59,7 +76,7 @@ declare module 'springboard/module_registry/module_registry' {
  * - Real-time performance optimized for <10ms MIDI latency
  */
 export class DynamicMacroModule implements Module<MacroConfigState>, DynamicMacroAPI {
-  moduleId = 'macro';
+  moduleId = 'enhanced_macro';
 
   registeredMacroTypes: CapturedRegisterMacroTypeCall[] = [];
   
@@ -81,7 +98,7 @@ export class DynamicMacroModule implements Module<MacroConfigState>, DynamicMacr
     '': {
       component: () => {
         const mod = DynamicMacroModule.use();
-        return <MacroPage state={mod.state || this.state} />;
+        return <DynamicMacroPage state={mod.state || this.state} />;
       },
     },
   };
@@ -367,7 +384,7 @@ export class DynamicMacroModule implements Module<MacroConfigState>, DynamicMacr
         // Return mock modules
         return {} as any;
       },
-      createAction: (...args) => {
+      createAction: (...args: any[]) => {
         return () => {};
       },
       statesAPI: {

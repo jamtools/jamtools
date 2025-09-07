@@ -15,7 +15,7 @@ import {
 export class ReactiveConnectionManager {
   private connections = new Map<string, ConnectionHandle>();
   private connectionSubscriptions = new Map<string, Subscription>();
-  private healthChecks = new Map<string, NodeJS.Timer>();
+  private healthChecks = new Map<string, NodeJS.Timeout>();
   private metrics: WorkflowMetrics;
   private destroy$ = new Subject<void>();
 
@@ -291,7 +291,7 @@ export class ReactiveConnectionManager {
           recoverable: true
         });
       }
-    }, this.HEALTH_CHECK_INTERVAL_MS);
+    }, this.HEALTH_CHECK_INTERVAL_MS) as NodeJS.Timeout;
 
     this.healthChecks.set(connectionId, healthTimer);
   }
@@ -300,7 +300,7 @@ export class ReactiveConnectionManager {
     // Collect system-wide metrics every second
     setInterval(() => {
       this.updateGlobalMetrics();
-    }, 1000);
+    }, 1000) as NodeJS.Timeout;
   }
 
   private updateGlobalMetrics(): void {
