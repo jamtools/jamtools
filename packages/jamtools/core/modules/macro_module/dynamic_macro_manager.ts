@@ -16,10 +16,13 @@ import {
     ConnectionHandle,
     WorkflowMetrics
 } from './dynamic_macro_types';
-import {MacroAPI} from './registered_macro_types';
+import {MacroAPI, macroTypeRegistry} from './registered_macro_types';
 import {MacroTypeConfigs} from './macro_module_types';
 import {ReactiveConnectionManager} from './reactive_connection_system';
 import {WorkflowValidator} from './workflow_validation';
+
+// Import macro handlers to ensure they are registered
+import './macro_handlers';
 
 /**
  * Core manager for dynamic macro workflows.
@@ -367,6 +370,42 @@ export class DynamicMacroManager implements DynamicMacroAPI, WorkflowEventEmitte
         };
     }
 
+    private loadMacroTypeDefinitions(): void {
+        // Access the registered macro types from the registry
+        const registeredCalls = (macroTypeRegistry.registerMacroType as any).calls || [];
+        
+        for (const [macroTypeId, options, callback] of registeredCalls) {
+            // Convert registry entries to MacroTypeDefinition format
+            const definition: MacroTypeDefinition = {
+                id: macroTypeId,
+                name: macroTypeId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+                description: `${macroTypeId} macro`,
+                category: this.getCategoryFromType(macroTypeId),
+                // Basic schema - could be enhanced based on actual macro configs
+                configSchema: {
+                    type: 'object',
+                    properties: {},
+                    additionalProperties: true
+                },
+                inputs: ['value'], // Most macro types have a value input
+                outputs: ['value'] // Most macro types have a value output
+            };
+            
+            this.macroTypeDefinitions.set(macroTypeId as keyof MacroTypeConfigs, definition);
+        }
+        
+        // Log loaded types for debugging
+        console.log(`Loaded ${this.macroTypeDefinitions.size} macro type definitions:`, 
+            Array.from(this.macroTypeDefinitions.keys()));
+    }
+
+    private getCategoryFromType(macroTypeId: string): string {
+        if (macroTypeId.includes('input')) return 'input';
+        if (macroTypeId.includes('output')) return 'output';
+        if (macroTypeId.includes('mapper') || macroTypeId.includes('processor')) return 'processor';
+        return 'utility';
+    }
+
     private async persistWorkflows(): Promise<void> {
         try {
             const workflowsData = Object.fromEntries(this.workflows);
@@ -536,6 +575,9 @@ export class DynamicMacroManager implements DynamicMacroAPI, WorkflowEventEmitte
     // =============================================================================
 
     async initialize(): Promise<void> {
+        // Load macro type definitions from registry
+        this.loadMacroTypeDefinitions();
+        
         await this.loadPersistedWorkflows();
     
         // Start enabled workflows
