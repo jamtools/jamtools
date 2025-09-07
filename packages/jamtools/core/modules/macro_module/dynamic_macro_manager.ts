@@ -22,6 +22,7 @@ import {MacroTypeConfigs} from './macro_module_types';
 import './macro_handlers';
 import {ReactiveConnectionManager} from './reactive_connection_system';
 import {WorkflowValidator} from './workflow_validation';
+import {deviceConfigManager, LogicalTemplateConfig} from './device_configuration_manager';
 
 /**
  * Core manager for dynamic macro workflows.
@@ -478,62 +479,67 @@ export class DynamicMacroManager implements DynamicMacroAPI, WorkflowEventEmitte
             name: 'MIDI CC Chain',
             description: 'Maps a MIDI CC input to a MIDI CC output with optional value transformation',
             category: 'MIDI Control',
-            generator: (config: any): MacroWorkflowConfig => ({
-                id: `cc_chain_${Date.now()}`,
-                name: `CC${config.inputCC} → CC${config.outputCC}`,
-                description: `Maps CC${config.inputCC} from ${config.inputDevice} to CC${config.outputCC} on ${config.outputDevice}`,
-                enabled: true,
-                version: 1,
-                created: Date.now(),
-                modified: Date.now(),
-                macros: [
-                    {
-                        id: 'input',
-                        type: 'midi_control_change_input',
-                        position: { x: 100, y: 100 },
-                        config: {
-                            deviceFilter: config.inputDevice,
-                            channelFilter: config.inputChannel,
-                            ccNumberFilter: config.inputCC
+            generator: (config: any): MacroWorkflowConfig => {
+                // Resolve logical configuration to physical devices/channels/CCs
+                const resolved = deviceConfigManager.resolveLogicalTemplate(config as LogicalTemplateConfig);
+                
+                return {
+                    id: `cc_chain_${Date.now()}`,
+                    name: `${config.inputCC} → ${config.outputCC} (${config.inputDevice}→${config.outputDevice})`,
+                    description: `Maps ${config.inputCC} from ${config.inputDevice} to ${config.outputCC} on ${config.outputDevice}`,
+                    enabled: true,
+                    version: 1,
+                    created: Date.now(),
+                    modified: Date.now(),
+                    macros: [
+                        {
+                            id: 'input',
+                            type: 'midi_control_change_input',
+                            position: { x: 100, y: 100 },
+                            config: {
+                                deviceFilter: resolved.inputDevice,
+                                channelFilter: resolved.inputChannel,
+                                ccNumberFilter: resolved.inputCC
+                            }
+                        },
+                        ...(config.minValue !== undefined || config.maxValue !== undefined ? [{
+                            id: 'processor',
+                            type: 'value_mapper' as keyof MacroTypeConfigs,
+                            position: { x: 300, y: 100 },
+                            config: {
+                                inputRange: [0, 127],
+                                outputRange: [config.minValue || 0, config.maxValue || 127]
+                            }
+                        }] : []),
+                        {
+                            id: 'output',
+                            type: 'midi_control_change_output',
+                            position: { x: 500, y: 100 },
+                            config: {
+                                device: resolved.outputDevice,
+                                channel: resolved.outputChannel,
+                                ccNumber: resolved.outputCC
+                            }
                         }
-                    },
-                    ...(config.minValue !== undefined || config.maxValue !== undefined ? [{
-                        id: 'processor',
-                        type: 'value_mapper' as keyof MacroTypeConfigs,
-                        position: { x: 300, y: 100 },
-                        config: {
-                            inputRange: [0, 127],
-                            outputRange: [config.minValue || 0, config.maxValue || 127]
-                        }
-                    }] : []),
-                    {
-                        id: 'output',
-                        type: 'midi_control_change_output',
-                        position: { x: 500, y: 100 },
-                        config: {
-                            device: config.outputDevice,
-                            channel: config.outputChannel,
-                            ccNumber: config.outputCC
-                        }
-                    }
-                ],
-                connections: [
-                    {
-                        id: 'input-to-output',
-                        sourceNodeId: 'input',
-                        targetNodeId: config.minValue !== undefined || config.maxValue !== undefined ? 'processor' : 'output',
-                        sourceOutput: 'value',
-                        targetInput: 'input'
-                    },
-                    ...(config.minValue !== undefined || config.maxValue !== undefined ? [{
-                        id: 'processor-to-output',
-                        sourceNodeId: 'processor',
-                        targetNodeId: 'output',
-                        sourceOutput: 'output',
-                        targetInput: 'value'
-                    }] : [])
-                ]
-            })
+                    ],
+                    connections: [
+                        {
+                            id: 'input-to-output',
+                            sourceNodeId: 'input',
+                            targetNodeId: config.minValue !== undefined || config.maxValue !== undefined ? 'processor' : 'output',
+                            sourceOutput: 'value',
+                            targetInput: 'input'
+                        },
+                        ...(config.minValue !== undefined || config.maxValue !== undefined ? [{
+                            id: 'processor-to-output',
+                            sourceNodeId: 'processor',
+                            targetNodeId: 'output',
+                            sourceOutput: 'output',
+                            targetInput: 'value'
+                        }] : [])
+                    ]
+                };
+            }
         });
 
         // MIDI Thru Template
@@ -542,38 +548,43 @@ export class DynamicMacroManager implements DynamicMacroAPI, WorkflowEventEmitte
             name: 'MIDI Thru',
             description: 'Routes MIDI from input device to output device',
             category: 'MIDI Routing',
-            generator: (config: any): MacroWorkflowConfig => ({
-                id: `midi_thru_${Date.now()}`,
-                name: `${config.inputDevice} → ${config.outputDevice}`,
-                description: `Routes MIDI from ${config.inputDevice} to ${config.outputDevice}`,
-                enabled: true,
-                version: 1,
-                created: Date.now(),
-                modified: Date.now(),
-                macros: [
-                    {
-                        id: 'input',
-                        type: 'musical_keyboard_input',
-                        position: { x: 100, y: 100 },
-                        config: { deviceFilter: config.inputDevice }
-                    },
-                    {
-                        id: 'output',
-                        type: 'musical_keyboard_output',
-                        position: { x: 300, y: 100 },
-                        config: { device: config.outputDevice }
-                    }
-                ],
-                connections: [
-                    {
-                        id: 'thru',
-                        sourceNodeId: 'input',
-                        targetNodeId: 'output',
-                        sourceOutput: 'midi',
-                        targetInput: 'midi'
-                    }
-                ]
-            })
+            generator: (config: any): MacroWorkflowConfig => {
+                // Resolve logical configuration to physical devices
+                const resolved = deviceConfigManager.resolveLogicalTemplate(config as LogicalTemplateConfig);
+                
+                return {
+                    id: `midi_thru_${Date.now()}`,
+                    name: `${config.inputDevice} → ${config.outputDevice}`,
+                    description: `Routes MIDI from ${config.inputDevice} to ${config.outputDevice}`,
+                    enabled: true,
+                    version: 1,
+                    created: Date.now(),
+                    modified: Date.now(),
+                    macros: [
+                        {
+                            id: 'input',
+                            type: 'musical_keyboard_input',
+                            position: { x: 100, y: 100 },
+                            config: { deviceFilter: resolved.inputDevice }
+                        },
+                        {
+                            id: 'output',
+                            type: 'musical_keyboard_output',
+                            position: { x: 300, y: 100 },
+                            config: { device: resolved.outputDevice }
+                        }
+                    ],
+                    connections: [
+                        {
+                            id: 'thru',
+                            sourceNodeId: 'input',
+                            targetNodeId: 'output',
+                            sourceOutput: 'midi',
+                            targetInput: 'midi'
+                        }
+                    ]
+                };
+            }
         });
     }
 

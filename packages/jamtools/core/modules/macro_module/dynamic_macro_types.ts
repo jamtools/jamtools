@@ -81,18 +81,24 @@ export type WorkflowTemplateType = 'midi_cc_chain' | 'midi_thru' | 'custom';
 
 export interface WorkflowTemplateConfigs {
     midi_cc_chain: {
-        inputDevice: string;
-        inputChannel: number;
-        inputCC: number;
-        outputDevice: string;
-        outputChannel: number;
-        outputCC: number;
+        // Logical device identifiers (user-configurable)
+        inputDevice: string;    // e.g., "main_controller", "drum_pads" 
+        outputDevice: string;   // e.g., "main_synth", "effects"
+        
+        // Logical or physical channel/CC numbers
+        inputChannel: string | number;  // e.g., "lead" or 1
+        outputChannel: string | number; // e.g., "bass" or 2
+        inputCC: string | number;       // e.g., "filter_cutoff" or 74
+        outputCC: string | number;      // e.g., "resonance" or 71
+        
+        // Value ranges
         minValue?: number;
         maxValue?: number;
     };
     midi_thru: {
-        inputDevice: string;
-        outputDevice: string;
+        // Logical device identifiers
+        inputDevice: string;    // e.g., "main_controller"
+        outputDevice: string;   // e.g., "main_synth"
         channelMap?: Record<number, number>;
     };
     custom: {

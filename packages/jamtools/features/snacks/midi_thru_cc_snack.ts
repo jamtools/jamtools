@@ -3,8 +3,20 @@ import springboard from 'springboard';
 springboard.registerModule('midi_thru_cc', {}, async (moduleAPI) => {
     const macroModule = moduleAPI.deps.module.moduleRegistry.getModule('enhanced_macro');
 
-    // Create a custom workflow for CC to Note conversion
-    const workflowId = await macroModule.createWorkflow({
+    // Use a simple template first, then create a custom processor workflow  
+    const basicWorkflowId = await macroModule.createWorkflowFromTemplate('midi_cc_chain', {
+        inputDevice: 'main_controller',    // User-configurable logical device
+        inputChannel: 'lead',              // User-configurable logical channel  
+        inputCC: 'filter_cutoff',          // User-configurable logical CC
+        outputDevice: 'main_synth',        // User-configurable logical device
+        outputChannel: 'lead',             // User-configurable logical channel
+        outputCC: 'resonance',             // User-configurable logical CC
+        minValue: 0,
+        maxValue: 127
+    });
+
+    // Create a custom workflow for CC to Note conversion with logical references
+    const customWorkflowId = await macroModule.createWorkflow({
         id: 'cc_to_note_converter',
         name: 'CC to Note Converter',
         description: 'Converts MIDI CC values to note events with custom logic',
@@ -16,13 +28,18 @@ springboard.registerModule('midi_thru_cc', {}, async (moduleAPI) => {
             {
                 id: 'cc_input',
                 type: 'midi_control_change_input',
-                config: {},
+                config: {
+                    // NOTE: Custom workflows could also resolve logical names
+                    // In practice, we'd want deviceConfigManager integration here too
+                },
                 position: { x: 0, y: 0 }
             },
             {
                 id: 'note_output',
                 type: 'musical_keyboard_output',
-                config: {},
+                config: {
+                    // NOTE: Similarly, this would resolve logical output device
+                },
                 position: { x: 200, y: 0 }
             },
             {
@@ -65,5 +82,6 @@ springboard.registerModule('midi_thru_cc', {}, async (moduleAPI) => {
         ]
     });
 
-    console.log('Created dynamic CC-to-Note workflow:', workflowId);
+    console.log('Created basic CC chain workflow:', basicWorkflowId);
+    console.log('Created custom CC-to-Note workflow:', customWorkflowId);
 });

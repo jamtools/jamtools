@@ -9,19 +9,79 @@ import {MacroConfigItem, MacroTypeConfigs} from './macro_module_types';
 import {BaseModule, ModuleHookValue} from 'springboard/modules/base_module/base_module';
 import {MacroPage} from './macro_page';
 
-// Simple component for dynamic macro system
+import DeviceConfigurationUI from './device_configuration_ui';
+
+// Enhanced component for dynamic macro system with device configuration
 const DynamicMacroPage: React.FC<{state: MacroConfigState}> = ({state}) => {
+    const [activeTab, setActiveTab] = React.useState<'workflows' | 'devices'>('workflows');
+
     return (
         <div>
-            <h2>Dynamic Macro System</h2>
-            <p>Active Workflows: {Object.keys(state.workflows).length}</p>
-            {Object.entries(state.workflows).map(([id, workflow]) => (
-                <div key={id}>
-                    <h3>{workflow.name}</h3>
-                    <p>{workflow.description}</p>
-                    <p>Status: {workflow.enabled ? 'Active' : 'Inactive'}</p>
+            <div style={{display: 'flex', gap: '10px', marginBottom: '20px', borderBottom: '1px solid #ddd'}}>
+                <button 
+                    onClick={() => setActiveTab('workflows')}
+                    style={{
+                        padding: '10px 20px', 
+                        border: 'none', 
+                        borderBottom: activeTab === 'workflows' ? '2px solid #007bff' : 'none',
+                        backgroundColor: 'transparent',
+                        fontWeight: activeTab === 'workflows' ? 'bold' : 'normal'
+                    }}
+                >
+                    📊 Active Workflows
+                </button>
+                <button 
+                    onClick={() => setActiveTab('devices')}
+                    style={{
+                        padding: '10px 20px', 
+                        border: 'none', 
+                        borderBottom: activeTab === 'devices' ? '2px solid #007bff' : 'none',
+                        backgroundColor: 'transparent',
+                        fontWeight: activeTab === 'devices' ? 'bold' : 'normal'
+                    }}
+                >
+                    🎛️ Device Configuration
+                </button>
+            </div>
+
+            {activeTab === 'workflows' && (
+                <div>
+                    <h2>Dynamic Macro System</h2>
+                    <p>Active Workflows: {Object.keys(state.workflows).length}</p>
+                    {Object.keys(state.workflows).length === 0 && (
+                        <div style={{padding: '20px', backgroundColor: '#f8f9fa', borderRadius: '8px', margin: '20px 0'}}>
+                            <p>No workflows active yet. Workflows are created automatically when you use feature modules!</p>
+                            <p>Try opening a feature like "Hand Raiser" or "MIDI Thru" to see workflows appear here.</p>
+                        </div>
+                    )}
+                    {Object.entries(state.workflows).map(([id, workflow]) => (
+                        <div key={id} style={{
+                            border: '1px solid #ddd', 
+                            borderRadius: '8px', 
+                            padding: '15px', 
+                            margin: '10px 0',
+                            backgroundColor: workflow.enabled ? '#f0f8ff' : '#f8f8f8'
+                        }}>
+                            <h3>{workflow.name}</h3>
+                            <p>{workflow.description}</p>
+                            <p>Status: <span style={{
+                                color: workflow.enabled ? 'green' : 'gray',
+                                fontWeight: 'bold'
+                            }}>{workflow.enabled ? '🟢 Active' : '⚫ Inactive'}</span></p>
+                            <details style={{marginTop: '10px'}}>
+                                <summary style={{cursor: 'pointer', fontWeight: 'bold'}}>Show Details</summary>
+                                <pre style={{fontSize: '12px', backgroundColor: '#f5f5f5', padding: '10px', marginTop: '10px', overflow: 'auto'}}>
+                                    {JSON.stringify(workflow, null, 2)}
+                                </pre>
+                            </details>
+                        </div>
+                    ))}
                 </div>
-            ))}
+            )}
+
+            {activeTab === 'devices' && (
+                <DeviceConfigurationUI />
+            )}
         </div>
     );
 };

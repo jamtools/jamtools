@@ -22,15 +22,15 @@ springboard.registerModule('HandRaiser', {}, async (m) => {
         },
     });
 
-    // Create dynamic workflows for each hand slider using templates
+    // Create dynamic workflows for each hand slider using logical device/channel/CC names
     const sliderWorkflows = await Promise.all([0, 1].map(async (index) => {
         const workflowId = await macroModule.createWorkflowFromTemplate('midi_cc_chain', {
-            inputDevice: 'Default Controller',
-            inputChannel: 1,
-            inputCC: 10 + index, // CC 10 for slider 0, CC 11 for slider 1
-            outputDevice: 'Internal Processing',
-            outputChannel: 1,
-            outputCC: 70 + index, // Output to different CCs
+            inputDevice: 'main_controller',       // User-configurable logical device
+            inputChannel: 'lead',                 // User-configurable logical channel
+            inputCC: `slider_${index + 1}`,      // User-configurable logical CC (slider_1, slider_2)
+            outputDevice: 'effects',             // User-configurable logical device for effects processing
+            outputChannel: 'effects',            // User-configurable logical channel
+            outputCC: `hand_position_${index}`,  // User-configurable logical CC for hand positions
             minValue: 0,
             maxValue: 127
         });
