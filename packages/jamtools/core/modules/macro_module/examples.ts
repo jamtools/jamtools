@@ -25,11 +25,17 @@ export const exampleLegacyMacroUsage = async (macroModule: DynamicMacroModule, m
     });
     console.log('Created workflow:', workflowId);
 
-    // Example 2: Connect legacy macros manually (original pattern)
-    midiInput.subject.subscribe((event: any) => {
-        if (event.event.type === 'cc') {
-            midiOutput.send(event.event.value!);
-        }
+    // Example 2: Direct workflow creation (modern pattern)
+    const customWorkflow = await macroModule.createWorkflow({
+        id: 'custom_cc_workflow',
+        name: 'Custom CC Workflow',
+        description: 'Custom workflow example',
+        enabled: true,
+        version: 1,
+        created: Date.now(),
+        modified: Date.now(),
+        macros: [],
+        connections: []
     });
 
     // Example 3: Create MIDI thru workflow
@@ -39,13 +45,12 @@ export const exampleLegacyMacroUsage = async (macroModule: DynamicMacroModule, m
     });
     console.log('Created MIDI thru workflow:', thruWorkflowId);
 
-    // Connect keyboard macros
-    macros.keyboard_in.subject.subscribe((event: any) => {
-        macros.keyboard_out.send(event.event);
-    });
+    // Example 4: List all workflows
+    const allWorkflows = macroModule.listWorkflows();
+    console.log(`Total workflows: ${allWorkflows.length}`);
 
     console.log('Workflows created successfully');
-    return { workflowId, thruWorkflowId };
+    return { workflowId, thruWorkflowId, customWorkflow };
 };
 
 // =============================================================================
@@ -518,9 +523,9 @@ export const runAllExamples = async (macroModule: DynamicMacroModule, moduleAPI:
         // Final system status
         const finalStatus = macroModule.getSystemStatus();
         console.log('=== Final System Status ===');
-        console.log(`Dynamic system: ${finalStatus.dynamicEnabled ? '✅ Enabled' : '❌ Disabled'}`);
-        console.log(`Legacy macros: ${finalStatus.legacyMacrosCount}`);
-        console.log(`Dynamic workflows: ${finalStatus.workflowsCount} (${finalStatus.activeWorkflowsCount} active)`);
+        console.log(`System initialized: ${finalStatus.initialized ? '✅ Yes' : '❌ No'}`);
+        console.log(`Active workflows: ${finalStatus.activeWorkflowsCount}`);
+        console.log(`Total workflows: ${finalStatus.workflowsCount}`);
         console.log(`Macro types registered: ${finalStatus.registeredMacroTypesCount}`);
 
         console.log('\n🎉 All examples completed successfully!');

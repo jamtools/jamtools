@@ -21,17 +21,17 @@ class SimpleValidator {
     }
 
     compile(schema: JSONSchemaType): ValidateFunction {
-        const validate = (data: any): boolean => {
+        const validate: ValidateFunction = (data: any): boolean => {
             // Simple validation - just check if data exists for required fields
             if (schema.required) {
                 for (const field of schema.required) {
                     if (!data || data[field] === undefined) {
-                        validate.errors = [{ instancePath: `/${field}`, message: `Required field '${field}' is missing` }];
+                        (validate as any).errors = [{ instancePath: `/${field}`, message: `Required field '${field}' is missing` }];
                         return false;
                     }
                 }
             }
-            validate.errors = null;
+            (validate as any).errors = null;
             return true;
         };
         return validate;
