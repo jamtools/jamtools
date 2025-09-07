@@ -302,27 +302,13 @@ export const exampleMigration = async (macroModule: DynamicMacroModule, moduleAP
     // Get migration statistics
     const stats = macroModule.getSystemStatus();
     console.log('System status:', {
-        dynamicEnabled: stats.dynamicEnabled,
-        legacyMacros: stats.legacyMacrosCount,
+        initialized: stats.initialized,
+        activeWorkflows: stats.activeWorkflowsCount,
         workflows: stats.workflowsCount
     });
 
-    // Auto-migrate compatible legacy macros
-    if (stats.legacyCompatibilityReport) {
-        console.log('Compatibility report:', stats.legacyCompatibilityReport);
-    
-        // Migrate all compatible legacy macros
-        const migrationResults = await macroModule.migrateAllLegacyMacros();
-        console.log(`Migration completed: ${migrationResults.length} macros processed`);
-    
-        migrationResults.forEach((result: any, index: number) => {
-            if (result.success) {
-                console.log(`✅ Migration ${index + 1}: ${result.migratedMacrosCount} macros migrated`);
-            } else {
-                console.log(`❌ Migration ${index + 1} failed:`, result.errors);
-            }
-        });
-    }
+    // System is fully dynamic - no legacy macros to migrate
+    console.log('Dynamic macro system ready for use!');
 
     return legacyMacros;
 };
