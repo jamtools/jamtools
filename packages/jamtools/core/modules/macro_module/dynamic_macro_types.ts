@@ -1,4 +1,10 @@
-import {JSONSchema4} from '@types/json-schema';
+// Simple JSON schema interface for basic validation
+interface JSONSchema4 {
+  type?: string;
+  properties?: Record<string, any>;
+  required?: string[];
+  additionalProperties?: boolean;
+}
 import {Observable, Subject} from 'rxjs';
 import {MacroTypeConfigs, MidiEventFull} from './macro_module_types';
 

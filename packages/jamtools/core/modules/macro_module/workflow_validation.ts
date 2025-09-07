@@ -1,4 +1,42 @@
-import Ajv, {JSONSchemaType} from 'ajv';
+// Simple validation interface to replace AJV dependency
+interface JSONSchemaType<T = any> {
+  type?: string;
+  properties?: Record<string, any>;
+  required?: string[];
+  additionalProperties?: boolean;
+}
+
+interface ValidateFunction {
+  (data: any): boolean;
+  errors?: Array<{instancePath: string; message: string}> | null;
+}
+
+class SimpleValidator {
+  allErrors: boolean;
+  verbose: boolean;
+
+  constructor(options: {allErrors?: boolean; verbose?: boolean} = {}) {
+    this.allErrors = options.allErrors || false;
+    this.verbose = options.verbose || false;
+  }
+
+  compile(schema: JSONSchemaType): ValidateFunction {
+    const validate = (data: any): boolean => {
+      // Simple validation - just check if data exists for required fields
+      if (schema.required) {
+        for (const field of schema.required) {
+          if (!data || data[field] === undefined) {
+            validate.errors = [{ instancePath: `/${field}`, message: `Required field '${field}' is missing` }];
+            return false;
+          }
+        }
+      }
+      validate.errors = null;
+      return true;
+    };
+    return validate;
+  }
+}
 import {
   MacroWorkflowConfig,
   MacroNodeConfig,
@@ -19,11 +57,11 @@ import {MacroTypeConfigs} from './macro_module_types';
  * Provides schema validation, connection validation, and performance testing.
  */
 export class WorkflowValidator {
-  private ajv: Ajv;
+  private ajv: SimpleValidator;
   private validationRules: Map<string, ValidationRule>;
   
   constructor() {
-    this.ajv = new Ajv({ allErrors: true, verbose: true });
+    this.ajv = new SimpleValidator({ allErrors: true, verbose: true });
     this.validationRules = new Map();
     this.initializeBuiltInRules();
   }
