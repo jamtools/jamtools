@@ -16,9 +16,21 @@ export class NodeMidiService implements MidiService {
     public onInputEvent = new Subject<MidiInputEventPayload>();
 
     private initialized = false;
+    private consecutiveErrors = 0;
+    private basePollInterval = 10000; // 10 seconds
+    private maxPollInterval = 60000; // 60 seconds maximum
+    private debugLoggingEnabled = process.env.ENABLE_MIDI_POLLER_DEBUG_LOGGING === 'true';
+
+    private logDebug = (message: string, ...args: any[]) => {
+        if (this.debugLoggingEnabled) {
+            console.log(message, ...args);
+        }
+    };
 
     public initialize = async () => {
+        this.logDebug('[NodeMidiService] Initializing...');
         await this.pollService.initialize();
+        this.logDebug('[NodeMidiService] Starting device polling...');
         await this.pollForConnectedDevices();
     };
 
@@ -32,7 +44,9 @@ export class NodeMidiService implements MidiService {
 
     private initializeMidiInputDevice = (inputName: string) => {
         inputName = inputName.trim();
+        this.logDebug(`[NodeMidiService] Attempting to initialize MIDI input: ${inputName}`);
         if (this.errorDevices.includes(inputName)) {
+            this.logDebug(`[NodeMidiService] Skipping ${inputName} - previously failed`);
             return;
         }
 
@@ -45,7 +59,11 @@ export class NodeMidiService implements MidiService {
                 this.inputs = [...this.inputs.slice(0, existingInputIndex), ...this.inputs.slice(existingInputIndex + 1)];
             }
 
+            this.logDebug(`[NodeMidiService] Creating easymidi.Input for ${inputName}...`);
+            const startTime = Date.now();
             const input = new easymidi.Input(inputName);
+            const createTime = Date.now() - startTime;
+            this.logDebug(`[NodeMidiService] Created input in ${createTime}ms`);
 
             const publishMidiEvent = (event: MidiEvent) => {
                 const fullEvent: MidiEventFull = {
@@ -99,17 +117,26 @@ export class NodeMidiService implements MidiService {
             });
 
             this.inputs.push(input);
-            // console.log('initialized midi input:', input.name);
+            this.logDebug(`[NodeMidiService] Successfully initialized MIDI input: ${input.name}. Total inputs: ${this.inputs.length}`);
 
         } catch (e) {
-            console.error('failed to initialize midi input device', inputName);
+            const error = e as Error;
+            console.error('failed to initialize midi input device', inputName, error.message);
+            
+            // Check if it's a memory allocation error specifically
+            if (error.message.includes('Cannot allocate memory') || error.message.includes('Failed to initialise RtMidi')) {
+                console.warn('Memory allocation failed for MIDI device. Consider reducing polling frequency or restarting service.');
+            }
+            
             this.errorDevices.push(inputName);
         }
     };
 
     private initializeMidiOutputDevice = (outputName: string) => {
         outputName = outputName.trim();
+        this.logDebug(`[NodeMidiService] Attempting to initialize MIDI output: ${outputName}`);
         if (this.errorDevices.includes(outputName)) {
+            this.logDebug(`[NodeMidiService] Skipping ${outputName} - previously failed`);
             return;
         }
 
@@ -122,11 +149,23 @@ export class NodeMidiService implements MidiService {
                 this.outputs = [...this.outputs.slice(0, existingOutputIndex), ...this.outputs.slice(existingOutputIndex + 1)];
             }
 
+            this.logDebug(`[NodeMidiService] Creating easymidi.Output for ${outputName}...`);
+            const startTime = Date.now();
             const output = new easymidi.Output(outputName);
+            const createTime = Date.now() - startTime;
+            this.logDebug(`[NodeMidiService] Created output in ${createTime}ms`);
+            
             this.outputs.push(output);
-            // console.log('initialized midi output:', output.name);
+            this.logDebug(`[NodeMidiService] Successfully initialized MIDI output: ${output.name}. Total outputs: ${this.outputs.length}`);
         } catch (e) {
-            console.error('failed to initialize midi output device', outputName);
+            const error = e as Error;
+            console.error('failed to initialize midi output device', outputName, error.message);
+            
+            // Check if it's a memory allocation error specifically
+            if (error.message.includes('Cannot allocate memory') || error.message.includes('Failed to initialise RtMidi')) {
+                console.warn('Memory allocation failed for MIDI device. Consider reducing polling frequency or restarting service.');
+            }
+            
             this.errorDevices.push(outputName);
         }
     };
@@ -170,61 +209,106 @@ export class NodeMidiService implements MidiService {
         }
     };
 
+    private getMemoryUsage = (): number => {
+        const usage = process.memoryUsage();
+        return usage.heapUsed / 1024 / 1024; // MB
+    };
+
     private pollForConnectedDevices = async () => {
-        const knownDevices = Array.from(new Set(this.inputs.map(i => i.name).concat(this.outputs.map(o => o.name))));
-        const result = await this.pollService.pollForDevices(knownDevices);
+        this.logDebug('[NodeMidiService] === Starting device poll cycle ===');
+        try {
+            const memoryBefore = this.getMemoryUsage();
+            console.log(`[NodeMidiService] Memory before polling: ${memoryBefore.toFixed(1)} MB`);
 
-        for (const device of result.newlyConnectedDevices) {
-            if (device.input) {
-                this.initializeMidiInputDevice(device.machineReadableName);
+            const knownDevices = Array.from(new Set(this.inputs.map(i => i.name).concat(this.outputs.map(o => o.name))));
+            this.logDebug(`[NodeMidiService] Current known devices: ${knownDevices.length}`);
+            
+            const pollStartTime = Date.now();
+            const result = await this.pollService.pollForDevices(knownDevices);
+            const pollDuration = Date.now() - pollStartTime;
+            this.logDebug(`[NodeMidiService] Poll completed in ${pollDuration}ms`);
+
+            const memoryAfter = this.getMemoryUsage();
+            console.log(`[NodeMidiService] Memory after polling: ${memoryAfter.toFixed(1)} MB (delta: ${(memoryAfter - memoryBefore).toFixed(1)} MB)`);
+
+            this.logDebug(`[NodeMidiService] Processing ${result.newlyConnectedDevices.length} newly connected devices...`);
+            for (const device of result.newlyConnectedDevices) {
+                this.logDebug(`[NodeMidiService] New device: ${device.humanReadableName} (machine: ${device.machineReadableName})`);
+                if (device.input) {
+                    this.initializeMidiInputDevice(device.machineReadableName);
+                }
+                if (device.output) {
+                    this.initializeMidiOutputDevice(device.machineReadableName);
+                }
             }
-            if (device.output) {
-                this.initializeMidiOutputDevice(device.machineReadableName);
+
+            this.logDebug(`[NodeMidiService] Processing ${result.newlyDisconnectedDevices.length} disconnected devices...`);
+            for (const device of result.newlyDisconnectedDevices) {
+                this.logDebug(`[NodeMidiService] Disconnected device: ${device.humanReadableName}`);
+                if (device.input) {
+                    const index = this.inputs.findIndex(d => d.name === device.machineReadableName);
+                    if (index !== -1) {
+                        this.logDebug(`[NodeMidiService] Closing input: ${this.inputs[index].name}`);
+                        this.inputs[index].close();
+                        this.inputs = [...this.inputs.slice(0, index), ...this.inputs.slice(index + 1)];
+                    }
+                }
+                if (device.output) {
+                    const index = this.outputs.findIndex(d => d.name === device.machineReadableName);
+                    if (index !== -1) {
+                        this.logDebug(`[NodeMidiService] Closing output: ${this.outputs[index].name}`);
+                        this.outputs[index].close();
+                        this.outputs = [...this.outputs.slice(0, index), ...this.outputs.slice(index + 1)];
+                    }
+                }
             }
+
+            if (result.newlyConnectedDevices.length || result.newlyDisconnectedDevices.length) {
+                if (this.initialized) {
+                    for (const device of result.newlyConnectedDevices) {
+                        this.onDeviceStatusChange.next({
+                            manufacturer: '',
+                            name: device.humanReadableName,
+                            status: 'connected',
+                            subtype: 'midi_input',
+                            type: 'midi',
+                        });
+                    }
+                    for (const device of result.newlyDisconnectedDevices) {
+                        this.onDeviceStatusChange.next({
+                            manufacturer: '',
+                            name: device.humanReadableName,
+                            status: 'disconnected',
+                            subtype: 'midi_input',
+                            type: 'midi',
+                        });
+                    }
+                }
+            }
+
+            this.initialized = true;
+            this.consecutiveErrors = 0; // Reset error count on successful poll
+            this.logDebug(`[NodeMidiService] Poll cycle completed successfully. Active inputs: ${this.inputs.length}, Active outputs: ${this.outputs.length}`);
+
+        } catch (error) {
+            this.consecutiveErrors++;
+            const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+            console.error(`[NodeMidiService] Polling error (${this.consecutiveErrors} consecutive): ${errorMsg}`);
+            this.logDebug('[NodeMidiService] Full error:', error);
+            
+            if (errorMsg.includes('Cannot allocate memory')) {
+                console.warn('[NodeMidiService] Memory allocation failure detected. Increasing poll interval.');
+                this.logDebug(`[NodeMidiService] Current memory usage: ${this.getMemoryUsage().toFixed(1)} MB`);
+                this.logDebug(`[NodeMidiService] Error devices list: ${this.errorDevices.join(', ')}`);
+            }
+        } finally {
+            // Calculate next poll interval with exponential backoff
+            const backoffMultiplier = Math.min(Math.pow(2, this.consecutiveErrors), 8); // Cap at 8x
+            const nextPollInterval = Math.min(this.basePollInterval * backoffMultiplier, this.maxPollInterval);
+            
+            this.logDebug(`[NodeMidiService] Next poll in ${nextPollInterval / 1000} seconds (errors: ${this.consecutiveErrors})`);
+            this.logDebug('[NodeMidiService] === Poll cycle ended ===\n');
+            setTimeout(this.pollForConnectedDevices, nextPollInterval);
         }
-
-        for (const device of result.newlyDisconnectedDevices) {
-            if (device.input) {
-                const index = this.inputs.findIndex(d => d.name === device.machineReadableName);
-                if (index !== -1) {
-                    this.inputs[index].close();
-                    this.inputs = [...this.inputs.slice(0, index), ...this.inputs.slice(index + 1)];
-                }
-            }
-            if (device.output) {
-                const index = this.outputs.findIndex(d => d.name === device.machineReadableName);
-                if (index !== -1) {
-                    this.outputs[index].close();
-                    this.outputs = [...this.outputs.slice(0, index), ...this.outputs.slice(index + 1)];
-                }
-            }
-        }
-
-        if (result.newlyConnectedDevices.length || result.newlyDisconnectedDevices.length) {
-            if (this.initialized) {
-                for (const device of result.newlyConnectedDevices) {
-                    this.onDeviceStatusChange.next({
-                        manufacturer: '',
-                        name: device.humanReadableName,
-                        status: 'connected',
-                        subtype: 'midi_input',
-                        type: 'midi',
-                    });
-                }
-                for (const device of result.newlyDisconnectedDevices) {
-                    this.onDeviceStatusChange.next({
-                        manufacturer: '',
-                        name: device.humanReadableName,
-                        status: 'disconnected',
-                        subtype: 'midi_input',
-                        type: 'midi',
-                    });
-                }
-            }
-        }
-
-        this.initialized = true;
-
-        setTimeout(this.pollForConnectedDevices, 10000);
     };
 }
