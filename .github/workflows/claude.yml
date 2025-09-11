@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: read
+      pull-requests: write
       issues: read
       id-token: write
       actions: read # Required for Claude to read CI results on PRs
@@ -53,10 +53,20 @@ jobs:
           # allowed_tools: "Bash(npm install),Bash(npm run build),Bash(npm run test:*),Bash(npm run lint:*)"
           
           # Optional: Add custom instructions for Claude to customize its behavior for your project
-          # custom_instructions: |
-          #   Follow our coding standards
-          #   Ensure all new code has tests
-          #   Use TypeScript for new files
+          custom_instructions: |
+            If reviewing the code, please first and foremost review the correctness of the feature to what it's trying to accomplish.
+            Also look for bugs and security issues. Be concise with your entire response.
+            Thanks!
+
+            If developing code, please use `turbo run check-types`, `turbo run test`, `turbo run lint`, `turbo run fix` to ensure your code is correct. Or `npm run *` in the respective package.
+            If checks fail, make minimal edits and try again. Keep going until they pass unless you're blocked on something that you cannot solve.
+            Keep commits small & descriptive. Do NOT push until all your commits are done. The CI job will push only after checks pass.
+
+            To set up pnpm:
+            npm i -g pnpm@10.15.0
+            pnpm install
+
+            Thanks!
           
           # Optional: Custom environment variables for Claude
           # claude_env: |
