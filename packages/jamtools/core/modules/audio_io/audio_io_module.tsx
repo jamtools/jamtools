@@ -164,7 +164,7 @@ export class AudioIOModule implements Module<AudioIOState> {
         try {
             const ioModule = this.coreDeps.modules.io;
             if (ioModule && ioModule.midiInputSubject) {
-                ioModule.midiInputSubject.subscribe(midiEvent => {
+                ioModule.midiInputSubject.subscribe((midiEvent: any) => {
                     this.handleMidiInput(midiEvent);
                 });
             }

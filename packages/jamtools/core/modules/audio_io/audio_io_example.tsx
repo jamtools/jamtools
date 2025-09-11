@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import springboard from 'springboard';
 import {WebAudioModule} from '@jamtools/core/types/audio_io_types';
 
@@ -13,7 +13,7 @@ springboard.registerModule('AudioIOExample', {}, async (moduleAPI) => {
     const masterVolumeState = await moduleAPI.statesAPI.createSharedState<number>('masterVolume', 0.8);
 
     // Subscribe to WAM instance changes
-    audioIOModule.wamInstancesSubject.subscribe(instances => {
+    audioIOModule.wamInstancesSubject.subscribe((instances: WebAudioModule[]) => {
         wamInstancesState.setState(instances);
     });
 
@@ -88,7 +88,7 @@ springboard.registerModule('AudioIOExample', {}, async (moduleAPI) => {
 
         const playTestNote = async () => {
             // Find a synthesizer instance and play a test note
-            const synth = wamInstances.find(wam => wam.moduleId === 'com.jamtools.oscillator-synth');
+            const synth = wamInstances.find((wam: WebAudioModule) => wam.moduleId === 'com.jamtools.oscillator-synth');
             if (synth && synth.onMidi) {
                 // Play middle C (note 60)
                 const noteOnData = new Uint8Array([0x90, 60, 100]); // Note on, middle C, velocity 100
@@ -97,7 +97,7 @@ springboard.registerModule('AudioIOExample', {}, async (moduleAPI) => {
                 // Stop after 1 second
                 setTimeout(() => {
                     const noteOffData = new Uint8Array([0x80, 60, 0]); // Note off
-                    synth.onMidi(noteOffData);
+                    synth.onMidi?.(noteOffData);
                 }, 1000);
             } else {
                 alert('Create a synthesizer first!');
@@ -155,7 +155,7 @@ springboard.registerModule('AudioIOExample', {}, async (moduleAPI) => {
                         <p>No WAM instances created yet.</p>
                     ) : (
                         <ul>
-                            {wamInstances.map(wam => (
+                            {wamInstances.map((wam: WebAudioModule) => (
                                 <li key={wam.instanceId} style={{marginBottom: '10px'}}>
                                     <strong>{wam.name}</strong> ({wam.instanceId})
                                     <br />
