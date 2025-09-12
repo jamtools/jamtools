@@ -10,3 +10,4 @@ import './midi_playback/midi_playback_module';
 import './dashboards/dashboards_module';
 import './eventide/eventide_module';
 import './song_structures/song_structures_module';
+import './random_progression/random_progression_module';
