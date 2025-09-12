@@ -11,8 +11,8 @@ export class SpectrumAnalyzerWAM implements WebAudioModule {
     
     private analyzerNode: AnalyserNode;
     private inputGain: GainNode;
-    private frequencyData: Uint8Array<ArrayBuffer>;
-    private timeData: Uint8Array<ArrayBuffer>;
+    private frequencyData: Uint8Array;
+    private timeData: Uint8Array;
     
     private parameters = {
         'analyzer.fftSize': 2048,

@@ -88,7 +88,7 @@ springboard.registerModule('AudioIOExample', {}, async (moduleAPI) => {
 
         const playTestNote = async () => {
             // Find a synthesizer instance and play a test note
-            const synth = wamInstances.find((wam: WebAudioModule) => wam.moduleId === 'com.jamtools.oscillator-synth');
+            const synth = wamInstances.find(wam => wam.moduleId === 'com.jamtools.oscillator-synth');
             if (synth && synth.onMidi) {
                 // Play middle C (note 60)
                 const noteOnData = new Uint8Array([0x90, 60, 100]); // Note on, middle C, velocity 100

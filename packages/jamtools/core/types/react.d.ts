@@ -116,3 +116,81 @@ declare const process: {
     [key: string]: string | undefined;
   };
 };
+
+declare global {
+  interface Window {
+    webkitAudioContext?: typeof AudioContext;
+    AudioContext: typeof AudioContext;
+  }
+  
+  interface AudioContext {
+    createOscillator(): OscillatorNode;
+    createGain(): GainNode;
+    createBiquadFilter(): BiquadFilterNode;
+    createAnalyser(): AnalyserNode;
+    createDelay(): DelayNode;
+    destination: AudioDestinationNode;
+    sampleRate: number;
+    currentTime: number;
+    state: AudioContextState;
+    suspend(): Promise<void>;
+    resume(): Promise<void>;
+    close(): Promise<void>;
+  }
+  
+  type AudioContextState = 'suspended' | 'running' | 'closed';
+  
+  interface AudioNode {
+    connect(destination: AudioNode): AudioNode;
+    connect(destination: AudioParam): void;
+    disconnect(): void;
+    disconnect(destination: AudioNode): void;
+    context: AudioContext;
+    numberOfInputs: number;
+    numberOfOutputs: number;
+  }
+  
+  interface GainNode extends AudioNode {
+    gain: AudioParam;
+  }
+  
+  interface OscillatorNode extends AudioNode {
+    frequency: AudioParam;
+    detune: AudioParam;
+    type: OscillatorType;
+    start(when?: number): void;
+    stop(when?: number): void;
+  }
+  
+  type OscillatorType = 'sine' | 'square' | 'sawtooth' | 'triangle';
+  
+  interface BiquadFilterNode extends AudioNode {
+    frequency: AudioParam;
+    Q: AudioParam;
+    type: BiquadFilterType;
+  }
+  
+  type BiquadFilterType = 'lowpass' | 'highpass' | 'bandpass' | 'lowshelf' | 'highshelf' | 'peaking' | 'notch' | 'allpass';
+  
+  interface AudioParam {
+    value: number;
+    setValueAtTime(value: number, startTime: number): AudioParam;
+    linearRampToValueAtTime(value: number, endTime: number): AudioParam;
+    exponentialRampToValueAtTime(value: number, endTime: number): AudioParam;
+  }
+  
+  interface AnalyserNode extends AudioNode {
+    fftSize: number;
+    frequencyBinCount: number;
+    getFloatFrequencyData(array: Float32Array): void;
+    getByteFrequencyData(array: Uint8Array): void;
+    getFloatTimeDomainData(array: Float32Array): void;
+    getByteTimeDomainData(array: Uint8Array): void;
+  }
+  
+  interface DelayNode extends AudioNode {
+    delayTime: AudioParam;
+  }
+  
+  interface AudioDestinationNode extends AudioNode {}
+}

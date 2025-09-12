@@ -174,7 +174,7 @@ export class AudioIOModule implements Module<AudioIOState> {
         }
     };
 
-    private handleMidiInput = (midiEvent: any) => {
+    private handleMidiInput = (midiEvent: MidiEvent) => {
         const midiData = this.convertMidiEventToBytes(midiEvent);
         
         // Send MIDI to all WAM instances that support it
@@ -185,7 +185,7 @@ export class AudioIOModule implements Module<AudioIOState> {
         });
     };
 
-    private convertMidiEventToBytes = (midiEvent: any): Uint8Array => {
+    private convertMidiEventToBytes = (midiEvent: MidiEvent): Uint8Array => {
         // Convert jamtools MIDI event to standard MIDI bytes
         const {type, number, velocity = 64, channel = 0} = midiEvent;
         
