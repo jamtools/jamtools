@@ -1,134 +1,69 @@
 /**
  * Cloudflare Worker entrypoint using partyserver
- * This uses partyserver utilities without extending the Server class to avoid type conflicts
+ * Extends Server class for proper partyserver integration
  */
 
-import { routePartykitRequest } from 'partyserver';
+import { routePartykitRequest, Server } from "partyserver";
 
 /**
- * Springboard Room using partyserver routing
+ * Springboard Room extending partyserver's Server class
  * Handles WebSocket connections, HTTP requests, and persistent storage
  */
-class SpringboardRoom implements DurableObject {
-  private kv: Record<string, string> = {};
-  private isInitialized = false;
-  private ctx: DurableObjectState;
-  private env: any;
-  private connections = new Set<WebSocket>();
-
-  constructor(ctx: DurableObjectState, env: any) {
-    this.ctx = ctx;
-    this.env = env;
+export class SpringboardRoom extends Server {
+  constructor(room: any, env: any) {
+    super(room, env);
   }
 
-  /**
-   * Handle HTTP requests (DurableObject method)
-   */
-  async fetch(request: Request): Promise<Response> {
-    await this.ensureInitialized();
+  onConnect(connection: any) {
+    console.log("Connected", connection.id, "to server", this.name);
+    // Initialize connection for Springboard framework
+    // TODO: Integrate with Springboard's RPC service
+  }
 
-    // Check if this is a WebSocket upgrade request
-    const upgradeHeader = request.headers.get('Upgrade');
-    if (upgradeHeader === 'websocket') {
-      return this.handleWebSocketUpgrade(request);
+  onMessage(connection: any, message: string | ArrayBuffer) {
+    console.log("Message from", connection.id, ":", message);
+    
+    // Handle Springboard RPC messages
+    if (typeof message === 'string') {
+      try {
+        const data = JSON.parse(message);
+        // TODO: Process through Springboard's RPC service
+        // For now, echo back the message
+        this.broadcast(message, [connection.id]);
+      } catch (error) {
+        console.error('Error parsing message:', error);
+        connection.send(JSON.stringify({ error: 'Invalid message format' }));
+      }
     }
+  }
 
+  onClose(connection: any, code: number, reason: string, wasClean: boolean) {
+    console.log("Disconnected", connection.id, "from server", this.name, { code, reason, wasClean });
+    // TODO: Clean up any Springboard resources for this connection
+  }
+
+  onError(connection: any, error: unknown) {
+    console.error("Error on connection", connection.id, ":", error);
+    // TODO: Handle error through Springboard's error handling system
+  }
+
+  async onRequest(request: Request): Promise<Response> {
     const url = new URL(request.url);
-
+    
     // Handle static asset requests
     if (url.pathname === '' || url.pathname === '/') {
       return this.serveStaticAsset('/dist/index.html');
     }
-
-    // For now, return a simple response
-    return new Response('Cloudflare Worker with partyserver - Under Construction', {
-      headers: { 'Content-Type': 'text/plain' },
-    });
-  }
-
-  /**
-   * Handle WebSocket upgrade requests
-   */
-  private handleWebSocketUpgrade(request: Request): Response {
-    const webSocketPair = new WebSocketPair();
-    const [client, server] = Object.values(webSocketPair);
-
-    // Accept the WebSocket connection
-    server.accept();
-    this.connections.add(server);
-
-    // Set up event handlers
-    server.addEventListener('message', (event) => {
-      this.handleWebSocketMessage(server, event.data);
-    });
-
-    server.addEventListener('close', () => {
-      this.connections.delete(server);
-    });
-
-    server.addEventListener('error', (error) => {
-      console.error('WebSocket error:', error);
-      this.connections.delete(server);
-    });
-
-    return new Response(null, {
-      status: 101,
-      webSocket: client,
-    });
-  }
-
-  /**
-   * Handle incoming WebSocket messages
-   */
-  private async handleWebSocketMessage(websocket: WebSocket, message: string | ArrayBuffer): Promise<void> {
-    if (typeof message === 'string') {
-      // For now, just echo the message back
-      console.log('Received WebSocket message:', message);
-      websocket.send(`Echo: ${message}`);
-    }
-  }
-
-  /**
-   * Ensure the room is properly initialized
-   */
-  private async ensureInitialized(): Promise<void> {
-    if (this.isInitialized) return;
-
-    // Load existing key-value pairs from storage
-    const values = await this.ctx.storage.list();
-    for (const [key, value] of values) {
-      this.kv[key] = value as string;
+    
+    // Handle API requests for Springboard
+    if (url.pathname.startsWith('/api/')) {
+      // TODO: Route through Springboard's HTTP handlers
+      return new Response(JSON.stringify({ message: 'API endpoint - under construction' }), {
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
-    this.isInitialized = true;
-  }
-
-  /**
-   * Simple key-value operations
-   */
-  private async getFromStorage(key: string): Promise<any> {
-    const value = this.kv[key];
-    if (!value) {
-      return null;
-    }
-    return JSON.parse(value);
-  }
-
-  private async setToStorage(key: string, value: unknown): Promise<void> {
-    const serialized = JSON.stringify(value);
-    this.kv[key] = serialized;
-    await this.ctx.storage.put(key, serialized);
-  }
-
-  /**
-   * Broadcast message to all connected WebSockets
-   */
-  private broadcastMessage(message: string | ArrayBuffer | ArrayBufferView): void {
-    for (const connection of this.connections) {
-      if (connection.readyState === WebSocket.OPEN) {
-        connection.send(message);
-      }
-    }
+    return new Response('Not Found', { status: 404 });
   }
 
   /**
@@ -142,7 +77,10 @@ class SpringboardRoom implements DurableObject {
         <!DOCTYPE html>
         <html>
           <head><title>Jamtools Springboard</title></head>
-          <body><h1>Jamtools Springboard - Cloudflare Worker (partyserver)</h1></body>
+          <body>
+            <h1>Jamtools Springboard - Cloudflare Worker (partyserver)</h1>
+            <p>WebSocket server running with partyserver</p>
+          </body>
         </html>
       `, {
         headers: { 'Content-Type': 'text/html' },
@@ -160,9 +98,7 @@ export default {
   async fetch(request: Request, env: any): Promise<Response> {
     try {
       // Use partyserver's routing utility
-      const response = await routePartykitRequest(request, env, {
-        // Configure partyserver options here if needed
-      });
+      const response = await routePartykitRequest(request, env);
       
       if (response) {
         return response;
@@ -174,10 +110,5 @@ export default {
       console.error('Worker error:', error);
       return new Response('Internal Server Error', { status: 500 });
     }
-  }
+  },
 };
-
-/**
- * Export the SpringboardRoom class for Durable Objects
- */
-export { SpringboardRoom };
