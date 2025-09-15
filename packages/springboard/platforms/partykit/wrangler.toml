@@ -1,0 +1,21 @@
+name = "jamtools-springboard"
+main = "src/entrypoints/cloudflare_worker_entrypoint.ts"
+compatibility_date = "2024-01-01"
+
+[env.production]
+name = "jamtools-springboard-prod"
+
+[durable_objects]
+bindings = [
+  { name = "SPRINGBOARD_ROOM", class_name = "SpringboardRoom" }
+]
+
+[[migrations]]
+tag = "v1"
+new_classes = ["SpringboardRoom"]
+
+[build]
+command = "npm run build"
+
+[vars]
+ENVIRONMENT = "production"
