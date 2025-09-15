@@ -20,6 +20,7 @@
     "hono": "catalog:",
     "json-rpc-2.0": "catalog:",
     "partysocket": "^1.0.3",
+    "partyserver": "^0.0.20",
     "springboard-server": "workspace:*",
     "zod": "catalog:"
   },

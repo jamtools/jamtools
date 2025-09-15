@@ -5,9 +5,10 @@ compatibility_date = "2024-01-01"
 [env.production]
 name = "jamtools-springboard-prod"
 
+# partyserver configuration
 [durable_objects]
 bindings = [
-  { name = "SPRINGBOARD_ROOM", class_name = "SpringboardRoom" }
+  { name = "parties", class_name = "SpringboardRoom" }
 ]
 
 [[migrations]]

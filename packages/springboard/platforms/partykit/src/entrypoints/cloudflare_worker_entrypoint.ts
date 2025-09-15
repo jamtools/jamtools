@@ -1,43 +1,33 @@
 /**
- * Cloudflare Worker entrypoint that replaces PartyKit with partyserver
- * This provides the same functionality as partykit_server_entrypoint.ts but runs on Cloudflare Workers
+ * Cloudflare Worker entrypoint using partyserver
+ * This replaces the custom Durable Object implementation with partyserver
  */
 
+import { Server } from 'partyserver';
 import { Hono } from 'hono';
 
 import springboard from 'springboard';
 import type { NodeAppDependencies } from '@springboardjs/platforms-node/entrypoints/main';
-import { makeMockCoreDependencies } from 'springboard/test/mock_core_dependencies';
 import { Springboard } from 'springboard/engine/engine';
-import { CoreDependencies } from 'springboard/types/module_types';
 
 import { initApp, PartykitKvForHttp } from '../partykit_hono_app';
 import { startSpringboardApp } from './partykit_server_entrypoint';
 import { PartykitJsonRpcServer } from '../services/partykit_rpc_server';
 
-// Environment interface for TypeScript support
-interface Env {
-  SPRINGBOARD_ROOM: DurableObjectNamespace;
-  ENVIRONMENT?: string;
-}
-
 /**
- * Durable Object that replaces PartyKit's Room functionality
+ * Springboard Room using partyserver
  * Handles WebSocket connections, HTTP requests, and persistent storage
  */
-export class SpringboardRoom {
+export class SpringboardRoom extends Server {
   private app: Hono;
   private nodeAppDependencies: NodeAppDependencies;
   private springboardApp: Springboard | null = null;
   private rpcService: PartykitJsonRpcServer;
   private kv: Record<string, string> = {};
-  private sessions = new Set<WebSocket>();
-  private state: DurableObjectState;
-  private env: Env;
+  private isInitialized = false;
 
-  constructor(state: DurableObjectState, env: Env) {
-    this.state = state;
-    this.env = env;
+  constructor(room: any) {
+    super(room);
     
     const { app, nodeAppDependencies, rpcService } = initApp({
       kvForHttp: this.makeKvStoreForHttp(),
@@ -47,21 +37,15 @@ export class SpringboardRoom {
     this.app = app;
     this.nodeAppDependencies = nodeAppDependencies;
     this.rpcService = rpcService;
-    
-    // Initialize storage from Durable Object state
-    this.initializeStorage();
   }
 
   /**
-   * Handle all requests to this Durable Object
+   * Handle HTTP requests
    */
-  async fetch(request: Request): Promise<Response> {
-    const url = new URL(request.url);
+  async onRequest(request: Request): Promise<Response> {
+    await this.ensureInitialized();
 
-    // Handle WebSocket upgrades
-    if (request.headers.get('Upgrade') === 'websocket') {
-      return this.handleWebSocketUpgrade(request);
-    }
+    const url = new URL(request.url);
 
     // Handle static asset requests
     if (url.pathname === '' || url.pathname === '/') {
@@ -73,26 +57,62 @@ export class SpringboardRoom {
   }
 
   /**
-   * Handle WebSocket upgrade requests
+   * Handle WebSocket connections
    */
-  private handleWebSocketUpgrade(request: Request): Response {
-    const pair = new WebSocketPair();
-    const [client, server] = Object.values(pair);
+  async onConnect(connection: any, request: Request): Promise<void> {
+    await this.ensureInitialized();
+    // WebSocket is automatically managed by partyserver
+  }
 
-    // Accept the WebSocket connection
-    this.state.acceptWebSocket(server);
-    this.sessions.add(server);
+  /**
+   * Handle incoming WebSocket messages
+   */
+  async onMessage(connection: any, message: string | ArrayBuffer): Promise<void> {
+    if (typeof message === 'string') {
+      await this.rpcService.onMessage(message, this.createConnectionAdapter(connection));
+    }
+  }
 
-    return new Response(null, {
-      status: 101,
-      webSocket: client,
-    });
+  /**
+   * Handle WebSocket disconnections
+   */
+  async onClose(connection: any): Promise<void> {
+    // Cleanup logic can be added here
+  }
+
+  /**
+   * Handle WebSocket errors
+   */
+  async onError(connection: any, error: Error): Promise<void> {
+    console.error('WebSocket error:', error);
+  }
+
+  /**
+   * Ensure the room is properly initialized
+   */
+  private async ensureInitialized(): Promise<void> {
+    if (this.isInitialized) return;
+
+    // Initialize Springboard if not already done
+    if (!this.springboardApp) {
+      springboard.reset();
+      
+      // Load existing key-value pairs from storage
+      const values = await this.room.storage.list();
+      for (const [key, value] of values) {
+        this.kv[key] = value as string;
+      }
+
+      this.springboardApp = await startSpringboardApp(this.nodeAppDependencies);
+    }
+
+    this.isInitialized = true;
   }
 
   /**
    * Handle HTTP requests through the Hono app
    */
-  private async handleHttpRequest(request: Request): Response {
+  private async handleHttpRequest(request: Request): Promise<Response> {
     const url = new URL(request.url);
     const urlParts = url.pathname.split('/');
     const partyName = urlParts[2];
@@ -103,49 +123,6 @@ export class SpringboardRoom {
     const newReq = new Request(newUrl, request as any);
 
     return this.app.fetch(newReq);
-  }
-
-  /**
-   * Handle incoming WebSocket messages
-   */
-  async webSocketMessage(ws: WebSocket, message: string | ArrayBuffer): Promise<void> {
-    if (typeof message === 'string') {
-      await this.rpcService.onMessage(message, this.createConnectionAdapter(ws));
-    }
-  }
-
-  /**
-   * Handle WebSocket connection closures
-   */
-  async webSocketClose(ws: WebSocket, code: number, reason: string): Promise<void> {
-    this.sessions.delete(ws);
-    // Perform any cleanup logic here
-  }
-
-  /**
-   * Handle WebSocket connection errors
-   */
-  async webSocketError(ws: WebSocket, error: Error): Promise<void> {
-    console.error('WebSocket error:', error);
-    this.sessions.delete(ws);
-  }
-
-  /**
-   * Initialize storage from Durable Object state
-   */
-  private async initializeStorage(): Promise<void> {
-    // Initialize Springboard if not already done
-    if (!this.springboardApp) {
-      springboard.reset();
-      
-      // Load existing key-value pairs from Durable Object storage
-      const values = await this.state.storage.list({ limit: 100 });
-      for (const [key, value] of values) {
-        this.kv[key] = value as string;
-      }
-
-      this.springboardApp = await startSpringboardApp(this.nodeAppDependencies);
-    }
   }
 
   /**
@@ -168,9 +145,10 @@ export class SpringboardRoom {
         return allEntriesAsRecord;
       },
       set: async (key: string, value: unknown) => {
-        this.kv[key] = JSON.stringify(value);
-        // Persist to Durable Object storage
-        await this.state.storage.put(key, JSON.stringify(value));
+        const serialized = JSON.stringify(value);
+        this.kv[key] = serialized;
+        // Persist to storage
+        await this.room.storage.put(key, serialized);
       },
     };
   };
@@ -186,10 +164,10 @@ export class SpringboardRoom {
         },
       },
       storage: {
-        get: (key: string) => this.state.storage.get(key),
-        put: (key: string, value: any) => this.state.storage.put(key, value),
-        list: (options: any) => this.state.storage.list(options),
-        delete: (key: string) => this.state.storage.delete(key),
+        get: (key: string) => this.room.storage.get(key),
+        put: (key: string, value: any) => this.room.storage.put(key, value),
+        list: (options: any) => this.room.storage.list(options),
+        delete: (key: string) => this.room.storage.delete(key),
       },
       broadcast: (message: string) => this.broadcast(message),
     };
@@ -198,14 +176,12 @@ export class SpringboardRoom {
   /**
    * Create a connection adapter for WebSocket
    */
-  private createConnectionAdapter(ws: WebSocket) {
+  private createConnectionAdapter(connection: any) {
     return {
       send: (message: string) => {
-        if (ws.readyState === WebSocket.READY_STATE_OPEN) {
-          ws.send(message);
-        }
+        connection.send(message);
       },
-      close: () => ws.close(),
+      close: () => connection.close(),
     };
   }
 
@@ -213,11 +189,8 @@ export class SpringboardRoom {
    * Broadcast message to all connected WebSockets
    */
   private broadcast(message: string): void {
-    this.sessions.forEach(ws => {
-      if (ws.readyState === WebSocket.READY_STATE_OPEN) {
-        ws.send(message);
-      }
-    });
+    // Use partyserver's built-in broadcast functionality
+    this.room.broadcast(message);
   }
 
   /**
@@ -231,7 +204,7 @@ export class SpringboardRoom {
         <!DOCTYPE html>
         <html>
           <head><title>Jamtools Springboard</title></head>
-          <body><h1>Jamtools Springboard - Cloudflare Worker</h1></body>
+          <body><h1>Jamtools Springboard - Cloudflare Worker (partyserver)</h1></body>
         </html>
       `, {
         headers: { 'Content-Type': 'text/html' },
@@ -243,33 +216,6 @@ export class SpringboardRoom {
 }
 
 /**
- * Main Worker fetch handler
- * Routes requests to appropriate Durable Objects
+ * Export for partyserver
  */
-export default {
-  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-    const url = new URL(request.url);
-    
-    // Extract room name from URL path
-    const pathParts = url.pathname.split('/');
-    let roomName = 'default';
-    
-    if (pathParts.length >= 4 && pathParts[1] === 'parties') {
-      roomName = pathParts[3] || 'default';
-    }
-
-    // Get Durable Object instance for this room
-    const id = env.SPRINGBOARD_ROOM.idFromName(roomName);
-    const durableObject = env.SPRINGBOARD_ROOM.get(id);
-
-    // Forward request to Durable Object
-    return durableObject.fetch(request);
-  },
-
-  /**
-   * Handle scheduled events (if needed)
-   */
-  async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
-    // Implement scheduled tasks if needed
-  },
-};
+export default SpringboardRoom;
