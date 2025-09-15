@@ -4,9 +4,10 @@
     "paths": {
     },
     "baseUrl": ".",
-    "lib": ["ES2021"],
+    "lib": ["ES2021", "WebWorker"],
     "target": "ES2021",
     "module": "ES2022",
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "types": ["@cloudflare/workers-types"]
   }
 }

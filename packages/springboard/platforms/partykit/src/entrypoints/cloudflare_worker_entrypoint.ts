@@ -25,7 +25,7 @@ export class SpringboardRoom extends Server {
   private rpcService: PartykitJsonRpcServer;
   private kv: Record<string, string> = {};
   private isInitialized = false;
-  protected room: any; // Expose room property for access
+  private room: any; // Store room reference for storage and broadcast access
 
   constructor(room: any) {
     super(room);
