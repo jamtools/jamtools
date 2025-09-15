@@ -54,7 +54,10 @@ jobs:
           
           # Optional: Add custom instructions for Claude to customize its behavior for your project
           custom_instructions: |
-            Use the following commands to check for code correctness:
+            Use `npm i -g pnpm` to install pnpm
+            Use `pnpm i` to install all dependencies
+          
+            Use the following commands to check for code correctness after all code changes:
             - turbo run check-types
             - turbo run lint
             - turbo run build
