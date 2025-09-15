@@ -3,6 +3,7 @@
     "allow": [
       "WebFetch(domain:github.com)",
       "Bash(mkdir:*)",
+      "Bash(npm i -g pnpm)",
       "Bash(pnpm add:*)",
       "Bash(npm run check-types:*)",
       "Bash(pnpm i:*)",
