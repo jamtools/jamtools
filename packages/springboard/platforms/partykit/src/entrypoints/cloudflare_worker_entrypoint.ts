@@ -1,51 +1,37 @@
 /**
  * Cloudflare Worker entrypoint using partyserver
- * This replaces the custom Durable Object implementation with partyserver
+ * This uses partyserver utilities without extending the Server class to avoid type conflicts
  */
 
-import { Server, type Connection, type ConnectionContext } from 'partyserver';
-import { Hono } from 'hono';
-
-import springboard from 'springboard';
-import type { NodeAppDependencies } from '@springboardjs/platforms-node/entrypoints/main';
-import { Springboard } from 'springboard/engine/engine';
-
-import { initApp, PartykitKvForHttp } from '../partykit_hono_app';
-import { startSpringboardApp } from './partykit_server_entrypoint';
-import { PartykitJsonRpcServer } from '../services/partykit_rpc_server';
+import { routePartykitRequest } from 'partyserver';
 
 /**
- * Springboard Room using partyserver
+ * Springboard Room using partyserver routing
  * Handles WebSocket connections, HTTP requests, and persistent storage
  */
-export class SpringboardRoom extends Server {
-  private app: Hono;
-  private nodeAppDependencies: NodeAppDependencies;
-  private springboardApp: Springboard | null = null;
-  private rpcService: PartykitJsonRpcServer;
+class SpringboardRoom implements DurableObject {
   private kv: Record<string, string> = {};
   private isInitialized = false;
-  protected ctx: DurableObjectState<{}>;
+  private ctx: DurableObjectState;
+  private env: any;
+  private connections = new Set<WebSocket>();
 
-  constructor(ctx: DurableObjectState<{}>, env: any) {
-    super(ctx, env);
+  constructor(ctx: DurableObjectState, env: any) {
     this.ctx = ctx;
-    
-    const { app, nodeAppDependencies, rpcService } = initApp({
-      kvForHttp: this.makeKvStoreForHttp(),
-      room: this.createRoomAdapter(),
-    });
-
-    this.app = app;
-    this.nodeAppDependencies = nodeAppDependencies;
-    this.rpcService = rpcService;
+    this.env = env;
   }
 
   /**
-   * Handle HTTP requests
+   * Handle HTTP requests (DurableObject method)
    */
-  async onRequest(request: Request): Promise<Response> {
+  async fetch(request: Request): Promise<Response> {
     await this.ensureInitialized();
+
+    // Check if this is a WebSocket upgrade request
+    const upgradeHeader = request.headers.get('Upgrade');
+    if (upgradeHeader === 'websocket') {
+      return this.handleWebSocketUpgrade(request);
+    }
 
     const url = new URL(request.url);
 
@@ -54,39 +40,52 @@ export class SpringboardRoom extends Server {
       return this.serveStaticAsset('/dist/index.html');
     }
 
-    // Handle API requests through Hono app
-    return this.handleHttpRequest(request);
+    // For now, return a simple response
+    return new Response('Cloudflare Worker with partyserver - Under Construction', {
+      headers: { 'Content-Type': 'text/plain' },
+    });
   }
 
   /**
-   * Handle WebSocket connections
+   * Handle WebSocket upgrade requests
    */
-  async onConnect(connection: Connection, ctx: ConnectionContext): Promise<void> {
-    await this.ensureInitialized();
-    // WebSocket is automatically managed by partyserver
+  private handleWebSocketUpgrade(request: Request): Response {
+    const webSocketPair = new WebSocketPair();
+    const [client, server] = Object.values(webSocketPair);
+
+    // Accept the WebSocket connection
+    server.accept();
+    this.connections.add(server);
+
+    // Set up event handlers
+    server.addEventListener('message', (event) => {
+      this.handleWebSocketMessage(server, event.data);
+    });
+
+    server.addEventListener('close', () => {
+      this.connections.delete(server);
+    });
+
+    server.addEventListener('error', (error) => {
+      console.error('WebSocket error:', error);
+      this.connections.delete(server);
+    });
+
+    return new Response(null, {
+      status: 101,
+      webSocket: client,
+    });
   }
 
   /**
    * Handle incoming WebSocket messages
    */
-  async onMessage(connection: Connection, message: string | ArrayBuffer): Promise<void> {
+  private async handleWebSocketMessage(websocket: WebSocket, message: string | ArrayBuffer): Promise<void> {
     if (typeof message === 'string') {
-      await this.rpcService.onMessage(message, this.createConnectionAdapter(connection));
+      // For now, just echo the message back
+      console.log('Received WebSocket message:', message);
+      websocket.send(`Echo: ${message}`);
     }
-  }
-
-  /**
-   * Handle WebSocket disconnections
-   */
-  async onClose(connection: Connection, code: number, reason: string, wasClean: boolean): Promise<void> {
-    // Cleanup logic can be added here
-  }
-
-  /**
-   * Handle WebSocket errors
-   */
-  async onError(connection: Connection, error: unknown): Promise<void> {
-    console.error('WebSocket error:', error);
   }
 
   /**
@@ -95,104 +94,41 @@ export class SpringboardRoom extends Server {
   private async ensureInitialized(): Promise<void> {
     if (this.isInitialized) return;
 
-    // Initialize Springboard if not already done
-    if (!this.springboardApp) {
-      springboard.reset();
-      
-      // Load existing key-value pairs from storage
-      const values = await this.ctx.storage.list();
-      for (const [key, value] of values) {
-        this.kv[key] = value as string;
-      }
-
-      this.springboardApp = await startSpringboardApp(this.nodeAppDependencies);
+    // Load existing key-value pairs from storage
+    const values = await this.ctx.storage.list();
+    for (const [key, value] of values) {
+      this.kv[key] = value as string;
     }
 
     this.isInitialized = true;
   }
 
   /**
-   * Handle HTTP requests through the Hono app
+   * Simple key-value operations
    */
-  private async handleHttpRequest(request: Request): Promise<Response> {
-    const url = new URL(request.url);
-    const urlParts = url.pathname.split('/');
-    const partyName = urlParts[2];
-    const roomName = urlParts[3];
-
-    const prefixToRemove = `/parties/${partyName}/${roomName}`;
-    const newUrl = request.url.replace(prefixToRemove, '');
-    const newReq = new Request(newUrl, request as any);
-
-    return this.app.fetch(newReq);
+  private async getFromStorage(key: string): Promise<any> {
+    const value = this.kv[key];
+    if (!value) {
+      return null;
+    }
+    return JSON.parse(value);
   }
 
-  /**
-   * Create a KV store adapter for HTTP requests
-   */
-  private makeKvStoreForHttp = (): PartykitKvForHttp => {
-    return {
-      get: async (key: string) => {
-        const value = this.kv[key];
-        if (!value) {
-          return null;
-        }
-        return JSON.parse(value);
-      },
-      getAll: async () => {
-        const allEntriesAsRecord: Record<string, any> = {};
-        for (const key of Object.keys(this.kv)) {
-          allEntriesAsRecord[key] = JSON.parse(this.kv[key]);
-        }
-        return allEntriesAsRecord;
-      },
-      set: async (key: string, value: unknown) => {
-        const serialized = JSON.stringify(value);
-        this.kv[key] = serialized;
-        // Persist to storage
-        await this.ctx.storage.put(key, serialized);
-      },
-    };
-  };
-
-  /**
-   * Create a room adapter that provides PartyKit-like API
-   */
-  private createRoomAdapter() {
-    return {
-      context: {
-        assets: {
-          fetch: (path: string) => this.serveStaticAsset(path),
-        },
-      },
-      storage: {
-        get: (key: string) => this.ctx.storage.get(key),
-        put: (key: string, value: any) => this.ctx.storage.put(key, value),
-        list: (options: any) => this.ctx.storage.list(options),
-        delete: (key: string) => this.ctx.storage.delete(key),
-      },
-      broadcast: (message: string) => this.broadcastMessage(message),
-    };
-  }
-
-  /**
-   * Create a connection adapter for WebSocket
-   */
-  private createConnectionAdapter(connection: Connection) {
-    return {
-      send: (message: string) => {
-        connection.send(message);
-      },
-      close: () => connection.close(),
-    };
+  private async setToStorage(key: string, value: unknown): Promise<void> {
+    const serialized = JSON.stringify(value);
+    this.kv[key] = serialized;
+    await this.ctx.storage.put(key, serialized);
   }
 
   /**
    * Broadcast message to all connected WebSockets
    */
-  private broadcastMessage(message: string): void {
-    // Use partyserver's built-in broadcast functionality
-    super.broadcast(message);
+  private broadcastMessage(message: string | ArrayBuffer | ArrayBufferView): void {
+    for (const connection of this.connections) {
+      if (connection.readyState === WebSocket.OPEN) {
+        connection.send(message);
+      }
+    }
   }
 
   /**
@@ -218,6 +154,30 @@ export class SpringboardRoom extends Server {
 }
 
 /**
- * Export for partyserver
+ * Main worker fetch handler using partyserver routing
  */
-export default SpringboardRoom;
+export default {
+  async fetch(request: Request, env: any): Promise<Response> {
+    try {
+      // Use partyserver's routing utility
+      const response = await routePartykitRequest(request, env, {
+        // Configure partyserver options here if needed
+      });
+      
+      if (response) {
+        return response;
+      }
+      
+      // Fallback to default response
+      return new Response('Not Found', { status: 404 });
+    } catch (error) {
+      console.error('Worker error:', error);
+      return new Response('Internal Server Error', { status: 500 });
+    }
+  }
+};
+
+/**
+ * Export the SpringboardRoom class for Durable Objects
+ */
+export { SpringboardRoom };

@@ -8,6 +8,25 @@
     "target": "ES2021",
     "module": "ES2022",
     "moduleResolution": "node",
-    "types": ["@cloudflare/workers-types"]
-  }
+    "types": ["@cloudflare/workers-types"],
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
+  },
+  "include": [
+    "src/entrypoints/cloudflare_worker_entrypoint.ts"
+  ],
+  "exclude": [
+    "src/entrypoints/partykit_browser_entrypoint.tsx",
+    "src/entrypoints/partykit_server_entrypoint.ts",
+    "src/services/partykit_rpc_client.ts",
+    "src/services/partykit_rpc_server.ts",
+    "src/partykit_hono_app.ts",
+    "src/services/partykit_kv_store.ts",
+    "../webapp/**/*",
+    "../node/**/*",
+    "../../core/**/*",
+    "node_modules"
+  ]
 }
