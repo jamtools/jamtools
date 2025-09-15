@@ -54,8 +54,9 @@ jobs:
           
           # Optional: Add custom instructions for Claude to customize its behavior for your project
           custom_instructions: |
-            Use `npm i -g pnpm` to install pnpm
-            Use `pnpm i` to install all dependencies
+            1. Use `npm i -g pnpm` to install pnpm
+            2. Use `pnpm i` to install all dependencies
+            Do these two exact things EVERY TIME
           
             Use the following commands to check for code correctness after all code changes:
             - turbo run check-types
