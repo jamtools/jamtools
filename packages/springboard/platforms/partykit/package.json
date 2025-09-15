@@ -20,15 +20,15 @@
     "hono": "catalog:",
     "json-rpc-2.0": "catalog:",
     "partysocket": "^1.0.3",
-    "partyserver": "^0.0.20",
+    "partyserver": "^0.0.73",
     "springboard-server": "workspace:*",
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250913.0",
     "@types/node": "catalog:",
     "partykit": "^0.0.111",
-    "@cloudflare/workers-types": "^4.20241106.0",
-    "wrangler": "^3.80.4"
+    "wrangler": "^4.37.0"
   },
   "peerDependencies": {
     "springboard": "workspace:*"

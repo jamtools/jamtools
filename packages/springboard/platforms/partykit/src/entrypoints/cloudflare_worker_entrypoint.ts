@@ -3,7 +3,7 @@
  * This replaces the custom Durable Object implementation with partyserver
  */
 
-import { Server } from 'partyserver';
+import { Server, type Connection, type ConnectionContext } from 'partyserver';
 import { Hono } from 'hono';
 
 import springboard from 'springboard';
@@ -25,11 +25,11 @@ export class SpringboardRoom extends Server {
   private rpcService: PartykitJsonRpcServer;
   private kv: Record<string, string> = {};
   private isInitialized = false;
-  private room: any; // Store room reference for storage and broadcast access
+  protected ctx: DurableObjectState<{}>;
 
-  constructor(room: any) {
-    super(room);
-    this.room = room;
+  constructor(ctx: DurableObjectState<{}>, env: any) {
+    super(ctx, env);
+    this.ctx = ctx;
     
     const { app, nodeAppDependencies, rpcService } = initApp({
       kvForHttp: this.makeKvStoreForHttp(),
@@ -61,7 +61,7 @@ export class SpringboardRoom extends Server {
   /**
    * Handle WebSocket connections
    */
-  async onConnect(connection: any, request: Request): Promise<void> {
+  async onConnect(connection: Connection, ctx: ConnectionContext): Promise<void> {
     await this.ensureInitialized();
     // WebSocket is automatically managed by partyserver
   }
@@ -69,7 +69,7 @@ export class SpringboardRoom extends Server {
   /**
    * Handle incoming WebSocket messages
    */
-  async onMessage(connection: any, message: string | ArrayBuffer): Promise<void> {
+  async onMessage(connection: Connection, message: string | ArrayBuffer): Promise<void> {
     if (typeof message === 'string') {
       await this.rpcService.onMessage(message, this.createConnectionAdapter(connection));
     }
@@ -78,14 +78,14 @@ export class SpringboardRoom extends Server {
   /**
    * Handle WebSocket disconnections
    */
-  async onClose(connection: any): Promise<void> {
+  async onClose(connection: Connection, code: number, reason: string, wasClean: boolean): Promise<void> {
     // Cleanup logic can be added here
   }
 
   /**
    * Handle WebSocket errors
    */
-  async onError(connection: any, error: Error): Promise<void> {
+  async onError(connection: Connection, error: unknown): Promise<void> {
     console.error('WebSocket error:', error);
   }
 
@@ -100,7 +100,7 @@ export class SpringboardRoom extends Server {
       springboard.reset();
       
       // Load existing key-value pairs from storage
-      const values = await this.room.storage.list();
+      const values = await this.ctx.storage.list();
       for (const [key, value] of values) {
         this.kv[key] = value as string;
       }
@@ -150,7 +150,7 @@ export class SpringboardRoom extends Server {
         const serialized = JSON.stringify(value);
         this.kv[key] = serialized;
         // Persist to storage
-        await this.room.storage.put(key, serialized);
+        await this.ctx.storage.put(key, serialized);
       },
     };
   };
@@ -166,19 +166,19 @@ export class SpringboardRoom extends Server {
         },
       },
       storage: {
-        get: (key: string) => this.room.storage.get(key),
-        put: (key: string, value: any) => this.room.storage.put(key, value),
-        list: (options: any) => this.room.storage.list(options),
-        delete: (key: string) => this.room.storage.delete(key),
+        get: (key: string) => this.ctx.storage.get(key),
+        put: (key: string, value: any) => this.ctx.storage.put(key, value),
+        list: (options: any) => this.ctx.storage.list(options),
+        delete: (key: string) => this.ctx.storage.delete(key),
       },
-      broadcast: (message: string) => this.broadcast(message),
+      broadcast: (message: string) => this.broadcastMessage(message),
     };
   }
 
   /**
    * Create a connection adapter for WebSocket
    */
-  private createConnectionAdapter(connection: any) {
+  private createConnectionAdapter(connection: Connection) {
     return {
       send: (message: string) => {
         connection.send(message);
@@ -190,9 +190,8 @@ export class SpringboardRoom extends Server {
   /**
    * Broadcast message to all connected WebSockets
    */
-  private broadcast(message: string): void {
+  private broadcastMessage(message: string): void {
     // Use partyserver's built-in broadcast functionality
-    // The Server class from partyserver should have broadcast method
     super.broadcast(message);
   }
 
