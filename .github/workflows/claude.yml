@@ -66,6 +66,7 @@ jobs:
             - npm run ci # runs check-types, lint, and build
 
             When calling any tools, use `batchit` mcp tool to batch multiple commands in one
+            For any failed tool calls that require permissions, include them in your final message
                 
           # Optional: Custom environment variables for Claude
           # claude_env: |
