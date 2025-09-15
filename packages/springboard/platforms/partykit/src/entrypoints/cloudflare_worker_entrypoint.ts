@@ -192,7 +192,8 @@ export class SpringboardRoom extends Server {
    */
   private broadcast(message: string): void {
     // Use partyserver's built-in broadcast functionality
-    this.room.broadcast(message);
+    // The Server class from partyserver should have broadcast method
+    super.broadcast(message);
   }
 
   /**
