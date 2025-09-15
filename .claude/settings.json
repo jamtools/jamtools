@@ -5,6 +5,8 @@
       "Bash(mkdir:*)",
       "Bash(pnpm add:*)",
       "Bash(npm run check-types:*)",
+      "Bash(pnpm i:*)",
+      "Bash(pnpm install:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(turbo run check-types:*)",
