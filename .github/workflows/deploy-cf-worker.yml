@@ -72,7 +72,7 @@ jobs:
           npx wrangler deploy --dry-run
 
       - name: Deploy (Production)
-        if: steps.deploy-mode.outputs.mode == 'deploy' && github.event_name != 'pull_request'
+        if: steps.deploy-mode.outputs.mode == 'deploy'
         run: |
           cd dist/cf-workers
           npx wrangler deploy
