@@ -45,25 +45,21 @@ jobs:
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             if [[ "${{ github.event.inputs.deploy }}" == "true" ]]; then
               echo "mode=deploy" >> $GITHUB_OUTPUT
-              echo "site_url=${{ github.event.inputs.site_url }}" >> $GITHUB_OUTPUT
             else
               echo "mode=dry-run" >> $GITHUB_OUTPUT
-              echo "site_url=${{ github.event.inputs.site_url }}" >> $GITHUB_OUTPUT
             fi
           elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            echo "mode=dry-run" >> $GITHUB_OUTPUT
-            echo "site_url=https://pr-${{ github.event.number }}.jamtools.app" >> $GITHUB_OUTPUT
+            echo "mode=deploy" >> $GITHUB_OUTPUT
           elif [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
             echo "mode=deploy" >> $GITHUB_OUTPUT
-            echo "site_url=https://jamtools.app" >> $GITHUB_OUTPUT
           fi
 
       - name: Build application
         run: |
-          export PUBLIC_SITE_URL="${{ steps.deploy-mode.outputs.site_url }}"
+          export PUBLIC_SITE_URL="${{ secrets.CLOUDFLARE_DEPLOYMENT_URL }}"
           npx tsx packages/springboard/cli/src/cli.ts build ./apps/jamtools/modules/index.ts --platforms cf-workers
         env:
-          PUBLIC_SITE_URL: ${{ steps.deploy-mode.outputs.site_url }}
+          PUBLIC_SITE_URL: ${{ secrets.CLOUDFLARE_DEPLOYMENT_URL }}
 
       - name: Setup Wrangler
         if: steps.deploy-mode.outputs.mode != ''
