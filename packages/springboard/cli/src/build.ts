@@ -138,32 +138,13 @@ export const platformCfWorkersServerBuildConfig: BuildConfig = {
 
 export const platformCfWorkersBrowserBuildConfig: BuildConfig = {
     ...platformBrowserBuildConfig,
-    platformEntrypoint: () => '@springboardjs/platforms-shared/src/entrypoints/browser_entrypoint.tsx',
+    platformEntrypoint: () => '@springboardjs/platforms-cf-workers/entrypoints/cf_worker_browser_entrypoint.tsx',
     esbuildPlugins: (args) => [
         ...platformBrowserBuildConfig.esbuildPlugins?.(args) || [],
         {
             name: 'move-html',
             setup(build) {
                 build.onEnd(async () => {
-                    const htmlFilePath = `${args.outDir}/index.html`;
-                    const newHtmlFilePath = `${args.outDir}/../index.html`;
-
-                    await fs.promises.rename(htmlFilePath, newHtmlFilePath);
-                });
-            },
-        },
-    ],
-};
-
-export const platformPartyserverBrowserBuildConfig: BuildConfig = {
-    ...platformBrowserBuildConfig,
-    platformEntrypoint: () => '@springboardjs/platforms-shared/src/entrypoints/browser_entrypoint.tsx',
-    esbuildPlugins: (args) => [
-        ...platformBrowserBuildConfig.esbuildPlugins?.(args) || [],
-        {
-            name: 'move-html',
-            setup(build) {
-                build.onEnd(async result => {
                     const htmlFilePath = `${args.outDir}/index.html`;
                     const newHtmlFilePath = `${args.outDir}/../index.html`;
 
