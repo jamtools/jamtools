@@ -61,7 +61,7 @@ jobs:
       - name: Build application
         run: |
           export PUBLIC_SITE_URL="${{ steps.deploy-mode.outputs.site_url }}"
-          npx tsx packages/springboard/cli/src/cli.ts build cf-workers --name jamtools-cf-workers
+          npx tsx packages/springboard/cli/src/cli.ts build ./apps/jamtools/modules/index.ts --platforms cf-workers
         env:
           PUBLIC_SITE_URL: ${{ steps.deploy-mode.outputs.site_url }}
 
