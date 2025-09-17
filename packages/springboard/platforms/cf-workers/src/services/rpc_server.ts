@@ -1,6 +1,4 @@
-// TODO: make this an arbitrary store instead of specifically this one
 import {Context} from 'hono';
-// import {Connection, Room} from 'partykit/server';
 import {RoomLike} from '../hono_app';
 import {RpcMiddleware} from 'springboard-server/src/register';
 

@@ -9,10 +9,8 @@ import {makeMockCoreDependencies} from 'springboard/test/mock_core_dependencies'
 
 import {RpcMiddleware, ServerModuleAPI, serverRegistry} from 'springboard-server/src/register';
 import {SharedJsonRpcServer} from './services/rpc_server';
-// import {Room} from 'partykit/server';
 import {CfWorkerKVStore} from './services/kv_store';
 
-// Abstract interface for room-like objects (works with both PartyKit and PartyServer)
 export interface RoomLike {
     storage: {
         get: (key: string) => Promise<unknown>;

@@ -4,9 +4,7 @@
   "main": "index.js",
   "scripts": {
     "build-cf": "rm -rf dist && PUBLIC_USE_WEBSOCKETS_FOR_RPC=true npx tsx ../../packages/springboard/cli/src/cli.ts build ./modules/index.ts --platforms cf-workers,main",
-    "deploy-cf": "npm run build-cf && npx wrangler deploy",
-    "build-pk": "rm -rf dist && PUBLIC_USE_WEBSOCKETS_FOR_RPC=true npx tsx ../../packages/springboard/cli/src/cli.ts build ./modules/index.ts --platforms partykit,main --name jamtools-handraiser-app",
-    "deploy-pk": "npm run build-pk && partykit deploy --with-vars"
+    "deploy-cf": "npm run build-cf && npx wrangler deploy"
   },
   "keywords": [],
   "author": "",
@@ -23,7 +21,6 @@
   },
   "devDependencies": {
     "@types/node": "catalog:",
-    "partykit": "^0.0.115",
     "springboard-cli": "workspace:*",
     "wrangler": "4.10.0"
   }

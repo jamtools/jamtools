@@ -1,4 +1,3 @@
-// import {Room} from 'partykit/server';
 import {KVStore} from 'springboard/types/module_types';
 import type {SharedKvForHttp, RoomLike} from '../hono_app';
 
