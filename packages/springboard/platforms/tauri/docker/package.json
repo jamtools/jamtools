@@ -10,7 +10,7 @@
     "build-pkg-small": "pkg ./local-server.js --out-path ./src-tauri/binaries",
     "build-dist": "npm run build-pkg -- --targets node20-linux-x64",
     "build-linux": "npm run build-pkg -- --targets node20-linux-x64,node20-linux-arm64",
-    "build-macos": "npm run build-pkg -- --targets node20-macos-arm64 && mv src-tauri/binaries/local-server src-tauri/binaries/local-server-aarch64-apple-darwin"
+    "build-macos": "npm run build-pkg -- --targets node20-macos-arm64 && mv src-tauri/binaries/index src-tauri/binaries/local-server-aarch64-apple-darwin"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.2.0",

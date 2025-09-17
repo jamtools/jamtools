@@ -27,7 +27,7 @@ const pkgCommand = `npx @yao-pkg/pkg ../../dist/tauri/node/dist/index.js --out-p
 execSync(pkgCommand, {stdio: 'inherit'});
 
 fs.renameSync(
-  'src-tauri/binaries/local-server',
+  'src-tauri/binaries/index',
   `src-tauri/binaries/local-server-${tauriTarget}${extension}`
 );
 
