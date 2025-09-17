@@ -1,0 +1,92 @@
+name: Deploy Cloudflare Workers
+
+on:
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: 'Deploy to production (true) or dry run (false)'
+        required: true
+        type: boolean
+        default: false
+      site_url:
+        description: 'Deployment URL'
+        required: true
+        type: string
+        default: 'https://jamtools.app'
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.13.2
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: Install modules
+        run: pnpm i
+
+      - name: Determine deployment mode
+        id: deploy-mode
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            if [[ "${{ github.event.inputs.deploy }}" == "true" ]]; then
+              echo "mode=deploy" >> $GITHUB_OUTPUT
+            else
+              echo "mode=dry-run" >> $GITHUB_OUTPUT
+            fi
+          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "mode=deploy" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "mode=deploy" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build application
+        run: |
+          export PUBLIC_SITE_URL="${{ secrets.CLOUDFLARE_DEPLOYMENT_URL }}"
+          npx tsx packages/springboard/cli/src/cli.ts build ./apps/jamtools/modules/index.ts --platforms cf-workers
+        env:
+          PUBLIC_SITE_URL: ${{ secrets.CLOUDFLARE_DEPLOYMENT_URL }}
+
+      - name: Setup Wrangler
+        if: steps.deploy-mode.outputs.mode != ''
+        run: npm install -g wrangler
+
+      - name: Deploy (Dry Run)
+        if: steps.deploy-mode.outputs.mode == 'dry-run'
+        run: |
+          cd dist/cf-workers
+          npx wrangler deploy --dry-run
+
+      - name: Deploy (Production)
+        if: steps.deploy-mode.outputs.mode == 'deploy'
+        run: |
+          cd dist/cf-workers
+          npx wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+
+      - name: Upload build artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cf-workers-build-${{ github.sha }}
+          path: |
+            dist/cf-workers/
+            !dist/cf-workers/node_modules
+          retention-days: 7
