@@ -8,6 +8,7 @@ packages:
   - "packages/springboard/platforms/webapp"
   - "packages/springboard/platforms/cf-workers"
   - "packages/springboard/platforms/react-native"
+  - "packages/springboard/plugins/*"
   - "packages/springboard/*"
   - "packages/springboard/external/*"
   - "packages/*"
@@ -29,3 +30,4 @@ catalog:
   "react-router-dom": "^6.28.1"
   esbuild: "^0.25.0"
   crossws: "^0.4.1"
+  estree-walker: "^2"

@@ -12,7 +12,9 @@ export type SpringboardPlatform = 'all' | 'main' | 'mobile' | 'desktop' | 'brows
 
 type EsbuildOptions = Parameters<typeof esbuild.build>[0];
 
-type BuildConfig = {
+export type EsbuildPlugin = esbuild.Plugin;
+
+export type BuildConfig = {
     platform: NonNullable<EsbuildOptions['platform']>;
     name?: string;
     platformEntrypoint: () => string;
@@ -27,9 +29,13 @@ type BuildConfig = {
     fingerprint?: boolean;
 }
 
+type PluginConfig = {editBuildOptions?: (options: EsbuildOptions) => void} & Partial<Pick<BuildConfig, 'esbuildPlugins' | 'externals' | 'name' | 'additionalFiles'>>;
+export type Plugin = (buildConfig: BuildConfig) => PluginConfig;
+
 export type ApplicationBuildOptions = {
     name?: string;
     documentMeta?: DocumentMeta;
+    plugins?: Plugin[]; // these need to be optional peer deps, instead of relative import happening above
     editBuildOptions?: (options: EsbuildOptions) => void;
     esbuildOutDir?: string;
     applicationEntrypoint?: string;
@@ -226,6 +232,8 @@ export const buildApplication = async (buildConfig: BuildConfig, options?: Appli
     const parentOutDir = process.env.ESBUILD_OUT_DIR || './dist';
     const childDir = options?.esbuildOutDir;
 
+    const plugins = (options?.plugins || []).map(p => p(buildConfig));
+
     let outDir = parentOutDir;
     if (childDir) {
         outDir += '/' + childDir;
@@ -295,6 +303,11 @@ export default initApp;
                 documentMeta: options?.documentMeta,
                 name: appName,
             }) || []),
+            ...plugins.map(p => p.esbuildPlugins?.({
+                outDir: fullOutDir,
+                nodeModulesParentDir: nodeModulesParentFolder,
+                documentMeta: options?.documentMeta,
+            }).filter(p => isNotUndefined(p)) || []).flat(),
         ],
         external: externals,
         alias: {
@@ -314,6 +327,9 @@ export default initApp;
     };
 
     options?.editBuildOptions?.(esbuildOptions);
+    for (const plugin of plugins) {
+        plugin.editBuildOptions?.(esbuildOptions);
+    }
 
     if (buildConfig.additionalFiles) {
         for (const srcFileName of Object.keys(buildConfig.additionalFiles)) {
@@ -379,3 +395,7 @@ const findNodeModulesParentFolder = async () => {
 
     return undefined;
 };
+
+type NotUndefined<T> = T extends undefined ? never : T;
+
+const isNotUndefined = <T>(value: T): value is NotUndefined<T> => value !== undefined;

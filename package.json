@@ -7,6 +7,7 @@
   "scripts": {
     "start": "turbo run start",
     "prestart": "bash -c \"./configs/scripts/check-dependencies.sh\"",
+    "postinstall": "pnpm -r --filter springboard-cli run dev:setup",
     "build": "turbo run build",
     "build-saas": "turbo run build-saas",
     "dev": "npm run dev-dev --prefix packages/springboard/cli",
@@ -20,11 +21,11 @@
     "fix": "TURBO_NO_UPDATE_NOTIFIER=true turbo run fix",
     "ci": "NODE_MODULES_PARENT_FOLDER=$PWD TURBO_NO_UPDATE_NOTIFIER=true turbo run lint check-types build test",
     "heroku-postbuild": "NODE_ENV=production npm run build-saas",
-    "build-desktop": "RUN_SIDECAR_FROM_WEBVIEW=true npx tsx packages/springboard/cli/src/cli.ts build ./apps/small_apps/empty_jamtools_app/index.ts --platforms desktop",
-    "build-all": "RUN_SIDECAR_FROM_WEBVIEW=true npx tsx packages/springboard/cli/src/cli.ts build ./apps/small_apps/empty_jamtools_app/index.ts --platforms all",
     "splash-screen-app": "npx tsx packages/springboard/cli/src/cli.ts dev ./apps/small_apps/app_with_splash_screen/app_with_splash_screen.tsx",
     "jamtools": "npx tsx packages/springboard/cli/src/cli.ts dev ./apps/jamtools/modules/index.ts",
-    "jamtools-cf": "npx tsx packages/springboard/cli/src/cli.ts build ./apps/jamtools/modules/index.ts --platforms cf-workers"
+    "jamtools-cf": "npx tsx packages/springboard/cli/src/cli.ts build ./apps/jamtools/modules/index.ts --platforms cf-workers",
+    "build-desktop": "RUN_SIDECAR_FROM_WEBVIEW=true npx tsx packages/springboard/cli/src/cli.ts build ./apps/jamtools/modules/index.ts --platforms desktop",
+    "build-all": "RUN_SIDECAR_FROM_WEBVIEW=true npx tsx packages/springboard/cli/src/cli.ts build ./apps/small_apps/empty_app/index.ts --platforms all"
   },
   "keywords": [],
   "author": "",
@@ -35,6 +36,7 @@
     "@springboardjs/platforms-cf-workers": "workspace:*",
     "@springboardjs/platforms-node": "workspace:*",
     "@springboardjs/platforms-tauri": "workspace:*",
+    "@springboardjs/plugin-svelte": "workspace:*",
     "@testing-library/jest-dom": "^6.4.6",
     "@testing-library/react": "^16.0.0",
     "@testing-library/user-event": "^14.6.1",
@@ -61,7 +63,8 @@
   "pnpm": {
     "overrides": {
       "react": "catalog:",
-      "esbuild": "catalog:"
+      "esbuild": "catalog:",
+      "estree-walker": "catalog:"
     }
   }
 }

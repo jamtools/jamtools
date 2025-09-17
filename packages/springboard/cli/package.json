@@ -14,7 +14,7 @@
     "build": "npm run clean && npm run build-cli",
     "build-cli": "tsc && npm run add-header",
     "prepublishOnly": "npm run build",
-    "postinstall": "[ -f ./dist/cli.js ] || npm run build",
+    "dev:setup": "[ -f ./dist/cli.js ] || npm run build",
     "build-saas": "DISABLE_IO=true npx tsx src/cli.ts build ../../../apps/jamtools/modules/index.ts",
     "build-with-cli": "npx tsx cli.ts build ../../../apps/jamtools/modules/index.ts",
     "run-node-local": "NODE_KV_STORE_DATA_FILE=kv_data.json node dist/node/dist/index.js",
@@ -28,7 +28,8 @@
     "dev-dev": "npx tsx src/cli.ts dev ../../../apps/small_apps/handraiser/index.ts",
     "clean": "rm -rf dist",
     "add-header": "./scripts/add-node-executable-header.sh",
-    "cli-docs": "npx tsx scripts/make_cli_docs.ts"
+    "cli-docs": "npx tsx scripts/make_cli_docs.ts",
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "commander": "catalog:",
