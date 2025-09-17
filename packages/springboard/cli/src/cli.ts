@@ -6,7 +6,7 @@ import concurrently from 'concurrently';
 
 import packageJSON from '../package.json';
 
-import {buildApplication, platformBrowserBuildConfig, platformCfWorkersBuildConfig, platformNodeBuildConfig, platformOfflineBrowserBuildConfig, platformPartykitBrowserBuildConfig, platformPartykitServerBuildConfig, platformTauriMaestroBuildConfig, platformTauriWebviewBuildConfig, SpringboardPlatform} from './build';
+import {buildApplication, platformBrowserBuildConfig, platformCfWorkersServerBuildConfig, platformCfWorkersBrowserBuildConfig, platformNodeBuildConfig, platformOfflineBrowserBuildConfig, platformPartyserverBrowserBuildConfig, platformTauriMaestroBuildConfig, platformTauriWebviewBuildConfig, SpringboardPlatform} from './build';
 import {esbuildPluginTransformAwaitImportToRequire} from './esbuild_plugins/esbuild_plugin_transform_await_import';
 
 program
@@ -162,29 +162,17 @@ program
             platformsToBuild.has('all') ||
             platformsToBuild.has('cf-workers')
         ) {
-            await buildApplication(platformCfWorkersBuildConfig, {
+            await buildApplication(platformCfWorkersBrowserBuildConfig, {
                 applicationEntrypoint,
                 watch: options.watch,
                 esbuildOutDir: 'cf-workers',
                 name: options.name,
             });
-        }
 
-        if (
-            platformsToBuild.has('all') ||
-            platformsToBuild.has('partykit')
-        ) {
-            await buildApplication(platformPartykitBrowserBuildConfig, {
+            await buildApplication(platformCfWorkersServerBuildConfig, {
                 applicationEntrypoint,
                 watch: options.watch,
-                esbuildOutDir: 'partykit',
-                name: options.name,
-            });
-
-            await buildApplication(platformPartykitServerBuildConfig, {
-                applicationEntrypoint,
-                watch: options.watch,
-                esbuildOutDir: 'partykit',
+                esbuildOutDir: 'cf-workers',
                 name: options.name,
             });
         }

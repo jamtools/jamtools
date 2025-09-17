@@ -8,11 +8,21 @@ import {Springboard} from 'springboard/engine/engine';
 import {makeMockCoreDependencies} from 'springboard/test/mock_core_dependencies';
 
 import {RpcMiddleware, ServerModuleAPI, serverRegistry} from 'springboard-server/src/register';
-import {PartykitJsonRpcServer} from './services/partykit_rpc_server';
-import {Room} from 'partykit/server';
-import {PartykitKVStore} from './services/partykit_kv_store';
+import {SharedJsonRpcServer} from './services/rpc_server';
+// import {Room} from 'partykit/server';
+import {CfWorkerKVStore} from './services/kv_store';
 
-export type PartykitKvForHttp = {
+// Abstract interface for room-like objects (works with both PartyKit and PartyServer)
+export interface RoomLike {
+    storage: {
+        get: (key: string) => Promise<unknown>;
+        put: (key: string, value: unknown) => Promise<void>;
+        list: (options?: { limit?: number }) => Promise<Map<string, unknown>>;
+    };
+    broadcast: (message: string) => void;
+}
+
+export type SharedKvForHttp = {
     get: (key: string) => Promise<unknown>;
     getAll: () => Promise<Record<string, unknown>>;
     set: (key: string, value: unknown) => Promise<void>;
@@ -27,12 +37,12 @@ export type ServerAppDependencies = Pick<CoreDependencies, 'rpc' | 'storage'> & 
 type InitAppReturnValue = {
     app: Hono;
     serverAppDependencies: ServerAppDependencies;
-    rpcService: PartykitJsonRpcServer;
+    rpcService: SharedJsonRpcServer;
 };
 
 type InitArgs = {
-    kvForHttp: PartykitKvForHttp;
-    room: Room;
+    kvForHttp: SharedKvForHttp;
+    room: RoomLike;
 }
 
 export const initApp = (coreDeps: InitArgs): InitAppReturnValue => {
@@ -88,7 +98,7 @@ export const initApp = (coreDeps: InitArgs): InitAppReturnValue => {
         },
     });
 
-    const rpcService = new PartykitJsonRpcServer({
+    const rpcService = new SharedJsonRpcServer({
         processRequest: async (message, middlewareResult: unknown) => {
             return rpc!.processRequest(message, middlewareResult);
         },
@@ -97,7 +107,7 @@ export const initApp = (coreDeps: InitArgs): InitAppReturnValue => {
 
     const mockDeps = makeMockCoreDependencies({store: {}});
 
-    const kvStore = new PartykitKVStore(coreDeps.room, coreDeps.kvForHttp);
+    const kvStore = new CfWorkerKVStore(coreDeps.room, coreDeps.kvForHttp);
 
     let storedEngine: Springboard | undefined;
 

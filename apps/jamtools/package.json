@@ -22,6 +22,7 @@
     "springboard": "workspace:*"
   },
   "devDependencies": {
+    "@types/node": "catalog:",
     "partykit": "^0.0.115",
     "springboard-cli": "workspace:*",
     "wrangler": "4.10.0"

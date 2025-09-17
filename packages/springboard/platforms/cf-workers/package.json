@@ -13,10 +13,14 @@
   "description": "",
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250812.0",
+    "@types/node": "catalog:",
     "wrangler": "^4.28.1"
   },
   "dependencies": {
-    "crossws": "catalog:"
+    "hono": "catalog:",
+    "json-rpc-2.0": "catalog:",
+    "partyserver": "^0.0.73",
+    "partysocket": "^1.0.2"
   },
   "config": {
     "dir": "../../../../configs"

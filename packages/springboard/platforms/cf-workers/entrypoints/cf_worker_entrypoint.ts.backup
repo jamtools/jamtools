@@ -1,0 +1,238 @@
+import {routePartykitRequest, Server} from 'partyserver';
+import {CoreDependencies} from 'springboard/types/module_types';
+import {initApp} from '../../../server/src/hono_app';
+import {Springboard} from 'springboard/engine/engine';
+import {makeMockCoreDependencies} from 'springboard/test/mock_core_dependencies';
+
+const mockDeps = makeMockCoreDependencies({store: {}});
+const remoteKV = mockDeps.storage.remote;
+const userAgentKV = mockDeps.storage.userAgent;
+
+// @ts-ignore import.meta.env usage
+const USE_WEBSOCKETS_FOR_RPC = import.meta.env.PUBLIC_USE_WEBSOCKETS_FOR_RPC === 'true';
+
+let wsServer: SpringboardServer | null = null;
+
+const {app, serverAppDependencies, injectResources, createWebSocketHooks} = initApp({
+    broadcastMessage: (message) => {
+        if (wsServer) {
+            wsServer.broadcast(message);
+        }
+    },
+    remoteKV,
+    userAgentKV,
+});
+
+const coreDeps: CoreDependencies = {
+    log: console.log,
+    showError: console.error,
+    storage: serverAppDependencies.storage,
+    isMaestro: () => true,
+    rpc: serverAppDependencies.rpc,
+};
+
+const engine = new Springboard(coreDeps, {});
+
+let storedEnv: Env;
+
+const initializeWithResources = async (environment: Env) => {
+    storedEnv = environment;
+
+    // Check if WebSocket RPC is enabled via environment variable
+    const getEnvValue = (name: string) => {
+        const value = (storedEnv as unknown as Record<string, unknown>)[name];
+        if (typeof value === 'string') {
+            return value;
+        }
+        return undefined;
+    };
+
+
+    injectResources({
+        engine,
+        serveStaticFile: async (c, _fileName, headers) => {
+            const url = new URL(c.req.url);
+            if (url.pathname.startsWith('/dist')) {
+                url.pathname = url.pathname.replace('/dist', '');
+            }
+
+            const response = await storedEnv.ASSETS.fetch(url.toString());
+
+            if (headers && Object.keys(headers).length > 0) {
+                const newResponse = new Response(response.body, response);
+
+                Object.entries(headers).forEach(([key, value]) => {
+                    newResponse.headers.set(key, value);
+                });
+
+                return newResponse;
+            }
+
+            return response;
+        },
+        getEnvValue,
+    });
+
+    await engine.initialize();
+};
+
+let initialized = false;
+
+// PartyServer implementation
+export class SpringboardServer extends Server {
+    private engine: Springboard | null = null;
+    private processWebSocketRpcMessage: ((message: string, connection: any) => Promise<string | void>) | null = null;
+
+    static options = {
+        hibernate: true
+    };
+
+    async onStart() {
+        // Initialize the engine and resources when the server starts
+        if (!this.engine) {
+            this.engine = engine;
+            wsServer = this;
+
+            // Create the RPC message handler
+            const hooks = createWebSocketHooks(USE_WEBSOCKETS_FOR_RPC);
+            if (USE_WEBSOCKETS_FOR_RPC && hooks.message) {
+                this.processWebSocketRpcMessage = async (message: string, connection: any) => {
+                    // Create a peer-like object for compatibility
+                    const peer = {
+                        id: connection.id,
+                        send: (data: string) => connection.send(data),
+                        subscribe: (_channel: string) => {},
+                        unsubscribe: (_channel: string) => {},
+                        request: connection.request,
+                    };
+
+                    const wsMessage = {
+                        text: () => message
+                    };
+
+                    return hooks.message!(peer as any, wsMessage as any);
+                };
+            }
+        }
+    }
+
+    async onConnect(connection: any) {
+        // Subscribe connection to 'event' channel for broadcasts
+        connection.subscribe = (_channel: string) => {};
+        connection.unsubscribe = (_channel: string) => {};
+
+        // Simulate the open hook
+        const hooks = createWebSocketHooks(USE_WEBSOCKETS_FOR_RPC);
+        if (hooks.open) {
+            const peer = {
+                id: connection.id,
+                subscribe: (_channel: string) => {},
+                unsubscribe: (_channel: string) => {},
+            };
+            hooks.open(peer as any);
+        }
+    }
+
+    async onMessage(connection: any, message: string) {
+        if (this.processWebSocketRpcMessage) {
+            const response = await this.processWebSocketRpcMessage(message, connection);
+            if (response) {
+                connection.send(response);
+            }
+        }
+    }
+
+    async onClose(connection: any) {
+        // Simulate the close hook
+        const hooks = createWebSocketHooks(USE_WEBSOCKETS_FOR_RPC);
+        if (hooks.close) {
+            const peer = {
+                id: connection.id,
+                unsubscribe: (_channel: string) => {},
+            };
+            hooks.close(peer as any);
+        }
+    }
+
+    // Override fetch to handle direct WebSocket connections to /ws
+    async fetch(request: Request): Promise<Response> {
+        const url = new URL(request.url);
+        
+        // For direct /ws connections, handle WebSocket upgrade manually
+        if (url.pathname === '/ws' && request.headers.get('upgrade') === 'websocket') {
+            const webSocketPair = new WebSocketPair();
+            const [client, server] = Object.values(webSocketPair);
+            
+            // Accept the WebSocket connection
+            server.accept();
+            
+            // Create a connection-like object for compatibility
+            const connection = {
+                id: Math.random().toString(36).substring(2),
+                send: (data: string) => server.send(data),
+                request: request
+            };
+            
+            // Set up event handlers
+            server.addEventListener('message', async (event) => {
+                if (this.processWebSocketRpcMessage) {
+                    const response = await this.processWebSocketRpcMessage(event.data as string, connection);
+                    if (response) {
+                        server.send(response);
+                    }
+                }
+            });
+            
+            server.addEventListener('close', () => {
+                this.onClose(connection);
+            });
+            
+            // Trigger onConnect
+            this.onConnect(connection);
+            
+            return new Response(null, {
+                status: 101,
+                webSocket: client
+            });
+        }
+        
+        // For partyserver routing (/parties/...), let the parent handle it normally
+        return super.fetch(request);
+    }
+}
+
+export default {
+    async fetch(request, env, ctx): Promise<Response> {
+        if (!initialized) {
+            await initializeWithResources(env);
+            initialized = true;
+        }
+
+        const {pathname} = new URL(request.url);
+        
+        // Handle legacy /ws endpoint - route directly to SpringboardServer
+        if (request.headers.get('upgrade') === 'websocket' && pathname === '/ws') {
+            const id = env.SpringboardServer.idFromName('main');
+            const stub = env.SpringboardServer.get(id);
+            return stub.fetch(request);
+        }
+
+        // Route partyserver WebSocket requests
+        const partykitResponse = await routePartykitRequest(request, env as unknown as Record<string, unknown>, {
+            prefix: '/parties',
+            onBeforeConnect: (req, lobby) => {
+                // Allow WebSocket connections to /parties/springboard/:room
+                if (lobby.party === 'springboard') {
+                    return req;
+                }
+                return new Response('Not found', { status: 404 });
+            }
+        });
+
+        if (partykitResponse) {
+            return partykitResponse;
+        }
+
+        return app.fetch(request, env, ctx);
+    },
+} satisfies ExportedHandler<Env>;

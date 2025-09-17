@@ -1,130 +1,132 @@
-import {DurableObject} from 'cloudflare:workers';
+import { Server, Connection, routePartykitRequest } from 'partyserver';
 
-import {CoreDependencies} from 'springboard/types/module_types';
-import {initApp} from '../../../server/src/hono_app';
+import {Hono} from 'hono';
 
-import crosswsCf from 'crossws/adapters/cloudflare';
-import {Springboard} from 'springboard/engine/engine';
+import springboard from 'springboard';
 import {makeMockCoreDependencies} from 'springboard/test/mock_core_dependencies';
+import {Springboard} from 'springboard/engine/engine';
+import {CoreDependencies, KVStore} from 'springboard/types/module_types';
 
-const mockDeps = makeMockCoreDependencies({store: {}});
-const remoteKV = mockDeps.storage.remote;
-const userAgentKV = mockDeps.storage.userAgent;
+import {initApp, SharedKvForHttp, ServerAppDependencies} from '../src/hono_app';
 
-// @ts-ignore import.meta.env usage
-const USE_WEBSOCKETS_FOR_RPC = import.meta.env.PUBLIC_USE_WEBSOCKETS_FOR_RPC === 'true';
+import {SharedJsonRpcServer} from '../src/services/rpc_server';
 
-// eslint-disable-next-line prefer-const
-let ws: ReturnType<typeof crosswsCf>;
+export class MyServer extends Server {
+    // declare ctx: {
+    //     storage: {
+    //         get: (key: string) => Promise<unknown>;
+    //         put: (key: string, value: unknown) => Promise<void>;
+    //         list: (options?: { limit?: number }) => Promise<Map<string, unknown>>;
+    //     };
+    //     assets: {
+    //         fetch: (path: string) => Promise<Response>;
+    //     };
+    // };
+    private app!: Hono;
+    private serverAppDependencies!: ServerAppDependencies;
+    private springboardApp!: Springboard;
+    private rpcService!: SharedJsonRpcServer;
 
-const {app, serverAppDependencies, injectResources, createWebSocketHooks} = initApp({
-    broadcastMessage: (message) => {
-        return ws.publish('event', message);
-    },
-    remoteKV,
-    userAgentKV,
-});
+    private kv: Record<string, string> = {};
 
-ws = crosswsCf({
-    hooks: createWebSocketHooks(USE_WEBSOCKETS_FOR_RPC)
-});
 
-const coreDeps: CoreDependencies = {
-    log: console.log,
-    showError: console.error,
-    storage: serverAppDependencies.storage,
-    isMaestro: () => true,
-    rpc: serverAppDependencies.rpc,
-};
+    async onStart() {
+        const roomAdapter = {
+            storage: this.ctx.storage,
+            broadcast: (message: string) => this.broadcast(message),
+        };
 
-const engine = new Springboard(coreDeps, {});
+        const {app, serverAppDependencies, rpcService} = initApp({
+            kvForHttp: this.makeKvStoreForHttp(),
+            room: roomAdapter,
+        });
 
-let storedEnv: Env;
+        this.app = app;
+        this.serverAppDependencies = serverAppDependencies;
+        this.rpcService = rpcService;
 
-const initializeWithResources = async (environment: Env) => {
-    storedEnv = environment;
+        springboard.reset();
+        const values = await this.ctx.storage.list({
+            limit: 100,
+        });
 
-    // Check if WebSocket RPC is enabled via environment variable
-    const getEnvValue = (name: string) => {
-        const value = (storedEnv as unknown as Record<string, unknown>)[name];
-        if (typeof value === 'string') {
-            return value;
+        for (const [key, value] of values) {
+            this.kv[key] = value as string;
         }
-        return undefined;
+
+        this.springboardApp = await startSpringboardApp(this.serverAppDependencies);
+    }
+
+    // static onFetch(req: Party.Request, lobby: Party.FetchLobby, ctx: Party.ExecutionContext) {
+    // }
+
+    async onRequest(req: Request) {
+        const urlParts = new URL(req.url).pathname.split('/');
+        const partyName = urlParts[2];
+        const roomName = urlParts[3];
+
+        const prefixToRemove = `/parties/${partyName}/${roomName}`;
+        const newUrl = req.url.replace(prefixToRemove, '');
+
+        // const pathname = new URL(newUrl).pathname;
+
+        // if (pathname === '' || pathname === '/') {
+        //     return (await this.ctx.assets.fetch('/dist/index.html'))!;
+        // }
+
+        const newReq = new Request(newUrl, req as any);
+        return this.app.fetch(newReq);
+    }
+
+    async onMessage(connection: Connection, message: string) {
+        await this.rpcService.onMessage(message, connection);
+    }
+
+    private makeKvStoreForHttp = (): SharedKvForHttp => {
+        return {
+            get: async (key: string) => {
+                const value = this.kv[key];
+                if (!value) {
+                    return null;
+                }
+
+                return JSON.parse(value);
+            },
+            getAll: async () => {
+                const allEntriesAsRecord: Record<string, any> = {};
+                for (const key of Object.keys(this.kv)) {
+                    allEntriesAsRecord[key] = JSON.parse(this.kv[key]);
+                }
+
+                return allEntriesAsRecord;
+            },
+            set: async (key: string, value: unknown) => {
+                this.kv[key] = JSON.stringify(value);
+            },
+        };
+    };
+}
+
+export const startSpringboardApp = async (deps: ServerAppDependencies): Promise<Springboard> => {
+    const coreDeps: CoreDependencies = {
+        log: console.log,
+        showError: console.error,
+        storage: deps.storage,
+        isMaestro: () => true,
+        rpc: deps.rpc,
     };
 
-
-    injectResources({
-        engine,
-        serveStaticFile: async (c, fileName, headers) => {
-            const url = new URL(c.req.url);
-            if (url.pathname.startsWith('/dist')) {
-                url.pathname = url.pathname.replace('/dist', '');
-            }
-
-            const response = await storedEnv.ASSETS.fetch(url.toString());
-
-            if (headers && Object.keys(headers).length > 0) {
-                const newResponse = new Response(response.body, response);
-
-                Object.entries(headers).forEach(([key, value]) => {
-                    newResponse.headers.set(key, value);
-                });
-
-                return newResponse;
-            }
-
-            return response;
-        },
-        getEnvValue,
-    });
+    Object.assign(coreDeps, deps);
+    const engine = new Springboard(coreDeps, {});
 
     await engine.initialize();
+    deps.injectEngine(engine);
+    return engine;
 };
 
-let initialized = false;
-
 export default {
-    async fetch(request, env, ctx): Promise<Response> {
-        if (!initialized) {
-            await initializeWithResources(env);
-            initialized = true;
-        }
-
-        const {pathname} = new URL(request.url);
-
-        if (request.headers.get('upgrade') === 'websocket' && pathname === '/ws') {
-            return ws.handleUpgrade(request, env, ctx);
-        }
-
-        return app.fetch(request, env, ctx);
-    },
-} satisfies ExportedHandler<Env>;
-
-export class $DurableObject extends DurableObject {
-    // @ts-ignore vendor-provided code. missing types
-    constructor(state, env) {
-        super(state, env);
-        ws.handleDurableInit(this, state, env);
+    async fetch(request: Request, env: any) {
+        const response = await routePartykitRequest(request, env);
+        return response || new Response('Not Found', { status: 404 });
     }
-
-    // @ts-ignore vendor-provided code. missing types
-    fetch(request) {
-        return ws.handleDurableUpgrade(this, request);
-    }
-
-    // @ts-ignore vendor-provided code. missing types
-    webSocketMessage(client, message) {
-        return ws.handleDurableMessage(this, client, message);
-    }
-
-    // @ts-ignore vendor-provided code. missing types
-    webSocketPublish(topic, message, opts) {
-        return ws.handleDurablePublish(this, topic, message, opts);
-    }
-
-    // @ts-ignore vendor-provided code. missing types
-    webSocketClose(client, code, reason, wasClean) {
-        return ws.handleDurableClose(this, client, code, reason, wasClean);
-    }
-}
+};
