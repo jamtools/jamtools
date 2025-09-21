@@ -39,6 +39,10 @@ export class NodeMidiService implements MidiService {
         console.log('[DEBUG] System MIDI outputs from easymidi.getOutputs():', JSON.stringify(systemOutputs));
         console.log(`[DEBUG] Total inputs: ${systemInputs.length}, Total outputs: ${systemOutputs.length}`);
 
+        // TEMPORARY: Clear error devices list to see the actual error
+        console.log('[DEBUG] CLEARING ERROR DEVICES LIST FOR DEBUGGING');
+        this.errorDevices = [];
+
         await this.pollService.initialize();
         this.logDebug('[NodeMidiService] Starting device polling...');
         await this.pollForConnectedDevices();
@@ -280,11 +284,12 @@ export class NodeMidiService implements MidiService {
             this.logDebug(`[NodeMidiService] Processing ${result.newlyConnectedDevices.length} newly connected devices...`);
             for (const device of result.newlyConnectedDevices) {
                 this.logDebug(`[NodeMidiService] New device: ${device.humanReadableName} (machine: ${device.machineReadableName})`);
+                console.log(`[DEBUG] TRYING HUMAN READABLE NAME: "${device.humanReadableName}" instead of machine name: "${device.machineReadableName}"`);
                 if (device.input) {
-                    this.initializeMidiInputDevice(device.machineReadableName);
+                    this.initializeMidiInputDevice(device.humanReadableName);
                 }
                 if (device.output) {
-                    this.initializeMidiOutputDevice(device.machineReadableName);
+                    this.initializeMidiOutputDevice(device.humanReadableName);
                 }
             }
 
