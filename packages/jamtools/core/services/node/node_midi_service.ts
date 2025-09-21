@@ -28,10 +28,21 @@ export class NodeMidiService implements MidiService {
     };
 
     public initialize = async () => {
+        console.log('[NodeMidiService] === INITIALIZATION START ===');
         this.logDebug('[NodeMidiService] Initializing...');
+
+        // Check system MIDI capabilities - DEBUG ONLY (will remove after fixing)
+        console.log('[DEBUG] === SYSTEM MIDI CAPABILITIES CHECK ===');
+        const systemInputs = easymidi.getInputs();
+        const systemOutputs = easymidi.getOutputs();
+        console.log('[DEBUG] System MIDI inputs from easymidi.getInputs():', JSON.stringify(systemInputs));
+        console.log('[DEBUG] System MIDI outputs from easymidi.getOutputs():', JSON.stringify(systemOutputs));
+        console.log(`[DEBUG] Total inputs: ${systemInputs.length}, Total outputs: ${systemOutputs.length}`);
+
         await this.pollService.initialize();
         this.logDebug('[NodeMidiService] Starting device polling...');
         await this.pollForConnectedDevices();
+        console.log('[NodeMidiService] === INITIALIZATION COMPLETE ===');
     };
 
     public getInputs = () => {
@@ -44,25 +55,45 @@ export class NodeMidiService implements MidiService {
 
     private initializeMidiInputDevice = (inputName: string) => {
         inputName = inputName.trim();
+        console.log(`[DEBUG] === INITIALIZING INPUT DEVICE: "${inputName}" ===`);
         this.logDebug(`[NodeMidiService] Attempting to initialize MIDI input: ${inputName}`);
+
+        console.log(`[DEBUG] Current error devices list: ${JSON.stringify(this.errorDevices)}`);
+        console.log(`[DEBUG] Is device in error list? ${this.errorDevices.includes(inputName)}`);
+
         if (this.errorDevices.includes(inputName)) {
+            console.log(`[DEBUG] SKIPPING - Device "${inputName}" is in error list`);
             this.logDebug(`[NodeMidiService] Skipping ${inputName} - previously failed`);
             return;
         }
 
         try {
+            console.log(`[DEBUG] Checking for existing input with name "${inputName}"`);
             const existingInputIndex = this.inputs.findIndex(i => i.name === inputName);
+            console.log(`[DEBUG] Existing input index: ${existingInputIndex}`);
 
             if (existingInputIndex !== -1) {
+                console.log(`[DEBUG] Found existing input, closing it first`);
                 const existingInput = this.inputs[existingInputIndex];
                 existingInput?.close();
                 this.inputs = [...this.inputs.slice(0, existingInputIndex), ...this.inputs.slice(existingInputIndex + 1)];
+                console.log(`[DEBUG] Closed existing input, new inputs length: ${this.inputs.length}`);
             }
 
+            // Debug: Show what easymidi actually sees vs what we're trying to open
+            const availableInputs = easymidi.getInputs();
+            console.log(`[DEBUG] === DEVICE NAME COMPARISON ===`);
+            console.log(`[DEBUG] Available easymidi inputs: ${JSON.stringify(availableInputs)}`);
+            console.log(`[DEBUG] Trying to open: "${inputName}"`);
+            console.log(`[DEBUG] Exact match found: ${availableInputs.includes(inputName)}`);
+            console.log(`[DEBUG] Partial matches:`, availableInputs.filter(name => name.includes('Digital Piano') || inputName.includes(name)));
+
+            console.log(`[DEBUG] About to call new easymidi.Input("${inputName}")`);
             this.logDebug(`[NodeMidiService] Creating easymidi.Input for ${inputName}...`);
             const startTime = Date.now();
             const input = new easymidi.Input(inputName);
             const createTime = Date.now() - startTime;
+            console.log(`[DEBUG] SUCCESS: Created easymidi.Input in ${createTime}ms`);
             this.logDebug(`[NodeMidiService] Created input in ${createTime}ms`);
 
             const publishMidiEvent = (event: MidiEvent) => {
@@ -122,12 +153,14 @@ export class NodeMidiService implements MidiService {
         } catch (e) {
             const error = e as Error;
             console.error('failed to initialize midi input device', inputName, error.message);
-            
+            console.error('Full error object:', error);
+            console.error('Error stack:', error.stack);
+
             // Check if it's a memory allocation error specifically
             if (error.message.includes('Cannot allocate memory') || error.message.includes('Failed to initialise RtMidi')) {
                 console.warn('Memory allocation failed for MIDI device. Consider reducing polling frequency or restarting service.');
             }
-            
+
             this.errorDevices.push(inputName);
         }
     };
@@ -149,23 +182,30 @@ export class NodeMidiService implements MidiService {
                 this.outputs = [...this.outputs.slice(0, existingOutputIndex), ...this.outputs.slice(existingOutputIndex + 1)];
             }
 
+            // Debug: Show what easymidi actually sees vs what we're trying to open
+            const availableOutputs = easymidi.getOutputs();
+            console.log(`[DEBUG] Available easymidi outputs: ${JSON.stringify(availableOutputs)}`);
+            console.log(`[DEBUG] Trying to open: "${outputName}"`);
+
             this.logDebug(`[NodeMidiService] Creating easymidi.Output for ${outputName}...`);
             const startTime = Date.now();
             const output = new easymidi.Output(outputName);
             const createTime = Date.now() - startTime;
             this.logDebug(`[NodeMidiService] Created output in ${createTime}ms`);
-            
+
             this.outputs.push(output);
             this.logDebug(`[NodeMidiService] Successfully initialized MIDI output: ${output.name}. Total outputs: ${this.outputs.length}`);
         } catch (e) {
             const error = e as Error;
             console.error('failed to initialize midi output device', outputName, error.message);
-            
+            console.error('Full error object:', error);
+            console.error('Error stack:', error.stack);
+
             // Check if it's a memory allocation error specifically
             if (error.message.includes('Cannot allocate memory') || error.message.includes('Failed to initialise RtMidi')) {
                 console.warn('Memory allocation failed for MIDI device. Consider reducing polling frequency or restarting service.');
             }
-            
+
             this.errorDevices.push(outputName);
         }
     };
@@ -218,18 +258,24 @@ export class NodeMidiService implements MidiService {
         this.logDebug('[NodeMidiService] === Starting device poll cycle ===');
         try {
             const memoryBefore = this.getMemoryUsage();
-            console.log(`[NodeMidiService] Memory before polling: ${memoryBefore.toFixed(1)} MB`);
+            this.logDebug(`[NodeMidiService] Memory before polling: ${memoryBefore.toFixed(1)} MB`);
 
-            const knownDevices = Array.from(new Set(this.inputs.map(i => i.name).concat(this.outputs.map(o => o.name))));
-            this.logDebug(`[NodeMidiService] Current known devices: ${knownDevices.length}`);
-            
+            const knownDevices = Array.from(new Set(
+                this.inputs.map(i => i.name)
+                    .concat(this.outputs.map(o => o.name))
+                    .concat(this.errorDevices) // Include error devices so they don't get re-detected as "newly connected"
+            ));
+            this.logDebug(`[NodeMidiService] Current known devices: ${knownDevices.length} (inputs: ${this.inputs.length}, outputs: ${this.outputs.length}, errors: ${this.errorDevices.length})`);
+            this.logDebug(`[NodeMidiService] Known device names: ${JSON.stringify(knownDevices)}`);
+            this.logDebug(`[NodeMidiService] Error devices: ${JSON.stringify(this.errorDevices)}`);
+
             const pollStartTime = Date.now();
             const result = await this.pollService.pollForDevices(knownDevices);
             const pollDuration = Date.now() - pollStartTime;
             this.logDebug(`[NodeMidiService] Poll completed in ${pollDuration}ms`);
 
             const memoryAfter = this.getMemoryUsage();
-            console.log(`[NodeMidiService] Memory after polling: ${memoryAfter.toFixed(1)} MB (delta: ${(memoryAfter - memoryBefore).toFixed(1)} MB)`);
+            this.logDebug(`[NodeMidiService] Memory after polling: ${memoryAfter.toFixed(1)} MB (delta: ${(memoryAfter - memoryBefore).toFixed(1)} MB)`);
 
             this.logDebug(`[NodeMidiService] Processing ${result.newlyConnectedDevices.length} newly connected devices...`);
             for (const device of result.newlyConnectedDevices) {
@@ -295,7 +341,7 @@ export class NodeMidiService implements MidiService {
             const errorMsg = error instanceof Error ? error.message : 'Unknown error';
             console.error(`[NodeMidiService] Polling error (${this.consecutiveErrors} consecutive): ${errorMsg}`);
             this.logDebug('[NodeMidiService] Full error:', error);
-            
+
             if (errorMsg.includes('Cannot allocate memory')) {
                 console.warn('[NodeMidiService] Memory allocation failure detected. Increasing poll interval.');
                 this.logDebug(`[NodeMidiService] Current memory usage: ${this.getMemoryUsage().toFixed(1)} MB`);
@@ -305,7 +351,7 @@ export class NodeMidiService implements MidiService {
             // Calculate next poll interval with exponential backoff
             const backoffMultiplier = Math.min(Math.pow(2, this.consecutiveErrors), 8); // Cap at 8x
             const nextPollInterval = Math.min(this.basePollInterval * backoffMultiplier, this.maxPollInterval);
-            
+
             this.logDebug(`[NodeMidiService] Next poll in ${nextPollInterval / 1000} seconds (errors: ${this.consecutiveErrors})`);
             this.logDebug('[NodeMidiService] === Poll cycle ended ===\n');
             setTimeout(this.pollForConnectedDevices, nextPollInterval);

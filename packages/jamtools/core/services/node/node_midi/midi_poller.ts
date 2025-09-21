@@ -41,32 +41,48 @@ export class NodeMidiDevicePollerService {
     };
 
     public pollForDevices = async (knownDevices: string[]): Promise<MidiPollResponse> => {
+        console.log('[DEBUG] === POLLING FOR DEVICES START ===');
         this.logDebug(`[MidiPoller] Starting poll. Known devices: ${knownDevices.length}`);
         this.logDebug(`[MidiPoller] Known device names: ${JSON.stringify(knownDevices)}`);
-        
+
+        console.log(`[DEBUG] Using ${this.isUsingAmidi ? 'AMidiDevicePoller' : 'EasyMidiDevicePoller'}`);
+
         const startTime = Date.now();
         const allPolledDevices = await this.poller.poll();
         const pollTime = Date.now() - startTime;
+        console.log(`[DEBUG] Raw poll results (${allPolledDevices.length} devices):`, JSON.stringify(allPolledDevices, null, 2));
         this.logDebug(`[MidiPoller] Poll completed in ${pollTime}ms. Found ${allPolledDevices.length} total devices`);
-        
+
         const polledDevices = allPolledDevices.filter(d => !d.humanReadableName.startsWith('Midi Through') && !d.humanReadableName.includes('RtMidi'));
+        console.log(`[DEBUG] After filtering out system devices (${polledDevices.length} devices):`, JSON.stringify(polledDevices, null, 2));
         this.logDebug(`[MidiPoller] After filtering: ${polledDevices.length} devices`);
         
         const newlyConnectedDevices: DeviceMetadata[] = [];
         const newlyDisconnectedDevices: DeviceMetadata[] = [];
 
         const currentDeviceNames = polledDevices.map(device => device.humanReadableName);
+        console.log(`[DEBUG] Current device names from poll: ${JSON.stringify(currentDeviceNames)}`);
 
+        console.log('[DEBUG] === IDENTIFYING NEWLY CONNECTED DEVICES ===');
         // Identify newly connected devices
         polledDevices.forEach(device => {
-            if (!knownDevices.find(name => name.startsWith(device.humanReadableName))) {
+            const isKnown = knownDevices.find(name => name.startsWith(device.humanReadableName));
+            console.log(`[DEBUG] Checking device "${device.humanReadableName}": known=${!!isKnown}, knownName="${isKnown || 'none'}"`);
+
+            if (!isKnown) {
+                console.log(`[DEBUG] NEWLY CONNECTED: ${device.humanReadableName} (machine: ${device.machineReadableName})`);
                 newlyConnectedDevices.push(device);
             }
         });
 
+        console.log('[DEBUG] === IDENTIFYING DISCONNECTED DEVICES ===');
         // Identify disconnected devices
         knownDevices.forEach(knownDevice => {
-            if (!currentDeviceNames.find(name => knownDevice.startsWith(name))) {
+            const stillConnected = currentDeviceNames.find(name => knownDevice.startsWith(name));
+            console.log(`[DEBUG] Checking known device "${knownDevice}": stillConnected=${!!stillConnected}, currentName="${stillConnected || 'none'}"`);
+
+            if (!stillConnected) {
+                console.log(`[DEBUG] DISCONNECTED: ${knownDevice}`);
                 newlyDisconnectedDevices.push({
                     humanReadableName: knownDevice,
                     machineReadableName: knownDevice,
@@ -77,23 +93,31 @@ export class NodeMidiDevicePollerService {
         });
 
         if (newlyConnectedDevices.length && !this.isUsingAmidi) {
+            console.log('[DEBUG] === PROCESSING DEVICE NAMES WITH EASYMIDI ===');
             this.logDebug('[MidiPoller] Processing newly connected devices with EasyMidi for machine-readable names...');
             // Only use easymidi for machine-readable names if not using AMidi
             let inputs: string[] | undefined;
             let outputs: string[] | undefined;
             for (const device of newlyConnectedDevices) {
+                console.log(`[DEBUG] Processing device: "${device.humanReadableName}" (input: ${device.input}, output: ${device.output})`);
+                console.log(`[DEBUG] Original machine name: "${device.machineReadableName}"`);
                 this.logDebug(`[MidiPoller] Processing device: ${device.humanReadableName} (input: ${device.input}, output: ${device.output})`);
+
                 if (device.input) {
                     if (!inputs) {
+                        console.log('[DEBUG] Getting EasyMidi inputs list...');
                         this.logDebug('[MidiPoller] Getting EasyMidi inputs...');
                         const startTime = Date.now();
                         inputs = easymidi.getInputs();
                         this.logDebug(`[MidiPoller] EasyMidi.getInputs() took ${Date.now() - startTime}ms`);
+                        console.log(`[DEBUG] EasyMidi inputs: ${JSON.stringify(inputs)}`);
                         this.logDebug(`[MidiPoller] EasyMidi inputs: ${JSON.stringify(inputs)}`);
                     }
 
                     const foundInput = inputs.find(deviceName => deviceName.startsWith(device.humanReadableName));
+                    console.log(`[DEBUG] Looking for input matching "${device.humanReadableName}": found="${foundInput || 'none'}"`);
                     if (foundInput) {
+                        console.log(`[DEBUG] Updating machine name from "${device.machineReadableName}" to "${foundInput}"`);
                         this.logDebug(`[MidiPoller] Found machine-readable name for input: ${foundInput}`);
                         device.machineReadableName = foundInput;
                         continue;
@@ -101,30 +125,42 @@ export class NodeMidiDevicePollerService {
                 }
                 if (device.output) {
                     if (!outputs) {
+                        console.log('[DEBUG] Getting EasyMidi outputs list...');
                         this.logDebug('[MidiPoller] Getting EasyMidi outputs...');
                         const startTime = Date.now();
                         outputs = easymidi.getOutputs();
                         this.logDebug(`[MidiPoller] EasyMidi.getOutputs() took ${Date.now() - startTime}ms`);
+                        console.log(`[DEBUG] EasyMidi outputs: ${JSON.stringify(outputs)}`);
                         this.logDebug(`[MidiPoller] EasyMidi outputs: ${JSON.stringify(outputs)}`);
                     }
 
                     const foundOutput = outputs.find(deviceName => deviceName.startsWith(device.humanReadableName));
+                    console.log(`[DEBUG] Looking for output matching "${device.humanReadableName}": found="${foundOutput || 'none'}"`);
                     if (foundOutput) {
+                        console.log(`[DEBUG] Updating machine name from "${device.machineReadableName}" to "${foundOutput}"`);
                         this.logDebug(`[MidiPoller] Found machine-readable name for output: ${foundOutput}`);
                         device.machineReadableName = foundOutput;
                         continue;
                     }
                 }
+                console.log(`[DEBUG] No EasyMidi name match found for "${device.humanReadableName}", keeping "${device.machineReadableName}"`);
             }
         }
 
+        console.log('[DEBUG] === POLLING RESULTS SUMMARY ===');
+        console.log(`[DEBUG] Newly connected: ${newlyConnectedDevices.length}, Newly disconnected: ${newlyDisconnectedDevices.length}`);
+
         this.logDebug(`[MidiPoller] Poll complete. Newly connected: ${newlyConnectedDevices.length}, Newly disconnected: ${newlyDisconnectedDevices.length}`);
         if (newlyConnectedDevices.length > 0) {
+            console.log('[DEBUG] Final newly connected devices:', JSON.stringify(newlyConnectedDevices, null, 2));
             this.logDebug('[MidiPoller] Newly connected devices:', JSON.stringify(newlyConnectedDevices, null, 2));
         }
         if (newlyDisconnectedDevices.length > 0) {
+            console.log('[DEBUG] Final newly disconnected devices:', JSON.stringify(newlyDisconnectedDevices, null, 2));
             this.logDebug('[MidiPoller] Newly disconnected devices:', JSON.stringify(newlyDisconnectedDevices, null, 2));
         }
+
+        console.log('[DEBUG] === POLLING FOR DEVICES END ===\n');
         return {newlyConnectedDevices, newlyDisconnectedDevices};
     };
 }
