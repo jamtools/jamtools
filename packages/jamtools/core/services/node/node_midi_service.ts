@@ -77,25 +77,32 @@ export class NodeMidiService implements MidiService {
             console.log(`[DEBUG] Existing input index: ${existingInputIndex}`);
 
             if (existingInputIndex !== -1) {
-                console.log(`[DEBUG] Found existing input, closing it first`);
+                console.log('[DEBUG] Found existing input, closing it first');
                 const existingInput = this.inputs[existingInputIndex];
                 existingInput?.close();
                 this.inputs = [...this.inputs.slice(0, existingInputIndex), ...this.inputs.slice(existingInputIndex + 1)];
                 console.log(`[DEBUG] Closed existing input, new inputs length: ${this.inputs.length}`);
             }
 
-            // Debug: Show what easymidi actually sees vs what we're trying to open
+            // Find the correct easymidi port name that matches our device
             const availableInputs = easymidi.getInputs();
-            console.log(`[DEBUG] === DEVICE NAME COMPARISON ===`);
             console.log(`[DEBUG] Available easymidi inputs: ${JSON.stringify(availableInputs)}`);
-            console.log(`[DEBUG] Trying to open: "${inputName}"`);
-            console.log(`[DEBUG] Exact match found: ${availableInputs.includes(inputName)}`);
-            console.log(`[DEBUG] Partial matches:`, availableInputs.filter(name => name.includes('Digital Piano') || inputName.includes(name)));
+            console.log(`[DEBUG] Looking for match with: "${inputName}"`);
 
-            console.log(`[DEBUG] About to call new easymidi.Input("${inputName}")`);
-            this.logDebug(`[NodeMidiService] Creating easymidi.Input for ${inputName}...`);
+            // Find input that contains our device name
+            const matchingInput = availableInputs.find(portName =>
+                portName.includes(inputName) || inputName.includes(portName.split(':')[1]?.trim() || '')
+            );
+
+            if (!matchingInput) {
+                throw new Error(`No matching easymidi input found for "${inputName}". Available: ${availableInputs.join(', ')}`);
+            }
+
+            console.log(`[DEBUG] Using easymidi port name: "${matchingInput}"`);
+            console.log(`[DEBUG] About to call new easymidi.Input("${matchingInput}")`);
+            this.logDebug(`[NodeMidiService] Creating easymidi.Input for ${matchingInput}...`);
             const startTime = Date.now();
-            const input = new easymidi.Input(inputName);
+            const input = new easymidi.Input(matchingInput);
             const createTime = Date.now() - startTime;
             console.log(`[DEBUG] SUCCESS: Created easymidi.Input in ${createTime}ms`);
             this.logDebug(`[NodeMidiService] Created input in ${createTime}ms`);
@@ -186,14 +193,24 @@ export class NodeMidiService implements MidiService {
                 this.outputs = [...this.outputs.slice(0, existingOutputIndex), ...this.outputs.slice(existingOutputIndex + 1)];
             }
 
-            // Debug: Show what easymidi actually sees vs what we're trying to open
+            // Find the correct easymidi port name that matches our device
             const availableOutputs = easymidi.getOutputs();
             console.log(`[DEBUG] Available easymidi outputs: ${JSON.stringify(availableOutputs)}`);
-            console.log(`[DEBUG] Trying to open: "${outputName}"`);
+            console.log(`[DEBUG] Looking for match with: "${outputName}"`);
 
-            this.logDebug(`[NodeMidiService] Creating easymidi.Output for ${outputName}...`);
+            // Find output that contains our device name
+            const matchingOutput = availableOutputs.find(portName =>
+                portName.includes(outputName) || outputName.includes(portName.split(':')[1]?.trim() || '')
+            );
+
+            if (!matchingOutput) {
+                throw new Error(`No matching easymidi output found for "${outputName}". Available: ${availableOutputs.join(', ')}`);
+            }
+
+            console.log(`[DEBUG] Using easymidi port name: "${matchingOutput}"`);
+            this.logDebug(`[NodeMidiService] Creating easymidi.Output for ${matchingOutput}...`);
             const startTime = Date.now();
-            const output = new easymidi.Output(outputName);
+            const output = new easymidi.Output(matchingOutput);
             const createTime = Date.now() - startTime;
             this.logDebug(`[NodeMidiService] Created output in ${createTime}ms`);
 

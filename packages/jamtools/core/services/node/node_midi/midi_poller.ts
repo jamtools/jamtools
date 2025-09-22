@@ -245,9 +245,14 @@ class AMidiDevicePoller implements NodeMidiDevicePoller {
             this.logDebug(`[AMidiPoller] getAseqHumanReadableNames() took ${Date.now() - aseqStartTime}ms`);
 
             for (const device of amidiOutput) {
-                const humanReadableName = aseqOutput.get(device.machineReadableName);
-                if (humanReadableName) {
-                    device.humanReadableName = humanReadableName;
+                // Try to find mapping using the client name part (after the hw: prefix)
+                const deviceClientName = device.humanReadableName; // e.g., "Digital Piano MIDI 1"
+                const betterHumanName = aseqOutput.get(deviceClientName);
+                if (betterHumanName) {
+                    console.log(`[DEBUG] Mapped "${deviceClientName}" -> "${betterHumanName}"`);
+                    device.humanReadableName = betterHumanName;
+                } else {
+                    console.log(`[DEBUG] No aseq mapping found for "${deviceClientName}", keeping original`);
                 }
             }
 
