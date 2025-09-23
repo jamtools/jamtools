@@ -9,10 +9,12 @@ export type ActionCallOptions = {
     mode?: 'local' | 'remote';
 }
 
+export interface RpcMiddlewareResults {}
+
 /**
  * The Action callback
 */
-type ActionCallback<Args extends undefined | object, ReturnValue extends Promise<any> = Promise<any>> = (args: Args, options?: ActionCallOptions) => ReturnValue;
+type ActionCallback<Args extends undefined | object, ReturnValue extends Promise<any> = Promise<any>> = (args: Args, middlewareResults?: RpcMiddlewareResults) => ReturnValue;
 
 // this would make it so modules/plugins can extend the module API dynamically through interface merging
 // export interface ModuleAPI {
@@ -125,7 +127,7 @@ export class ModuleAPI {
 
     createActions = <Actions extends Record<string, ActionCallback<any, any>>>(
         actions: Actions
-    ): { [K in keyof Actions]: undefined extends Parameters<Actions[K]>[0] ? ((payload?: Parameters<Actions[K]>[0], options?: ActionCallOptions) => Promise<ReturnType<Actions[K]>>) : ((payload: Parameters<Actions[K]>[0], options?: ActionCallOptions) => Promise<ReturnType<Actions[K]>>) } => {
+    ): { [K in keyof Actions]: undefined extends Parameters<Actions[K]>[0] ? ((payload?: Parameters<Actions[K]>[0], middlewareResults?: RpcMiddlewareResults) => Promise<ReturnType<Actions[K]>>) : ((payload: Parameters<Actions[K]>[0], middlewareResults?: RpcMiddlewareResults) => Promise<ReturnType<Actions[K]>>) } => {
         const keys = Object.keys(actions);
 
         for (const key of keys) {

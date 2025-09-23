@@ -186,6 +186,9 @@ importers:
       '@springboardjs/platforms-node':
         specifier: workspace:*
         version: link:../../packages/springboard/platforms/node
+      hono:
+        specifier: 'catalog:'
+        version: 4.7.10
       react:
         specifier: ^19.1.0
         version: 19.1.0

@@ -23,10 +23,15 @@ export class ServerJsonRpcClientAndServer implements Rpc {
         return true;
     };
 
-    registerRpc = <Args, Return>(method: string, cb: (args: Args) => Promise<Return>) => {
+    registerRpc = <Args, Return>(method: string, cb: (args: Args, middlewareResults?: unknown) => Promise<Return>) => {
         this.rpcServer.addMethod(method, async (args) => {
-            const result = await cb(args);
-            return result;
+            if (args) {
+                const {middlewareResults, ...rest} = args;
+                const result = await cb(rest, middlewareResults);
+                return result;
+            }
+
+            return cb(args, undefined);
         });
     };
 
@@ -41,6 +46,9 @@ export class ServerJsonRpcClientAndServer implements Rpc {
 
     public processRequest = async (jsonMessageStr: string, middlewareResults: unknown) => {
         const jsonMessage = JSON.parse(jsonMessageStr);
+        if (typeof jsonMessage === 'object' && jsonMessage !== null && 'params' in jsonMessage) {
+            jsonMessage.params.middlewareResults = middlewareResults;
+        }
 
         const result = await this.rpcServer.receive(jsonMessage);
         if (result) {
