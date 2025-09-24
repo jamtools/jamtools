@@ -202,6 +202,9 @@ importers:
         specifier: workspace:*
         version: link:../../packages/springboard/cli
     devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 20.17.48
       '@types/react':
         specifier: 'catalog:'
         version: 19.1.5
