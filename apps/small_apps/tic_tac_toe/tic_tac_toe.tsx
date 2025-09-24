@@ -9,11 +9,17 @@ type MiddlewareValue = {
     user_id: string;
 }
 
+declare module 'springboard/engine/module_api' {
+    interface RpcMiddlewareResults {
+        user_id: string;
+    }
+}
+
 // @platform "node"
 serverRegistry.registerServerModule(async (api) => {
     const {setCookie, getCookie} = await import('hono/cookie');
 
-    api.hooks.registerRpcMiddleware((c): Promise<MiddlewareValue> => {
+    api.hooks.registerRpcMiddleware(async (c): Promise<MiddlewareValue> => {
         const cookie = getCookie(c);
         if (cookie.user_id) {
             return {
@@ -86,6 +92,7 @@ springboard.registerModule('TicTacToe', {}, async (moduleAPI) => {
     const actions = moduleAPI.createActions({
         clickedCell: async (args: {row: number, column: number}, c) => {
             console.log('in action', c);
+            console.log(c?.user_id.length);
             if (winnerState.getState()) {
                 return;
             }
