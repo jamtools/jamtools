@@ -157,18 +157,20 @@ export class ModuleAPI {
         actionName: string,
         options: Options,
         cb: undefined extends Args ? ActionCallback<Args, ReturnValue> : ActionCallback<Args, ReturnValue>
-    ): undefined extends Args ? ((args?: Args, options?: ActionCallOptions) => ReturnValue) : ((args: Args, options?: ActionCallOptions) => ReturnValue) => {
+    ): undefined extends Args ? ((args?: Args, options?: ActionCallOptions, context?: RpcMiddlewareResults) => ReturnValue) : ((args: Args, options?: ActionCallOptions, context?: RpcMiddlewareResults) => ReturnValue) => {
         const fullActionName = `${this.fullPrefix}|action|${actionName}`;
 
         if (this.coreDeps.rpc.remote.role === 'server') {
-            this.coreDeps.rpc.remote.registerRpc(fullActionName, cb);
+            this.coreDeps.rpc.remote.registerRpc(fullActionName, (...args) => {
+                return (cb as any)(...args);
+            });
         }
 
         if (this.coreDeps.rpc.local?.role === 'server') {
             this.coreDeps.rpc.local.registerRpc(fullActionName, cb);
         }
 
-        return (async (args: Args, options?: ActionCallOptions): Promise<Awaited<ReturnValue>> => {
+        return (async (args: Args, options?: ActionCallOptions, middlewareResults?: RpcMiddlewareResults): Promise<Awaited<ReturnValue>> => {
             try {
                 let rpc = this.coreDeps.rpc.remote;
 
@@ -176,7 +178,7 @@ export class ModuleAPI {
 
                 if (this.coreDeps.isMaestro() || this.options.rpcMode === 'local' || options?.mode === 'local') {
                     if (!this.coreDeps.rpc.local || this.coreDeps.rpc.local.role !== 'client') {
-                        return await cb(args, undefined);
+                        return await cb(args, middlewareResults);
                     }
 
                     rpc = this.coreDeps.rpc.local!;
