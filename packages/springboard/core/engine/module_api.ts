@@ -9,6 +9,7 @@ export type ActionCallOptions = {
     mode?: 'local' | 'remote';
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface RpcMiddlewareResults {}
 
 /**
