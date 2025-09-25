@@ -54,11 +54,5 @@ export class SharedJsonRpcServer {
 
         return this.initArgs.processRequest(message, rpcContext);
 
-        // return new Promise<string>((resolve) => {
-        //     nodeRpcAsyncLocalStorage.run(rpcContext, async () => {
-        //         const response = await this.initArgs.processRequest(message);
-        //         resolve(response);
-        //     });
-        // });
     };
 }

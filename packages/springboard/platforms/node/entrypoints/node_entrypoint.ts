@@ -2,7 +2,7 @@ import process from 'node:process';
 import path from 'node:path';
 
 import {serve} from '@hono/node-server';
-import crosswsNode, {NodeAdapter} from 'crossws/adapters/node';
+import crosswsNode from 'crossws/adapters/node';
 
 import {makeWebsocketServerCoreDependenciesWithSqlite} from '../services/ws_server_core_dependencies';
 

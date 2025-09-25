@@ -4,9 +4,6 @@ import {serveStatic} from 'hono/serve-static';
 import {cors} from 'hono/cors';
 
 import {ServerAppDependencies} from './types/server_app_dependencies';
-// import {KVStoreFromKysely} from '@springboardjs/data-storage/kv_api_kysely';
-// import {LocalJsonNodeKVStoreService} from '@springboardjs/platforms-node/services/node_kvstore_service';
-// import {NodeLocalJsonRpcClientAndServer} from '@springboardjs/platforms-node/services/node_local_json_rpc';
 
 import {createCommonWebSocketHooks} from './services/crossws_json_rpc';
 import {WebsocketServerCoreDependencies} from '@springboardjs/platforms-node/services/ws_server_core_dependencies';
@@ -46,27 +43,6 @@ export const initApp = (initArgs: InitServerAppArgs): InitAppReturnValue => {
 
     app.use('*', cors());
 
-    // const service: CrossWsJsonRpcServer = new CrossWsJsonRpcServer({
-    //     processRequest: async (message) => {
-    //         return rpc!.processRequest(message);
-    //     },
-    //     rpcMiddlewares,
-    // });
-
-    // const wsServer = initArgs.crossWsAdapter({
-    //     open: peer => {
-    //         console.log(`new peer ${peer.id}`)
-    //         peer.subscribe('event');
-    //     },
-    //     close: peer => {
-    //         console.log(`closed peer ${peer.id}`)
-    //         peer.unsubscribe('event');
-    //     },
-    // });
-    // const broadcastMessage = (message: string) => {
-    //     console.log(`sending message to ${wsServer.peers.size} peers`);
-    //     wsServer.publish('event', message);
-    // }
 
     const remoteKV = initArgs.remoteKV;
     const userAgentKV = initArgs.userAgentKV;
@@ -158,21 +134,6 @@ export const initApp = (initArgs: InitServerAppArgs): InitAppReturnValue => {
 
     app.post('/kv/set', async (c) => {
         return c.json({error: 'Not supported'}, 400);
-        // const body = await c.req.text();
-        // const {key, value} = JSON.parse(body);
-
-        // c.header('Content-Type', 'application/json');
-
-        // if (!key) {
-        //     return c.json({error: 'No key provided'}, 400);
-        // }
-
-        // if (!value) {
-        //     return c.json({error: 'No value provided'}, 400);
-        // }
-
-        // await remoteKV.set(key, value);
-        // return c.json({success: true});
     });
 
     app.get('/kv/get-all', async (c) => {

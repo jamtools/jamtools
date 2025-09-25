@@ -12,16 +12,6 @@ import {initApp, SharedKvForHttp, ServerAppDependencies} from '../src/hono_app';
 import {SharedJsonRpcServer} from '../src/services/rpc_server';
 
 export class MyServer extends Server {
-    // declare ctx: {
-    //     storage: {
-    //         get: (key: string) => Promise<unknown>;
-    //         put: (key: string, value: unknown) => Promise<void>;
-    //         list: (options?: { limit?: number }) => Promise<Map<string, unknown>>;
-    //     };
-    //     assets: {
-    //         fetch: (path: string) => Promise<Response>;
-    //     };
-    // };
     private app!: Hono;
     private serverAppDependencies!: ServerAppDependencies;
     private springboardApp!: Springboard;
@@ -57,8 +47,6 @@ export class MyServer extends Server {
         this.springboardApp = await startSpringboardApp(this.serverAppDependencies);
     }
 
-    // static onFetch(req: Party.Request, lobby: Party.FetchLobby, ctx: Party.ExecutionContext) {
-    // }
 
     async onRequest(req: Request) {
         const urlParts = new URL(req.url).pathname.split('/');
@@ -68,11 +56,6 @@ export class MyServer extends Server {
         const prefixToRemove = `/parties/${partyName}/${roomName}`;
         const newUrl = req.url.replace(prefixToRemove, '');
 
-        // const pathname = new URL(newUrl).pathname;
-
-        // if (pathname === '' || pathname === '/') {
-        //     return (await this.ctx.assets.fetch('/dist/index.html'))!;
-        // }
 
         const newReq = new Request(newUrl, req as any);
         return this.app.fetch(newReq);

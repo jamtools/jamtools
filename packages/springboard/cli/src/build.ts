@@ -8,7 +8,7 @@ import {esbuildPluginPlatformInject} from './esbuild_plugins/esbuild_plugin_plat
 import {esbuildPluginHtmlGenerate} from './esbuild_plugins/esbuild_plugin_html_generate';
 import {esbuildPluginCfWorkersConfig} from './esbuild_plugins/esbuild_plugin_cf_workers_config';
 
-export type SpringboardPlatform = 'all' | 'main' | 'mobile' | 'desktop' | 'browser_offline' | 'partyserver' | 'cf-workers';
+export type SpringboardPlatform = 'all' | 'main' | 'mobile' | 'desktop' | 'browser_offline' | 'cf-workers';
 
 type EsbuildOptions = Parameters<typeof esbuild.build>[0];
 
@@ -227,7 +227,21 @@ export const buildApplication = async (buildConfig: BuildConfig, options?: Appli
         outDir += '/' + childDir;
     }
 
-    const fullOutDir = `${outDir}/${buildConfig.platform}/dist`;
+    // Determine platform family and context based on build config
+    let platformFamily = 'node'; // default
+    let context = 'server'; // default
+    
+    const entrypoint = buildConfig.platformEntrypoint();
+    if (entrypoint.includes('cf-workers') || entrypoint.includes('cf_worker')) {
+        platformFamily = 'cf-workers';
+        if (entrypoint.includes('browser')) {
+            context = 'browser';
+        }
+    } else if (entrypoint.includes('browser') || buildConfig.platform === 'browser') {
+        context = 'browser';
+    }
+    
+    const fullOutDir = `${outDir}/${platformFamily}/${context}/dist`;
 
     if (!fs.existsSync(fullOutDir)) {
         fs.mkdirSync(fullOutDir, {recursive: true});
