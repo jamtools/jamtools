@@ -15,7 +15,6 @@
     "springboard": "workspace:*"
   },
   "devDependencies": {
-    "react": "catalog:",
-    "react-router-dom": "catalog:"
+    "@tanstack/react-router": "catalog:"
   }
 }

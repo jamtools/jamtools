@@ -5,3 +5,5 @@ import {springboard} from '../engine/register';
 // export const SpringboardProvider = engine.SpringboardProvider;
 
 export default springboard;
+
+export {AllModules} from '../module_registry/module_registry';

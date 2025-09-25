@@ -1,7 +1,5 @@
 import React from 'react';
 
-import {Link} from 'react-router-dom';
-
 import springboard from 'springboard';
 import {MidiEvent} from '@jamtools/core/modules/macro_module/macro_module_types';
 
@@ -140,11 +138,11 @@ springboard.registerModule('song_structures_dashboards', {}, async (moduleAPI): 
     moduleAPI.registerRoute('', () => {
         return (
             <div>
-                <Link to='/modules/song_structures_dashboards/bass_guitar'>
+                <a href='/modules/song_structures_dashboards/bass_guitar'>
                     <button>
                         Go to Bass Guitar
                     </button>
-                </Link>
+                </a>
             </div>
         );
     });

@@ -8,7 +8,6 @@
   },
   "peerDependencies": {
     "@tanstack/react-router": "^1",
-    "react-router-dom": "^6",
     "springboard": "workspace:*"
   },
   "dependencies": {

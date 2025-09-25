@@ -1,7 +1,5 @@
 import React from 'react';
 
-import {useLocation, matchPath} from 'react-router-dom';
-
 import {Module} from 'springboard/module_registry/module_registry';
 
 type Props = React.PropsWithChildren<{
