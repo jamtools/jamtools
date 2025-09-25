@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 
-import {useLocation, useNavigate} from 'react-router-dom';
+import {useLocation, useNavigate} from '@tanstack/react-router';
 
 import SlTab from '@shoelace-style/shoelace/dist/react/tab/index.js';
 import SlTabGroup from '@shoelace-style/shoelace/dist/react/tab-group/index.js';
@@ -79,10 +79,10 @@ const Tabs = (props: TabsProps) => {
 
     const showRoute = (modId: string, route: string) => {
         if (route.startsWith('/')) {
-            navigate(route);
+            navigate({to: route});
             return;
         }
-        navigate(`/modules/${modId}/${route}`);
+        navigate({to: `/modules/${modId}/${route}`});
     };
 
     const modulesWithRoutes = props.modules.filter(m => m.routes).map(m => (

@@ -46,7 +46,7 @@ springboard.registerModule('HandRaiser', {}, async (m) => {
         },
     });
 
-    m.registerRoute('/', {}, () => {
+    m.registerRoute('/', () => {
         const positions = states.handPositions.useState();
 
         return (

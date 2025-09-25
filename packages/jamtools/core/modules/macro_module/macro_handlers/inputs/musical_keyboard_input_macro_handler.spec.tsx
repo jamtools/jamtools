@@ -3,7 +3,7 @@ import {act} from 'react';
 import { screen } from 'shadow-dom-testing-library';
 import '@testing-library/jest-dom';
 
-import '@jamtools/core/modules';
+import '@jamtools/core/modules/macro_module/macro_module';
 import {Springboard} from 'springboard/engine/engine';
 import springboard from 'springboard';
 
@@ -20,7 +20,7 @@ import {getMacroInputTestHelpers} from './macro_input_test_helpers';
 
 describe('MusicalKeyboardInputMacroHandler', () => {
     beforeEach(() => {
-        springboard.reset();
+        springboard.reset({keepCalls: true});
         macroTypeRegistry.reset();
     });
 

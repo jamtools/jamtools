@@ -21,6 +21,7 @@
     "fix": "TURBO_NO_UPDATE_NOTIFIER=true turbo run fix",
     "ci": "NODE_MODULES_PARENT_FOLDER=$PWD TURBO_NO_UPDATE_NOTIFIER=true turbo run lint check-types build test",
     "heroku-postbuild": "NODE_ENV=production npm run build-saas",
+    "test-tanstack-app": "npx tsx packages/springboard/cli/src/cli.ts dev ./apps/small_apps/test_tanstack_app/test_tanstack_app.tsx",
     "build-desktop": "RUN_SIDECAR_FROM_WEBVIEW=true npx tsx packages/springboard/cli/src/cli.ts build ./apps/jamtools/modules/index.ts --platforms desktop",
     "build-all": "RUN_SIDECAR_FROM_WEBVIEW=true npx tsx packages/springboard/cli/src/cli.ts build ./apps/small_apps/empty_app/index.ts --platforms all",
     "splash-screen-app": "npx tsx packages/springboard/cli/src/cli.ts dev ./apps/small_apps/app_with_splash_screen/app_with_splash_screen.tsx"

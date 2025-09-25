@@ -12,8 +12,11 @@ import springboard from 'springboard';
 import {CapturedRegisterMacroTypeCall, MacroAPI, MacroCallback} from '@jamtools/core/modules/macro_module/registered_macro_types';
 import {ModuleAPI} from 'springboard/engine/module_api';
 
+import {createRoute} from '@tanstack/react-router';
+
 import './macro_handlers';
 import {macroTypeRegistry} from './registered_macro_types';
+import {rootRoute} from 'springboard/ui/root_route';
 
 type ModuleId = string;
 
@@ -52,14 +55,16 @@ export class MacroModule implements Module<MacroConfigState> {
 
     constructor(private coreDeps: CoreDependencies, private moduleDeps: ModuleDependencies) { }
 
-    routes = {
-        '': {
+    routes = [
+        createRoute({
+            getParentRoute: () => rootRoute,
+            path: '/modules/macro',
             component: () => {
                 const mod = MacroModule.use();
                 return <MacroPage state={mod.state || this.state} />;
             },
-        },
-    };
+        }),
+    ];
 
     state: MacroConfigState = {
         configs: {},

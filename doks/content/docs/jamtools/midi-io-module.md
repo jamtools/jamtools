@@ -35,7 +35,7 @@ springboard.registerModule('Main', {}, async (moduleAPI) => {
         mostRecentMidiEvent.setState(event);
     });
 
-    moduleAPI.registerRoute('', {}, () => {
+    moduleAPI.registerRoute('', () => {
         const midiEvent = mostRecentMidiEvent.useState();
 
         return (

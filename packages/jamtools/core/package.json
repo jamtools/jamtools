@@ -13,6 +13,7 @@
   "module": "./src/index.ts",
   "peerDependencies": {
     "@springboardjs/platforms-browser": "workspace:*",
+    "@tanstack/react-router": "^1",
     "@tonejs/midi": "^2.0.0",
     "springboard": "workspace:*",
     "svelte": ">= 5"
@@ -31,6 +32,7 @@
   },
   "devDependencies": {
     "@springboardjs/platforms-browser": "workspace:*",
+    "@tanstack/react-router": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "react": "catalog:",

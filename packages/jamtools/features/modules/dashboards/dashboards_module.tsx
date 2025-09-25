@@ -1,7 +1,5 @@
 import React from 'react';
 
-import {Link} from 'react-router-dom';
-
 import springboard from 'springboard';
 
 import {ModuleAPI} from 'springboard/engine/module_api';
@@ -28,16 +26,16 @@ springboard.registerModule('Dashboards', {}, async (moduleAPI): Promise<Dashboar
     const promises = allDashboards.map(d => d.dashboard(moduleAPI, d.id));
     await Promise.all(promises);
 
-    moduleAPI.registerRoute('', {}, () => {
+    moduleAPI.registerRoute('', () => {
         return (
             <div>
                 <h2>Dashboards:</h2>
                 <ul>
                     {allDashboards.map(d => (
                         <li key={d.id}>
-                            <Link to={`/modules/Dashboards/${d.id}`}>
+                            <a href={`/modules/Dashboards/${d.id}`}>
                                 {d.label}
-                            </Link>
+                            </a>
                         </li>
                     ))}
                 </ul>

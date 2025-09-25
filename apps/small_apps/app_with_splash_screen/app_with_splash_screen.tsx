@@ -60,7 +60,7 @@ springboard.registerModule('AppWithSplashScreen', {}, async (moduleAPI) => {
         },
     });
 
-    moduleAPI.registerRoute('/', {}, () => {
+    moduleAPI.registerRoute('/', () => {
         return (
             <AppWithSplashScreenComponent
                 message={messageState.useState()}
