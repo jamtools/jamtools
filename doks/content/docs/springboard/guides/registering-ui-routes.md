@@ -15,12 +15,15 @@ seo:
 ---
 
 
-Springboard currently uses React Router to register UI routes for the application. The plan is to move to [TanStack Router](https://tanstack.com/router) in the future for better type safety and more features.
+Springboard currently uses [TanStack Router](https://tanstack.com/router) to register UI routes for the application.
 
-The `moduleAPI.registerRoute` function allows modules to register their own routes. If the specified route begins with a `/`, it's assumed the route starts at the beginning of the URL. Otherwise, the URL is assumed to be relative to the URL `/modules/(module id)`.
+There are two ways to register routes:
+
+- The module can return a `routes` array of tanstack router routes. These are assumed to be relative to the root route.
+- The `moduleAPI.registerRoute` function allows modules to register their own routes. This circumvents tanstack's type safety.
 
 ```jsx
-import {useParams} from 'react-router';
+import {createRoute} from '@tanstack/react-router';
 
 springboard.registerModule('MyModule', async (moduleAPI) => {
     // matches "" and "/"
@@ -38,9 +41,8 @@ springboard.registerModule('MyModule', async (moduleAPI) => {
     });
 
     // matches "/modules/MyModule/things/1"
-    moduleAPI.registerRoute('things/:thingId', () => {
-        const params = useParams();
-        const thingId = params.thingId;
+    moduleAPI.registerRoute('things/:thingId', ({pathParams}) => {
+        const thingId = pathParams.thingId;
 
         return (
             <div/>
@@ -48,14 +50,24 @@ springboard.registerModule('MyModule', async (moduleAPI) => {
     });
 
     // matches "/users/1"
-    moduleAPI.registerRoute('/users/:userId', () => {
-        const params = useParams();
-        const userId = params.userId;
+    moduleAPI.registerRoute('/users/:userId', ({pathParams}) => {
+        const userId = pathParams.userId;
 
         return (
             <div/>
         );
     });
+
+    return {
+        routes: [
+            createRoute({
+                path: '/my-typed-route',
+                element: () => (
+                    <div/>
+                ),
+            }),
+        ],
+    };
 });
 ```
 
