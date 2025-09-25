@@ -121,6 +121,13 @@ export const platformCfWorkersServerBuildConfig: BuildConfig = {
                     };
                 });
 
+                build.onResolve({ filter: /^crypto$/ }, (args: any) => {
+                    return {
+                        path: args.path,
+                        namespace: 'crypto-shim'
+                    };
+                });
+
                 build.onLoad({ filter: /.*/, namespace: 'crypto-shim' }, () => {
                     return {
                         contents: `export const webcrypto = crypto;`,
