@@ -23,7 +23,8 @@
     "heroku-postbuild": "NODE_ENV=production npm run build-saas",
     "build-desktop": "RUN_SIDECAR_FROM_WEBVIEW=true npx tsx packages/springboard/cli/src/cli.ts build ./apps/jamtools/modules/index.ts --platforms desktop",
     "build-all": "RUN_SIDECAR_FROM_WEBVIEW=true npx tsx packages/springboard/cli/src/cli.ts build ./apps/small_apps/empty_app/index.ts --platforms all",
-    "splash-screen-app": "npx tsx packages/springboard/cli/src/cli.ts dev ./apps/small_apps/app_with_splash_screen/app_with_splash_screen.tsx"
+    "splash-screen-app": "npx tsx packages/springboard/cli/src/cli.ts dev ./apps/small_apps/app_with_splash_screen/app_with_splash_screen.tsx",
+    "test-vite-build": "npm run test-vite-build --prefix apps/small_apps"
   },
   "keywords": [],
   "author": "",
@@ -50,8 +51,8 @@
     "springboard-server": "workspace:*",
     "tsx": "^4.19.2",
     "tsup": "^8.3.5",
-    "typescript": "^5.4.5",
-    "vite": "^5.4.6",
+    "typescript": "catalog:",
+    "vite": "catalog:",
     "vite-tsconfig-paths": "^5.0.1",
     "vitest": "^2.1.1"
   },

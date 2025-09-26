@@ -21,7 +21,7 @@
   "devDependencies": {
     "@tauri-apps/cli": "^2",
     "@yao-pkg/pkg": "^6.1.1",
-    "typescript": "^5.2.2",
-    "vite": "^5.3.1"
+    "typescript": "catalog:",
+    "vite": "catalog:"
   }
 }
