@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 
 import esbuild from 'esbuild';
+import { build as viteBuild, createServer as viteCreateServer, type InlineConfig } from 'vite';
 
 import {esbuildPluginLogBuildTime} from './esbuild_plugins/esbuild_plugin_log_build_time';
 import {esbuildPluginPlatformInject} from './esbuild_plugins/esbuild_plugin_platform_inject.js';
@@ -163,6 +164,300 @@ export const platformTauriMaestroBuildConfig: BuildConfig = {
 };
 
 const shouldOutputMetaFile = process.argv.includes('--meta');
+
+export const buildApplicationWithVite = async (buildConfig: BuildConfig, options?: ApplicationBuildOptions) => {
+    console.log('Starting Vite build for platform:', buildConfig.platform);
+
+    let coreFile = buildConfig.platformEntrypoint();
+
+    let applicationEntrypoint = process.env.APPLICATION_ENTRYPOINT || options?.applicationEntrypoint;
+    if (!applicationEntrypoint) {
+        throw new Error('No application entrypoint provided');
+    }
+
+    const parentOutDir = './vite-dist';
+    const childDir = options?.esbuildOutDir;
+
+    // const plugins = (options?.plugins || []).map(p => p(buildConfig));
+
+    let outDir = parentOutDir;
+    if (childDir) {
+        outDir += '/' + childDir;
+    }
+
+    const fullOutDir = `${outDir}/${buildConfig.platform}`;
+
+    if (!fs.existsSync(fullOutDir)) {
+        fs.mkdirSync(fullOutDir, {recursive: true});
+    }
+
+    const dynamicEntryPath = path.join(fullOutDir, 'dynamic-entry.js');
+    console.log(dynamicEntryPath);
+
+    if (path.isAbsolute(coreFile)) {
+        coreFile = path.relative(fullOutDir, coreFile).replace(/\\/g, '/');
+    }
+
+    if (path.isAbsolute(applicationEntrypoint)) {
+        applicationEntrypoint = path.relative(fullOutDir, applicationEntrypoint).replace(/\\/g, '/');
+    }
+
+    const allImports = `import '${coreFile}';
+import '${applicationEntrypoint}';
+`
+
+    fs.writeFileSync(dynamicEntryPath, allImports);
+    console.log('Created dynamic entry at:', dynamicEntryPath);
+
+    const externals = buildConfig.externals?.() || [];
+    externals.push('better-sqlite3');
+
+    let nodeModulesParentFolder = process.env.NODE_MODULES_PARENT_FOLDER || options?.nodeModulesParentFolder;
+    if (!nodeModulesParentFolder) {
+        nodeModulesParentFolder = await findNodeModulesParentFolder();
+    }
+    if (!nodeModulesParentFolder) {
+        throw new Error('Failed to find node_modules folder in current directory and parent directories')
+    }
+
+    const platformName = buildConfig.name || buildConfig.platform;
+    const appName = options?.name;
+    const fullName = appName ? appName + '-' + platformName : platformName;
+
+    // Create minimal Vite config
+    const viteConfig: InlineConfig = {
+        root: process.cwd(), // Use current working directory as root
+        build: {
+            outDir: fullOutDir, // Output to the full output directory
+            emptyOutDir: false,
+            rollupOptions: {
+                input: dynamicEntryPath,
+                external: externals,
+                output: {
+                    entryFileNames: 'index.js',
+                    chunkFileNames: buildConfig.fingerprint ? '[name]-[hash].js' : '[name].js',
+                    assetFileNames: buildConfig.fingerprint ? '[name]-[hash][extname]' : '[name][extname]',
+                    format: buildConfig.platform === 'node' ? 'cjs' : 'es',
+                }
+            },
+            sourcemap: true,
+            minify: process.env.NODE_ENV === 'production' ? 'esbuild' : false,
+            target: buildConfig.platform === 'node' ? 'node18' : 'es2022', // Modern targets avoid tslib helpers
+        },
+        esbuild: {
+            jsx: 'automatic', // For React 17+ with automatic JSX transform
+        },
+        define: {
+            'process.env.WS_HOST': `"${process.env.WS_HOST || ''}"`,
+            'process.env.DATA_HOST': `"${process.env.DATA_HOST || ''}"`,
+            'process.env.NODE_ENV': `"${process.env.NODE_ENV || ''}"`,
+            'process.env.DISABLE_IO': `"${process.env.DISABLE_IO || ''}"`,
+            'process.env.IS_SERVER': `"${process.env.IS_SERVER || ''}"`,
+            'process.env.DEBUG_LOG_PERFORMANCE': `"${process.env.DEBUG_LOG_PERFORMANCE || ''}"`,
+            'process.env.RELOAD_CSS': `"${options?.dev?.reloadCss || ''}"`,
+            'process.env.RELOAD_JS': `"${options?.dev?.reloadJs || ''}"`,
+        },
+        plugins: [],
+        logLevel: 'info' as const,
+    };
+
+    console.log('Vite config:', JSON.stringify(viteConfig, null, 2));
+
+    // Copy additional files if needed
+    if (buildConfig.additionalFiles) {
+        for (const srcFileName of Object.keys(buildConfig.additionalFiles)) {
+            const destFileName = buildConfig.additionalFiles[srcFileName];
+
+            const fullSrcFilePath = path.join(nodeModulesParentFolder, 'node_modules', srcFileName);
+            const fullDestFilePath = `${fullOutDir}/${destFileName}`;
+            await fs.promises.copyFile(fullSrcFilePath, fullDestFilePath);
+        }
+    }
+
+    if (options?.watch) {
+        console.log(`Starting Vite watch mode for ${fullName}...`);
+
+        // For browser platform with dev server (HMR)
+        if (buildConfig.platform === 'browser') {
+            // Create HTML entry point for dev server
+            const htmlTemplatePath = path.join(nodeModulesParentFolder, 'node_modules/@springboardjs/platforms-browser/index.html');
+            const htmlEntryPath = path.join(fullOutDir, 'index.html');
+
+            // Read the HTML template
+            let htmlContent = await fs.promises.readFile(htmlTemplatePath, 'utf-8');
+
+            // Inject the dynamic entry script
+            const scriptTag = `<script type="module" src="${path.relative(fullOutDir, dynamicEntryPath)}"></script>`;
+            htmlContent = htmlContent.replace('</body>', `${scriptTag}\n</body>`);
+
+            // Write the HTML entry point
+            await fs.promises.writeFile(htmlEntryPath, htmlContent);
+            console.log('Created HTML entry point for dev server at:', htmlEntryPath);
+
+            // Create a dev server with HMR
+            const server = await viteCreateServer({
+                root: fullOutDir,
+                server: {
+                    port: 3000,
+                    open: false,
+                    strictPort: false,
+                    proxy: {
+                        '/users/*': {
+                            target: 'http://localhost:1337',
+                            changeOrigin: true,
+                        },
+                        '/rpc/*': {
+                            target: 'http://localhost:1337',
+                            changeOrigin: true,
+                        },
+                        '/ws': {
+                            target: 'ws://localhost:1337',
+                            changeOrigin: true,
+                        },
+                        '/kv/get-all': {
+                            target: 'http://localhost:1337',
+                            changeOrigin: true,
+                        },
+                    },
+                },
+                // Don't use the build config for dev server
+                build: undefined,
+                define: viteConfig.define,
+                esbuild: viteConfig.esbuild,
+            });
+
+            await server.listen();
+            console.log(`Vite dev server running at http://localhost:${server.config.server.port || 3000}`);
+            console.log('Press Ctrl+C to stop watching...');
+
+            // Keep the process alive
+            return new Promise(() => {
+                // This promise never resolves, keeping the server running
+                process.on('SIGINT', async () => {
+                    console.log('\nStopping Vite dev server...');
+                    await server.close();
+                    process.exit(0);
+                });
+            });
+        } else {
+            // Use Vite's built-in build watch mode (Rollup watcher)
+            console.log(`Watching for changes for ${buildConfig.platform} application build...`);
+
+            // Configure watch mode using Rollup watcher
+            const watchConfig: InlineConfig = {
+                ...viteConfig,
+                build: {
+                    ...viteConfig.build,
+                    watch: {
+                        // Rollup watch options
+                        buildDelay: 100,
+                        clearScreen: false,
+                        skipWrite: false,
+                        // For WSL2 compatibility
+                        chokidar: {
+                            usePolling: process.platform === 'linux',
+                        }
+                    },
+                },
+                plugins: [
+                    ...(viteConfig.plugins || []),
+                    {
+                        name: 'watch-notifier',
+                        watchChange(id) {
+                            console.log(`File changed: ${path.relative(process.cwd(), id)}`);
+                        },
+                        buildStart() {
+                            console.log('Rebuilding...');
+                        },
+                        buildEnd(error) {
+                            if (error) {
+                                console.error('Build failed:', error);
+                            } else {
+                                console.log('✓ Build completed');
+                            }
+                        },
+                    }
+                ]
+            };
+
+            // Start the watcher
+            const rollupWatcher = await viteBuild(watchConfig);
+
+            console.log('Press Ctrl+C to stop watching...');
+
+            // Keep process alive and handle cleanup
+            return new Promise(() => {
+                process.on('SIGINT', async () => {
+                    console.log('\nStopping watch mode...');
+                    if (rollupWatcher && 'close' in rollupWatcher) {
+                        await (rollupWatcher as any).close();
+                    }
+                    process.exit(0);
+                });
+            });
+        }
+    }
+
+    try {
+        console.log('Starting Vite build...');
+        const result = await viteBuild(viteConfig);
+        console.log(`Vite build completed for ${fullName}`);
+
+        // Generate HTML file for browser platform (similar to esbuild plugin)
+        if (buildConfig.platform === 'browser') {
+            const htmlTemplatePath = path.join(nodeModulesParentFolder, 'node_modules/@springboardjs/platforms-browser/index.html');
+            const htmlOutputPath = path.join(fullOutDir, 'index.html');
+
+            // Read the HTML template
+            let htmlContent = await fs.promises.readFile(htmlTemplatePath, 'utf-8');
+
+            // Find generated JS and CSS files
+            if (result && Array.isArray(result)) {
+                for (const output of result) {
+                    if (output && 'output' in output) {
+                        for (const chunk of output.output) {
+                            if (chunk.fileName.endsWith('.js')) {
+                                const scriptTag = `<script src="/${chunk.fileName}"></script>`;
+                                htmlContent = htmlContent.replace('</body>', `${scriptTag}\n</body>`);
+                            } else if (chunk.fileName.endsWith('.css')) {
+                                const linkTag = `<link rel="stylesheet" href="/${chunk.fileName}">`;
+                                htmlContent = htmlContent.replace('</head>', `${linkTag}\n</head>`);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Apply document metadata if provided
+            if (options?.documentMeta) {
+                const title = options.documentMeta.title;
+                if (title) {
+                    htmlContent = htmlContent.replace(/<title>(.*?)<\/title>/, `<title>${title}</title>`);
+                }
+
+                for (const [key, value] of Object.entries(options.documentMeta)) {
+                    if (key === 'title') continue;
+
+                    if (key === 'Content-Security-Policy') {
+                        const metaTag = `<meta http-equiv="${key}" content="${value}">`;
+                        htmlContent = htmlContent.replace('</head>', `${metaTag}\n</head>`);
+                    } else {
+                        const metaTag = `<meta property="${key}" content="${value}">`;
+                        htmlContent = htmlContent.replace('</head>', `${metaTag}\n</head>`);
+                    }
+                }
+            }
+
+            if (buildConfig.platform === 'browser') {
+                await fs.promises.writeFile(htmlOutputPath, htmlContent);
+                console.log('Generated HTML file at:', htmlOutputPath);
+            }
+        }
+    } catch (error) {
+        console.error('Vite build failed:', error);
+        throw error;
+    }
+};
 
 export const buildApplication = async (buildConfig: BuildConfig, options?: ApplicationBuildOptions) => {
     let coreFile = buildConfig.platformEntrypoint();

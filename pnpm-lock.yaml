@@ -42,6 +42,12 @@ catalogs:
     tslib:
       specifier: ^2.8.1
       version: 2.8.1
+    typescript:
+      specifier: ^5.4.5
+      version: 5.8.3
+    vite:
+      specifier: ^5.4.6
+      version: 5.4.19
     zod:
       specifier: ^3.23.8
       version: 3.25.7
@@ -123,10 +129,10 @@ importers:
         specifier: ^4.19.2
         version: 4.19.4
       typescript:
-        specifier: ^5.4.5
+        specifier: 'catalog:'
         version: 5.8.3
       vite:
-        specifier: ^5.4.6
+        specifier: 'catalog:'
         version: 5.4.19(@types/node@22.15.21)
       vite-tsconfig-paths:
         specifier: ^5.0.1
@@ -196,6 +202,15 @@ importers:
       '@types/react-dom':
         specifier: 'catalog:'
         version: 19.1.5(@types/react@19.1.5)
+      concurrently:
+        specifier: ^9.1.0
+        version: 9.1.2
+      tslib:
+        specifier: ^2.8.1
+        version: 2.8.1
+      typescript:
+        specifier: 'catalog:'
+        version: 5.8.3
 
   configs:
     dependencies:
@@ -240,10 +255,10 @@ importers:
         specifier: ^8.3.5
         version: 8.5.0(postcss@8.5.3)(tsx@4.19.4)(typescript@5.8.3)
       typescript:
-        specifier: ^5.4.5
+        specifier: 'catalog:'
         version: 5.8.3
       vite:
-        specifier: ^5.4.6
+        specifier: 'catalog:'
         version: 5.4.19(@types/node@22.15.21)
       vite-tsconfig-paths:
         specifier: ^5.0.1
@@ -389,8 +404,11 @@ importers:
         specifier: 'catalog:'
         version: 2.8.1
       typescript:
-        specifier: ^5.4.5
+        specifier: 'catalog:'
         version: 5.8.3
+      vite:
+        specifier: 'catalog:'
+        version: 5.4.19(@types/node@22.15.21)
 
   packages/springboard/core:
     dependencies:
@@ -445,7 +463,7 @@ importers:
         specifier: 'catalog:'
         version: 20.17.48
       typescript:
-        specifier: ^5.4.5
+        specifier: 'catalog:'
         version: 5.8.3
 
   packages/springboard/data_storage:
@@ -1700,9 +1718,6 @@ packages:
 
   '@types/node@20.17.48':
     resolution: {integrity: sha512-KpSfKOHPsiSC4IkZeu2LsusFwExAIVGkhG1KkbaBMLwau0uMhj0fCrvyg9ddM2sAvd+gtiBJLir4LAw1MNMIaw==}
-
-  '@types/node@22.15.19':
-    resolution: {integrity: sha512-3vMNr4TzNQyjHcRZadojpRaD9Ofr6LsonZAoQ+HMUa/9ORTPoxVIw0e0mpqWpdjj8xybyCM+oKOUH2vwFu/oEw==}
 
   '@types/node@22.15.21':
     resolution: {integrity: sha512-EV/37Td6c+MgKAbkcLG6vqZ2zEYHD7bvSrzqqs2RIhbA6w3x+Dqz8MZM3sP6kGTeLrdoOgKZe+Xja7tUB2DNkQ==}
@@ -3766,6 +3781,7 @@ packages:
   source-map@0.8.0-beta.0:
     resolution: {integrity: sha512-2ymg6oRBpebeZi9UUNsgQ89bhx01TcTkmNTGnNO88imTmbSgy4nfujrgVEFKWpMTEGA11EDkTt7mqObTPdigIA==}
     engines: {node: '>= 8'}
+    deprecated: The work that was done in this beta branch won't be included in future versions
 
   stack-utils@2.0.6:
     resolution: {integrity: sha512-XlkWvfIm6RmsWtNJx+uqtKLS8eqFbxUg0ZzLXqY0caEy9l7hruX8IpiDnjsLavoBgqCCR71TqWO8MaXYheJ3RQ==}
@@ -5479,10 +5495,6 @@ snapshots:
     dependencies:
       undici-types: 6.19.8
 
-  '@types/node@22.15.19':
-    dependencies:
-      undici-types: 6.21.0
-
   '@types/node@22.15.21':
     dependencies:
       undici-types: 6.21.0
@@ -5491,7 +5503,7 @@ snapshots:
 
   '@types/qrcode@1.5.5':
     dependencies:
-      '@types/node': 22.15.19
+      '@types/node': 22.15.21
 
   '@types/react-dom@19.1.5(@types/react@19.1.5)':
     dependencies:
@@ -6920,7 +6932,7 @@ snapshots:
       '@jest/fake-timers': 29.7.0
       '@jest/types': 29.6.3
       '@types/jsdom': 20.0.1
-      '@types/node': 22.15.19
+      '@types/node': 22.15.21
       jest-mock: 29.7.0
       jest-util: 29.7.0
       jsdom: 20.0.3

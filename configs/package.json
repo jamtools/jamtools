@@ -15,8 +15,8 @@
     "identity-obj-proxy": "^3.0.0",
     "shadow-dom-testing-library": "^1.11.3",
     "tsup": "^8.3.5",
-    "typescript": "^5.4.5",
-    "vite": "^5.4.6",
+    "typescript": "catalog:",
+    "vite": "catalog:",
     "vite-tsconfig-paths": "^5.0.1",
     "vitest": "^2.1.1"
   },

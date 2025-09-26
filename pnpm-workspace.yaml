@@ -30,3 +30,5 @@ catalog:
   "react-router-dom": "^6.28.1"
   esbuild: "^0.25.0"
   estree-walker: "^2"
+  vite: "^5.4.6"
+  typescript: "^5.4.5"
